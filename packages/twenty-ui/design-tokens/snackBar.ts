@@ -16,7 +16,7 @@ export const SNACK_BAR_TOKENS = {
   },
   info: {
     color: COLOR_TOKENS.blue,
-    backgroundColor: token({ light: '#0047f112', dark: '#3566ff57' }),
+    backgroundColor: token({ light: '#0E3D4112', dark: '#6FB8B257' }),
   },
   default: {
     color: GRAY_SCALE_TOKENS.gray12,

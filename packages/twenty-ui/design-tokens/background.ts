@@ -31,7 +31,7 @@ export const BACKGROUND_TOKENS = {
     light: COLOR_TOKENS.transparent.gray2,
     lighter: COLOR_TOKENS.transparent.gray1,
     danger: COLOR_TOKENS.transparent.red3,
-    blue: token({ light: '#0047f112', dark: '#3566ff57' }),
+    blue: token({ light: '#0E3D4112', dark: '#6FB8B257' }),
     orange: token({ light: '#ff9c0029', dark: '#ff590039' }),
     success: token({ light: '#00a43319', dark: '#11ff992d' }),
   },
