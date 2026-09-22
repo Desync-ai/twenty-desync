@@ -436,6 +436,24 @@ export class UserService {
     });
   }
 
+  async findUserByClerkId(clerkId: string) {
+    return await this.userRepository.findOne({
+      where: {
+        clerkId,
+      },
+    });
+  }
+
+  async linkClerkIdToUser(userId: string, clerkId: string) {
+    await this.userRepository.update(userId, { clerkId });
+
+    return await this.userRepository.findOneOrFail({
+      where: {
+        id: userId,
+      },
+    });
+  }
+
   async findUserByEmailWithWorkspaces(email: string) {
     return await this.userRepository.findOne({
       where: {

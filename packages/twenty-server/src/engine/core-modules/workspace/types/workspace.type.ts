@@ -3,5 +3,6 @@ export enum AuthProviderEnum {
   Microsoft = 'microsoft',
   Password = 'password',
   SSO = 'sso',
+  Clerk = 'clerk',
   Impersonation = 'impersonation',
 }

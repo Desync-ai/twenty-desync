@@ -2,6 +2,7 @@ import { useIsSettingsDrawer } from '@/navigation/hooks/useIsSettingsDrawer';
 
 import { MainNavigationDrawerContent } from '@/navigation/components/MainNavigationDrawerContent';
 import { MainNavigationDrawerModeSwitcher } from '@/navigation/components/MainNavigationDrawerModeSwitcher';
+import { NavigationDrawerLogoutButton } from '@/navigation/components/NavigationDrawerLogoutButton';
 import { SettingsNavigationDrawerContent } from '@/navigation/components/SettingsNavigationDrawerContent';
 import { NavigationDrawer } from '@/ui/navigation/navigation-drawer/components/NavigationDrawer';
 import { NavigationDrawerFixedContent } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerFixedContent';
@@ -37,6 +38,12 @@ export const AppNavigationDrawer = ({
       ) : (
         <MainNavigationDrawerContent />
       )}
+
+      {/* Pinned to the drawer footer (flex-shrink: 0) below the scrollable
+          content, so a full sign-out (Twenty + Clerk) is always one click away. */}
+      <NavigationDrawerFixedContent>
+        <NavigationDrawerLogoutButton />
+      </NavigationDrawerFixedContent>
     </NavigationDrawer>
   );
 };

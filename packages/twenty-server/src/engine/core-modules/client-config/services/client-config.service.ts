@@ -204,6 +204,16 @@ export class ClientConfigService {
         provider: captchaProvider ? captchaProvider : undefined,
         siteKey: this.twentyConfigService.get('CAPTCHA_SITE_KEY'),
       },
+      clerk: {
+        // The publishable key is safe to expose to the browser; the secret key
+        // is intentionally NEVER surfaced here.
+        isEnabled: !!(
+          this.twentyConfigService.get('CLERK_PUBLISHABLE_KEY') &&
+          this.twentyConfigService.get('CLERK_SECRET_KEY')
+        ),
+        publishableKey:
+          this.twentyConfigService.get('CLERK_PUBLISHABLE_KEY') ?? null,
+      },
       api: {
         mutationMaximumAffectedRecords: this.twentyConfigService.get(
           'MUTATION_MAXIMUM_AFFECTED_RECORDS',

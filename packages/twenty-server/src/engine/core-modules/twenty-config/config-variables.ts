@@ -2110,6 +2110,26 @@ export class ConfigVariables {
   CAPTCHA_SECRET_KEY?: string;
 
   @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.CLERK_AUTH,
+    isSensitive: false,
+    description:
+      'Clerk publishable key, exposed to the frontend to mount Clerk and start the token exchange',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  CLERK_PUBLISHABLE_KEY?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.CLERK_AUTH,
+    isSensitive: true,
+    description:
+      'Clerk secret key, used server-side to verify Clerk session tokens and fetch the Clerk user',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  CLERK_SECRET_KEY?: string;
+
+  @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.SERVER_CONFIG,
     isSensitive: true,
     description: 'License key for the Enterprise version',

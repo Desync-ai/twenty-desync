@@ -8,6 +8,7 @@ import { billingState } from '@/client-config/states/billingState';
 import { calendarBookingPageIdState } from '@/client-config/states/calendarBookingPageIdState';
 import { canManageFeatureFlagsState } from '@/client-config/states/canManageFeatureFlagsState';
 import { captchaState } from '@/client-config/states/captchaState';
+import { clerkConfigState } from '@/client-config/states/clerkConfigState';
 import { isBookCallOnboardingStepEnabledState } from '@/client-config/states/isBookCallOnboardingStepEnabledState';
 import { isCompanyEnrichmentEnabledState } from '@/client-config/states/isCompanyEnrichmentEnabledState';
 import { isAnalyticsEnabledState } from '@/client-config/states/isAnalyticsEnabledState';
@@ -75,6 +76,8 @@ export const useClientConfig = (): UseClientConfigResult => {
   );
 
   const setCaptcha = useSetAtomState(captchaState);
+
+  const setClerkConfig = useSetAtomState(clerkConfigState);
 
   const setApiConfig = useSetAtomState(apiConfigState);
   const setOnboardingConfig = useSetAtomState(onboardingConfigState);
@@ -201,6 +204,11 @@ export const useClientConfig = (): UseClientConfigResult => {
         siteKey: clientConfig?.captcha?.siteKey,
       });
 
+      setClerkConfig({
+        isEnabled: clientConfig?.clerk?.isEnabled ?? false,
+        publishableKey: clientConfig?.clerk?.publishableKey ?? null,
+      });
+
       setApiConfig(clientConfig?.api);
       setOnboardingConfig(clientConfig?.onboarding ?? null);
       setDomainConfiguration({
@@ -270,6 +278,7 @@ export const useClientConfig = (): UseClientConfigResult => {
     setCalendarBookingPageId,
     setCanManageFeatureFlags,
     setCaptcha,
+    setClerkConfig,
     setClientConfigApiStatus,
     setDomainConfiguration,
     setIsGoogleCalendarEnabled,

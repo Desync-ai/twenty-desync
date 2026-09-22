@@ -34,6 +34,10 @@ registerEnumType(OnboardingStatus, {
   unique: true,
   where: '"deletedAt" IS NULL',
 })
+@Index('IDX_USER_CLERK_ID_UNIQUE', ['clerkId'], {
+  unique: true,
+  where: '"clerkId" IS NOT NULL',
+})
 export class UserEntity {
   @Field(() => UUIDScalarType)
   @PrimaryGeneratedColumn('uuid')
@@ -67,6 +71,11 @@ export class UserEntity {
 
   @Column({ nullable: true })
   passwordHash: string;
+
+  // Clerk user id (`sub`) linking a Twenty user to its Clerk identity.
+  // Not exposed via GraphQL. Unique when set (see IDX_USER_CLERK_ID_UNIQUE).
+  @Column({ type: 'varchar', nullable: true })
+  clerkId: string | null;
 
   @Field()
   @Column({ default: false })

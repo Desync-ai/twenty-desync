@@ -1,6 +1,6 @@
 import { DEFAULT_WORKSPACE_LOGO } from '@/ui/navigation/navigation-drawer/constants/DefaultWorkspaceLogo';
 
-import { useAuth } from '@/auth/hooks/useAuth';
+import { useLogout } from '@/auth/hooks/useLogout';
 import { availableWorkspacesState } from '@/auth/states/availableWorkspacesState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { countAvailableWorkspaces } from '@/auth/utils/availableWorkspacesUtils';
@@ -62,7 +62,7 @@ export const MultiWorkspaceDropdownDefaultComponents = () => {
   const { buildWorkspaceUrl } = useBuildWorkspaceUrl();
   const { redirectToDefaultDomain } = useRedirectToDefaultDomain();
   const { closeDropdown } = useCloseDropdown();
-  const { signOut } = useAuth();
+  const { logout } = useLogout();
   const { colorScheme, colorSchemeList } = useColorScheme();
   const supportChat = useAtomStateValue(supportChatState);
   const isSupportChatConfigured =
@@ -140,7 +140,7 @@ export const MultiWorkspaceDropdownDefaultComponents = () => {
                   <MenuItem
                     LeftIcon={IconLogout}
                     text={t`Log out`}
-                    onClick={signOut}
+                    onClick={logout}
                   />
                 </DropdownMenuItemsContainer>
               </DropdownContent>

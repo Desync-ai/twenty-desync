@@ -103,6 +103,7 @@ import { streamToBuffer } from 'src/utils/stream-to-buffer';
 import { ApiKeyToken } from './dto/api-key-token.dto';
 import { AuthToken } from './dto/auth-token.dto';
 import { AuthTokens } from './dto/auth-tokens.dto';
+import { GetAuthTokensFromClerkTokenInput } from './dto/get-auth-tokens-from-clerk-token.input';
 import { GetAuthTokensFromLoginTokenInput } from './dto/get-auth-tokens-from-login-token.input';
 import { GetAuthTokensFromSsoExchangeTokenInput } from './dto/get-auth-tokens-from-sso-exchange-token.input';
 import { LoginTokenDTO } from './dto/login-token.dto';
@@ -114,6 +115,7 @@ import { EmailAndCaptchaInput } from './dto/user-exists.input';
 import { WorkspaceInviteHashValidDTO } from './dto/workspace-invite-hash-valid.dto';
 import { WorkspaceInviteHashValidInput } from './dto/workspace-invite-hash.input';
 import { AuthService } from './services/auth.service';
+import { ClerkAuthService } from './services/clerk-auth.service';
 
 const PASSWORD_RESET_EMAIL_RATE_LIMIT_MAX = 3;
 const PASSWORD_RESET_EMAIL_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -141,6 +143,7 @@ export class AuthResolver {
     private readonly appTokenRepository: Repository<AppTokenEntity>,
     private readonly twoFactorAuthenticationService: TwoFactorAuthenticationService,
     private authService: AuthService,
+    private clerkAuthService: ClerkAuthService,
     private renewTokenService: RenewTokenService,
     private userService: UserService,
     private apiKeyService: ApiKeyService,
@@ -774,6 +777,30 @@ export class AuthResolver {
       },
     };
 
+    await this.userSessionService.issueSessionForTokenPair({
+      tokenPair: authTokens.tokens,
+      request: context.req,
+      origin: 'sign_in',
+    });
+
+    return authTokens;
+  }
+
+  @Mutation(() => AuthTokens)
+  @UseGuards(PublicEndpointGuard, NoPermissionGuard)
+  async getAuthTokensFromClerkToken(
+    @Args() { clerkToken }: GetAuthTokensFromClerkTokenInput,
+    @Args('origin') origin: string,
+    @Context() context: { req: Request },
+  ): Promise<AuthTokens> {
+    const authTokens = await this.clerkAuthService.getAuthTokensFromClerkToken(
+      clerkToken,
+      origin,
+    );
+
+    // Twenty v2.41 web auth is a server-set httpOnly session cookie, not a
+    // client-stored token: issue it here from the freshly minted pair, exactly
+    // like getAuthTokensFromLoginToken / getAuthTokensFromSSOExchangeToken.
     await this.userSessionService.issueSessionForTokenPair({
       tokenPair: authTokens.tokens,
       request: context.req,

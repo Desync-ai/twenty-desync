@@ -12,6 +12,7 @@ import {
 
 import { StyledOnboardingContentContainer } from '@/auth/components/StyledOnboardingContentContainer';
 import { OnboardingStepAnimatedItem } from '@/onboarding/components/OnboardingStepAnimatedItem';
+import { SignInUpWithClerk } from '@/auth/sign-in-up/components/internal/SignInUpWithClerk';
 import { SignInUpWithCredentials } from '@/auth/sign-in-up/components/internal/SignInUpWithCredentials';
 import { SignInUpWithGoogle } from '@/auth/sign-in-up/components/internal/SignInUpWithGoogle';
 import { SignInUpWithMicrosoft } from '@/auth/sign-in-up/components/internal/SignInUpWithMicrosoft';
@@ -23,6 +24,7 @@ import {
 } from '@/auth/states/signInUpStepState';
 import { getAvailableWorkspacePathAndSearchParams } from '@/auth/utils/availableWorkspacesUtils';
 import { authProvidersState } from '@/client-config/states/authProvidersState';
+import { clerkConfigState } from '@/client-config/states/clerkConfigState';
 import { isDDLLockedState } from '@/client-config/states/isDDLLockedState';
 import { DEFAULT_WORKSPACE_LOGO } from '@/ui/navigation/navigation-drawer/constants/DefaultWorkspaceLogo';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -129,6 +131,7 @@ const StyledForgotPasswordLinkContainer = styled.div`
 export const SignInUpGlobalScopeForm = () => {
   const { theme } = useContext(ThemeContext);
   const authProviders = useAtomStateValue(authProvidersState);
+  const clerkConfig = useAtomStateValue(clerkConfigState);
   const isDDLLocked = useAtomStateValue(isDDLLockedState);
   const signInUpStep = useAtomStateValue(signInUpStepState);
   const setSignInUpStep = useSetAtomState(signInUpStepState);
@@ -236,35 +239,40 @@ export const SignInUpGlobalScopeForm = () => {
       )}
       {signInUpStep !== SignInUpStep.WorkspaceSelection && (
         <StyledOnboardingContentContainer>
-          {authProviders.google && (
-            <SignInUpWithGoogle
-              action="list-available-workspaces"
-              isGlobalScope
-            />
-          )}
-          {authProviders.microsoft && (
-            <SignInUpWithMicrosoft
-              action="list-available-workspaces"
-              isGlobalScope
-            />
-          )}
-          {(authProviders.google || authProviders.microsoft) && (
-            <HorizontalSeparator
-              color={themeCssVariables.background.transparent.light}
-            />
-          )}
-          {/* oxlint-disable-next-line react/jsx-props-no-spreading */}
-          <FormProvider {...form}>
-            <SignInUpWithCredentials isGlobalScope />
-          </FormProvider>
-          {signInUpStep === SignInUpStep.Password && (
-            <StyledForgotPasswordLinkContainer>
-              <ClickToActionLink
-                onClick={handleResetPassword(form.getValues('email'))}
-              >
-                <Trans>Forgot your password?</Trans>
-              </ClickToActionLink>
-            </StyledForgotPasswordLinkContainer>
+          {clerkConfig.isEnabled && <SignInUpWithClerk />}
+          {!clerkConfig.isEnabled && (
+            <>
+              {authProviders.google && (
+                <SignInUpWithGoogle
+                  action="list-available-workspaces"
+                  isGlobalScope
+                />
+              )}
+              {authProviders.microsoft && (
+                <SignInUpWithMicrosoft
+                  action="list-available-workspaces"
+                  isGlobalScope
+                />
+              )}
+              {(authProviders.google || authProviders.microsoft) && (
+                <HorizontalSeparator
+                  color={themeCssVariables.background.transparent.light}
+                />
+              )}
+              {/* oxlint-disable-next-line react/jsx-props-no-spreading */}
+              <FormProvider {...form}>
+                <SignInUpWithCredentials isGlobalScope />
+              </FormProvider>
+              {signInUpStep === SignInUpStep.Password && (
+                <StyledForgotPasswordLinkContainer>
+                  <ClickToActionLink
+                    onClick={handleResetPassword(form.getValues('email'))}
+                  >
+                    <Trans>Forgot your password?</Trans>
+                  </ClickToActionLink>
+                </StyledForgotPasswordLinkContainer>
+              )}
+            </>
           )}
         </StyledOnboardingContentContainer>
       )}

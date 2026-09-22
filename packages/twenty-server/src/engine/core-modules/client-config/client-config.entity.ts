@@ -237,6 +237,15 @@ export class Captcha {
 }
 
 @ObjectType()
+export class Clerk {
+  @Field(() => Boolean)
+  isEnabled: boolean;
+
+  @Field(() => String, { nullable: true })
+  publishableKey: string | null;
+}
+
+@ObjectType()
 export class ApiConfig {
   @Field(() => Number, { nullable: false })
   mutationMaximumAffectedRecords: number;
@@ -337,6 +346,9 @@ export class ClientConfig {
 
   @Field(() => Captcha)
   captcha: Captcha;
+
+  @Field(() => Clerk)
+  clerk: Clerk;
 
   @Field(() => ApiConfig)
   api: ApiConfig;

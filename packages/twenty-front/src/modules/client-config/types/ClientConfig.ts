@@ -11,6 +11,7 @@ import {
   type Support,
 } from '~/generated-metadata/graphql';
 import { type EnterpriseInstanceType } from 'twenty-shared/constants';
+import { type ClerkConfig } from '@/client-config/types/ClerkConfig';
 import { type OnboardingConfig } from '@/client-config/types/OnboardingConfig';
 
 export type ClientConfig = {
@@ -21,6 +22,7 @@ export type ClientConfig = {
   api: ApiConfig;
   authProviders: AuthProviders;
   billing: Billing;
+  clerk: ClerkConfig;
   calendarBookingPageId?: string;
   isBookCallOnboardingStepEnabled: boolean;
   isCompanyEnrichmentEnabled: boolean;
