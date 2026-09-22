@@ -1,10 +1,10 @@
 {
-  "short_name": "Twenty",
-  "name": "Twenty",
+  "short_name": "Desync",
+  "name": "Desync CRM",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
+  "theme_color": "#0E3D41",
+  "background_color": "#F7F4EE",
   "icons": [
     {
       "src": "images/icons/windows11/SmallTile.scale-100.png",

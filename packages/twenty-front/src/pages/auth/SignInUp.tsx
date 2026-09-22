@@ -120,17 +120,13 @@ export const SignInUp = () => {
       return t`Welcome to Twenty`;
     }
 
-    const workspaceName = workspacePublicData?.displayName;
-
-    if (!workspaceName) {
-      return t`Welcome to your workspace`;
-    }
-
-    return t`Welcome, ${workspaceName}.`;
+    // Clerk is the only auth surface and this is a single-tenant self-host, so the
+    // sign-in title stays generic — never personalize it with the workspace/owner
+    // name, which would otherwise leak on the logged-out sign-in screen.
+    return t`Welcome`;
   }, [
     workspaceInviteHash,
     signInUpStep,
-    workspacePublicData?.displayName,
     isGlobalScope,
     t,
     workspaceFromInviteHash?.displayName,
