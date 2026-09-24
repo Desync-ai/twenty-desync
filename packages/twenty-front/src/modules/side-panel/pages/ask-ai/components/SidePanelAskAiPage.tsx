@@ -1,19 +1,18 @@
 import { styled } from '@linaria/react';
-import { AiChatTab } from '@/ai/components/AiChatTab';
-import { AI_CHAT_SURFACE } from '@/ai/constants/AiChatSurface';
-import { AiChatSurfaceContext } from '@/ai/contexts/AiChatSurfaceContext';
+import { DesyncAiChatPanel } from '@/desync-ai/components/DesyncAiChatPanel';
 
 const StyledContainer = styled.div`
   height: 100%;
   width: 100%;
 `;
 
+// The "Ask AI" side-panel seat renders the Desync assistant, which calls the
+// lead-gen platform's metered AI gateway (quota-gated) instead of Twenty's
+// native server-side LLM. See DesyncAiChatPanel.
 export const SidePanelAskAiPage = () => {
   return (
-    <AiChatSurfaceContext.Provider value={AI_CHAT_SURFACE.SIDE_PANEL}>
-      <StyledContainer>
-        <AiChatTab />
-      </StyledContainer>
-    </AiChatSurfaceContext.Provider>
+    <StyledContainer>
+      <DesyncAiChatPanel />
+    </StyledContainer>
   );
 };

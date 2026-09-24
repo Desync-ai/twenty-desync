@@ -54,4 +54,6 @@ export type ClientConfig = {
   allowRequestsToTwentyIcons: boolean;
   maintenance?: ClientConfigMaintenanceMode;
   enterpriseInstanceType?: EnterpriseInstanceType;
+  // Desync: base URL of the lead-gen metered AI gateway (see DesyncAiChatPanel).
+  crmAiBaseUrl?: string;
 };

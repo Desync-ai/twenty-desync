@@ -103,6 +103,7 @@ import { streamToBuffer } from 'src/utils/stream-to-buffer';
 import { ApiKeyToken } from './dto/api-key-token.dto';
 import { AuthToken } from './dto/auth-token.dto';
 import { AuthTokens } from './dto/auth-tokens.dto';
+import { ClerkExchangeResult } from './dto/clerk-exchange-result.dto';
 import { GetAuthTokensFromClerkTokenInput } from './dto/get-auth-tokens-from-clerk-token.input';
 import { GetAuthTokensFromLoginTokenInput } from './dto/get-auth-tokens-from-login-token.input';
 import { GetAuthTokensFromSsoExchangeTokenInput } from './dto/get-auth-tokens-from-sso-exchange-token.input';
@@ -786,28 +787,21 @@ export class AuthResolver {
     return authTokens;
   }
 
-  @Mutation(() => AuthTokens)
+  @Mutation(() => ClerkExchangeResult)
   @UseGuards(PublicEndpointGuard, NoPermissionGuard)
   async getAuthTokensFromClerkToken(
     @Args() { clerkToken }: GetAuthTokensFromClerkTokenInput,
     @Args('origin') origin: string,
-    @Context() context: { req: Request },
-  ): Promise<AuthTokens> {
-    const authTokens = await this.clerkAuthService.getAuthTokensFromClerkToken(
+  ): Promise<ClerkExchangeResult> {
+    // Returns a login token + the resolved workspace URL (NOT a session cookie).
+    // The Twenty session cookie is host-only, so it can't be set here for a
+    // sibling subdomain: the frontend redirects the browser to the resolved
+    // workspace's `/verify`, which sets the cookie on the correct host. See
+    // ClerkAuthService for the full rationale.
+    return await this.clerkAuthService.getAuthTokensFromClerkToken(
       clerkToken,
       origin,
     );
-
-    // Twenty v2.41 web auth is a server-set httpOnly session cookie, not a
-    // client-stored token: issue it here from the freshly minted pair, exactly
-    // like getAuthTokensFromLoginToken / getAuthTokensFromSSOExchangeToken.
-    await this.userSessionService.issueSessionForTokenPair({
-      tokenPair: authTokens.tokens,
-      request: context.req,
-      origin: 'sign_in',
-    });
-
-    return authTokens;
   }
 
   private async validateAndDecodeLoginToken(
