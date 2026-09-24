@@ -292,10 +292,6 @@ export class ClientConfigService {
       enterpriseInstanceType:
         this.twentyConfigService.get('ENTERPRISE_INSTANCE_TYPE') ??
         ENTERPRISE_INSTANCE_TYPE.PRODUCTION,
-      // Desync: surfaced to the frontend so the CRM AI panel knows the metered
-      // gateway origin. Read from process.env directly — a fork-added var, not
-      // in the config-variables schema, matching ENTITLEMENT_DATABASE_URL.
-      crmAiBaseUrl: process.env.CRM_AI_BASE_URL || undefined,
     };
 
     const maintenanceMode =
