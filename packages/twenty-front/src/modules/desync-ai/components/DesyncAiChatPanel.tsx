@@ -8,8 +8,8 @@ import { RoundedIconButton, Textarea } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { clerkConfigState } from '@/client-config/states/clerkConfigState';
+import { crmAiBaseUrlState } from '@/client-config/states/crmAiBaseUrlState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
-import { CRM_AI_BASE_URL } from '~/config';
 
 // The Desync AI assistant is a keyless client: it calls the lead-gen platform's
 // metered gateway (POST /internal/ai/complete) with the signed-in user's Clerk
@@ -162,7 +162,7 @@ const StyledComposerButtons = styled.div`
   width: 100%;
 `;
 
-const DesyncAiChatInner = () => {
+const DesyncAiChatInner = ({ baseUrl }: { baseUrl: string }) => {
   const { t } = useLingui();
   const { getToken } = useClerkAuth();
 
@@ -199,7 +199,7 @@ const DesyncAiChatInner = () => {
         return;
       }
 
-      const response = await fetch(`${CRM_AI_BASE_URL}/internal/ai/complete`, {
+      const response = await fetch(`${baseUrl}/internal/ai/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -337,6 +337,7 @@ const DesyncAiChatInner = () => {
 export const DesyncAiChatPanel = () => {
   const { t } = useLingui();
   const clerkConfig = useAtomStateValue(clerkConfigState);
+  const crmAiBaseUrl = useAtomStateValue(crmAiBaseUrlState);
 
   if (!clerkConfig.isEnabled) {
     return (
@@ -344,11 +345,11 @@ export const DesyncAiChatPanel = () => {
     );
   }
 
-  if (CRM_AI_BASE_URL.length === 0) {
+  if (crmAiBaseUrl === null || crmAiBaseUrl.length === 0) {
     return (
       <StyledCentered>{t`The AI assistant is not configured on this instance.`}</StyledCentered>
     );
   }
 
-  return <DesyncAiChatInner />;
+  return <DesyncAiChatInner baseUrl={crmAiBaseUrl} />;
 };
