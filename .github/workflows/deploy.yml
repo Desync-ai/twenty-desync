@@ -1,0 +1,91 @@
+name: Build image & deploy to Render
+
+# Render cannot build this fork from git — Twenty's frontend build needs ~8 GB
+# and OOMs Render's builder — so we build the image here and Render autodeploys
+# it. push to `dev` -> :dev tag -> dev instance; push to `main` -> :prod tag ->
+# prod instance. Render does the deploy half (via its API); this workflow does
+# the build half Render can't.
+#
+# Required config (Settings -> Secrets and variables -> Actions):
+#   secret RENDER_API_KEY        — Render API key (rotate the leaked one first)
+#   variable RENDER_SERVICE_ID_PROD — prod Twenty service id (once it exists)
+# The dev service id is hardcoded below (service ids are not secret). Until the
+# secret is set the image still builds + pushes; only the deploy is skipped.
+
+on:
+  push:
+    branches: [dev, main]
+
+concurrency:
+  # One build per branch; a newer push supersedes an in-flight build.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/desync-ai/twenty-desync
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # The Twenty image build is large; reclaim the runner's preinstalled
+      # toolchains (~20 GB) so the multi-stage build doesn't run out of disk.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+            /usr/local/.ghcup /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune -af || true
+          df -h /
+
+      - uses: actions/checkout@v4
+
+      - name: Resolve target (dev vs prod)
+        id: meta
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "tag=prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=dev" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$(echo '${{ github.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build & push image
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          SHA="${{ steps.meta.outputs.sha }}"
+          docker build \
+            --target twenty \
+            -f packages/twenty-docker/twenty/Dockerfile \
+            --build-arg APP_VERSION="2.41.0-${TAG}-${SHA}" \
+            -t "${IMAGE}:${TAG}" \
+            -t "${IMAGE}:${TAG}-${SHA}" \
+            .
+          docker push "${IMAGE}:${TAG}"
+          docker push "${IMAGE}:${TAG}-${SHA}"
+
+      # Deploy the exact image just pushed via the Render API. If the API key
+      # isn't set yet (or no prod service id on main), the image is still built
+      # + pushed and the job succeeds with a warning — so wiring is non-blocking.
+      - name: Deploy on Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID_PROD: ${{ vars.RENDER_SERVICE_ID_PROD }}
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          SHA="${{ steps.meta.outputs.sha }}"
+          if [ "$TAG" = "prod" ]; then SERVICE_ID="$SERVICE_ID_PROD"; else SERVICE_ID="srv-dapupi142hec73e8tecg"; fi
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$SERVICE_ID" ]; then
+            echo "::warning::RENDER_API_KEY or service id missing for '$TAG'; image pushed, deploy skipped."
+            exit 0
+          fi
+          curl -fsS -X POST "https://api.render.com/v1/services/${SERVICE_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"imageUrl\":\"${IMAGE}:${TAG}-${SHA}\",\"clearCache\":\"do_not_clear\"}" >/dev/null \
+            && echo "Render deploy triggered ($TAG -> ${TAG}-${SHA})."
