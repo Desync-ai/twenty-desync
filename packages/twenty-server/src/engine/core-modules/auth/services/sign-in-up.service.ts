@@ -707,6 +707,24 @@ export class SignInUpService {
       );
     }
 
+    // Desync: one workspace per user. An existing user who already belongs to a
+    // workspace cannot create another. This is the single server-side lock that
+    // neutralises every native "create workspace" UI path; the Clerk auth path
+    // only reaches signUpOnNewWorkspace for workspace-less users, so it's safe.
+    if (userData.type === 'existingUser') {
+      const existingWorkspaceCount =
+        await this.userWorkspaceService.countUserWorkspaces(
+          userData.existingUser.id,
+        );
+
+      if (existingWorkspaceCount > 0) {
+        throw new AuthException(
+          'You already belong to a workspace. Each user can belong to only one workspace.',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
+    }
+
     await this.assertWorkspaceCreationAllowed(userData);
 
     const displayName = options?.displayName?.trim();
