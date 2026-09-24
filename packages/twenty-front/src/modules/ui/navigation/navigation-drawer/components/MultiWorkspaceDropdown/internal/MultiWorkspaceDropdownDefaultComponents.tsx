@@ -130,13 +130,9 @@ export const MultiWorkspaceDropdownDefaultComponents = () => {
             dropdownComponents={
               <DropdownContent>
                 <DropdownMenuItemsContainer>
-                  {isMultiWorkspaceEnabled && (
-                    <MenuItem
-                      LeftIcon={IconPlus}
-                      text={t`Create Workspace`}
-                      onClick={createWorkspace}
-                    />
-                  )}
+                  {/* Desync: one workspace per user — the "Create Workspace"
+                      entry is intentionally removed. Workspace creation only
+                      happens (entitlement-gated) at Clerk sign-in. */}
                   <MenuItem
                     LeftIcon={IconLogout}
                     text={t`Log out`}
