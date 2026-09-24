@@ -7,10 +7,14 @@ fi
 
 echo "Injecting runtime environment variables into index.html..."
 
+# REACT_APP_CRM_AI_BASE_URL is optional (unlike the server base URL above): when
+# unset it is injected as an empty string, and the CRM AI panel then renders a
+# "not configured" notice instead of calling an unknown origin.
 CONFIG_BLOCK=$(cat << EOF
     <script id="twenty-env-config">
       window._env_ = {
-        REACT_APP_SERVER_BASE_URL: "$REACT_APP_SERVER_BASE_URL"
+        REACT_APP_SERVER_BASE_URL: "$REACT_APP_SERVER_BASE_URL",
+        REACT_APP_CRM_AI_BASE_URL: "$REACT_APP_CRM_AI_BASE_URL"
       };
     </script>
     <!-- END: Twenty Config -->
