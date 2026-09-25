@@ -50,6 +50,7 @@ import { BrowsingContextType } from 'src/engine/metadata-modules/ai/ai-agent/typ
 import { repairToolCall } from 'src/engine/metadata-modules/ai/ai-agent/utils/repair-tool-call.util';
 import { AiBillingService } from 'src/engine/metadata-modules/ai/ai-billing/services/ai-billing.service';
 import { convertDollarsToCreditsMicro } from 'src/engine/metadata-modules/ai/ai-billing/utils/convert-dollars-to-credits-micro.util';
+import { DesyncAiBudgetService } from 'src/engine/metadata-modules/ai/desync/desync-ai-budget.service';
 import { countNativeWebSearchCallsFromSteps } from 'src/engine/metadata-modules/ai/ai-billing/utils/count-native-web-search-calls-from-steps.util';
 import {
   extractCacheCreationTokens,
@@ -135,6 +136,7 @@ export class ChatExecutionService {
     private readonly nativeToolBinder: NativeToolBinderService,
     private readonly messagePruningService: MessagePruningService,
     private readonly metricsService: MetricsService,
+    private readonly desyncAiBudgetService: DesyncAiBudgetService,
   ) {}
 
   async streamChat({
@@ -464,6 +466,16 @@ export class ChatExecutionService {
         null,
         userWorkspaceId,
       );
+
+      // Desync: debit this turn's real cost against the user's shared AI budget
+      // (lead-gen subscription_usage via the private backend). Best-effort —
+      // never throws, never blocks the stream. No-op unless TWENTY_BACKEND_URL set.
+      void this.desyncAiBudgetService.recordSpend({
+        userWorkspaceId,
+        costCents: Math.round(costInDollars * 100),
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+      });
 
       // billNativeWebSearchUsage short-circuits when count <= 0, so calling
       // unconditionally is safe regardless of whether native search fired.

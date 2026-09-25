@@ -21,6 +21,7 @@ import { AgentTurnEntity } from 'src/engine/metadata-modules/ai/ai-agent-executi
 import { MetricsModule } from 'src/engine/core-modules/metrics/metrics.module';
 import { AiBillingModule } from 'src/engine/metadata-modules/ai/ai-billing/ai-billing.module';
 import { AiGraphqlApiExceptionInterceptor } from 'src/engine/metadata-modules/ai/interceptors/ai-graphql-api-exception.interceptor';
+import { DesyncAiBudgetService } from 'src/engine/metadata-modules/ai/desync/desync-ai-budget.service';
 import { PermissionsModule } from 'src/engine/metadata-modules/permissions/permissions.module';
 import { SkillModule } from 'src/engine/metadata-modules/skill/skill.module';
 import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/provide-workspace-scoped-repository';
@@ -89,6 +90,7 @@ import { SystemPromptBuilderService } from './services/system-prompt-builder.ser
     StreamAgentChatJob,
     SystemPromptBuilderService,
     AiGraphqlApiExceptionInterceptor,
+    DesyncAiBudgetService,
     provideWorkspaceScopedRepository(AgentChatThreadEntity),
     provideWorkspaceScopedRepository(AgentTurnEntity),
     provideWorkspaceScopedRepository(AgentMessageEntity),
