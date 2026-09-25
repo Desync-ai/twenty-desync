@@ -26,6 +26,7 @@ export enum AiExceptionCode {
   RUN_AGENT_NOT_ALLOWED = 'RUN_AGENT_NOT_ALLOWED',
   NO_FAILED_TURN_TO_RETRY = 'NO_FAILED_TURN_TO_RETRY',
   STREAM_INTERRUPTED = 'STREAM_INTERRUPTED',
+  AI_SPEND_LIMIT_REACHED = 'AI_SPEND_LIMIT_REACHED',
 }
 
 const getAiExceptionUserFriendlyMessage = (code: AiExceptionCode) => {
@@ -72,6 +73,8 @@ const getAiExceptionUserFriendlyMessage = (code: AiExceptionCode) => {
       return msg`There is no failed message to retry.`;
     case AiExceptionCode.STREAM_INTERRUPTED:
       return msg`The response was interrupted before it could finish.`;
+    case AiExceptionCode.AI_SPEND_LIMIT_REACHED:
+      return msg`You've used your AI budget for this period. It resets at the start of your next billing period.`;
     default:
       assertUnreachable(code);
   }

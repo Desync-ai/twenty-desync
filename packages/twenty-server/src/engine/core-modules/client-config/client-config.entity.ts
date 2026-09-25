@@ -414,11 +414,6 @@ export class ClientConfig {
   @Field(() => String)
   enterpriseInstanceType: string;
 
-  // Desync: base URL of the lead-gen metered AI gateway the CRM AI panel posts
-  // to. Exposed so the frontend need not know the (cross-origin) gateway host.
-  @Field(() => String, { nullable: true })
-  crmAiBaseUrl?: string;
-
   @Field(() => ClientConfigMaintenanceMode, { nullable: true })
   maintenance?: ClientConfigMaintenanceMode;
 }
