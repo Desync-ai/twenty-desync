@@ -18,6 +18,7 @@ import { OAuthPropagatorController } from 'src/engine/core-modules/auth/controll
 import { SsoAuthController } from 'src/engine/core-modules/auth/controllers/sso-auth.controller';
 import { AuthSsoService } from 'src/engine/core-modules/auth/services/auth-sso.service';
 import { ClerkAuthService } from 'src/engine/core-modules/auth/services/clerk-auth.service';
+import { EntitlementService } from 'src/engine/core-modules/auth/services/entitlement.service';
 import { CreateCalendarChannelService } from 'src/engine/core-modules/auth/services/create-calendar-channel.service';
 import { CreateConnectedAccountService } from 'src/engine/core-modules/auth/services/create-connected-account.service';
 import { CreateMessageChannelService } from 'src/engine/core-modules/auth/services/create-message-channel.service';
@@ -151,6 +152,7 @@ import { JwtAuthStrategy } from './strategies/jwt.auth.strategy';
     SignInUpService,
     AuthService,
     ClerkAuthService,
+    EntitlementService,
     JwtAuthStrategy,
     SamlAuthStrategy,
     AuthResolver,

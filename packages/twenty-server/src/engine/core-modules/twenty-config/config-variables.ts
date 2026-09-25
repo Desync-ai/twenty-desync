@@ -891,7 +891,11 @@ export class ConfigVariables {
     type: ConfigVariableType.BOOLEAN,
   })
   @IsOptional()
-  TELEMETRY_ENABLED = true;
+  // Desync: telemetry OFF by default. Upstream defaults this to true, which posts
+  // self-hosting events to https://twenty-telemetry.com. We never want to phone
+  // home. (Analytics is already off: ANALYTICS_ENABLED=false; errors go to
+  // CONSOLE not Sentry; METER_DRIVER=[] so no OpenTelemetry export.)
+  TELEMETRY_ENABLED = false;
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.LOGGING,

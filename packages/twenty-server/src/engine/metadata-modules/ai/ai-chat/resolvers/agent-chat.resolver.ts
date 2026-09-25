@@ -49,6 +49,7 @@ import { AiGraphqlApiExceptionInterceptor } from 'src/engine/metadata-modules/ai
 import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/inject-workspace-scoped-repository.decorator';
 import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
 import { getChatModelId } from 'src/engine/metadata-modules/ai/ai-models/utils/get-chat-model-id.util';
+import { DesyncAiBudgetService } from 'src/engine/metadata-modules/ai/desync/desync-ai-budget.service';
 
 @UseGuards(WorkspaceAuthGuard, SettingsPermissionGuard(PermissionFlagType.AI))
 @UseInterceptors(AiGraphqlApiExceptionInterceptor)
@@ -68,6 +69,7 @@ export class AgentChatResolver {
     private readonly redisClientService: RedisClientService,
     @InjectWorkspaceScopedRepository(AgentChatThreadEntity)
     private readonly threadRepository: WorkspaceScopedRepository<AgentChatThreadEntity>,
+    private readonly desyncAiBudgetService: DesyncAiBudgetService,
   ) {}
 
   @Query(() => [AgentChatThreadDTO])
@@ -193,6 +195,11 @@ export class AgentChatResolver {
       spenders: { userWorkspaceId },
     });
 
+    // Desync: enforce the per-user shared AI budget (lead-gen subscription_usage
+    // via the private backend) after Twenty's native quota check. No-op unless
+    // TWENTY_BACKEND_URL is set; fails closed on any backend error.
+    await this.desyncAiBudgetService.assertAllowed(userWorkspaceId);
+
     const thread = await this.threadRepository.findOne(workspace.id, {
       where: { id: threadId, userWorkspaceId },
     });
@@ -307,6 +314,11 @@ export class AgentChatResolver {
       spenders: { userWorkspaceId },
     });
 
+    // Desync: enforce the per-user shared AI budget (lead-gen subscription_usage
+    // via the private backend) after Twenty's native quota check. No-op unless
+    // TWENTY_BACKEND_URL is set; fails closed on any backend error.
+    await this.desyncAiBudgetService.assertAllowed(userWorkspaceId);
+
     const result = await this.agentChatStreamingService.retryLastFailedTurn({
       threadId,
       userWorkspaceId,
@@ -363,6 +375,11 @@ export class AgentChatResolver {
       operationType: UsageOperationType.AI_CHAT_TOKEN,
       spenders: { userWorkspaceId },
     });
+
+    // Desync: enforce the per-user shared AI budget (lead-gen subscription_usage
+    // via the private backend) after Twenty's native quota check. No-op unless
+    // TWENTY_BACKEND_URL is set; fails closed on any backend error.
+    await this.desyncAiBudgetService.assertAllowed(userWorkspaceId);
 
     const thread = await this.threadRepository.findOne(workspace.id, {
       where: { id: threadId, userWorkspaceId },
