@@ -54,6 +54,7 @@ import { MessagingWebhooksModule } from 'src/modules/messaging-webhooks/messagin
 import { ConnectedAccountSyncWebhooksModule } from 'src/modules/connected-account-sync-webhooks/connected-account-sync-webhooks.module';
 import { MetricsModule } from 'src/engine/core-modules/metrics/metrics.module';
 import { MetricsService } from 'src/engine/core-modules/metrics/metrics.service';
+import { OntologyModule } from 'src/engine/core-modules/ontology/ontology.module';
 import { OpenApiModule } from 'src/engine/core-modules/open-api/open-api.module';
 import { PublicDomainModule } from 'src/engine/core-modules/public-domain/public-domain.module';
 import { RedisClientModule } from 'src/engine/core-modules/redis-client/redis-client.module';
@@ -100,6 +101,7 @@ import { FileModule } from './file/file.module';
     ConnectedAccountSyncWebhooksModule,
     UsageModule,
     ClientConfigModule,
+    OntologyModule,
     FeatureFlagModule,
     FileModule,
     RecordShareModule,

@@ -73,5 +73,16 @@ describe('ClientConfigService', () => {
         consoleUrl: null,
       });
     });
+
+    it('never exposes ONTOLOGY_SSO_SECRET through the client config payload', async () => {
+      configValues.ONTOLOGY_CONSOLE_URL = 'https://console.example.com';
+      configValues.ONTOLOGY_SSO_SECRET = 'do-not-leak-this-secret';
+
+      const clientConfig = await service.getClientConfig();
+
+      expect(JSON.stringify(clientConfig)).not.toContain(
+        'do-not-leak-this-secret',
+      );
+    });
   });
 });

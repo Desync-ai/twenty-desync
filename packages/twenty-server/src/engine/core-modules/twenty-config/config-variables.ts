@@ -2486,6 +2486,16 @@ export class ConfigVariables {
   )
   @IsOptional()
   ONTOLOGY_CONSOLE_URL?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: true,
+    description:
+      'Shared secret used to sign SSO launch tokens for the Ontology console. Never exposed through /client-config. When unset, opening the Ontology page does not sign the user into the console.',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  ONTOLOGY_SSO_SECRET?: string;
 }
 
 export const validate = (config: Record<string, unknown>): ConfigVariables => {
