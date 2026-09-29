@@ -1,4 +1,10 @@
-import { Controller, Get, NotFoundException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 
 import { ApiPath } from 'twenty-shared/types';
 
@@ -24,6 +30,9 @@ export class OntologyLaunchController {
   constructor(private readonly twentyConfigService: TwentyConfigService) {}
 
   @Get('launch')
+  // Per-user, secret-bearing response on one shared URL for every caller:
+  // must never be cached (by a browser, proxy, or CDN in front of it).
+  @Header('Cache-Control', 'no-store')
   async getLaunchUrl(
     @AuthUser() user: UserEntity,
     @AuthWorkspace() workspace: FlatWorkspace,

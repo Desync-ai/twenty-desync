@@ -1,4 +1,4 @@
-import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { GUARDS_METADATA, HEADERS_METADATA } from '@nestjs/common/constants';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
@@ -9,6 +9,21 @@ import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 
 import { OntologyLaunchController } from './ontology-launch.controller';
+
+// getLaunchUrl carries ONE @Header decorator regardless of which branch it
+// takes, so "present on both success responses" is checked by calling this
+// from inside each success-path test, against the actual response each one
+// produces — not a single one-off metadata check unrelated to those paths.
+const expectNoStoreCacheControl = () => {
+  const headers = Reflect.getMetadata(
+    HEADERS_METADATA,
+    OntologyLaunchController.prototype.getLaunchUrl,
+  );
+
+  expect(headers).toEqual(
+    expect.arrayContaining([{ name: 'Cache-Control', value: 'no-store' }]),
+  );
+};
 
 describe('OntologyLaunchController', () => {
   let controller: OntologyLaunchController;
@@ -68,6 +83,16 @@ describe('OntologyLaunchController', () => {
     );
   });
 
+  it('404s when ONTOLOGY_CONSOLE_URL is unset, even if the SSO secret is set', async () => {
+    configValues.ONTOLOGY_CONSOLE_URL = undefined;
+    configValues.ONTOLOGY_SSO_SECRET =
+      'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8';
+
+    await expect(controller.getLaunchUrl(user, workspace)).rejects.toThrow(
+      'Not Found',
+    );
+  });
+
   it('returns the plain console URL when the SSO secret is unset', async () => {
     configValues.ONTOLOGY_CONSOLE_URL = 'https://console.example.com';
     configValues.ONTOLOGY_SSO_SECRET = undefined;
@@ -75,6 +100,7 @@ describe('OntologyLaunchController', () => {
     const result = await controller.getLaunchUrl(user, workspace);
 
     expect(result).toEqual({ url: 'https://console.example.com' });
+    expectNoStoreCacheControl();
   });
 
   it('returns url + "#sso=" + token when both the console URL and secret are set', async () => {
@@ -103,5 +129,6 @@ describe('OntologyLaunchController', () => {
     expect(payload.sub).toBe('user-1');
     expect(payload.ws).toBe('workspace-1');
     expect(payload.aud).toBe('ontology-console');
+    expectNoStoreCacheControl();
   });
 });
