@@ -41,6 +41,12 @@ const AiChatPage = lazy(() =>
   })),
 );
 
+const OntologyPage = lazy(() =>
+  import('~/pages/ontology/OntologyPage').then((module) => ({
+    default: module.OntologyPage,
+  })),
+);
+
 const MobileHomePage = lazy(() =>
   import('~/pages/mobile-home/MobileHomePage').then((module) => ({
     default: module.MobileHomePage,
@@ -56,6 +62,7 @@ const NotFound = lazy(() =>
 type CreateWorkspaceRouteObjectsArgs = {
   isAdminPageEnabled?: boolean;
   isWorkflowCoreIndexPageEnabled?: boolean;
+  isOntologyEnabled?: boolean;
 };
 
 const MAIN_AND_SIDE_PANEL = ['main', 'side-panel'] as const;
@@ -64,6 +71,7 @@ const SETTINGS_ROOT_PATH = AppPath.SettingsCatchAll.replace('/*', '');
 export const createWorkspaceRouteObjects = ({
   isAdminPageEnabled,
   isWorkflowCoreIndexPageEnabled,
+  isOntologyEnabled,
 }: CreateWorkspaceRouteObjectsArgs): WorkspaceRouteObject[] => {
   const settingsRouteObjects = createSettingsRouteObjects({
     isAdminPageEnabled,
@@ -127,6 +135,18 @@ export const createWorkspaceRouteObjects = ({
         </LazyRoute>
       ),
     },
+    ...(isOntologyEnabled
+      ? [
+          {
+            path: AppPath.Ontology,
+            element: (
+              <LazyRoute>
+                <OntologyPage />
+              </LazyRoute>
+            ),
+          } satisfies WorkspaceRouteObject,
+        ]
+      : []),
     {
       path: AppPath.Home,
       element: (

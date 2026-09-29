@@ -44,6 +44,14 @@ export const mockedClientConfig: ClientConfig = {
     provider: CaptchaDriverType.GOOGLE_RECAPTCHA,
     siteKey: 'MOCKED_SITE_KEY',
   },
+  clerk: {
+    isEnabled: false,
+    publishableKey: null,
+  },
+  ontology: {
+    isEnabled: false,
+    consoleUrl: null,
+  },
   api: { mutationMaximumAffectedRecords: 100 },
   onboarding: {
     importContactsCreditsReward: 2,

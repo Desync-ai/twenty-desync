@@ -188,4 +188,30 @@ describe('workspace route objects', () => {
       ),
     ).toBe(true);
   });
+
+  it('does not expose the Ontology route by default', () => {
+    const routeObjects = createWorkspaceRouteObjects({});
+
+    expect(routeObjects.some((route) => route.path === AppPath.Ontology)).toBe(
+      false,
+    );
+
+    const match = matchRoutes(routeObjects, '/ontology');
+
+    expect(match?.at(-1)?.route.path).toBe(AppPath.NotFoundWildcard);
+  });
+
+  it('hosts the Ontology page only when enabled', () => {
+    const routeObjects = createWorkspaceRouteObjects({
+      isOntologyEnabled: true,
+    });
+
+    expect(routeObjects.some((route) => route.path === AppPath.Ontology)).toBe(
+      true,
+    );
+
+    const match = matchRoutes(routeObjects, '/ontology');
+
+    expect(match?.at(-1)?.route.path).toBe(AppPath.Ontology);
+  });
 });

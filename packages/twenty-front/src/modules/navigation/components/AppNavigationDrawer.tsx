@@ -3,6 +3,7 @@ import { useIsSettingsDrawer } from '@/navigation/hooks/useIsSettingsDrawer';
 import { MainNavigationDrawerContent } from '@/navigation/components/MainNavigationDrawerContent';
 import { MainNavigationDrawerModeSwitcher } from '@/navigation/components/MainNavigationDrawerModeSwitcher';
 import { NavigationDrawerLogoutButton } from '@/navigation/components/NavigationDrawerLogoutButton';
+import { NavigationDrawerOntologyItem } from '@/navigation/components/NavigationDrawerOntologyItem';
 import { SettingsNavigationDrawerContent } from '@/navigation/components/SettingsNavigationDrawerContent';
 import { NavigationDrawer } from '@/ui/navigation/navigation-drawer/components/NavigationDrawer';
 import { NavigationDrawerFixedContent } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerFixedContent';
@@ -36,7 +37,15 @@ export const AppNavigationDrawer = ({
       {isSettingsDrawer ? (
         <SettingsNavigationDrawerContent />
       ) : (
-        <MainNavigationDrawerContent />
+        <>
+          {/* Desync addition, gated on server config; see
+              client-config.entity.ts's ontology field. Workspace-level only,
+              never shown in the settings drawer. */}
+          <NavigationDrawerFixedContent>
+            <NavigationDrawerOntologyItem />
+          </NavigationDrawerFixedContent>
+          <MainNavigationDrawerContent />
+        </>
       )}
 
       {/* Pinned to the drawer footer (flex-shrink: 0) below the scrollable

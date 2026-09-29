@@ -13,6 +13,7 @@ import {
 import { type EnterpriseInstanceType } from 'twenty-shared/constants';
 import { type ClerkConfig } from '@/client-config/types/ClerkConfig';
 import { type OnboardingConfig } from '@/client-config/types/OnboardingConfig';
+import { type OntologyConfig } from '@/client-config/types/OntologyConfig';
 
 export type ClientConfig = {
   appVersion?: string;
@@ -23,6 +24,7 @@ export type ClientConfig = {
   authProviders: AuthProviders;
   billing: Billing;
   clerk: ClerkConfig;
+  ontology: OntologyConfig;
   calendarBookingPageId?: string;
   isBookCallOnboardingStepEnabled: boolean;
   isCompanyEnrichmentEnabled: boolean;
