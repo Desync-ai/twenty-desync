@@ -131,4 +131,23 @@ describe('OntologyLaunchController', () => {
     expect(payload.aud).toBe('ontology-console');
     expectNoStoreCacheControl();
   });
+
+  it('returns the plain console URL (no fragment) when the email contains a non-ASCII character, even with a secret set', async () => {
+    configValues.ONTOLOGY_CONSOLE_URL = 'https://console.example.com';
+    configValues.ONTOLOGY_SSO_SECRET =
+      'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8';
+
+    // U+212A KELVIN SIGN lowercases to plain "k" in both JS and Python - a
+    // case-folding collision risk with a different, all-ASCII account. No
+    // SSO for this one user; the page must NOT error, it just gets the plain
+    // console url, same as the secret being unset.
+    const kelvinUser = {
+      id: 'user-1',
+      email: 'Kelvin@example.com',
+    } as UserEntity;
+
+    const result = await controller.getLaunchUrl(kelvinUser, workspace);
+
+    expect(result).toEqual({ url: 'https://console.example.com' });
+  });
 });

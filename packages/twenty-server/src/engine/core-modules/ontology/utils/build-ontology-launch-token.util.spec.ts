@@ -1,6 +1,9 @@
 import { createHmac } from 'crypto';
 
-import { buildOntologyLaunchToken } from './build-ontology-launch-token.util';
+import {
+  buildOntologyLaunchToken,
+  OntologyLaunchTokenEmailError,
+} from './build-ontology-launch-token.util';
 
 // Contract test vector, computed independently with the Python stdlib. Both
 // sides of the SSO contract must reproduce this byte for byte.
@@ -115,5 +118,35 @@ describe('buildOntologyLaunchToken', () => {
       .digest('base64url');
 
     expect(TEST_VECTOR_EXPECTED_TOKEN.endsWith(wrongSignature)).toBe(false);
+  });
+
+  describe('non-ASCII email refusal (Unicode case-folding collisions)', () => {
+    it('refuses U+212A KELVIN SIGN, which lowercases to plain "k" in both JS and Python', () => {
+      // Visually "Kelvin@example.com", but the K is U+212A KELVIN SIGN, not
+      // U+004B LATIN CAPITAL LETTER K. .toLowerCase() maps BOTH to the same
+      // "k", so this could otherwise collide with an unrelated ASCII account.
+      const kelvinSignEmail = 'Kelvin@example.com';
+
+      expect(kelvinSignEmail.toLowerCase()).toBe('kelvin@example.com');
+      expect(() =>
+        buildOntologyLaunchToken({
+          email: kelvinSignEmail,
+          userId: 'u1',
+          workspaceId: 'w1',
+          secretB64Url: TEST_VECTOR_SECRET_B64_URL,
+        }),
+      ).toThrow(OntologyLaunchTokenEmailError);
+    });
+
+    it('accepts a plain-ASCII email with the same letters', () => {
+      expect(() =>
+        buildOntologyLaunchToken({
+          email: 'Kelvin@example.com',
+          userId: 'u1',
+          workspaceId: 'w1',
+          secretB64Url: TEST_VECTOR_SECRET_B64_URL,
+        }),
+      ).not.toThrow();
+    });
   });
 });

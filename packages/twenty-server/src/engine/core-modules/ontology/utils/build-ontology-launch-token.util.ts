@@ -24,6 +24,22 @@ const base64UrlEncode = (input: Buffer | string): string =>
     'base64url',
   );
 
+// U+212A KELVIN SIGN (and other Unicode "confusables", e.g. U+212B ANGSTROM
+// SIGN) lowercase to a plain ASCII letter in both JS's String.toLowerCase and
+// Python's str.lower(). An email containing one could therefore case-fold to
+// the exact same string as a different, unrelated all-ASCII email - a
+// collision an attacker controls by choosing which glyph they register.
+// Refuse before any lowercasing happens, rather than risk it.
+const isAsciiOnly = (value: string): boolean => /^[\x00-\x7F]*$/.test(value);
+
+export class OntologyLaunchTokenEmailError extends Error {
+  constructor() {
+    super(
+      'Refusing to build an Ontology launch token: email contains a non-ASCII character',
+    );
+  }
+}
+
 type BuildOntologyLaunchTokenParams = {
   email: string;
   userId: string;
@@ -43,6 +59,10 @@ export const buildOntologyLaunchToken = ({
   now = Math.floor(Date.now() / 1000),
   nonce = base64UrlEncode(randomBytes(ONTOLOGY_LAUNCH_TOKEN_NONCE_BYTES)),
 }: BuildOntologyLaunchTokenParams): string => {
+  if (!isAsciiOnly(email)) {
+    throw new OntologyLaunchTokenEmailError();
+  }
+
   // Key order matters: the HMAC is computed over this exact JSON string, and
   // the console verifies it over the received bytes, never re-serialised
   // JSON, so key order here must match the contract precisely.

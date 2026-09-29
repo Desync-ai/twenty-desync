@@ -8,7 +8,10 @@ import {
 
 import { ApiPath } from 'twenty-shared/types';
 
-import { buildOntologyLaunchToken } from 'src/engine/core-modules/ontology/utils/build-ontology-launch-token.util';
+import {
+  buildOntologyLaunchToken,
+  OntologyLaunchTokenEmailError,
+} from 'src/engine/core-modules/ontology/utils/build-ontology-launch-token.util';
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
 import { type UserEntity } from 'src/engine/core-modules/user/user.entity';
 import { type FlatWorkspace } from 'src/engine/core-modules/workspace/types/flat-workspace.type';
@@ -49,13 +52,23 @@ export class OntologyLaunchController {
       return { url: consoleUrl };
     }
 
-    const token = buildOntologyLaunchToken({
-      email: user.email,
-      userId: user.id,
-      workspaceId: workspace.id,
-      secretB64Url: secret,
-    });
+    try {
+      const token = buildOntologyLaunchToken({
+        email: user.email,
+        userId: user.id,
+        workspaceId: workspace.id,
+        secretB64Url: secret,
+      });
 
-    return { url: `${consoleUrl}#sso=${token}` };
+      return { url: `${consoleUrl}#sso=${token}` };
+    } catch (error) {
+      if (error instanceof OntologyLaunchTokenEmailError) {
+        // No SSO for this one user, same as the secret being unset - not an
+        // error page, just the plain console url with no fragment.
+        return { url: consoleUrl };
+      }
+
+      throw error;
+    }
   }
 }
