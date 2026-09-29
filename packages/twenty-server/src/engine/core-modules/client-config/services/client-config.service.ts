@@ -64,6 +64,9 @@ export class ClientConfigService {
   }
 
   async getClientConfig(): Promise<ClientConfig> {
+    const ontologyConsoleUrl = this.twentyConfigService.get(
+      'ONTOLOGY_CONSOLE_URL',
+    );
     const captchaProvider = this.twentyConfigService.get('CAPTCHA_DRIVER');
     const supportDriver = this.twentyConfigService.get('SUPPORT_DRIVER');
     const calendarBookingPageId = this.twentyConfigService.get(
@@ -213,6 +216,10 @@ export class ClientConfigService {
         ),
         publishableKey:
           this.twentyConfigService.get('CLERK_PUBLISHABLE_KEY') ?? null,
+      },
+      ontology: {
+        isEnabled: !!ontologyConsoleUrl,
+        consoleUrl: ontologyConsoleUrl ?? null,
       },
       api: {
         mutationMaximumAffectedRecords: this.twentyConfigService.get(

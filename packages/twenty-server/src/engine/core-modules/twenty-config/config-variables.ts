@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Matches,
   Max,
   ValidateIf,
   type ValidationError,
@@ -2468,6 +2469,20 @@ export class ConfigVariables {
   })
   @IsOptional()
   APP_REGISTRY_TOKEN: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: false,
+    description:
+      'URL of the separately hosted Ontology console. When unset, the Ontology page is not shown.',
+    type: ConfigVariableType.STRING,
+  })
+  @Matches(/^(https:\/\/.+|http:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/.*)?)$/, {
+    message:
+      'ONTOLOGY_CONSOLE_URL must be an absolute https:// URL, or http://127.0.0.1… / http://localhost… for local runs',
+  })
+  @IsOptional()
+  ONTOLOGY_CONSOLE_URL?: string;
 }
 
 export const validate = (config: Record<string, unknown>): ConfigVariables => {

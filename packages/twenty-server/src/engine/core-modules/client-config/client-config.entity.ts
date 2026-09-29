@@ -246,6 +246,15 @@ export class Clerk {
 }
 
 @ObjectType()
+export class Ontology {
+  @Field(() => Boolean)
+  isEnabled: boolean;
+
+  @Field(() => String, { nullable: true })
+  consoleUrl: string | null;
+}
+
+@ObjectType()
 export class ApiConfig {
   @Field(() => Number, { nullable: false })
   mutationMaximumAffectedRecords: number;
@@ -349,6 +358,9 @@ export class ClientConfig {
 
   @Field(() => Clerk)
   clerk: Clerk;
+
+  @Field(() => Ontology)
+  ontology: Ontology;
 
   @Field(() => ApiConfig)
   api: ApiConfig;

@@ -85,6 +85,14 @@ describe('ClientConfigController', () => {
           provider: undefined,
           siteKey: undefined,
         },
+        clerk: {
+          isEnabled: false,
+          publishableKey: null,
+        },
+        ontology: {
+          isEnabled: false,
+          consoleUrl: null,
+        },
         api: {
           mutationMaximumAffectedRecords: 100,
         },
