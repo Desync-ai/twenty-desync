@@ -6,13 +6,16 @@ import { AvatarOrIcon, Chip } from 'twenty-ui/primitives/data-display';
 import {
   IconApi,
   IconCalendar,
+  IconDesync,
   IconGmail,
   IconGoogleCalendar,
+  IconHubspot,
   IconMail,
   IconMicrosoftCalendar,
   IconMicrosoftOutlook,
   IconPlug,
   IconRobot,
+  IconSalesforce,
   IconSettingsAutomation,
   IconUpload,
   IconWebhook,
@@ -47,9 +50,15 @@ const PROVIDERS_ICON_MAPPING = {
 const getLeftIcon = ({
   source,
   context,
-}: Pick<ActorDisplayProps, 'source' | 'context'>):
+  name,
+}: Pick<ActorDisplayProps, 'source' | 'context' | 'name'>):
   | IconComponent
   | undefined => {
+  // Our integration write-keys are named after the provider, so records synced
+  // from them show the brand logo instead of the generic API icon.
+  if (name === 'HubSpot') return IconHubspot;
+  if (name === 'Salesforce') return IconSalesforce;
+  if (name === 'Desync') return IconDesync;
   switch (source) {
     case 'API':
       return IconApi;
@@ -83,7 +92,7 @@ export const ActorDisplay = ({
   avatarUrl,
   context,
 }: ActorDisplayProps) => {
-  const LeftIcon = getLeftIcon({ source, context });
+  const LeftIcon = getLeftIcon({ source, context, name });
 
   return (
     <Chip

@@ -2007,6 +2007,15 @@ export class ConfigVariables {
   IS_MULTIWORKSPACE_ENABLED = false;
 
   @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.SERVER_CONFIG,
+    description:
+      'Desync: when a user signs out, revoke ALL of their sessions across every subdomain (incl. the workspace-agnostic app session) instead of only the current one. Default false so prod is unaffected; enabled per-service (e.g. dev).',
+    type: ConfigVariableType.BOOLEAN,
+  })
+  @IsOptional()
+  IS_FULL_ACCOUNT_SIGN_OUT_ENABLED = false;
+
+  @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     description:
       'Number of inactive days before sending a deletion warning for workspaces. Used in the workspace deletion cron job to determine when to send warning emails.',

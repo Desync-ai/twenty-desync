@@ -45,6 +45,12 @@ export const SentryInitEffect = () => {
             integrations: [
               browserTracingIntegration({}),
               replayIntegration({
+                // Desync: never capture PII in session replays — mask all text and
+                // inputs and block media. (These are Sentry defaults; pinned here so
+                // replays can't leak clients' CRM data even if defaults change.)
+                maskAllText: true,
+                maskAllInputs: true,
+                blockAllMedia: true,
                 _experiments: {
                   ignoreMutations: [
                     `[${SENTRY_REPLAY_IGNORE_MUTATIONS_ATTRIBUTE}]`,
@@ -85,7 +91,8 @@ export const SentryInitEffect = () => {
         try {
           const { setUser } = await import('@sentry/react');
           setUser({
-            email: currentUser?.email,
+            // Desync: do NOT send the user's email (PII) to Sentry — the id +
+            // workspace ids are enough to correlate an error to a user.
             id: currentUser?.id,
             workspaceId: currentWorkspace?.id,
             workspaceMemberId: currentWorkspaceMember?.id,

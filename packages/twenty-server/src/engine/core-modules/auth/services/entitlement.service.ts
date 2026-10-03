@@ -10,7 +10,7 @@ import { Pool } from 'pg';
  * This is the cost control: Twenty bills ~$19 per ACTIVE seat, so we must never
  * provision a workspace for a free/trial user. A user is entitled iff they are a
  * Desync admin (@desync.ai) OR have a non-revoked subscription row that is an
- * Admin plan, or a Starter/Crusader/Referral plan inside its current billing
+ * Admin plan, or a Starter/Crusader/Pro/Referral plan inside its current billing
  * period (so an expired referral or a revoked/cancelled plan is NOT entitled).
  *
  * Fails CLOSED: if the billing DB is unconfigured or unreachable, isEntitled
@@ -71,7 +71,7 @@ export class EntitlementService {
              AND (
                su.plan_level = 'Admin'
                OR (
-                 su.plan_level IN ('Starter', 'Crusader', 'Referral')
+                 su.plan_level IN ('Starter', 'Crusader', 'Pro', 'Referral')
                  AND su.period_start <= EXTRACT(EPOCH FROM now())
                  AND su.period_end >= EXTRACT(EPOCH FROM now())
                )

@@ -2,6 +2,8 @@ export enum SettingsPath {
   ProfilePage = 'profile',
   TwoFactorAuthenticationStrategyConfig = 'profile/two-factor-authentication/:twoFactorAuthenticationStrategy',
   Experience = 'experience',
+  // Desync: self-service plan management (own backend, not Twenty native billing).
+  PlanBilling = 'plan-billing',
   Accounts = 'accounts',
   NewAccount = 'accounts/new',
   AccountsConfiguration = 'accounts/configuration/:connectedAccountId',

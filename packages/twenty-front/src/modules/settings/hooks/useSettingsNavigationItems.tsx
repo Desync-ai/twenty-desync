@@ -87,6 +87,13 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           Icon: IconColorSwatch,
         },
         {
+          // Desync: per-user plan management (always visible — every user has
+          // their own subscription/entitlement, including invited seat members).
+          label: t`Plan & Billing`,
+          path: SettingsPath.PlanBilling,
+          Icon: IconCreditCard,
+        },
+        {
           label: t`Accounts`,
           path: SettingsPath.Accounts,
           Icon: IconAt,
@@ -150,13 +157,12 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           Icon: IconPlug,
           isHidden: !permissionMap[PermissionFlagType.API_KEYS_AND_WEBHOOKS],
         },
-        // TODO: Re-enable when integrations page is ready
-        // {
-        //   label: t`Integrations`,
-        //   path: SettingsPath.Integrations,
-        //   Icon: IconApps,
-        //   isHidden: !permissionMap[PermissionFlagType.API_KEYS_AND_WEBHOOKS],
-        // },
+        {
+          label: t`Integrations`,
+          path: SettingsPath.Integrations,
+          Icon: IconApps,
+          isHidden: !permissionMap[PermissionFlagType.API_KEYS_AND_WEBHOOKS],
+        },
         {
           label: t`Apps`,
           path: SettingsPath.Applications,

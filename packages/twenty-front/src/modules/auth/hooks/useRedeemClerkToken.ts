@@ -4,6 +4,7 @@ import { useAuth } from '@/auth/hooks/useAuth';
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
 import { useOrigin } from '@/domain-manager/hooks/useOrigin';
 import { useRedirectToWorkspaceDomain } from '@/domain-manager/hooks/useRedirectToWorkspaceDomain';
+import { subscribeRequiredUrlState } from '@/auth/states/subscribeRequiredUrlState';
 import { getToastOptionsFromError } from '@/error-handler/utils/getToastOptionsFromError';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
@@ -16,7 +17,7 @@ import { useToast } from 'twenty-ui/primitives/feedback';
 export const useRedeemClerkToken = () => {
   const { enqueueToast } = useToast();
   const { origin } = useOrigin();
-  const { getAuthTokensFromLoginToken } = useAuth();
+  const { getAuthTokensFromLoginToken, clerkCentralLanding } = useAuth();
   const { redirectToWorkspaceDomain } = useRedirectToWorkspaceDomain();
   const isMultiWorkspaceEnabled = useAtomStateValue(
     isMultiWorkspaceEnabledState,
@@ -24,6 +25,7 @@ export const useRedeemClerkToken = () => {
   const setIsAppEffectRedirectEnabled = useSetAtomState(
     isAppEffectRedirectEnabledState,
   );
+  const setSubscribeRequiredUrl = useSetAtomState(subscribeRequiredUrlState);
   const [getAuthTokensFromClerkToken] = useMutation(
     GET_AUTH_TOKENS_FROM_CLERK_TOKEN,
   );
@@ -50,9 +52,23 @@ export const useRedeemClerkToken = () => {
         }
 
         // Not entitled: the server hands back a URL to sign up + subscribe on the
-        // lead-gen platform (instead of tokens). Send the user there.
+        // lead-gen platform (instead of tokens). Rather than hard-redirect the
+        // user out of the CRM, surface a soft interstitial (SignInUpWithClerk
+        // reads this state) with a Subscribe button that opens the page in a new
+        // tab. Terminal (return true) so the exchange effect stops re-firing; the
+        // effect also stands down while this is set (see SignInUpClerkExchangeEffect).
         if (isDefined(result.subscribeUrl)) {
-          window.location.href = result.subscribeUrl;
+          setSubscribeRequiredUrl(result.subscribeUrl);
+
+          return true;
+        }
+
+        // Desync: new / no-workspace users STAY on the central domain to finish
+        // signup. The server already set a workspace-agnostic session cookie on
+        // this (central) host, so we must NOT redirect — load the user and run the
+        // step machine (questionnaire → workspace choice/creation).
+        if (result.onCentralDomain === true) {
+          await clerkCentralLanding();
 
           return true;
         }
@@ -88,9 +104,11 @@ export const useRedeemClerkToken = () => {
       getAuthTokensFromClerkToken,
       origin,
       getAuthTokensFromLoginToken,
+      clerkCentralLanding,
       redirectToWorkspaceDomain,
       isMultiWorkspaceEnabled,
       setIsAppEffectRedirectEnabled,
+      setSubscribeRequiredUrl,
       enqueueToast,
     ],
   );

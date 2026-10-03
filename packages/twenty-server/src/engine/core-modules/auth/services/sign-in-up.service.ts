@@ -164,7 +164,25 @@ export class SignInUpService {
     return await this.signUpOnNewWorkspace(params.userData);
   }
 
+  // Desync: this fork authenticates through Clerk. Native email/password
+  // sign-up / sign-in / reset are still mounted as PUBLIC GraphQL mutations
+  // and, unguarded, let anyone create a user + workspace directly — bypassing
+  // Clerk AND the billing entitlement gate (which lives only in the Clerk
+  // exchange path). AUTH_PASSWORD_ENABLED was previously read only for the
+  // frontend UI toggle; enforce it here so it actually disables the password
+  // flows. Set AUTH_PASSWORD_ENABLED=false in prod/dev to make Clerk the only door.
+  private assertPasswordAuthEnabled() {
+    if (!this.twentyConfigService.get('AUTH_PASSWORD_ENABLED')) {
+      throw new AuthException(
+        'Password authentication is disabled',
+        AuthExceptionCode.USE_SSO_AUTH,
+      );
+    }
+  }
+
   async generateHash(password: string) {
+    this.assertPasswordAuthEnabled();
+
     const isPasswordValid = PASSWORD_REGEX.test(password);
 
     if (!isPasswordValid) {
@@ -187,6 +205,8 @@ export class SignInUpService {
     password: string;
     passwordHash: string;
   }) {
+    this.assertPasswordAuthEnabled();
+
     const isValid = await compareHash(password, passwordHash);
 
     if (!isValid) {
