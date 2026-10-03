@@ -250,6 +250,14 @@ const SettingsApiWebhooks = lazy(() =>
   ),
 );
 
+const SettingsIntegrations = lazy(() =>
+  import('~/pages/settings/integrations/SettingsIntegrations').then(
+    (module) => ({
+      default: module.SettingsIntegrations,
+    }),
+  ),
+);
+
 const SettingsAI = lazy(() =>
   import('~/pages/settings/ai/SettingsAI').then((module) => ({
     default: module.SettingsAI,
@@ -443,6 +451,13 @@ const SettingsAccountsCalendars = lazy(() =>
 const SettingsBilling = lazy(() =>
   import('~/pages/settings/billing/SettingsBilling').then((module) => ({
     default: module.SettingsBilling,
+  })),
+);
+
+// Desync: self-service plan management (own Stripe backend, not Twenty native billing).
+const SettingsPlanBilling = lazy(() =>
+  import('~/pages/settings/plan-billing/SettingsPlanBilling').then((module) => ({
+    default: module.SettingsPlanBilling,
   })),
 );
 
@@ -735,6 +750,7 @@ const createSettingsRouteElements = ({
       element={<SettingsTwoFactorAuthenticationMethod />}
     />
     <Route path={SettingsPath.Experience} element={<SettingsExperience />} />
+    <Route path={SettingsPath.PlanBilling} element={<SettingsPlanBilling />} />
     <Route
       element={
         <SettingsProtectedRouteWrapper
@@ -1021,6 +1037,10 @@ const createSettingsRouteElements = ({
       <Route
         path={SettingsPath.ApiWebhooks}
         element={<SettingsApiWebhooks />}
+      />
+      <Route
+        path={SettingsPath.Integrations}
+        element={<SettingsIntegrations />}
       />
       <Route
         path={`${SettingsPath.GraphQLPlayground}`}

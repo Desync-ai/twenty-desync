@@ -15,7 +15,10 @@ export abstract class GoogleAPIsOauthCommonStrategy extends PassportStrategy(
   'google-apis',
 ) {
   constructor(twentyConfigService: TwentyConfigService) {
-    const scopes = getGoogleApisOauthScopes();
+    const scopes = getGoogleApisOauthScopes({
+      gmail: twentyConfigService.get('MESSAGING_PROVIDER_GMAIL_ENABLED'),
+      calendar: twentyConfigService.get('CALENDAR_PROVIDER_GOOGLE_ENABLED'),
+    });
 
     super({
       clientID: twentyConfigService.get('AUTH_GOOGLE_CLIENT_ID'),

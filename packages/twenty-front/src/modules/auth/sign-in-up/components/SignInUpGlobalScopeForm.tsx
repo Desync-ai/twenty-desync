@@ -1,7 +1,7 @@
 import { availableWorkspacesState } from '@/auth/states/availableWorkspacesState';
 import { returnToPathState } from '@/auth/states/returnToPathState';
 import { useBuildWorkspaceUrl } from '@/domain-manager/hooks/useBuildWorkspaceUrl';
-import { useQuery } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { FormProvider } from 'react-hook-form';
@@ -22,7 +22,10 @@ import {
   SignInUpStep,
   signInUpStepState,
 } from '@/auth/states/signInUpStepState';
+import { ACCEPT_WORKSPACE_INVITATION_FOR_CURRENT_USER } from '@/auth/graphql/mutations/acceptWorkspaceInvitationForCurrentUser';
 import { getAvailableWorkspacePathAndSearchParams } from '@/auth/utils/availableWorkspacesUtils';
+import { useRedirectToWorkspaceDomain } from '@/domain-manager/hooks/useRedirectToWorkspaceDomain';
+import { getToastOptionsFromError } from '@/error-handler/utils/getToastOptionsFromError';
 import { authProvidersState } from '@/client-config/states/authProvidersState';
 import { clerkConfigState } from '@/client-config/states/clerkConfigState';
 import { isDDLLockedState } from '@/client-config/states/isDDLLockedState';
@@ -30,7 +33,10 @@ import { DEFAULT_WORKSPACE_LOGO } from '@/ui/navigation/navigation-drawer/consta
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { isNonEmptyString } from '@sniptt/guards';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
+import { AppPath } from 'twenty-shared/types';
+import { isDefined } from 'twenty-shared/utils';
+import { useToast } from 'twenty-ui/primitives/feedback';
 import { Avatar } from 'twenty-ui/primitives/data-display';
 import { IconChevronRight, IconPlus } from 'twenty-ui/icon';
 import { HorizontalSeparator } from 'twenty-ui/primitives/layout';
@@ -143,6 +149,50 @@ export const SignInUpGlobalScopeForm = () => {
   const { handleResetPassword } = useHandleResetPassword();
   const returnToPath = useAtomStateValue(returnToPathState);
 
+  // Desync: accept a pending invite from the central domain (app.*), then hand
+  // the user into the workspace via a login token — see the mutation doc.
+  const { redirectToWorkspaceDomain } = useRedirectToWorkspaceDomain();
+  const { enqueueToast } = useToast();
+  const [isAcceptingInvite, setIsAcceptingInvite] = useState(false);
+  const [acceptWorkspaceInvitation] = useMutation(
+    ACCEPT_WORKSPACE_INVITATION_FOR_CURRENT_USER,
+  );
+
+  const handleAcceptInvite = async (availableWorkspace: AvailableWorkspace) => {
+    if (
+      isAcceptingInvite ||
+      !isNonEmptyString(availableWorkspace.personalInviteToken)
+    ) {
+      return;
+    }
+
+    setIsAcceptingInvite(true);
+
+    try {
+      const { data } = await acceptWorkspaceInvitation({
+        variables: {
+          personalInviteToken: availableWorkspace.personalInviteToken,
+        },
+      });
+
+      const result = data?.acceptWorkspaceInvitationForCurrentUser;
+
+      if (!isDefined(result?.loginToken)) {
+        throw new Error('Could not accept the invitation. Please try again.');
+      }
+
+      await redirectToWorkspaceDomain(
+        getWorkspaceUrl(availableWorkspace.workspaceUrls),
+        AppPath.Verify,
+        { loginToken: result.loginToken },
+        '_self',
+      );
+    } catch (error: unknown) {
+      setIsAcceptingInvite(false);
+      enqueueToast(getToastOptionsFromError({ error }));
+    }
+  };
+
   useQuery(GetWorkspaceCreationDefaultsDocument, {
     skip: signInUpStep !== SignInUpStep.WorkspaceSelection,
   });
@@ -173,44 +223,67 @@ export const SignInUpGlobalScopeForm = () => {
       {signInUpStep === SignInUpStep.WorkspaceSelection && (
         <StyledOnboardingContentContainer>
           <StyledWorkspaceContainer>
-            {availableWorkspacesList.map((availableWorkspace, index) => (
-              <OnboardingStepAnimatedItem
-                key={availableWorkspace.id}
-                index={index}
-              >
-                <UndecoratedLink
-                  to={getAvailableWorkspaceUrl(availableWorkspace)}
+            {availableWorkspacesList.map((availableWorkspace, index) => {
+              // Desync: a pending INVITE (no loginToken, has inviteHash) is
+              // accepted server-side from app.* on click, then the user is handed
+              // into the workspace via /verify — rather than navigating to the
+              // workspace subdomain, where the Clerk session may not have carried.
+              // Members (loginToken present) keep the normal link.
+              const isInvite =
+                !isDefined(availableWorkspace.loginToken) &&
+                isNonEmptyString(availableWorkspace.personalInviteToken);
+
+              const workspaceRow = (
+                <StyledWorkspaceItem
+                  {...(isInvite
+                    ? { onClick: () => handleAcceptInvite(availableWorkspace) }
+                    : {})}
                 >
-                  <StyledWorkspaceItem>
-                    <StyledWorkspaceContent>
-                      <Avatar
-                        name={availableWorkspace.displayName || ''}
-                        src={getAbsoluteImageUrl(
-                          availableWorkspace.logo ?? DEFAULT_WORKSPACE_LOGO,
-                        )}
-                        size="lg"
-                      />
-                      <StyledWorkspaceTextContainer>
-                        <StyledWorkspaceName>
-                          {availableWorkspace.displayName ||
-                            availableWorkspace.id}
-                        </StyledWorkspaceName>
-                        <StyledWorkspaceUrl>
-                          {
-                            new URL(
-                              getWorkspaceUrl(availableWorkspace.workspaceUrls),
-                            ).hostname
-                          }
-                        </StyledWorkspaceUrl>
-                      </StyledWorkspaceTextContainer>
-                      <StyledChevronIcon>
-                        <IconChevronRight size={theme.icon.size.md} />
-                      </StyledChevronIcon>
-                    </StyledWorkspaceContent>
-                  </StyledWorkspaceItem>
-                </UndecoratedLink>
-              </OnboardingStepAnimatedItem>
-            ))}
+                  <StyledWorkspaceContent>
+                    <Avatar
+                      name={availableWorkspace.displayName || ''}
+                      src={getAbsoluteImageUrl(
+                        availableWorkspace.logo ?? DEFAULT_WORKSPACE_LOGO,
+                      )}
+                      size="lg"
+                    />
+                    <StyledWorkspaceTextContainer>
+                      <StyledWorkspaceName>
+                        {availableWorkspace.displayName ||
+                          availableWorkspace.id}
+                      </StyledWorkspaceName>
+                      <StyledWorkspaceUrl>
+                        {
+                          new URL(
+                            getWorkspaceUrl(availableWorkspace.workspaceUrls),
+                          ).hostname
+                        }
+                      </StyledWorkspaceUrl>
+                    </StyledWorkspaceTextContainer>
+                    <StyledChevronIcon>
+                      <IconChevronRight size={theme.icon.size.md} />
+                    </StyledChevronIcon>
+                  </StyledWorkspaceContent>
+                </StyledWorkspaceItem>
+              );
+
+              return (
+                <OnboardingStepAnimatedItem
+                  key={availableWorkspace.id}
+                  index={index}
+                >
+                  {isInvite ? (
+                    workspaceRow
+                  ) : (
+                    <UndecoratedLink
+                      to={getAvailableWorkspaceUrl(availableWorkspace)}
+                    >
+                      {workspaceRow}
+                    </UndecoratedLink>
+                  )}
+                </OnboardingStepAnimatedItem>
+              );
+            })}
             {!isDDLLocked && (
               <OnboardingStepAnimatedItem
                 index={availableWorkspacesList.length}

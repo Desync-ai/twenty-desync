@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { createClerkClient } from '@clerk/backend';
 import { isNonEmptyString } from '@sniptt/guards';
 import { addMilliseconds } from 'date-fns';
 import { type Request } from 'express';
@@ -548,6 +549,50 @@ export class UserSessionService {
     return revokedSessions.length;
   }
 
+  // Desync: revoke ALL of a user's Clerk sessions (server-side, via the Clerk
+  // Backend API) so a full sign-out can't be undone by a sibling subdomain
+  // re-exchanging a still-live Clerk session. Best-effort: logging out must not
+  // 500 because the Clerk API hiccuped. Gated by the caller
+  // (IS_FULL_ACCOUNT_SIGN_OUT_ENABLED), so prod is unaffected.
+  private async revokeClerkSessionsForUser(
+    clerkId: string | null,
+  ): Promise<void> {
+    if (!isNonEmptyString(clerkId)) {
+      return;
+    }
+
+    const secretKey = this.twentyConfigService.get('CLERK_SECRET_KEY');
+
+    if (!isNonEmptyString(secretKey)) {
+      return;
+    }
+
+    try {
+      const clerkClient = createClerkClient({ secretKey });
+      const { data } = await clerkClient.sessions.getSessionList({
+        userId: clerkId,
+      });
+
+      await Promise.all(
+        (data ?? []).map((session) =>
+          clerkClient.sessions
+            .revokeSession(session.id)
+            .catch(() => undefined),
+        ),
+      );
+
+      this.logger.log(
+        `Full sign-out: revoked ${data?.length ?? 0} Clerk session(s) for user`,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Full sign-out: Clerk session revoke failed (non-fatal): ${
+          (error as Error)?.message
+        }`,
+      );
+    }
+  }
+
   async signOut({
     sessionToken,
     refreshToken,
@@ -557,10 +602,47 @@ export class UserSessionService {
   }): Promise<void> {
     try {
       if (isNonEmptyString(sessionToken)) {
-        await this.revokeSessionByToken(
-          sessionToken,
-          UserSessionRevokedReason.UserSignOut,
-        );
+        // Desync (dev-gated): Twenty sessions are host-only per-subdomain (own
+        // cookie + user_session row + localStorage flag each), so a single-token
+        // revoke leaves sibling subdomains — notably the workspace-agnostic `app`
+        // session — logged in. With IS_FULL_ACCOUNT_SIGN_OUT_ENABLED, revoke ALL
+        // of the user's sessions so sign-out is account-wide. Default false →
+        // prod behaves exactly as before; enabled only on the dev service.
+        if (
+          this.twentyConfigService.get('IS_FULL_ACCOUNT_SIGN_OUT_ENABLED')
+        ) {
+          // Load the session WITH its user so we can also revoke the user's
+          // Clerk sessions (need the clerkId).
+          const session = await this.userSessionRepository.findOne({
+            where: { tokenHash: hashUserSessionToken(sessionToken) },
+            relations: { user: true },
+          });
+
+          if (isDefined(session)) {
+            await this.revokeAllSessionsForUser({
+              userId: session.userId,
+              reason: UserSessionRevokedReason.UserSignOut,
+            });
+            // Revoking Twenty sessions alone is NOT enough: a sibling subdomain
+            // (e.g. the central `app` host) still holds a live Clerk session, and
+            // SignInUpClerkExchangeEffect re-exchanges it into a fresh Twenty
+            // session the moment ours is revoked — so the user stays logged in
+            // there. Kill the Clerk session too so `isSignedIn` flips false
+            // everywhere and no re-exchange can happen. (This signs the user out
+            // of every Clerk app on this instance — the intended "full sign-out".)
+            await this.revokeClerkSessionsForUser(session.user?.clerkId ?? null);
+          } else {
+            await this.revokeSessionByToken(
+              sessionToken,
+              UserSessionRevokedReason.UserSignOut,
+            );
+          }
+        } else {
+          await this.revokeSessionByToken(
+            sessionToken,
+            UserSessionRevokedReason.UserSignOut,
+          );
+        }
       }
     } finally {
       if (isNonEmptyString(refreshToken)) {

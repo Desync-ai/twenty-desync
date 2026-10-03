@@ -1,3 +1,5 @@
+import { useAuth } from '@/auth/hooks/useAuth';
+import { DesyncQuestionnaire } from '@/desync-onboarding/components/DesyncQuestionnaire';
 import { useSignInUp } from '@/auth/sign-in-up/hooks/useSignInUp';
 import { useSignInUpForm } from '@/auth/sign-in-up/hooks/useSignInUpForm';
 import { isCreatingWorkspaceState } from '@/auth/states/isCreatingWorkspaceState';
@@ -20,6 +22,7 @@ import { OnboardingLayout } from '@/onboarding/components/OnboardingLayout';
 import { StyledOnboardingStepPage } from '@/onboarding/components/StyledOnboardingStepPage';
 import { SignInUpWorkspaceCreationForm } from '@/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm';
 import { SignInUpWorkspaceScopeFormEffect } from '@/auth/sign-in-up/components/internal/SignInUpWorkspaceScopeFormEffect';
+import { SignInUpRedirectToDefaultDomainEffect } from '@/auth/sign-in-up/components/internal/SignInUpRedirectToDefaultDomainEffect';
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
 import { useGetPublicWorkspaceDataByDomain } from '@/domain-manager/hooks/useGetPublicWorkspaceDataByDomain';
 import { useIsCurrentLocationOnAWorkspace } from '@/domain-manager/hooks/useIsCurrentLocationOnAWorkspace';
@@ -32,6 +35,7 @@ import { SignInUpTwoFactorAuthenticationProvision } from '@/auth/sign-in-up/comp
 import { SignInUpTOTPVerification } from '@/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification';
 import { useWorkspaceFromInviteHash } from '@/auth/sign-in-up/hooks/useWorkspaceFromInviteHash';
 import { clientConfigApiStatusState } from '@/client-config/states/clientConfigApiStatusState';
+import { clerkConfigState } from '@/client-config/states/clerkConfigState';
 import { ModalContent } from 'twenty-ui/primitives/surfaces';
 import { useLingui } from '@lingui/react/macro';
 import { useSearchParams } from 'react-router-dom';
@@ -66,6 +70,7 @@ export const SignInUp = () => {
   const { form } = useSignInUpForm();
   const { signInUpStep } = useSignInUp(form);
   const { isDefaultDomain } = useIsCurrentLocationOnDefaultDomain();
+  const clerkConfig = useAtomStateValue(clerkConfigState);
   const { isOnAWorkspace } = useIsCurrentLocationOnAWorkspace();
   const workspacePublicData = useAtomStateValue(workspacePublicDataState);
   const { loading: getPublicWorkspaceDataLoading } =
@@ -75,6 +80,12 @@ export const SignInUp = () => {
   );
   const { workspaceInviteHash, workspace: workspaceFromInviteHash } =
     useWorkspaceFromInviteHash();
+
+  // Desync: after the questionnaire, re-load the user and run the step machine.
+  // The questionnaire gate (in navigateAfterMultiWorkspaceSignInUp) now passes
+  // (onboarding complete), so the flow falls through to the workspace step
+  // (create for a new user; accept/choose for an invited one).
+  const { clerkCentralLanding } = useAuth();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -117,7 +128,7 @@ export const SignInUp = () => {
     }
 
     if (isGlobalScope) {
-      return t`Welcome to Twenty`;
+      return t`Welcome to Desync`;
     }
 
     // Clerk is the only auth surface and this is a single-tenant self-host, so the
@@ -146,6 +157,13 @@ export const SignInUp = () => {
     // workspace scope.
     if (signInUpStep === SignInUpStep.WorkspaceCreation) {
       return <SignInUpWorkspaceCreationForm />;
+    }
+
+    // Desync: the signup questionnaire step. Must come BEFORE the
+    // isDefaultDomain/global-scope catch-all below so it actually renders on the
+    // central domain (where the workspace nav hotkeys aren't mounted).
+    if (signInUpStep === SignInUpStep.DesyncQuestionnaire) {
+      return <DesyncQuestionnaire onCompleted={clerkCentralLanding} />;
     }
 
     if (isDefaultDomain && isMultiWorkspaceEnabled) {
@@ -197,11 +215,20 @@ export const SignInUp = () => {
     getPublicWorkspaceDataLoading,
     signInUpStep,
     workspacePublicData,
+    clerkCentralLanding,
   ]);
 
-  return signInUpStep === SignInUpStep.WorkspaceCreation ? (
+  return (
+    <>
+      {clerkConfig.isEnabled && <SignInUpRedirectToDefaultDomainEffect />}
+      {signInUpStep === SignInUpStep.WorkspaceCreation ||
+      signInUpStep === SignInUpStep.DesyncQuestionnaire ? (
     <OnboardingLayout
-      onBack={!isCreatingWorkspace ? onBackFromWorkspaceCreation : undefined}
+      onBack={
+        signInUpStep === SignInUpStep.WorkspaceCreation && !isCreatingWorkspace
+          ? onBackFromWorkspaceCreation
+          : undefined
+      }
     >
       <StyledOnboardingStepPage>{signInUpForm}</StyledOnboardingStepPage>
     </OnboardingLayout>
@@ -221,5 +248,7 @@ export const SignInUp = () => {
         />
       )}
     </StyledBackground>
+      )}
+    </>
   );
 };

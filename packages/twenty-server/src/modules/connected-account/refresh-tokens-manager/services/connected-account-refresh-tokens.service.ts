@@ -222,9 +222,12 @@ export class ConnectedAccountRefreshTokensService {
           );
       }
     } catch (error) {
+      // Log only the message — the raw error is a Gaxios error whose request
+      // config carries the OAuth refresh_token in plaintext; never log the object.
       this.logger.log(
-        `Error while refreshing tokens on connected account ${connectedAccount.id} in workspace ${workspaceId}`,
-        error,
+        `Error while refreshing tokens on connected account ${connectedAccount.id} in workspace ${workspaceId}: ${
+          (error as { message?: string })?.message ?? 'unknown error'
+        }`,
       );
       throw error;
     }

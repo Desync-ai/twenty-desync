@@ -42,7 +42,7 @@ export const useHandleCheckoutSession = ({
       if (!data?.checkoutSession.url) {
         enqueueToast({
           variant: 'error',
-          children: t`Checkout session error. Please retry or contact Twenty team`,
+          children: t`Checkout session error. Please retry or contact Desync team`,
         });
         return;
       }
@@ -50,7 +50,7 @@ export const useHandleCheckoutSession = ({
     } catch {
       enqueueToast({
         variant: 'error',
-        children: t`Checkout session error. Please retry or contact Twenty team`,
+        children: t`Checkout session error. Please retry or contact Desync team`,
       });
     } finally {
       setIsSubmitting(false);

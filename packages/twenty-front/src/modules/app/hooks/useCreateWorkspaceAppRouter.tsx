@@ -9,6 +9,7 @@ import { WorkspaceRouteObjectsProvider } from '@/app/routing/components/Workspac
 import { createWorkspaceRouteObjects } from '@/app/routing/utils/createWorkspaceRouteObjects';
 import { getWorkspaceRouteObjectsForSurface } from '@/app/routing/utils/getWorkspaceRouteObjectsForSurface';
 import { VerifyEmail } from '@/auth/components/VerifyEmail';
+import { DesyncEntitlementGate } from '@/desync-onboarding/components/DesyncEntitlementGate';
 import { MinimalMetadataGate } from '@/metadata-store/components/MinimalMetadataGate';
 import { OnboardingActivationOutlet } from '@/onboarding/components/OnboardingActivationOutlet';
 import { OnboardingPageLoader } from '@/onboarding/components/OnboardingPageLoader';
@@ -128,14 +129,25 @@ const createWorkspaceAppRouter = ({
               element: <MinimalMetadataGate />,
               children: [
                 {
-                  element: <DefaultLayout />,
+                  // Desync: block the CRM when the user has no active plan
+                  // (expired Referral / never paid). Renders the paywall in place
+                  // of the CRM — reachable without entitlement — while the
+                  // workspace + metadata stay loaded, so paying restores the SAME
+                  // workspace. Sits below MinimalMetadataGate (workspace resolved)
+                  // and above DefaultLayout (the gated CRM surface).
+                  element: <DesyncEntitlementGate />,
                   children: [
                     {
-                      element: <MainAppLayoutWithSidePanel />,
-                      children: getWorkspaceRouteObjectsForSurface(
-                        workspaceRouteObjects,
-                        'main',
-                      ),
+                      element: <DefaultLayout />,
+                      children: [
+                        {
+                          element: <MainAppLayoutWithSidePanel />,
+                          children: getWorkspaceRouteObjectsForSurface(
+                            workspaceRouteObjects,
+                            'main',
+                          ),
+                        },
+                      ],
                     },
                   ],
                 },

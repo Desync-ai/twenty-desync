@@ -10,7 +10,6 @@ import {
   AuthException,
   AuthExceptionCode,
 } from 'src/engine/core-modules/auth/auth.exception';
-import { type ClerkExchangeResult } from 'src/engine/core-modules/auth/dto/clerk-exchange-result.dto';
 import { EntitlementService } from 'src/engine/core-modules/auth/services/entitlement.service';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
 import { LoginTokenService } from 'src/engine/core-modules/auth/token/services/login-token.service';
@@ -23,7 +22,7 @@ import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/use
 import { UserService } from 'src/engine/core-modules/user/services/user.service';
 import { type UserEntity } from 'src/engine/core-modules/user/user.entity';
 import { AuthProviderEnum } from 'src/engine/core-modules/workspace/types/workspace.type';
-import { type WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
+import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 
 type ClerkIdentity = {
   clerkUserId: string;
@@ -39,6 +38,21 @@ type ClerkIdentity = {
  * frontend can send them to sign up + subscribe on the lead-gen platform.
  */
 class NotEntitledError extends Error {}
+
+/**
+ * Desync: where a Clerk sign-in should land. Either straight into a resolved
+ * workspace, or "stay on central" (new / no-workspace users finish signup on
+ * app.* first — questionnaire → workspace choice), or "subscribe" (not entitled;
+ * now only reachable on the subdomain invite-accept path).
+ */
+export type ClerkExchangeOutcome =
+  | { kind: 'workspace'; loginToken: string; workspaceUrl: string }
+  | { kind: 'central'; userId: string }
+  | { kind: 'subscribe'; subscribeUrl: string };
+
+type ClerkResolution =
+  | { kind: 'workspace'; workspace: WorkspaceEntity }
+  | { kind: 'central'; userId: string };
 
 /**
  * Token-exchange bridge for Clerk: the frontend authenticates with Clerk and
@@ -70,33 +84,157 @@ export class ClerkAuthService {
     private readonly workspaceInvitationService: WorkspaceInvitationService,
     @InjectRepository(UserWorkspaceEntity)
     private readonly userWorkspaceRepository: Repository<UserWorkspaceEntity>,
+    @InjectRepository(WorkspaceEntity)
+    private readonly workspaceRepository: Repository<WorkspaceEntity>,
   ) {}
 
   async getAuthTokensFromClerkToken(
     clerkToken: string,
     origin: string,
-  ): Promise<ClerkExchangeResult> {
+  ): Promise<ClerkExchangeOutcome> {
     const identity = await this.verifyClerkTokenAndFetchUser(clerkToken);
 
-    let workspace: WorkspaceEntity;
+    let resolution: ClerkResolution;
 
     try {
-      workspace = await this.resolveWorkspaceForClerkIdentity(identity, origin);
+      resolution = await this.resolveClerkSignIn(identity, origin);
     } catch (error) {
       // Not a paying/referral/admin user -> don't error; hand the frontend a URL
-      // to go sign up + subscribe on the lead-gen platform.
+      // to go sign up + subscribe on the lead-gen platform. (Now only the
+      // subdomain invite-accept path can throw this.)
       if (error instanceof NotEntitledError) {
-        return { subscribeUrl: this.getSubscribeUrl() };
+        return { kind: 'subscribe', subscribeUrl: this.getSubscribeUrl() };
       }
 
       throw error;
     }
 
-    // Mint a short-lived login token for the resolved workspace. The frontend
-    // redirects to that workspace's subdomain `/verify?loginToken=…`, which sets
+    // Desync: new users (and existing users without a workspace) stay on the
+    // central domain to finish signup — the resolver issues a workspace-agnostic
+    // session there and the frontend runs the questionnaire → workspace-choice
+    // step machine. No workspace is created or resolved here.
+    if (resolution.kind === 'central') {
+      return { kind: 'central', userId: resolution.userId };
+    }
+
+    // Straight into a resolved workspace (existing member / existing user's own
+    // workspace / subdomain invite-accept). Mint a short-lived login token; the
+    // frontend redirects to that workspace's `/verify?loginToken=…`, which sets
     // the host-only session cookie on the correct host (see the class doc).
     const loginToken = await this.loginTokenService.generateLoginToken(
       identity.email,
+      resolution.workspace.id,
+      AuthProviderEnum.Clerk,
+    );
+
+    const { subdomainUrl, customUrl } =
+      this.workspaceDomainsService.getWorkspaceUrls(
+        this.workspaceDomainsService.getSubdomainAndCustomDomainFromWorkspaceFallbackOnDefaultSubdomain(
+          resolution.workspace,
+        ),
+      );
+
+    return {
+      kind: 'workspace',
+      loginToken: loginToken.token,
+      workspaceUrl: customUrl ?? subdomainUrl,
+    };
+  }
+
+  /**
+   * Desync: accept a pending workspace invitation for an ALREADY-authenticated
+   * user (one who finished signup on the central domain and holds a
+   * workspace-agnostic session on app.*). This runs the SAME branch-A accept as
+   * resolveClerkSignIn, but SERVER-SIDE from the central domain — so it does NOT
+   * depend on the Clerk session reaching the workspace subdomain (which is
+   * unreliable cross-subdomain on dev, and fragile for prod). Returns a login
+   * token + the workspace URL; the frontend sends the browser to that workspace's
+   * `/verify`, which sets the host-only session cookie on the correct host.
+   */
+  async acceptInvitationForAuthenticatedUser(
+    { userId, email }: { userId: string; email: string },
+    personalInviteToken: string,
+  ): Promise<{ loginToken: string; workspaceUrl: string }> {
+    // Resolve + validate the pending PERSONAL (email) invitation by its token.
+    // The frontend availableWorkspaces entry carries personalInviteToken — NOT the
+    // workspace inviteHash (currentUser.availableWorkspaces never exposes inviteHash,
+    // so keying off it made the invite look like a member row and broke the accept).
+    const invitationValidation =
+      await this.workspaceInvitationService.validatePersonalInvitation({
+        workspacePersonalInviteToken: personalInviteToken,
+        email,
+      });
+
+    if (
+      !invitationValidation?.isValid ||
+      !isDefined(invitationValidation.workspace)
+    ) {
+      throw new AuthException(
+        'You do not have a valid pending invitation.',
+        AuthExceptionCode.FORBIDDEN_EXCEPTION,
+      );
+    }
+
+    const workspace = invitationValidation.workspace;
+
+    const alreadyMember = isDefined(
+      await this.userWorkspaceService.checkUserWorkspaceExists(
+        userId,
+        workspace.id,
+      ),
+    );
+
+    if (!alreadyMember) {
+      const invitation =
+        await this.workspaceInvitationService.getOneWorkspaceInvitation(
+          workspace.id,
+          email,
+        );
+
+      if (!isDefined(invitation)) {
+        throw new AuthException(
+          'You do not have a pending invitation to this workspace.',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
+
+      // One workspace per user: cannot accept an invite into a SECOND workspace.
+      if (isDefined(await this.getFirstWorkspaceForUser(userId))) {
+        throw new AuthException(
+          'You already belong to a workspace and cannot join another.',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
+
+      const existingUser = await this.userService.findUserByIdOrThrow(userId);
+
+      // Entitlement still applies (the questionnaire's Referral grant satisfies it).
+      const entitled = await this.entitlementService.isEntitled(
+        email,
+        existingUser.clerkId ?? '',
+      );
+
+      if (!entitled) {
+        throw new AuthException(
+          'You are not entitled to join a workspace. Please subscribe.',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
+
+      await this.signInUpService.signInUpOnExistingWorkspace({
+        workspace,
+        roleId: invitation.context?.roleId ?? null,
+        userData: { type: 'existingUser', existingUser },
+      });
+
+      await this.workspaceInvitationService.invalidateWorkspaceInvitation(
+        workspace.id,
+        email,
+      );
+    }
+
+    const loginToken = await this.loginTokenService.generateLoginToken(
+      email,
       workspace.id,
       AuthProviderEnum.Clerk,
     );
@@ -161,15 +299,28 @@ export class ClerkAuthService {
 
     const clerkUser = await clerkClient.users.getUser(clerkUserId);
 
-    const primaryEmail =
+    const primaryEmailAddress =
       clerkUser.emailAddresses.find(
         (emailAddress) => emailAddress.id === clerkUser.primaryEmailAddressId,
-      )?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress;
+      ) ?? clerkUser.emailAddresses[0];
+
+    const primaryEmail = primaryEmailAddress?.emailAddress;
 
     if (!isNonEmptyString(primaryEmail)) {
       throw new AuthException(
         'Clerk user has no email address',
         AuthExceptionCode.INVALID_INPUT,
+      );
+    }
+
+    // Desync: account-linking keys off this email (an existing Twenty user with the
+    // same address gets linked to this Clerk identity), so only ever trust a
+    // VERIFIED email — never an unverified/attacker-controlled one. Defence-in-depth
+    // even though the live Clerk instance already requires verification at signup.
+    if (primaryEmailAddress?.verification?.status !== 'verified') {
+      throw new AuthException(
+        'Clerk email address is not verified',
+        AuthExceptionCode.UNAUTHENTICATED,
       );
     }
 
@@ -185,20 +336,23 @@ export class ClerkAuthService {
   }
 
   /**
-   * Resolve which workspace a Clerk sign-in belongs to, from the origin it was
-   * initiated on — the heart of multi-workspace support.
+   * Resolve where a Clerk sign-in should land, from the origin it was initiated on.
    *
    * A) On a workspace subdomain (e.g. acme.twenty-dev.desync.ai): the user MUST
-   *    already be a member. We NEVER auto-join, so visiting a tenant's URL can
-   *    never grant access to that tenant.
-   * B) On the root/default domain (no workspace in the origin): send an existing
-   *    user to their own workspace, and let a brand-new user self-serve a fresh
-   *    workspace (subdomain auto-generated by signUpOnNewWorkspace).
+   *    already be a member, or hold a pending invite to THIS workspace. We NEVER
+   *    auto-join. -> { kind:'workspace' }.
+   * B) On the root/default domain (no workspace in the origin):
+   *    - existing user WITH a workspace -> straight into it ({ kind:'workspace' }).
+   *    - Desync: NEW user, or existing user with NO workspace -> { kind:'central' }:
+   *      do NOT auto-create a workspace and do NOT gate on entitlement here. They
+   *      finish signup on the central domain (questionnaire grants the Referral
+   *      plan → entitled), then choose/create a workspace. Entitlement is enforced
+   *      at workspace CREATION (signUpInNewWorkspace), not at this exchange.
    */
-  private async resolveWorkspaceForClerkIdentity(
+  private async resolveClerkSignIn(
     identity: ClerkIdentity,
     origin: string,
-  ): Promise<WorkspaceEntity> {
+  ): Promise<ClerkResolution> {
     const existingUser = await this.findExistingUser(identity);
 
     const originWorkspace =
@@ -218,7 +372,7 @@ export class ClerkAuthService {
         );
 
       if (isMember) {
-        return originWorkspace;
+        return { kind: 'workspace', workspace: originWorkspace };
       }
 
       // Not a member yet -> honor a pending invitation to THIS workspace (that's
@@ -270,7 +424,7 @@ export class ClerkAuthService {
         identity.email,
       );
 
-      return originWorkspace;
+      return { kind: 'workspace', workspace: originWorkspace };
     }
 
     // B) Signing in on the root/default domain (origin resolves to no workspace).
@@ -280,37 +434,35 @@ export class ClerkAuthService {
       );
 
       if (isDefined(usersWorkspace)) {
-        return usersWorkspace;
+        return { kind: 'workspace', workspace: usersWorkspace };
       }
 
-      // Existing Twenty user with no workspace -> self-serve a new one.
-      // Entitlement gate: only provision a (billable) workspace for an active
-      // paid/referral/admin user.
-      await this.assertEntitledOrThrow(identity);
-
-      const { workspace } = await this.signInUpService.signUpOnNewWorkspace(
-        { type: 'existingUser', existingUser },
-        { displayName: this.computeWorkspaceDisplayName(identity) },
-      );
-
-      return workspace;
+      // Desync: existing Twenty user with no workspace -> stay on central and
+      // finish signup there (questionnaire → choose/create). No auto-create and
+      // no entitlement gate here; entitlement is enforced at workspace creation.
+      return { kind: 'central', userId: existingUser.id };
     }
 
-    // Brand-new user on the root domain -> self-serve create their workspace,
-    // but ONLY if entitled (Twenty bills ~$19 per active seat; no free/trial seats).
-    await this.assertEntitledOrThrow(identity);
-
-    const newUserWithPicture = await this.buildNewUserPayload(identity);
-
-    const { workspace } = await this.signInUpService.signUpOnNewWorkspace(
+    // Desync: brand-new user on the root domain -> create the Twenty user WITHOUT
+    // a workspace and keep them on central to finish signup. The questionnaire
+    // grants the Referral plan (→ entitled), after which they can create a
+    // workspace (entitlement checked there). We do NOT auto-create or gate here.
+    const newUser = await this.signInUpService.signUpWithoutWorkspace(
       {
-        type: 'newUserWithPicture',
-        newUserWithPicture,
+        email: identity.email,
+        firstName: identity.firstName,
+        lastName: identity.lastName,
+        picture: identity.imageUrl,
+        isEmailAlreadyVerified: true,
       },
-      { displayName: this.computeWorkspaceDisplayName(identity) },
+      { provider: AuthProviderEnum.Clerk },
     );
 
-    return workspace;
+    // signUpWithoutWorkspace computes the user without the Clerk link; persist it
+    // so future sign-ins resolve by clerkId (not just the email fallback).
+    await this.userService.linkClerkIdToUser(newUser.id, identity.clerkUserId);
+
+    return { kind: 'central', userId: newUser.id };
   }
 
   /**
@@ -392,15 +544,5 @@ export class ClerkAuthService {
     partialUser.clerkId = identity.clerkUserId;
 
     return partialUser;
-  }
-
-  private computeWorkspaceDisplayName(identity: ClerkIdentity): string {
-    if (isNonEmptyString(identity.firstName)) {
-      return `${identity.firstName}'s Workspace`;
-    }
-
-    const [emailLocalPart] = identity.email.split('@');
-
-    return `${emailLocalPart}'s Workspace`;
   }
 }

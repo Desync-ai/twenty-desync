@@ -29,6 +29,7 @@ import { TimelineCalendarEventModule } from 'src/engine/core-modules/calendar/ti
 import { CaptchaModule } from 'src/engine/core-modules/captcha/captcha.module';
 import { CloudflareModule } from 'src/engine/core-modules/cloudflare/cloudflare.module';
 import { CodeInterpreterModule } from 'src/engine/core-modules/code-interpreter/code-interpreter.module';
+import { DesyncOnboardingModule } from 'src/engine/core-modules/desync-onboarding/desync-onboarding.module';
 import { DnsManagerModule } from 'src/engine/core-modules/dns-manager/dns-manager.module';
 import { DpaModule } from 'src/engine/core-modules/dpa/dpa.module';
 import { EmailModule } from 'src/engine/core-modules/email/email.module';
@@ -94,6 +95,7 @@ import { FileModule } from './file/file.module';
     TwentyConfigModule.forRoot(),
     HealthModule,
     AuthModule,
+    DesyncOnboardingModule,
     BillingModule,
     BillingWebhookModule,
     MessagingWebhooksModule,

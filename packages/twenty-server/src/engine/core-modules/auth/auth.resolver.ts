@@ -49,6 +49,7 @@ import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-u
 import { AccessTokenService } from 'src/engine/core-modules/auth/token/services/access-token.service';
 import { EmailVerificationTokenService } from 'src/engine/core-modules/auth/token/services/email-verification-token.service';
 import { LoginTokenService } from 'src/engine/core-modules/auth/token/services/login-token.service';
+import { EntitlementService } from 'src/engine/core-modules/auth/services/entitlement.service';
 import { RefreshTokenService } from 'src/engine/core-modules/auth/token/services/refresh-token.service';
 import { RenewTokenService } from 'src/engine/core-modules/auth/token/services/renew-token.service';
 import { SsoExchangeTokenService } from 'src/engine/core-modules/auth/token/services/sso-exchange-token.service';
@@ -145,6 +146,7 @@ export class AuthResolver {
     private readonly twoFactorAuthenticationService: TwoFactorAuthenticationService,
     private authService: AuthService,
     private clerkAuthService: ClerkAuthService,
+    private entitlementService: EntitlementService,
     private renewTokenService: RenewTokenService,
     private userService: UserService,
     private apiKeyService: ApiKeyService,
@@ -614,6 +616,22 @@ export class AuthResolver {
 
     const fullUser = await this.userService.findUserByIdOrThrow(currentUser.id);
 
+    // Desync: entitlement is enforced at workspace CREATION now (moved off the
+    // Clerk exchange so a new user can reach the questionnaire first). The
+    // questionnaire grants the Referral plan → entitled; a user who has not
+    // onboarded/subscribed is refused here.
+    const entitled = await this.entitlementService.isEntitled(
+      fullUser.email,
+      fullUser.clerkId ?? '',
+    );
+
+    if (!entitled) {
+      throw new AuthException(
+        'Complete onboarding before creating a workspace.',
+        AuthExceptionCode.FORBIDDEN_EXCEPTION,
+      );
+    }
+
     const { user, workspace } = await this.signInUpService.signUpOnNewWorkspace(
       { type: 'existingUser', existingUser: fullUser },
       { displayName: input?.displayName, subdomain: input?.subdomain },
@@ -792,16 +810,75 @@ export class AuthResolver {
   async getAuthTokensFromClerkToken(
     @Args() { clerkToken }: GetAuthTokensFromClerkTokenInput,
     @Args('origin') origin: string,
+    @Context() context: { req: Request },
   ): Promise<ClerkExchangeResult> {
-    // Returns a login token + the resolved workspace URL (NOT a session cookie).
-    // The Twenty session cookie is host-only, so it can't be set here for a
-    // sibling subdomain: the frontend redirects the browser to the resolved
-    // workspace's `/verify`, which sets the cookie on the correct host. See
-    // ClerkAuthService for the full rationale.
-    return await this.clerkAuthService.getAuthTokensFromClerkToken(
+    const outcome = await this.clerkAuthService.getAuthTokensFromClerkToken(
       clerkToken,
       origin,
     );
+
+    // Desync: new users (and existing users with no workspace) STAY on the central
+    // domain to finish signup (questionnaire → workspace choice). Unlike the
+    // workspace path — where the host-only cookie is set on the target subdomain's
+    // /verify — here we mint a WORKSPACE-AGNOSTIC token pair and set the session
+    // cookie on the central host now, then tell the frontend not to redirect.
+    if (outcome.kind === 'central') {
+      const tokenPair = {
+        accessOrWorkspaceAgnosticToken:
+          await this.workspaceAgnosticTokenService.generateWorkspaceAgnosticToken(
+            {
+              userId: outcome.userId,
+              authProvider: AuthProviderEnum.Clerk,
+            },
+          ),
+        refreshToken: await this.refreshTokenService.generateRefreshToken({
+          userId: outcome.userId,
+          authProvider: AuthProviderEnum.Clerk,
+          targetedTokenType: JwtTokenTypeEnum.WORKSPACE_AGNOSTIC,
+        }),
+      };
+
+      await this.userSessionService.issueSessionForTokenPair({
+        tokenPair,
+        request: context.req,
+        origin: 'sign_in',
+      });
+
+      return { onCentralDomain: true };
+    }
+
+    if (outcome.kind === 'subscribe') {
+      return { subscribeUrl: outcome.subscribeUrl };
+    }
+
+    // Straight into the resolved workspace: the session cookie is host-only, so
+    // the frontend redirects the browser to that workspace's `/verify`, which sets
+    // it on the correct host. See ClerkAuthService for the full rationale.
+    return {
+      loginToken: outcome.loginToken,
+      workspaceUrl: outcome.workspaceUrl,
+    };
+  }
+
+  // Desync: accept a pending workspace invitation for the CURRENTLY authenticated
+  // user (they finished signup on the central domain and hold a workspace-agnostic
+  // session). The accept runs server-side here on app.* — where the session is
+  // valid — instead of relying on the Clerk session reaching the workspace
+  // subdomain. Returns a login token + workspace URL; the frontend hands the user
+  // into the workspace via `/verify`.
+  @Mutation(() => ClerkExchangeResult)
+  @UseGuards(UserAuthGuard, NoPermissionGuard)
+  async acceptWorkspaceInvitationForCurrentUser(
+    @Args('personalInviteToken') personalInviteToken: string,
+    @AuthUser() user: AuthContextUser,
+  ): Promise<ClerkExchangeResult> {
+    const { loginToken, workspaceUrl } =
+      await this.clerkAuthService.acceptInvitationForAuthenticatedUser(
+        { userId: user.id, email: user.email },
+        personalInviteToken,
+      );
+
+    return { loginToken, workspaceUrl };
   }
 
   private async validateAndDecodeLoginToken(
