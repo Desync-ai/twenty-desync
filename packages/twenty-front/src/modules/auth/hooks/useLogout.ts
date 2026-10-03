@@ -1,6 +1,8 @@
 import { useAuth } from '@/auth/hooks/useAuth';
 import { clerkSignOutState } from '@/auth/states/clerkSignOutState';
+import { isPendingServerSignOutState } from '@/auth/states/isPendingServerSignOutState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { useCallback } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
@@ -18,8 +20,18 @@ import { isDefined } from 'twenty-shared/utils';
 export const useLogout = () => {
   const { signOut: signOutFromTwenty } = useAuth();
   const { signOut: clerkSignOut } = useAtomStateValue(clerkSignOutState);
+  const setPendingServerSignOut = useSetAtomState(isPendingServerSignOutState);
 
   const logout = useCallback(async () => {
+    // Mark sign-out pending up front so SignInUpClerkExchangeEffect stands down
+    // through the whole logout (incl. the async Clerk sign-out) and can't
+    // re-exchange us straight back in. Cleared on the next active session.
+    setPendingServerSignOut(true);
+
+    // Clear the PostHog identity so post-logout events aren't tied to this user.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).posthog?.reset?.();
+
     if (isDefined(clerkSignOut)) {
       try {
         await clerkSignOut();
@@ -30,7 +42,7 @@ export const useLogout = () => {
     }
 
     await signOutFromTwenty();
-  }, [clerkSignOut, signOutFromTwenty]);
+  }, [clerkSignOut, signOutFromTwenty, setPendingServerSignOut]);
 
   return { logout };
 };

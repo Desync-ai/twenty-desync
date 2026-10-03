@@ -34,6 +34,32 @@ export class ImpersonationAuthorizationService {
     private readonly twentyConfigService: TwentyConfigService,
   ) {}
 
+  // Desync: impersonation is restricted to an explicit allowlist of support
+  // operators (env IMPERSONATION_ALLOWED_EMAILS, comma-separated; default = the
+  // three founders). A stray canImpersonate / IMPERSONATE grant is useless to
+  // anyone not on this list — the hard gate against operator-surface abuse.
+  private static readonly DEFAULT_IMPERSONATION_ALLOWED_EMAILS = [
+    'jackson@desync.ai',
+    'maks@desync.ai',
+    'mark@desync.ai',
+  ];
+
+  private isEmailAllowedToImpersonate(email?: string | null): boolean {
+    if (!isDefined(email)) {
+      return false;
+    }
+    const configured = (process.env.IMPERSONATION_ALLOWED_EMAILS ?? '')
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .filter((entry) => entry.length > 0);
+    const allowlist =
+      configured.length > 0
+        ? configured
+        : ImpersonationAuthorizationService.DEFAULT_IMPERSONATION_ALLOWED_EMAILS;
+
+    return allowlist.includes(email.trim().toLowerCase());
+  }
+
   getImpersonationLevel(
     impersonatorUserWorkspace: UserWorkspaceEntity,
     targetUserWorkspace: UserWorkspaceEntity,
@@ -53,6 +79,21 @@ export class ImpersonationAuthorizationService {
       targetUserWorkspace,
     );
 
+    // Desync hard gate: only allowlisted support operators may impersonate, at
+    // any level — independent of the canImpersonate / IMPERSONATE flags.
+    if (
+      !this.isEmailAllowedToImpersonate(impersonatorUserWorkspace.user.email)
+    ) {
+      return {
+        allowed: false,
+        level,
+        reason:
+          level === 'server'
+            ? 'SERVER_LEVEL_NOT_ALLOWED'
+            : 'WORKSPACE_LEVEL_NOT_ALLOWED',
+      };
+    }
+
     if (level === 'server') {
       const hasServerLevelImpersonatePermission =
         impersonatorUserWorkspace.user.canImpersonate === true &&
@@ -70,6 +111,15 @@ export class ImpersonationAuthorizationService {
         if (isDefined(twoFactorDenialReason)) {
           return { allowed: false, level, reason: twoFactorDenialReason };
         }
+      }
+
+      // Desync: block impersonating a higher-privileged (admin) user at server
+      // level too — the workspace-level branch already enforces this below.
+      if (
+        userHasAdminPrivileges(targetUserWorkspace.user) &&
+        !userHasAdminPrivileges(impersonatorUserWorkspace.user)
+      ) {
+        return { allowed: false, level, reason: 'TARGET_HAS_ADMIN_PRIVILEGES' };
       }
 
       return { allowed: true, level };

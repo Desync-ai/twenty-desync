@@ -1,12 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 /**
- * Result of exchanging a Clerk session token. Two shapes:
- *  - Entitled  -> { loginToken, workspaceUrl }: the frontend redirects to
- *    `{workspaceUrl}/verify?loginToken=…`, which sets the host-only session
- *    cookie on the correct subdomain (the cookie can't span sibling subdomains).
- *  - Not entitled -> { subscribeUrl }: no CRM access; the frontend sends the user
- *    to sign up + subscribe on the lead-gen platform instead of erroring.
+ * Result of exchanging a Clerk session token. Shapes:
+ *  - Straight into a workspace -> { loginToken, workspaceUrl }: the frontend
+ *    redirects to `{workspaceUrl}/verify?loginToken=…`, which sets the host-only
+ *    session cookie on the correct subdomain (can't span sibling subdomains).
+ *  - Desync: stay on central -> { onCentralDomain: true }: the server has already
+ *    issued a WORKSPACE-AGNOSTIC session cookie on the central domain, so the
+ *    frontend must NOT redirect — it runs the central step machine (questionnaire
+ *    → workspace choice/creation). Used for new users and users without a
+ *    workspace yet, so they finish signup on app.* before picking a workspace.
+ *  - Not entitled (now only for subdomain invite-accept) -> { subscribeUrl }.
  */
 @ObjectType()
 export class ClerkExchangeResult {
@@ -18,4 +22,7 @@ export class ClerkExchangeResult {
 
   @Field(() => String, { nullable: true })
   subscribeUrl?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  onCentralDomain?: boolean;
 }

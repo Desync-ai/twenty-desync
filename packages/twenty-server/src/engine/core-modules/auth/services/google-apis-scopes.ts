@@ -7,6 +7,7 @@ import {
 import { includesExpectedScopes } from 'src/engine/core-modules/auth/services/google-apis-scopes.service.util';
 import { getGoogleApisOauthScopes } from 'src/engine/core-modules/auth/utils/get-google-apis-oauth-scopes';
 import { SecureHttpClientService } from 'src/engine/core-modules/secure-http-client/secure-http-client.service';
+import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
 
 interface TokenInfoResponse {
   scope: string;
@@ -26,6 +27,7 @@ interface TokenInfoResponse {
 export class GoogleApiScopesService {
   constructor(
     private readonly secureHttpClientService: SecureHttpClientService,
+    private readonly twentyConfigService: TwentyConfigService,
   ) {}
 
   public async getScopesFromGoogleAccessTokenAndCheckIfExpectedScopesArePresent(
@@ -40,7 +42,10 @@ export class GoogleApiScopesService {
       );
 
       const scopes = response.data.scope.split(' ');
-      const expectedScopes = getGoogleApisOauthScopes();
+      const expectedScopes = getGoogleApisOauthScopes({
+        gmail: this.twentyConfigService.get('MESSAGING_PROVIDER_GMAIL_ENABLED'),
+        calendar: this.twentyConfigService.get('CALENDAR_PROVIDER_GOOGLE_ENABLED'),
+      });
 
       return {
         scopes,

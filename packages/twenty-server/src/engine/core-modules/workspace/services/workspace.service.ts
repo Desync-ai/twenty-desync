@@ -109,6 +109,11 @@ import { WorkspaceMigrationValidateBuildAndRunService } from 'src/engine/workspa
 // PENDING_CREATION) and may be retried. It is far longer than a real activation
 // takes, so a genuinely in-progress activation is never reclaimed.
 const WORKSPACE_ACTIVATION_STALE_LOCK_TIMEOUT_MS = 5 * 60 * 1000;
+// When a concurrent activation already holds the lock (e.g. the client re-fired
+// during a racy Clerk token re-exchange), wait for that in-flight winner to
+// finish rather than surfacing a "creation failed" error to the user.
+const WORKSPACE_ACTIVATION_CONCURRENT_WAIT_TIMEOUT_MS = 45 * 1000;
+const WORKSPACE_ACTIVATION_CONCURRENT_POLL_MS = 750;
 const WORKSPACE_APPLICATION_UNINSTALL_RETRY_LIMIT = 3;
 
 @Injectable()
@@ -410,24 +415,38 @@ export class WorkspaceService {
     }
 
     if ((activationLockResult.affected ?? 0) === 0) {
-      // Activation is idempotent for the terminal state: if a prior attempt
-      // already completed (e.g. the client lost the response and retried),
-      // return the active workspace instead of failing. Otherwise another
-      // activation is genuinely in progress and must not be interrupted.
-      const existingWorkspace = await this.workspaceRepository.findOneBy({
-        id: workspace.id,
-      });
+      // We didn't acquire the lock: either a prior attempt already finished, or
+      // a concurrent activation (e.g. the client re-fired during a racy Clerk
+      // token re-exchange) is still in progress. Treat this idempotently —
+      // return the workspace if it is already terminal, otherwise wait for the
+      // in-flight winner to finish and return its result. Only give up if it
+      // never reaches a terminal state within the wait window (a genuinely
+      // stuck activation, which the stale-lock reclaim above handles on retry).
+      const deadline =
+        Date.now() + WORKSPACE_ACTIVATION_CONCURRENT_WAIT_TIMEOUT_MS;
 
-      if (
-        existingWorkspace?.activationStatus ===
-          WorkspaceActivationStatus.ACTIVE ||
-        existingWorkspace?.activationStatus ===
-          WorkspaceActivationStatus.CREATED
-      ) {
-        return existingWorkspace;
+      for (;;) {
+        const existingWorkspace = await this.workspaceRepository.findOneBy({
+          id: workspace.id,
+        });
+
+        if (
+          existingWorkspace?.activationStatus ===
+            WorkspaceActivationStatus.ACTIVE ||
+          existingWorkspace?.activationStatus ===
+            WorkspaceActivationStatus.CREATED
+        ) {
+          return existingWorkspace;
+        }
+
+        if (Date.now() >= deadline) {
+          throw new Error('Workspace is already being created');
+        }
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, WORKSPACE_ACTIVATION_CONCURRENT_POLL_MS),
+        );
       }
-
-      throw new Error('Workspace is already being created');
     }
 
     await this.coreEntityCacheService.invalidate(

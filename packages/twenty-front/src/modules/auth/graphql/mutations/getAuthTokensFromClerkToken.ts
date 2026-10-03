@@ -15,6 +15,7 @@ export const GET_AUTH_TOKENS_FROM_CLERK_TOKEN = gql`
       loginToken
       workspaceUrl
       subscribeUrl
+      onCentralDomain
     }
   }
 `;

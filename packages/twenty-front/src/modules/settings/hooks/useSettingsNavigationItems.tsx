@@ -1,12 +1,9 @@
 import { SettingsPath } from 'twenty-shared/types';
 
-import { useAuth } from '@/auth/hooks/useAuth';
 import { currentUserState } from '@/auth/states/currentUserState';
-import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { billingState } from '@/client-config/states/billingState';
 import { supportChatState } from '@/client-config/states/supportChatState';
 import { usePermissionFlagMap } from '@/settings/roles/hooks/usePermissionFlagMap';
-import { getDocumentationUrl } from '@/support/utils/getDocumentationUrl';
 import {
   type NavigationDrawerItemIndentationLevel,
   type NavigationDrawerItemModifier,
@@ -22,8 +19,6 @@ import {
   IconColorSwatch,
   type IconComponent,
   IconCreditCard,
-  IconDoorEnter,
-  IconHelpCircle,
   IconHierarchy,
   IconMail,
   IconMessage,
@@ -58,9 +53,7 @@ export type SettingsNavigationItem = {
 
 const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
   const billing = useAtomStateValue(billingState);
-  const { signOut } = useAuth();
   const supportChat = useAtomStateValue(supportChatState);
-  const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
 
   const isBillingEnabled = billing?.isBillingEnabled ?? false;
   const currentUser = useAtomStateValue(currentUserState);
@@ -85,6 +78,13 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           label: t`Experience`,
           path: SettingsPath.Experience,
           Icon: IconColorSwatch,
+        },
+        {
+          // Desync: per-user plan management (always visible — every user has
+          // their own subscription/entitlement, including invited seat members).
+          label: t`Plan & Billing`,
+          path: SettingsPath.PlanBilling,
+          Icon: IconCreditCard,
         },
         {
           label: t`Accounts`,
@@ -150,13 +150,12 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           Icon: IconPlug,
           isHidden: !permissionMap[PermissionFlagType.API_KEYS_AND_WEBHOOKS],
         },
-        // TODO: Re-enable when integrations page is ready
-        // {
-        //   label: t`Integrations`,
-        //   path: SettingsPath.Integrations,
-        //   Icon: IconApps,
-        //   isHidden: !permissionMap[PermissionFlagType.API_KEYS_AND_WEBHOOKS],
-        // },
+        {
+          label: t`Integrations`,
+          path: SettingsPath.Integrations,
+          Icon: IconApps,
+          isHidden: !permissionMap[PermissionFlagType.API_KEYS_AND_WEBHOOKS],
+        },
         {
           label: t`Apps`,
           path: SettingsPath.Applications,
@@ -187,31 +186,10 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           isHidden: !isAdminEnabled,
         },
         {
-          label: t`Community`,
-          path: SettingsPath.Community,
-          Icon: IconUsers,
-          isHidden: !permissionMap[PermissionFlagType.WORKSPACE],
-        },
-        {
           label: t`Support`,
           onClick: () => window.FrontChat?.('show'),
           Icon: IconMessage,
           isHidden: !isSupportChatConfigured,
-        },
-        {
-          label: t`Documentation`,
-          onClick: () =>
-            window.open(
-              getDocumentationUrl({ locale: currentWorkspaceMember?.locale }),
-              '_blank',
-            ),
-          Icon: IconHelpCircle,
-        },
-        {
-          label: t`Logout`,
-          onClick: signOut,
-          Icon: IconDoorEnter,
-          matchSubPages: false,
         },
       ],
     },

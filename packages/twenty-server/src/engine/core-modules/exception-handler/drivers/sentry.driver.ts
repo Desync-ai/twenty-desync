@@ -40,11 +40,10 @@ export class ExceptionHandlerSentryDriver implements ExceptionHandlerDriverInter
       }
 
       if (options?.user) {
+        // Desync: correlate errors by user id only — don't send email/name (PII)
+        // to the external error sink.
         scope.setUser({
           id: options.user.id,
-          email: options.user.email,
-          firstName: options.user.firstName,
-          lastName: options.user.lastName,
         });
       }
 

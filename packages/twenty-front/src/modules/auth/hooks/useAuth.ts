@@ -1,3 +1,4 @@
+import { gql } from '@apollo/client';
 import {
   useApolloClient,
   useLazyQuery,
@@ -53,6 +54,7 @@ import {
 import { isEmailVerificationRequiredState } from '@/client-config/states/isEmailVerificationRequiredState';
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
 import { useLastAuthenticatedWorkspaceDomain } from '@/domain-manager/hooks/useLastAuthenticatedWorkspaceDomain';
+import { useReadDefaultDomainFromConfiguration } from '@/domain-manager/hooks/useReadDefaultDomainFromConfiguration';
 import { useOrigin } from '@/domain-manager/hooks/useOrigin';
 import { useRedirect } from '@/domain-manager/hooks/useRedirect';
 import { useRedirectToWorkspaceDomain } from '@/domain-manager/hooks/useRedirectToWorkspaceDomain';
@@ -64,6 +66,15 @@ import { isDefined } from 'twenty-shared/utils';
 import { getWorkspaceUrl } from '~/utils/getWorkspaceUrl';
 import { isGraphqlErrorOfType } from '~/utils/is-graphql-error-of-type.util';
 import { useStore } from 'jotai';
+
+// Desync: central-schema (served at /metadata, the default Apollo client) query
+// for whether the signup questionnaire is done. Untyped on purpose (no codegen
+// dependency in the dev build).
+const DESYNC_ONBOARDING_STATUS_QUERY = gql`
+  query DesyncOnboardingStatus {
+    desyncOnboardingStatus
+  }
+`;
 
 export const useAuth = () => {
   const store = useStore();
@@ -109,6 +120,7 @@ export const useAuth = () => {
 
   const { setLastAuthenticateWorkspaceDomain } =
     useLastAuthenticatedWorkspaceDomain();
+  const { defaultDomain } = useReadDefaultDomainFromConfiguration();
   const [checkUserExistsQuery, { data: checkUserExistsData }] = useLazyQuery(
     CheckUserExistsDocument,
   );
@@ -130,14 +142,47 @@ export const useAuth = () => {
     clearSessionGeneration();
     clearSessionLocalStorageKeys();
     setLastAuthenticateWorkspaceDomain(null);
-    window.location.assign(AppPath.SignInUp);
-  }, [store, setLastAuthenticateWorkspaceDomain]);
+    // Land on the central/default subdomain's sign-in (e.g. app.<domain>) rather
+    // than the workspace subdomain you signed out of, so logout goes to a neutral
+    // login page. Already on the default domain (or single-workspace) → stay local.
+    if (
+      isMultiWorkspaceEnabled &&
+      isNonEmptyString(defaultDomain) &&
+      window.location.hostname !== defaultDomain
+    ) {
+      window.location.assign(`https://${defaultDomain}${AppPath.SignInUp}`);
+    } else {
+      window.location.assign(AppPath.SignInUp);
+    }
+  }, [
+    store,
+    setLastAuthenticateWorkspaceDomain,
+    isMultiWorkspaceEnabled,
+    defaultDomain,
+  ]);
 
   const navigateAfterMultiWorkspaceSignInUp = useCallback(
     async (
       availableWorkspaces: Parameters<typeof countAvailableWorkspaces>[0],
       email: string,
     ) => {
+      // Desync: gate the whole post-signup flow on the questionnaire. Until it's
+      // complete, show the questionnaire step (on the central domain) BEFORE any
+      // workspace choice/creation. Fails open so a backend blip can't trap the user.
+      try {
+        const { data } = await apolloClient.query({
+          query: DESYNC_ONBOARDING_STATUS_QUERY,
+          fetchPolicy: 'network-only',
+        });
+
+        if (data?.desyncOnboardingStatus === false) {
+          setSignInUpStep(SignInUpStep.DesyncQuestionnaire);
+          return;
+        }
+      } catch {
+        // fall through — don't trap the user if the check errors.
+      }
+
       const availableWorkspacesCount =
         countAvailableWorkspaces(availableWorkspaces);
 
@@ -160,22 +205,47 @@ export const useAuth = () => {
         const targetWorkspace =
           getFirstAvailableWorkspaces(availableWorkspaces);
 
-        return await redirectToWorkspaceDomain(
-          getWorkspaceUrl(targetWorkspace.workspaceUrls),
-          targetWorkspace.loginToken ? AppPath.Verify : AppPath.SignInUp,
-          {
-            ...(targetWorkspace.loginToken && {
+        // Desync: only auto-redirect into a workspace the user is already a
+        // MEMBER of — a membership carries a loginToken, so `/verify` sets the
+        // host-only session cookie on that subdomain. A single PENDING INVITE
+        // has NO loginToken; auto-redirecting it loops (the user is signed in on
+        // app.* but has no session on the workspace subdomain, which bounces back
+        // to app.*). For an invite, stay on the central domain and show the
+        // explicit choice: accept the invite OR create your own workspace.
+        if (isDefined(targetWorkspace.loginToken)) {
+          return await redirectToWorkspaceDomain(
+            getWorkspaceUrl(targetWorkspace.workspaceUrls),
+            AppPath.Verify,
+            {
               loginToken: targetWorkspace.loginToken,
-            }),
-            email,
-          },
-        );
+              email,
+            },
+          );
+        }
+
+        setSignInUpStep(SignInUpStep.WorkspaceSelection);
+        return;
       }
 
       setSignInUpStep(SignInUpStep.WorkspaceSelection);
     },
     [apolloClient, redirectToWorkspaceDomain, setSignInUpStep],
   );
+
+  // Desync: after the Clerk exchange establishes a workspace-agnostic session on
+  // the CENTRAL domain (result.onCentralDomain), load the user and run the step
+  // machine (questionnaire → workspace choice) instead of redirecting into a
+  // workspace. Mirrors handleverifyEmailAndGetWorkspaceAgnosticToken.
+  const handleClerkCentralLanding = useCallback(async () => {
+    markSessionActive();
+
+    const { user } = await loadCurrentUser();
+
+    await navigateAfterMultiWorkspaceSignInUp(
+      user.availableWorkspaces,
+      user.email,
+    );
+  }, [markSessionActive, loadCurrentUser, navigateAfterMultiWorkspaceSignInUp]);
 
   const handleGetLoginTokenFromCredentials = useCallback(
     async (email: string, password: string, captchaToken?: string) => {
@@ -446,7 +516,6 @@ export const useAuth = () => {
 
     try {
       await signOutMutation();
-      store.set(isPendingServerSignOutState.atom, false);
     } catch {}
 
     broadcastSignOutToOtherTabs();
@@ -642,5 +711,6 @@ export const useAuth = () => {
     signInWithMicrosoft: handleMicrosoftLogin,
     getAuthTokensFromOTP: handleGetAuthTokensFromOTP,
     navigateAfterMultiWorkspaceSignInUp,
+    clerkCentralLanding: handleClerkCentralLanding,
   };
 };

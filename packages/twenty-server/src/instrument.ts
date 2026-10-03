@@ -80,8 +80,10 @@ if (process.env.EXCEPTION_HANDLER_DRIVER === ExceptionHandlerDriver.SENTRY) {
         },
       }),
       Sentry.vercelAIIntegration({
-        recordInputs: true,
-        recordOutputs: true,
+        // Desync: never ship AI prompt inputs/outputs to Sentry — they carry
+        // CRM records and clients' PII.
+        recordInputs: false,
+        recordOutputs: false,
       }),
       nodeProfilingIntegration(),
     ],
@@ -93,7 +95,10 @@ if (process.env.EXCEPTION_HANDLER_DRIVER === ExceptionHandlerDriver.SENTRY) {
       fallback: 0.01,
     }),
     maxValueLength: 8192,
-    sendDefaultPii: true,
+    // Desync: do NOT attach default PII (IP, cookies, request headers/body, user
+    // data) to Sentry events. This system holds clients' PII; keep it out of an
+    // external error sink even if the Sentry driver is enabled later.
+    sendDefaultPii: false,
     debug: process.env.NODE_ENV === NodeEnvironment.DEVELOPMENT,
     beforeSendSpan: (span) => {
       const twentyContext = Sentry.getIsolationScope().getScopeData().contexts
