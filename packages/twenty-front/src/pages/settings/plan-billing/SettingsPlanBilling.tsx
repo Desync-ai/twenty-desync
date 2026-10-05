@@ -48,6 +48,8 @@ type SubscriptionStatus = {
   periodEnd: number | null;
   quota: number | null;
   used: number | null;
+  aiCostCents: number | null;
+  aiCostQuotaCents: number | null;
   stripeActive: boolean;
   cancelAtPeriodEnd: boolean;
   isInternal: boolean;
@@ -441,6 +443,18 @@ export const SettingsPlanBilling = () => {
   const quotaStr = (sub?.quota ?? 0).toLocaleString();
   const periodEndStr = formatDate(sub?.periodEnd ?? null);
 
+  // AI $ budget spent this period. Hidden for internal/Admin (unlimited) and for
+  // plans with no AI allowance (Trial/Referral = 0). Metered per copilot run.
+  const aiQuotaCents = sub?.aiCostQuotaCents ?? 0;
+  const aiUsedCents = sub?.aiCostCents ?? 0;
+  const aiKnown =
+    !isInternal && sub?.planLevel !== 'Admin' && aiQuotaCents > 0;
+  const aiPct = aiKnown
+    ? Math.min(100, Math.round((aiUsedCents / aiQuotaCents) * 100))
+    : 0;
+  const aiUsedDollars = (aiUsedCents / 100).toFixed(2);
+  const aiQuotaDollars = (aiQuotaCents / 100).toFixed(2);
+
   return (
     <SettingsPageLayout
       title={t`Plan & Billing`}
@@ -477,6 +491,12 @@ export const SettingsPlanBilling = () => {
             {quotaKnown && (
               <StyledMeta>
                 {t`${usedStr} of ${quotaStr} leads used this period`}
+              </StyledMeta>
+            )}
+
+            {aiKnown && (
+              <StyledMeta>
+                {t`AI usage: ${aiPct}% — $${aiUsedDollars} of $${aiQuotaDollars} this period`}
               </StyledMeta>
             )}
           </StyledCard>
