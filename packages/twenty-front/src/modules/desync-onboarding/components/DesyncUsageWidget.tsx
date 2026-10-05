@@ -5,24 +5,16 @@ import { SettingsPath } from 'twenty-shared/types';
 import { ProgressBar } from 'twenty-ui/primitives/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-import { currentWorkspaceMembersState } from '@/auth/states/currentWorkspaceMembersState';
-import {
-  MY_DESYNC_SEATS_QUERY,
-  MY_SUBSCRIPTION_QUERY,
-} from '@/desync-onboarding/graphql/desyncBilling';
-import { usePermissionFlagMap } from '@/settings/roles/hooks/usePermissionFlagMap';
-import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
-import { PermissionFlagType } from '~/generated-metadata/graphql';
+import { MY_SUBSCRIPTION_QUERY } from '@/desync-onboarding/graphql/desyncBilling';
 import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 
 // Desync: a compact "plan + usage" card pinned to the bottom of the main app nav
-// drawer — plan, renewal, leads quota remaining, and (for workspace admins) seats
-// claimed vs purchased. Mirrors the meters on the lead-gen sidebar so a user sees
-// the same Desync plan status wherever they are. Reads only data the backend
-// already exposes (mySubscription + myDesyncSeats) and routes to Plan & Billing on
-// click. AI-spend and transcription-minute bars are intentionally omitted: those
-// columns exist in subscription_usage but are not read out to the browser yet
-// (needs a backend change + the AI-metering decision).
+// drawer — plan + renewal, leads generated this cycle (n / N), and AI budget
+// spent (%). Mirrors the lead-gen sidebar meters so a user sees the same Desync
+// plan status inside the CRM. Reads only the mySubscription query (leads quota +
+// AI $ budget both live on the shared subscription_usage row; AI is metered per
+// CRM-copilot run via the backend /ai/record path, so the % is real). The whole
+// card routes to Plan & Billing on click.
 
 type SubscriptionStatus = {
   hasSubscription: boolean;
@@ -33,13 +25,10 @@ type SubscriptionStatus = {
   periodEnd: number | null;
   quota: number | null;
   used: number | null;
+  aiCostCents: number | null;
+  aiCostQuotaCents: number | null;
   cancelAtPeriodEnd: boolean;
   isInternal: boolean;
-};
-
-type Seat = {
-  beneficiaryEmail: string | null;
-  status: string;
 };
 
 type ChipTone = 'active' | 'warn' | 'muted';
@@ -140,25 +129,16 @@ const clampPct = (n: number): number => Math.min(100, Math.max(0, n));
 export const DesyncUsageWidget = () => {
   const { t } = useLingui();
   const navigateSettings = useNavigateSettings();
-  const permissionMap = usePermissionFlagMap();
-  const canManageMembers =
-    permissionMap[PermissionFlagType.WORKSPACE_MEMBERS] === true;
 
   const { data: subData } = useQuery<{ mySubscription: SubscriptionStatus }>(
     MY_SUBSCRIPTION_QUERY,
     { fetchPolicy: 'cache-and-network' },
   );
-  // Only admins can buy/manage seats, so only they get the seats meter.
-  const { data: seatsData } = useQuery<{ myDesyncSeats: Seat[] }>(
-    MY_DESYNC_SEATS_QUERY,
-    { skip: !canManageMembers, fetchPolicy: 'cache-and-network' },
-  );
-  const members = useAtomStateValue(currentWorkspaceMembersState);
 
   const sub = subData?.mySubscription;
   // Render nothing until the subscription is known: keeps the footer clean and
-  // avoids a flash of an empty card. The entitlement gate guarantees the viewer
-  // is entitled, so a usage row exists.
+  // avoids a flash of an empty card. The entitlement gate guarantees an entitled
+  // viewer, so a usage row exists.
   if (sub === undefined) {
     return null;
   }
@@ -196,29 +176,17 @@ export const DesyncUsageWidget = () => {
     }
   }
 
-  // --- leads quota (bar depletes to show how much is left) ---
-  const showQuota = !isFullAccess && sub.quota != null && sub.quota > 0;
+  // --- leads generated this cycle (bar fills as leads are used; n / N) ---
   const quota = sub.quota ?? 0;
   const used = sub.used ?? 0;
-  const remaining = Math.max(0, quota - used);
-  const remainingPct = showQuota ? clampPct((remaining / quota) * 100) : 0;
+  const showLeads = !isFullAccess && quota > 0;
+  const leadsPct = showLeads ? clampPct((used / quota) * 100) : 0;
 
-  // --- seats (claimed by a current member vs purchased) ---
-  const seats = seatsData?.myDesyncSeats ?? [];
-  const memberEmailSet = new Set(
-    (members ?? [])
-      .map((m) => (m.userEmail ?? '').toLowerCase())
-      .filter((email) => email !== ''),
-  );
-  const claimedSeats = seats.filter(
-    (seat) =>
-      seat.beneficiaryEmail != null &&
-      memberEmailSet.has(seat.beneficiaryEmail.toLowerCase()),
-  ).length;
-  const showSeats = canManageMembers && seats.length > 0;
-  const seatsPct = showSeats
-    ? clampPct((claimedSeats / seats.length) * 100)
-    : 0;
+  // --- AI budget spent this cycle (percent of the $ allowance used) ---
+  const aiQuota = sub.aiCostQuotaCents ?? 0;
+  const aiUsed = sub.aiCostCents ?? 0;
+  const showAi = !isFullAccess && aiQuota > 0;
+  const aiPct = showAi ? clampPct((aiUsed / aiQuota) * 100) : 0;
 
   return (
     <StyledCard
@@ -232,7 +200,7 @@ export const DesyncUsageWidget = () => {
       </StyledHeaderRow>
       {meta !== '' && <StyledMeta>{meta}</StyledMeta>}
 
-      {showQuota && (
+      {showLeads && (
         <StyledMeter>
           <StyledMeterRow>
             <span>{t`Leads`}</span>
@@ -241,33 +209,35 @@ export const DesyncUsageWidget = () => {
             </StyledMeterValue>
           </StyledMeterRow>
           <ProgressBar
-            value={remainingPct}
+            value={leadsPct}
             backgroundColor={themeCssVariables.background.tertiary}
             barColor={
-              remainingPct <= 10
+              leadsPct >= 90
                 ? themeCssVariables.color.red9
                 : themeCssVariables.color.green9
             }
             withBorderRadius
-            ariaLabel={t`Leads remaining`}
+            ariaLabel={t`Leads generated this cycle`}
           />
         </StyledMeter>
       )}
 
-      {showSeats && (
+      {showAi && (
         <StyledMeter>
           <StyledMeterRow>
-            <span>{t`Seats`}</span>
-            <StyledMeterValue>
-              {claimedSeats} / {seats.length}
-            </StyledMeterValue>
+            <span>{t`AI usage`}</span>
+            <StyledMeterValue>{Math.round(aiPct)}%</StyledMeterValue>
           </StyledMeterRow>
           <ProgressBar
-            value={seatsPct}
+            value={aiPct}
             backgroundColor={themeCssVariables.background.tertiary}
-            barColor={themeCssVariables.color.blue}
+            barColor={
+              aiPct >= 90
+                ? themeCssVariables.color.red9
+                : themeCssVariables.color.green9
+            }
             withBorderRadius
-            ariaLabel={t`Seats used`}
+            ariaLabel={t`AI budget used`}
           />
         </StyledMeter>
       )}

@@ -59,6 +59,8 @@ export const MY_SUBSCRIPTION_QUERY = gql`
       periodEnd
       quota
       used
+      aiCostCents
+      aiCostQuotaCents
       stripeActive
       cancelAtPeriodEnd
       isInternal
