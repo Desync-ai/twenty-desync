@@ -447,8 +447,9 @@ export const SettingsPlanBilling = () => {
   // plans with no AI allowance (Trial/Referral = 0). Metered per copilot run.
   const aiQuotaCents = sub?.aiCostQuotaCents ?? 0;
   const aiUsedCents = sub?.aiCostCents ?? 0;
-  const aiKnown =
-    !isInternal && sub?.planLevel !== 'Admin' && aiQuotaCents > 0;
+  // Show whenever the plan has an AI allowance — same rule as the leads line
+  // (which shows for Admin/internal too). Only Trial/Referral (quota 0) hide it.
+  const aiKnown = aiQuotaCents > 0;
   const aiPct = aiKnown
     ? Math.min(100, Math.round((aiUsedCents / aiQuotaCents) * 100))
     : 0;

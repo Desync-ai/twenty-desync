@@ -179,13 +179,13 @@ export const DesyncUsageWidget = () => {
   // --- leads generated this cycle (bar fills as leads are used; n / N) ---
   const quota = sub.quota ?? 0;
   const used = sub.used ?? 0;
-  const showLeads = !isFullAccess && quota > 0;
+  const showLeads = quota > 0;
   const leadsPct = showLeads ? clampPct((used / quota) * 100) : 0;
 
   // --- AI budget spent this cycle (percent of the $ allowance used) ---
   const aiQuota = sub.aiCostQuotaCents ?? 0;
   const aiUsed = sub.aiCostCents ?? 0;
-  const showAi = !isFullAccess && aiQuota > 0;
+  const showAi = aiQuota > 0;
   const aiPct = showAi ? clampPct((aiUsed / aiQuota) * 100) : 0;
 
   return (
