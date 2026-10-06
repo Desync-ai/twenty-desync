@@ -38,6 +38,7 @@ import {
   hashPassword,
 } from 'src/engine/core-modules/auth/auth.util';
 import { MAX_WORKSPACES_WITHOUT_ENTERPRISE_KEY } from 'src/engine/core-modules/auth/constants/max-workspaces-without-organization-key.constants';
+import { MAX_WORKSPACES_PER_USER } from 'src/engine/core-modules/auth/constants/max-workspaces-per-user.constant';
 import { getSignUpWithoutWorkspaceDecision } from 'src/engine/core-modules/auth/utils/get-sign-up-without-workspace-decision.util';
 import { hasProvisionedSignUpDestination } from 'src/engine/core-modules/auth/utils/has-provisioned-sign-up-destination.util';
 import { DEFAULT_DPA_REGION } from 'src/engine/core-modules/dpa/config/dpa-region-config.constant';
@@ -740,12 +741,12 @@ export class SignInUpService {
           userData.existingUser.id,
         );
 
-      if (existingWorkspaceCount > 0) {
+      if (existingWorkspaceCount >= MAX_WORKSPACES_PER_USER) {
         throw new AuthException(
-          'You already belong to a workspace. Each user can belong to only one workspace.',
+          `A user can belong to at most ${MAX_WORKSPACES_PER_USER} workspaces.`,
           AuthExceptionCode.FORBIDDEN_EXCEPTION,
           {
-            userFriendlyMessage: msg`You already have a workspace. Each account can own one workspace.`,
+            userFriendlyMessage: msg`You've reached the maximum number of workspaces for your account.`,
           },
         );
       }
