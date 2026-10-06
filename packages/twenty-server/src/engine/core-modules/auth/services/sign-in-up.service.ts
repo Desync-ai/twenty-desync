@@ -732,8 +732,11 @@ export class SignInUpService {
     // neutralises every native "create workspace" UI path; the Clerk auth path
     // only reaches signUpOnNewWorkspace for workspace-less users, so it's safe.
     if (userData.type === 'existingUser') {
+      // Count only FINISHED (ACTIVE/CREATED) workspaces — a half-provisioned
+      // workspace left by an abandoned or failed onboarding must not permanently
+      // block the user from creating one.
       const existingWorkspaceCount =
-        await this.userWorkspaceService.countUserWorkspaces(
+        await this.userWorkspaceService.countActiveUserWorkspaces(
           userData.existingUser.id,
         );
 
@@ -741,6 +744,9 @@ export class SignInUpService {
         throw new AuthException(
           'You already belong to a workspace. Each user can belong to only one workspace.',
           AuthExceptionCode.FORBIDDEN_EXCEPTION,
+          {
+            userFriendlyMessage: msg`You already have a workspace. Each account can own one workspace.`,
+          },
         );
       }
     }

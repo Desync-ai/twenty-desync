@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { type APP_LOCALES, SOURCE_LOCALE } from 'twenty-shared/translations';
 import { FileFolder, OpenRecordIn } from 'twenty-shared/types';
 import { assertIsDefinedOrThrow, isDefined } from 'twenty-shared/utils';
+import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import { IsNull, Not, type QueryRunner, type Repository } from 'typeorm';
 
 import { CoreEntityCacheService } from 'src/engine/core-entity-cache/services/core-entity-cache.service';
@@ -345,6 +346,26 @@ export class UserWorkspaceService {
 
   async countUserWorkspaces(userId: string): Promise<number> {
     return await this.userWorkspaceRepository.count({ where: { userId } });
+  }
+
+  // Desync: count only FINISHED workspaces (ACTIVE / CREATED) the user belongs
+  // to. The one-workspace-per-user lock must ignore half-provisioned workspaces
+  // (PENDING_CREATION etc.): an abandoned or failed onboarding otherwise leaves a
+  // user_workspace row that PERMANENTLY blocks the user from ever creating one.
+  async countActiveUserWorkspaces(userId: string): Promise<number> {
+    return await this.userWorkspaceRepository
+      .createQueryBuilder('userWorkspace')
+      .innerJoin('userWorkspace.workspace', 'workspace')
+      .where('userWorkspace.userId = :userId', { userId })
+      .andWhere('userWorkspace.deletedAt IS NULL')
+      .andWhere('workspace.deletedAt IS NULL')
+      .andWhere('workspace.activationStatus IN (:...statuses)', {
+        statuses: [
+          WorkspaceActivationStatus.ACTIVE,
+          WorkspaceActivationStatus.CREATED,
+        ],
+      })
+      .getCount();
   }
 
   async deleteUserWorkspace({
