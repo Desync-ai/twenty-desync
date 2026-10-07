@@ -10,6 +10,7 @@ import {
   AuthException,
   AuthExceptionCode,
 } from 'src/engine/core-modules/auth/auth.exception';
+import { MAX_WORKSPACES_PER_USER } from 'src/engine/core-modules/auth/constants/max-workspaces-per-user.constant';
 import { EntitlementService } from 'src/engine/core-modules/auth/services/entitlement.service';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
 import { LoginTokenService } from 'src/engine/core-modules/auth/token/services/login-token.service';
@@ -198,10 +199,10 @@ export class ClerkAuthService {
         );
       }
 
-      // One workspace per user: cannot accept an invite into a SECOND workspace.
-      if (isDefined(await this.getFirstWorkspaceForUser(userId))) {
+      // A user may belong to at most MAX_WORKSPACES_PER_USER workspaces.
+      if ((await this.countUserWorkspaces(userId)) >= MAX_WORKSPACES_PER_USER) {
         throw new AuthException(
-          'You already belong to a workspace and cannot join another.',
+          `You already belong to ${MAX_WORKSPACES_PER_USER} workspaces and cannot join another.`,
           AuthExceptionCode.FORBIDDEN_EXCEPTION,
         );
       }
@@ -391,13 +392,14 @@ export class ClerkAuthService {
         );
       }
 
-      // One workspace per user: cannot accept an invite into a SECOND workspace.
+      // A user may belong to at most MAX_WORKSPACES_PER_USER workspaces.
       if (
         isDefined(existingUser) &&
-        isDefined(await this.getFirstWorkspaceForUser(existingUser.id))
+        (await this.countUserWorkspaces(existingUser.id)) >=
+          MAX_WORKSPACES_PER_USER
       ) {
         throw new AuthException(
-          'You already belong to a workspace and cannot join another.',
+          `You already belong to ${MAX_WORKSPACES_PER_USER} workspaces and cannot join another.`,
           AuthExceptionCode.FORBIDDEN_EXCEPTION,
         );
       }
@@ -498,6 +500,12 @@ export class ClerkAuthService {
     });
 
     return userWorkspace?.workspace ?? undefined;
+  }
+
+  // Desync: how many workspaces a user already belongs to — gates how many more
+  // they may join (see MAX_WORKSPACES_PER_USER).
+  private async countUserWorkspaces(userId: string): Promise<number> {
+    return this.userWorkspaceRepository.count({ where: { userId } });
   }
 
   private async findExistingUser(

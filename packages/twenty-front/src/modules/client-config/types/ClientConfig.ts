@@ -35,6 +35,7 @@ export type ClientConfig = {
   isConfigVariablesInDbEnabled: boolean;
   isEmailVerificationRequired: boolean;
   isGoogleCalendarEnabled: boolean;
+  isGoogleContactsEnabled: boolean;
   isGoogleMessagingEnabled: boolean;
   isMicrosoftCalendarEnabled: boolean;
   isMicrosoftMessagingEnabled: boolean;

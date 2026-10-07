@@ -7,6 +7,7 @@ import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twent
 export type GoogleApisServiceAvailability = {
   isMessagingAvailable: boolean;
   isCalendarAvailable: boolean;
+  isContactsAvailable: boolean;
 };
 
 @Injectable()
@@ -30,14 +31,17 @@ export class GoogleApisServiceAvailabilityService {
       access_token: accessToken,
     });
 
-    const [isMessagingAvailable, isCalendarAvailable] = await Promise.all([
-      this.checkMessagingAvailability(oAuth2Client),
-      this.checkCalendarAvailability(oAuth2Client),
-    ]);
+    const [isMessagingAvailable, isCalendarAvailable, isContactsAvailable] =
+      await Promise.all([
+        this.checkMessagingAvailability(oAuth2Client),
+        this.checkCalendarAvailability(oAuth2Client),
+        this.checkContactsAvailability(oAuth2Client),
+      ]);
 
     return {
       isMessagingAvailable,
       isCalendarAvailable,
+      isContactsAvailable,
     };
   }
 
@@ -101,6 +105,44 @@ export class GoogleApisServiceAvailabilityService {
       }
 
       this.logger.error('Error checking Calendar availability', error);
+
+      throw error;
+    }
+  }
+
+  private async checkContactsAvailability(
+    oAuth2Client: InstanceType<typeof google.auth.OAuth2>,
+  ): Promise<boolean> {
+    if (!this.twentyConfigService.get('CONTACTS_PROVIDER_GOOGLE_ENABLED')) {
+      return false;
+    }
+
+    try {
+      const peopleClient = google.people({
+        version: 'v1',
+        auth: oAuth2Client,
+      });
+
+      // Light probe: a brand-new account with no contacts returns an empty
+      // list (not an error), so success here just means the People API is
+      // reachable with the granted scope.
+      await peopleClient.people.connections.list({
+        resourceName: 'people/me',
+        personFields: 'names',
+        pageSize: 1,
+      });
+
+      return true;
+    } catch (error) {
+      if (this.isServiceNotEnabledError(error)) {
+        this.logger.log(
+          'People (Contacts) service is not enabled for this Google account',
+        );
+
+        return false;
+      }
+
+      this.logger.error('Error checking Contacts availability', error);
 
       throw error;
     }

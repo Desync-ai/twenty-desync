@@ -22,6 +22,7 @@ import { enterpriseInstanceTypeState } from '@/client-config/states/enterpriseIn
 import { isEmailingDomainInDemoModeState } from '@/client-config/states/isEmailingDomainInDemoModeState';
 import { isEmailVerificationRequiredState } from '@/client-config/states/isEmailVerificationRequiredState';
 import { isGoogleCalendarEnabledState } from '@/client-config/states/isGoogleCalendarEnabledState';
+import { isGoogleContactsEnabledState } from '@/client-config/states/isGoogleContactsEnabledState';
 import { isGoogleMessagingEnabledState } from '@/client-config/states/isGoogleMessagingEnabledState';
 import { isImapSmtpCaldavEnabledState } from '@/client-config/states/isImapSmtpCaldavEnabledState';
 import { maintenanceModeState } from '@/client-config/states/maintenanceModeState';
@@ -100,6 +101,9 @@ export const useClientConfig = (): UseClientConfigResult => {
 
   const setIsGoogleCalendarEnabled = useSetAtomState(
     isGoogleCalendarEnabledState,
+  );
+  const setIsGoogleContactsEnabled = useSetAtomState(
+    isGoogleContactsEnabledState,
   );
 
   const setIsAttachmentPreviewEnabled = useSetAtomState(
@@ -222,6 +226,7 @@ export const useClientConfig = (): UseClientConfigResult => {
       setIsMicrosoftCalendarEnabled(clientConfig?.isMicrosoftCalendarEnabled);
       setIsGoogleMessagingEnabled(clientConfig?.isGoogleMessagingEnabled);
       setIsGoogleCalendarEnabled(clientConfig?.isGoogleCalendarEnabled);
+      setIsGoogleContactsEnabled(clientConfig?.isGoogleContactsEnabled);
       setIsAttachmentPreviewEnabled(clientConfig?.isAttachmentPreviewEnabled);
       setIsConfigVariablesInDbEnabled(
         clientConfig?.isConfigVariablesInDbEnabled,
@@ -282,6 +287,7 @@ export const useClientConfig = (): UseClientConfigResult => {
     setClientConfigApiStatus,
     setDomainConfiguration,
     setIsGoogleCalendarEnabled,
+    setIsGoogleContactsEnabled,
     setIsGoogleMessagingEnabled,
     setIsAnalyticsEnabled,
     setIsAttachmentPreviewEnabled,

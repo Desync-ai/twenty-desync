@@ -199,6 +199,15 @@ export class ConfigVariables {
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.GOOGLE_AUTH,
+    description:
+      'Enable or disable the Google Contacts import integration (People API: ' +
+      'saved contacts + "other contacts". SENSITIVE scopes only, no Gmail/CASA).',
+    type: ConfigVariableType.BOOLEAN,
+  })
+  CONTACTS_PROVIDER_GOOGLE_ENABLED = false;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.GOOGLE_AUTH,
     isSensitive: false,
     description:
       'Google Cloud Pub/Sub topic that Gmail push notifications publish to ' +
