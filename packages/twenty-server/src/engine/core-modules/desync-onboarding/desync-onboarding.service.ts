@@ -235,6 +235,8 @@ export class DesyncOnboardingService {
     periodEnd: number | null;
     quota: number | null;
     used: number | null;
+    aiCostCents: number | null;
+    aiCostQuotaCents: number | null;
     stripeActive: boolean;
     cancelAtPeriodEnd: boolean;
   }> {
@@ -247,6 +249,8 @@ export class DesyncOnboardingService {
       periodEnd: null,
       quota: null,
       used: null,
+      aiCostCents: null,
+      aiCostQuotaCents: null,
       stripeActive: false,
       cancelAtPeriodEnd: false,
     };
@@ -275,6 +279,8 @@ export class DesyncOnboardingService {
         periodEnd: (d.period_end as number) ?? null,
         quota: (d.quota as number) ?? null,
         used: (d.used as number) ?? null,
+        aiCostCents: (d.ai_cost_cents as number) ?? null,
+        aiCostQuotaCents: (d.ai_cost_quota_cents as number) ?? null,
         stripeActive: d.stripe_active === true,
         cancelAtPeriodEnd: d.cancel_at_period_end === true,
       };

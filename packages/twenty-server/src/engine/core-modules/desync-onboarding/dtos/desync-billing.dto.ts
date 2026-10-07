@@ -88,6 +88,14 @@ export class DesyncSubscriptionStatus {
   @Field(() => Int, { nullable: true })
   used: number | null;
 
+  // AI $ budget this period, in cents: spent vs the plan's allowance. A 0/null
+  // quota means AI is off for this plan (Trial/Referral).
+  @Field(() => Int, { nullable: true })
+  aiCostCents: number | null;
+
+  @Field(() => Int, { nullable: true })
+  aiCostQuotaCents: number | null;
+
   // The user has a live Stripe subscription (vs a free Referral with none).
   @Field(() => Boolean)
   stripeActive: boolean;

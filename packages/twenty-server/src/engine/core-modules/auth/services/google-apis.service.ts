@@ -132,14 +132,14 @@ export class GoogleAPIsService {
       );
     }
 
-    const { isMessagingAvailable, isCalendarAvailable } =
+    const { isMessagingAvailable, isCalendarAvailable, isContactsAvailable } =
       await this.googleApisServiceAvailabilityService.checkServicesAvailability(
         input.accessToken,
       );
 
-    if (!isMessagingAvailable && !isCalendarAvailable) {
+    if (!isMessagingAvailable && !isCalendarAvailable && !isContactsAvailable) {
       throw new AuthException(
-        'Unable to connect: Your Google account does not have access to Gmail or Calendar. Please contact your workspace administrator.',
+        'Unable to connect: Your Google account does not have access to Gmail, Calendar or Contacts. Please contact your workspace administrator.',
         AuthExceptionCode.INSUFFICIENT_SCOPES,
       );
     }

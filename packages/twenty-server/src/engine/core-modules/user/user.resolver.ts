@@ -307,15 +307,20 @@ export class UserResolver {
         workspaceId: workspace.id,
       });
 
+    // Desync: SKIP orphaned members (a workspaceMember row with no live core
+    // userWorkspace, or with no roles) instead of throwing. This field runs on
+    // every login (GetCurrentUser), and it iterates ALL of the workspace's
+    // members — so a single orphan here previously bricked login for EVERY
+    // member of the workspace. flatMap drops the bad entry rather than throwing.
     const toWorkspaceMemberDtoArgs =
-      workspaceMemberEntities.map<ToWorkspaceMemberDtoArgs>(
+      workspaceMemberEntities.flatMap<ToWorkspaceMemberDtoArgs>(
         (workspaceMemberEntity) => {
           const userWorkspace = userWorkspacesByUserIdMap.get(
             workspaceMemberEntity.userId,
           );
 
           if (!isDefined(userWorkspace)) {
-            throw new Error('UserEntity workspace not found');
+            return [];
           }
 
           const userWorkspaceRoles = rolesByUserWorkspacesMap.get(
@@ -323,14 +328,16 @@ export class UserResolver {
           );
 
           if (!isDefined(userWorkspaceRoles)) {
-            throw new Error('UserEntity workspace roles not found');
+            return [];
           }
 
-          return {
-            userWorkspace,
-            userWorkspaceRoles,
-            workspaceMemberEntity,
-          };
+          return [
+            {
+              userWorkspace,
+              userWorkspaceRoles,
+              workspaceMemberEntity,
+            },
+          ];
         },
       );
 

@@ -59,7 +59,8 @@ export class GoogleAPIsOauthRequestCodeGuard extends AuthGuard('google-apis') {
 
       if (
         !this.twentyConfigService.get('MESSAGING_PROVIDER_GMAIL_ENABLED') &&
-        !this.twentyConfigService.get('CALENDAR_PROVIDER_GOOGLE_ENABLED')
+        !this.twentyConfigService.get('CALENDAR_PROVIDER_GOOGLE_ENABLED') &&
+        !this.twentyConfigService.get('CONTACTS_PROVIDER_GOOGLE_ENABLED')
       ) {
         throw new AuthException(
           'Google apis auth is not enabled',
