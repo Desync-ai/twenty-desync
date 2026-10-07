@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -47,12 +47,51 @@ import { DesyncOnboardingService } from './desync-onboarding.service';
 @Resolver()
 @UseGuards(UserAuthGuard, NoPermissionGuard)
 export class DesyncOnboardingResolver {
+  private readonly logger = new Logger(DesyncOnboardingResolver.name);
+
   constructor(
     private readonly desyncOnboardingService: DesyncOnboardingService,
     private readonly entitlementService: EntitlementService,
     @InjectRepository(UserWorkspaceEntity)
     private readonly userWorkspaceRepository: Repository<UserWorkspaceEntity>,
   ) {}
+
+  /**
+   * Desync: persist the website-analysis tags on the TWENTY-side core user
+   * (core.user.onboardingTags) — NOT scraper_db, which is being sunset. Raw
+   * UPDATE + FAIL-SILENT so it's a harmless no-op where core.user doesn't have
+   * the column yet (e.g. prod until its migration ships) and never blocks the
+   * questionnaire save.
+   */
+  private async persistOnboardingTags(
+    userId: string,
+    answers: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const rawTags = (answers as { tags?: unknown }).tags;
+      const tags = Array.isArray(rawTags)
+        ? rawTags
+            .map((t) => String(t).trim())
+            .filter((t) => t !== '')
+            .join(',')
+        : '';
+
+      if (tags === '') {
+        return;
+      }
+
+      await this.userWorkspaceRepository.query(
+        'UPDATE core."user" SET "onboardingTags" = $1 WHERE id = $2',
+        [tags, userId],
+      );
+    } catch (error) {
+      this.logger.warn(
+        `persistOnboardingTags skipped (column may be absent): ${
+          (error as Error)?.message
+        }`,
+      );
+    }
+  }
 
   @Query(() => Boolean)
   async desyncOnboardingStatus(
@@ -67,7 +106,12 @@ export class DesyncOnboardingResolver {
     @Args('answers', { type: () => GraphQLJSON })
     answers: Record<string, unknown>,
   ): Promise<boolean> {
-    return this.desyncOnboardingService.save(user.email, answers);
+    const saved = await this.desyncOnboardingService.save(user.email, answers);
+
+    // Store the tags on the twenty side (fail-silent; see persistOnboardingTags).
+    await this.persistOnboardingTags(user.id, answers);
+
+    return saved;
   }
 
   /**
