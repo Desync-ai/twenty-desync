@@ -183,3 +183,31 @@ export class DesyncMemberPlan {
   @Field(() => String, { nullable: true })
   cadence: string | null;
 }
+
+// Onboarding website-analysis prefill: the structured profile Claude extracts
+// from the user's site to pre-fill the questionnaire. `ok` is false when the
+// scrape/analysis couldn't produce anything (bad URL, unreachable, no key, etc.)
+// — the UI then just shows a blank form. Never blocks onboarding.
+@ObjectType()
+export class DesyncWebsiteAnalysis {
+  @Field(() => Boolean)
+  ok: boolean;
+
+  @Field(() => String)
+  company: string;
+
+  @Field(() => String)
+  product: string;
+
+  @Field(() => String)
+  who: string;
+
+  @Field(() => String)
+  businessType: string;
+
+  @Field(() => [String])
+  outreach: string[];
+
+  @Field(() => [String])
+  tags: string[];
+}

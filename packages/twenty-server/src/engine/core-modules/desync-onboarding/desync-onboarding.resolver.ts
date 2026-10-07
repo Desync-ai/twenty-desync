@@ -23,6 +23,7 @@ import {
   DesyncSeatResult,
   DesyncSubscriptionResult,
   DesyncSubscriptionStatus,
+  DesyncWebsiteAnalysis,
 } from './dtos/desync-billing.dto';
 import { DesyncOnboardingService } from './desync-onboarding.service';
 
@@ -67,6 +68,18 @@ export class DesyncOnboardingResolver {
     answers: Record<string, unknown>,
   ): Promise<boolean> {
     return this.desyncOnboardingService.save(user.email, answers);
+  }
+
+  /**
+   * Best-effort: scrape + analyze the user's website to pre-fill the
+   * questionnaire. Fails silent (ok=false on any failure) so it never blocks
+   * onboarding or workspace creation — purely a convenience prefill.
+   */
+  @Mutation(() => DesyncWebsiteAnalysis)
+  async analyzeWebsite(
+    @Args('website') website: string,
+  ): Promise<DesyncWebsiteAnalysis> {
+    return this.desyncOnboardingService.analyzeWebsite(website);
   }
 
   // --- Entitlement paywall + paid checkout -----------------------------------
