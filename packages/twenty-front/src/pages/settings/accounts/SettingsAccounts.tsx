@@ -1,5 +1,6 @@
 import { SettingsAccountsBlocklistSection } from '@/settings/accounts/components/SettingsAccountsBlocklistSection';
 import { SettingsAccountsConnectedAccountsListCard } from '@/settings/accounts/components/SettingsAccountsConnectedAccountsListCard';
+import { SettingsAccountsImportGoogleContactsSection } from '@/settings/accounts/components/SettingsAccountsImportGoogleContactsSection';
 import { SettingsAccountsSettingsSection } from '@/settings/accounts/components/SettingsAccountsSettingsSection';
 import { useMyConnectedAccounts } from '@/settings/accounts/hooks/useMyConnectedAccounts';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
@@ -41,6 +42,7 @@ export const SettingsAccounts = () => {
                 accounts={allAccounts}
               />
             </Section>
+            <SettingsAccountsImportGoogleContactsSection />
             <SettingsAccountsBlocklistSection />
             <SettingsAccountsSettingsSection />
           </>

@@ -379,6 +379,9 @@ export class ClientConfig {
   isGoogleCalendarEnabled: boolean;
 
   @Field(() => Boolean)
+  isGoogleContactsEnabled: boolean;
+
+  @Field(() => Boolean)
   isConfigVariablesInDbEnabled: boolean;
 
   @Field(() => Boolean)
