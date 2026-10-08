@@ -29,6 +29,8 @@ const getCategoryLabel = (category: ToolCategory): string => {
       return 'Webhook Tools (outgoing webhooks)';
     case ToolCategory.ROLE:
       return 'Role Tools (manage roles and permissions)';
+    case ToolCategory.COMPOSIO:
+      return 'Slack Tools (via Composio — post, search, and read messages)';
     default:
       return assertUnreachable(category);
   }

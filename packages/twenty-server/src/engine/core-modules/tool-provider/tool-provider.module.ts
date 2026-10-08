@@ -1,11 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { ComposioModule } from 'src/engine/core-modules/composio/composio.module';
 import { FileEntity } from 'src/engine/core-modules/file/entities/file.entity';
 import { FilesFieldModule } from 'src/engine/core-modules/file/files-field/files-field.module';
 import { RecordCrudModule } from 'src/engine/core-modules/record-crud/record-crud.module';
 import { TOOL_PROVIDERS } from 'src/engine/core-modules/tool-provider/constants/tool-providers.token';
 import { ActionToolProvider } from 'src/engine/core-modules/tool-provider/providers/action-tool.provider';
+import { ComposioToolProvider } from 'src/engine/core-modules/tool-provider/providers/composio-tool.provider';
 import { DashboardToolProvider } from 'src/engine/core-modules/tool-provider/providers/dashboard-tool.provider';
 import { DatabaseToolProvider } from 'src/engine/core-modules/tool-provider/providers/database-tool.provider';
 import { LogicFunctionToolProvider } from 'src/engine/core-modules/tool-provider/providers/logic-function-tool.provider';
@@ -56,6 +58,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
 @Module({
   imports: [
     ApplicationTranslationCatalogModule,
+    ComposioModule,
     ToolModule,
     RecordCrudModule,
     FilesFieldModule,
@@ -84,6 +87,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
     RecordFilesResolverService,
     provideWorkspaceScopedRepository(FileEntity),
     ActionToolProvider,
+    ComposioToolProvider,
     DashboardToolProvider,
     DatabaseToolProvider,
     MetadataToolProvider,
@@ -101,6 +105,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
       provide: TOOL_PROVIDERS,
       useFactory: (
         actionProvider: ActionToolProvider,
+        composioProvider: ComposioToolProvider,
         databaseProvider: DatabaseToolProvider,
         metadataProvider: MetadataToolProvider,
         logicFunctionProvider: LogicFunctionToolProvider,
@@ -112,6 +117,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
         dashboardProvider: DashboardToolProvider,
       ) => [
         actionProvider,
+        composioProvider,
         databaseProvider,
         metadataProvider,
         logicFunctionProvider,
@@ -124,6 +130,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
       ],
       inject: [
         ActionToolProvider,
+        ComposioToolProvider,
         DatabaseToolProvider,
         MetadataToolProvider,
         LogicFunctionToolProvider,
