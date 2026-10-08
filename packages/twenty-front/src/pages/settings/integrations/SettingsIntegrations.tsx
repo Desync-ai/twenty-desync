@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
 import { IconCheck, IconPlug, IconRefresh } from 'twenty-ui/icon';
@@ -20,13 +21,21 @@ import { REACT_APP_SERVER_BASE_URL } from '~/config';
 
 const INTEGRATIONS_BASE_URL = `${REACT_APP_SERVER_BASE_URL}/integrations`;
 
+// 'connect' = OAuth/sync via the integrations API. 'mcp' = an AI agent that
+// connects to the CRM through our built-in MCP server; the card just deep-links
+// to Settings -> API & MCP where the user makes a key + copies the endpoint.
+type IntegrationKind = 'connect' | 'mcp';
+
 type IntegrationDef = {
   plugin: string;
   name: string;
-  connectedBlurb: string;
-  disconnectedBlurb: string;
-  // Copilot-tool integrations (e.g. Slack via Composio) are used by the AI
-  // assistant rather than synced, so they show no "Sync now" action.
+  tags: string[];
+  kind: IntegrationKind;
+  logoDomain?: string;
+  blurb: string;
+  connectedBlurb?: string;
+  // Copilot-tool connects (Slack, Airtable) are used by the AI assistant rather
+  // than synced, so they show no "Sync now" action once connected.
   agentTool?: boolean;
 };
 
@@ -34,55 +43,124 @@ const INTEGRATIONS: IntegrationDef[] = [
   {
     plugin: 'hubspot',
     name: 'HubSpot',
-    connectedBlurb: 'Import contacts, companies & deals',
-    disconnectedBlurb: 'Connect to import your CRM data',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'hubspot.com',
+    blurb: 'Import contacts, companies & deals',
+    connectedBlurb: 'Contacts, companies & deals',
   },
   {
     plugin: 'salesforce',
     name: 'Salesforce',
-    connectedBlurb: 'Import accounts, contacts & opportunities',
-    disconnectedBlurb: 'Connect to import your CRM data',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'salesforce.com',
+    blurb: 'Import accounts, contacts & opportunities',
+    connectedBlurb: 'Accounts, contacts & opportunities',
   },
   {
     plugin: 'desync',
     name: 'Desync Leads',
-    connectedBlurb: 'Import your leads from the Desync platform',
-    disconnectedBlurb: 'No Desync workspace found for your account',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'desync.ai',
+    blurb: 'Import your leads from the Desync platform',
+    connectedBlurb: 'Your Desync leads',
   },
   {
     plugin: 'slack',
     name: 'Slack',
-    connectedBlurb: 'Available to your AI assistant — post, search & read messages',
-    disconnectedBlurb: 'Connect so the AI assistant can post & read Slack for you',
+    kind: 'connect',
+    tags: ['Productivity'],
+    logoDomain: 'slack.com',
     agentTool: true,
+    blurb: 'Let the AI assistant post, search & read Slack',
+    connectedBlurb: 'Available to your AI assistant',
   },
   {
     plugin: 'airtable',
     name: 'Airtable',
-    connectedBlurb: 'Available to your AI assistant — read & write your bases & records',
-    disconnectedBlurb: 'Connect so the AI assistant can read & update your Airtable',
+    kind: 'connect',
+    tags: ['Productivity'],
+    logoDomain: 'airtable.com',
     agentTool: true,
+    blurb: 'Let the AI assistant read & write your bases',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'claude',
+    name: 'Claude',
+    kind: 'mcp',
+    tags: ['AI'],
+    logoDomain: 'anthropic.com',
+    blurb: 'Give Claude secure access to your CRM over MCP',
+  },
+  {
+    plugin: 'chatgpt',
+    name: 'ChatGPT',
+    kind: 'mcp',
+    tags: ['AI'],
+    logoDomain: 'openai.com',
+    blurb: 'Give ChatGPT secure access to your CRM over MCP',
+  },
+  {
+    plugin: 'grok',
+    name: 'Grok',
+    kind: 'mcp',
+    tags: ['AI'],
+    logoDomain: 'x.ai',
+    blurb: 'Give Grok secure access to your CRM over MCP',
+  },
+  {
+    plugin: 'cursor',
+    name: 'Cursor',
+    kind: 'mcp',
+    tags: ['AI'],
+    logoDomain: 'cursor.com',
+    blurb: 'Give Cursor secure access to your CRM over MCP',
   },
 ];
 
-const StyledRow = styled.div`
-  align-items: center;
+const StyledFilters = styled.div`
   display: flex;
-  gap: ${themeCssVariables.spacing[4]};
-  justify-content: space-between;
-  padding: ${themeCssVariables.spacing[3]} ${themeCssVariables.spacing[4]};
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
+  margin-bottom: ${themeCssVariables.spacing[4]};
 `;
 
-const StyledLeft = styled.div`
-  align-items: center;
-  display: flex;
+const StyledGrid = styled.div`
+  display: grid;
   gap: ${themeCssVariables.spacing[3]};
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 `;
 
-const StyledText = styled.div`
+const StyledCardInner = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[1]};
+  gap: ${themeCssVariables.spacing[2]};
+  height: 100%;
+  padding: ${themeCssVariables.spacing[3]};
+`;
+
+const StyledHeader = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledLogoBox = styled.div`
+  align-items: center;
+  display: flex;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+`;
+
+const StyledLogoImg = styled.img`
+  border-radius: 6px;
+  height: 28px;
+  object-fit: contain;
+  width: 28px;
 `;
 
 const StyledName = styled.span`
@@ -90,21 +168,50 @@ const StyledName = styled.span`
   font-weight: ${themeCssVariables.font.weight.medium};
 `;
 
-const StyledStatus = styled.span`
+const StyledBlurb = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
+  flex: 1;
   font-size: ${themeCssVariables.font.size.sm};
 `;
 
-const StyledActions = styled.div`
-  display: flex;
-  gap: ${themeCssVariables.spacing[2]};
+const StyledStatus = styled.span`
+  color: ${themeCssVariables.font.color.tertiary};
+  font-size: ${themeCssVariables.font.size.xs};
 `;
 
-const StyledCards = styled.div`
+const StyledCardActions = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
+  justify-content: flex-end;
+  margin-top: ${themeCssVariables.spacing[1]};
 `;
+
+const IntegrationLogo = ({
+  domain,
+  name,
+}: {
+  domain?: string;
+  name: string;
+}) => {
+  // clearbit logo -> google favicon -> plug icon. Any external block (CSP/404)
+  // falls through gracefully so the card still renders.
+  const [stage, setStage] = useState<0 | 1 | 2>(0);
+
+  if (!domain || stage === 2) {
+    return <IconPlug size={22} />;
+  }
+  const src =
+    stage === 0
+      ? `https://logo.clearbit.com/${domain}`
+      : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+
+  return (
+    <StyledLogoImg
+      src={src}
+      alt={name}
+      onError={() => setStage((s) => (s + 1) as 0 | 1 | 2)}
+    />
+  );
+};
 
 async function callIntegrations(
   path: string,
@@ -130,7 +237,11 @@ async function callIntegrations(
   return json;
 }
 
-const IntegrationCard = ({ integration }: { integration: IntegrationDef }) => {
+const ConnectIntegrationCard = ({
+  integration,
+}: {
+  integration: IntegrationDef;
+}) => {
   const { t } = useLingui();
   const { enqueueToast } = useToast();
   const { plugin, name } = integration;
@@ -161,7 +272,6 @@ const IntegrationCard = ({ integration }: { integration: IntegrationDef }) => {
         window.location.href = res.connectUrl;
         return;
       }
-      // Sources without OAuth (e.g. Desync) report their connection state inline.
       await refreshStatus();
       if (!res?.connected) {
         throw new Error(t`Nothing to import for your account yet`);
@@ -182,8 +292,7 @@ const IntegrationCard = ({ integration }: { integration: IntegrationDef }) => {
     setIsSyncing(true);
     setProgress(t`Starting…`);
     try {
-      await callIntegrations(`/${plugin}/sync`, 'POST'); // kicks off a background job
-      // Poll progress until the job reaches a terminal state (~up to 30 min).
+      await callIntegrations(`/${plugin}/sync`, 'POST');
       let final: any = null;
       for (let i = 0; i < 900 && !final; i++) {
         await new Promise((r) => setTimeout(r, 2000));
@@ -226,26 +335,27 @@ const IntegrationCard = ({ integration }: { integration: IntegrationDef }) => {
   }, [plugin, name, enqueueToast, t]);
 
   const statusLabel =
-    connected === null ? t`Checking…` : connected ? t`Connected` : t`Not connected`;
+    connected === null
+      ? t`Checking…`
+      : connected
+        ? t`Connected`
+        : t`Not connected`;
 
   return (
     <Card rounded>
       <CardContent>
-        <StyledRow>
-          <StyledLeft>
-            <IconPlug size={20} />
-            <StyledText>
-              <StyledName>{name}</StyledName>
-              <StyledStatus>
-                {isSyncing && progress
-                  ? progress
-                  : `${statusLabel} · ${
-                      connected ? integration.connectedBlurb : integration.disconnectedBlurb
-                    }`}
-              </StyledStatus>
-            </StyledText>
-          </StyledLeft>
-          <StyledActions>
+        <StyledCardInner>
+          <StyledHeader>
+            <StyledLogoBox>
+              <IntegrationLogo domain={integration.logoDomain} name={name} />
+            </StyledLogoBox>
+            <StyledName>{name}</StyledName>
+          </StyledHeader>
+          <StyledBlurb>
+            {connected ? integration.connectedBlurb ?? integration.blurb : integration.blurb}
+          </StyledBlurb>
+          <StyledStatus>{isSyncing && progress ? progress : statusLabel}</StyledStatus>
+          <StyledCardActions>
             {connected ? (
               integration.agentTool ? null : (
                 <Button
@@ -269,8 +379,43 @@ const IntegrationCard = ({ integration }: { integration: IntegrationDef }) => {
                 {t`Connect`}
               </Button>
             )}
-          </StyledActions>
-        </StyledRow>
+          </StyledCardActions>
+        </StyledCardInner>
+      </CardContent>
+    </Card>
+  );
+};
+
+const McpIntegrationCard = ({
+  integration,
+}: {
+  integration: IntegrationDef;
+}) => {
+  const { t } = useLingui();
+  const navigate = useNavigate();
+  const { name } = integration;
+
+  return (
+    <Card rounded>
+      <CardContent>
+        <StyledCardInner>
+          <StyledHeader>
+            <StyledLogoBox>
+              <IntegrationLogo domain={integration.logoDomain} name={name} />
+            </StyledLogoBox>
+            <StyledName>{name}</StyledName>
+          </StyledHeader>
+          <StyledBlurb>{integration.blurb}</StyledBlurb>
+          <StyledStatus>{t`Connects via MCP`}</StyledStatus>
+          <StyledCardActions>
+            <Button
+              variant="outline"
+              onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
+            >
+              {t`Set up`}
+            </Button>
+          </StyledCardActions>
+        </StyledCardInner>
       </CardContent>
     </Card>
   );
@@ -291,7 +436,6 @@ const StyledModalActions = styled.div`
   gap: ${themeCssVariables.spacing[2]};
   margin-top: ${themeCssVariables.spacing[6]};
 
-  /* Each action button takes an equal half so neither overflows the modal. */
   > * {
     flex: 1;
     min-width: 0;
@@ -299,15 +443,35 @@ const StyledModalActions = styled.div`
 `;
 
 const FEEDBACK_MODAL_ID = 'integrations-feedback-modal';
+const ALL_TAG = 'All';
 
 export const SettingsIntegrations = () => {
   const { t } = useLingui();
   const { enqueueToast } = useToast();
   const { openModal, closeModal } = useModal();
 
+  const [activeTag, setActiveTag] = useState<string>(ALL_TAG);
   const [feedbackKind, setFeedbackKind] = useState<'request' | 'problem'>('request');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+
+  const tags = useMemo(() => {
+    const set = new Set<string>();
+    for (const integration of INTEGRATIONS) {
+      for (const tag of integration.tags) set.add(tag);
+    }
+    return [ALL_TAG, ...[...set].sort()];
+  }, []);
+
+  const visible = useMemo(
+    () =>
+      activeTag === ALL_TAG
+        ? INTEGRATIONS
+        : INTEGRATIONS.filter((integration) =>
+            integration.tags.includes(activeTag),
+          ),
+    [activeTag],
+  );
 
   const openFeedback = (kind: 'request' | 'problem') => {
     setFeedbackKind(kind);
@@ -347,13 +511,29 @@ export const SettingsIntegrations = () => {
         <Section>
           <H2Title
             title={t`Integrations`}
-            description={t`Connect your other tools and bring their data into your CRM.`}
+            description={t`Connect your tools and AI agents to your CRM.`}
           />
-          <StyledCards>
-            {INTEGRATIONS.map((integration) => (
-              <IntegrationCard key={integration.plugin} integration={integration} />
+          <StyledFilters>
+            {tags.map((tag) => (
+              <Button
+                key={tag}
+                variant={activeTag === tag ? 'solid' : 'outline'}
+                color={activeTag === tag ? 'accent' : undefined}
+                onClick={() => setActiveTag(tag)}
+              >
+                {tag}
+              </Button>
             ))}
-          </StyledCards>
+          </StyledFilters>
+          <StyledGrid>
+            {visible.map((integration) =>
+              integration.kind === 'mcp' ? (
+                <McpIntegrationCard key={integration.plugin} integration={integration} />
+              ) : (
+                <ConnectIntegrationCard key={integration.plugin} integration={integration} />
+              ),
+            )}
+          </StyledGrid>
           <StyledFooter>
             <Button variant="outline" onClick={() => openFeedback('request')}>
               {t`Request an integration`}
