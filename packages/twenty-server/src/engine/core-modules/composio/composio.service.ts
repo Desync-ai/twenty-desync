@@ -143,6 +143,78 @@ export const COMPOSIO_GMAIL_TOOLS: ComposioTool[] = [
   },
 ];
 
+// Curated Outlook (Microsoft 365) tools — mail read/search + calendar. Email is
+// read-only; calendar create is allowed.
+export const COMPOSIO_OUTLOOK_TOOLS: ComposioTool[] = [
+  { slug: 'OUTLOOK_OUTLOOK_LIST_MESSAGES', description: "List the user's Outlook emails (optionally by folder), newest first." },
+  { slug: 'OUTLOOK_OUTLOOK_SEARCH_MESSAGES', description: 'Search the mailbox by sender, subject, keywords, or dates.' },
+  { slug: 'OUTLOOK_OUTLOOK_GET_MESSAGE', description: 'Fetch the full content of one Outlook email by id.' },
+  { slug: 'OUTLOOK_OUTLOOK_LIST_MAIL_FOLDERS', description: 'List the mailbox folders.' },
+  { slug: 'OUTLOOK_OUTLOOK_LIST_EVENTS', description: "List events on the user's Outlook calendar for a time range." },
+  { slug: 'OUTLOOK_OUTLOOK_GET_EVENT', description: 'Get a single Outlook calendar event by id.' },
+  { slug: 'OUTLOOK_OUTLOOK_CALENDAR_CREATE_EVENT', description: 'Create an Outlook calendar event (subject, attendees, start/end).' },
+  { slug: 'OUTLOOK_OUTLOOK_GET_PROFILE', description: 'Get the connected Outlook account profile (name, email).' },
+];
+
+// Curated Google Calendar tools — read schedule, free/busy, manage events.
+export const COMPOSIO_GOOGLECALENDAR_TOOLS: ComposioTool[] = [
+  { slug: 'GOOGLECALENDAR_FIND_EVENT', description: "Find/list events on the user's calendar by time range or text query." },
+  { slug: 'GOOGLECALENDAR_FREE_BUSY_QUERY', description: 'Check when the user is free or busy across a time range.' },
+  { slug: 'GOOGLECALENDAR_GET_CALENDAR', description: "Get metadata for one of the user's calendars." },
+  { slug: 'GOOGLECALENDAR_CREATE_EVENT', description: 'Create a calendar event (title, attendees, start/end, conferencing).' },
+  { slug: 'GOOGLECALENDAR_UPDATE_EVENT', description: 'Update or reschedule an existing calendar event.' },
+  { slug: 'GOOGLECALENDAR_DELETE_EVENT', description: 'Delete/cancel a calendar event by id.' },
+];
+
+// Curated Notion tools — search + read pages/databases, create pages.
+export const COMPOSIO_NOTION_TOOLS: ComposioTool[] = [
+  { slug: 'NOTION_SEARCH_NOTION_PAGE', description: "Search the user's Notion workspace for pages/databases by title." },
+  { slug: 'NOTION_FETCH_DATA', description: 'Fetch a Notion page with its properties and content.' },
+  { slug: 'NOTION_FETCH_BLOCK_CONTENTS', description: 'Fetch the block contents (text) of a Notion page/block.' },
+  { slug: 'NOTION_QUERY_DATABASE', description: 'Query rows of a Notion database with filters and sorts.' },
+  { slug: 'NOTION_FETCH_DATABASE', description: 'Fetch a Notion database schema/metadata.' },
+  { slug: 'NOTION_CREATE_NOTION_PAGE', description: 'Create a new Notion page (title, parent, content).' },
+];
+
+// Curated Calendly tools — scheduled events, availability, booking links.
+export const COMPOSIO_CALENDLY_TOOLS: ComposioTool[] = [
+  { slug: 'CALENDLY_GET_CURRENT_USER', description: 'Get the connected Calendly user (needed to scope other calls).' },
+  { slug: 'CALENDLY_LIST_EVENTS', description: "List the user's scheduled Calendly events by status or time." },
+  { slug: 'CALENDLY_GET_EVENT', description: 'Get details of one scheduled Calendly event.' },
+  { slug: 'CALENDLY_LIST_EVENT_INVITEES', description: 'List invitees/attendees of a scheduled event.' },
+  { slug: 'CALENDLY_LIST_USER_S_EVENT_TYPES', description: "List the user's Calendly event types (meeting templates)." },
+  { slug: 'CALENDLY_CREATE_SINGLE_USE_SCHEDULING_LINK', description: 'Create a single-use booking link for an event type.' },
+];
+
+// Curated Microsoft Teams tools — read teams/channels/messages + create meetings.
+export const COMPOSIO_MICROSOFT_TEAMS_TOOLS: ComposioTool[] = [
+  { slug: 'MICROSOFT_TEAMS_GET_TEAM', description: 'Get a Microsoft Teams team by id.' },
+  { slug: 'MICROSOFT_TEAMS_GET_CHANNEL', description: 'Get a channel in a team.' },
+  { slug: 'MICROSOFT_TEAMS_GET_CHAT_MESSAGE', description: 'Get a specific chat or channel message.' },
+  { slug: 'MICROSOFT_TEAMS_LIST_MESSAGE_REPLIES', description: 'List replies to a channel message.' },
+  { slug: 'MICROSOFT_TEAMS_LIST_TEAM_MEMBERS', description: 'List members of a team.' },
+  { slug: 'MICROSOFT_TEAMS_CREATE_MEETING', description: 'Create a Teams online meeting (subject, start/end).' },
+];
+
+// Curated Google Drive tools — find and read files.
+export const COMPOSIO_GOOGLEDRIVE_TOOLS: ComposioTool[] = [
+  { slug: 'GOOGLEDRIVE_FIND_FILE', description: "Find files in the user's Drive by name or query." },
+  { slug: 'GOOGLEDRIVE_LIST_FILES', description: 'List files/folders in Drive, optionally filtered.' },
+  { slug: 'GOOGLEDRIVE_FIND_FOLDER', description: 'Find folders by name or query.' },
+  { slug: 'GOOGLEDRIVE_GET_FILE_METADATA', description: "Get a file's metadata (name, type, owners, links)." },
+  { slug: 'GOOGLEDRIVE_PARSE_FILE', description: 'Extract the text content of a Drive file (docs/pdf) so the assistant can read it.' },
+];
+
+// Curated Google Sheets tools — find sheets, read values, append rows.
+export const COMPOSIO_GOOGLESHEETS_TOOLS: ComposioTool[] = [
+  { slug: 'GOOGLESHEETS_SEARCH_SPREADSHEETS', description: "Search the user's Google Sheets by name." },
+  { slug: 'GOOGLESHEETS_GET_SPREADSHEET_INFO', description: "Get a spreadsheet's metadata (sheets, title, ids)." },
+  { slug: 'GOOGLESHEETS_GET_SHEET_NAMES', description: 'List the tab/sheet names in a spreadsheet.' },
+  { slug: 'GOOGLESHEETS_BATCH_GET', description: 'Read cell values from one or more ranges.' },
+  { slug: 'GOOGLESHEETS_LOOKUP_SPREADSHEET_ROW', description: 'Find a row matching a value.' },
+  { slug: 'GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', description: 'Append a row of values to a sheet.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -190,6 +262,48 @@ export class ComposioService {
         label: 'Gmail',
         authConfigId: process.env.COMPOSIO_GMAIL_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_GMAIL_TOOLS,
+      },
+      {
+        slug: 'outlook',
+        label: 'Outlook',
+        authConfigId: process.env.COMPOSIO_OUTLOOK_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_OUTLOOK_TOOLS,
+      },
+      {
+        slug: 'googlecalendar',
+        label: 'Google Calendar',
+        authConfigId: process.env.COMPOSIO_GOOGLECALENDAR_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GOOGLECALENDAR_TOOLS,
+      },
+      {
+        slug: 'notion',
+        label: 'Notion',
+        authConfigId: process.env.COMPOSIO_NOTION_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_NOTION_TOOLS,
+      },
+      {
+        slug: 'calendly',
+        label: 'Calendly',
+        authConfigId: process.env.COMPOSIO_CALENDLY_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_CALENDLY_TOOLS,
+      },
+      {
+        slug: 'microsoft_teams',
+        label: 'Microsoft Teams',
+        authConfigId: process.env.COMPOSIO_MICROSOFT_TEAMS_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_MICROSOFT_TEAMS_TOOLS,
+      },
+      {
+        slug: 'googledrive',
+        label: 'Google Drive',
+        authConfigId: process.env.COMPOSIO_GOOGLEDRIVE_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GOOGLEDRIVE_TOOLS,
+      },
+      {
+        slug: 'googlesheets',
+        label: 'Google Sheets',
+        authConfigId: process.env.COMPOSIO_GOOGLESHEETS_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GOOGLESHEETS_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.
