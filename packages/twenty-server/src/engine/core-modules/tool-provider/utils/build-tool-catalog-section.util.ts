@@ -30,7 +30,7 @@ const getCategoryLabel = (category: ToolCategory): string => {
     case ToolCategory.ROLE:
       return 'Role Tools (manage roles and permissions)';
     case ToolCategory.COMPOSIO:
-      return 'Slack Tools (via Composio — post, search, and read messages)';
+      return 'Connected App Tools (via Composio — e.g. Slack, Airtable)';
     default:
       return assertUnreachable(category);
   }
