@@ -925,6 +925,48 @@
     "apiKey": "{{ANTHROPIC_API_KEY}}",
     "models": [
       {
+        "name": "claude-haiku-5-5",
+        "label": "Claude Haiku 5.5",
+        "modelFamily": "CLAUDE",
+        "inputCostPerMillionTokens": 0.1,
+        "outputCostPerMillionTokens": 0.5,
+        "cachedInputCostPerMillionTokens": 0.01,
+        "cacheCreationCostPerMillionTokens": 0.125,
+        "contextWindowTokens": 200000,
+        "maxOutputTokens": 64000,
+        "modalities": ["image", "pdf"],
+        "supportsReasoning": true,
+        "efforts": ["low", "medium", "high", "xhigh", "max"]
+      },
+      {
+        "name": "claude-sonnet-5-5",
+        "label": "Claude Sonnet 5.5",
+        "modelFamily": "CLAUDE",
+        "inputCostPerMillionTokens": 2,
+        "outputCostPerMillionTokens": 10,
+        "cachedInputCostPerMillionTokens": 0.2,
+        "cacheCreationCostPerMillionTokens": 2.5,
+        "contextWindowTokens": 1000000,
+        "maxOutputTokens": 128000,
+        "modalities": ["image", "pdf"],
+        "supportsReasoning": true,
+        "efforts": ["low", "medium", "high", "xhigh", "max"]
+      },
+      {
+        "name": "claude-opus-5-5",
+        "label": "Claude Opus 5.5",
+        "modelFamily": "CLAUDE",
+        "inputCostPerMillionTokens": 4,
+        "outputCostPerMillionTokens": 20,
+        "cachedInputCostPerMillionTokens": 0.4,
+        "cacheCreationCostPerMillionTokens": 5,
+        "contextWindowTokens": 1000000,
+        "maxOutputTokens": 128000,
+        "modalities": ["image", "pdf"],
+        "supportsReasoning": true,
+        "efforts": ["low", "medium", "high", "xhigh", "max"]
+      },
+      {
         "name": "claude-sonnet-4-6",
         "label": "Claude Sonnet 4.6",
         "modelFamily": "CLAUDE",

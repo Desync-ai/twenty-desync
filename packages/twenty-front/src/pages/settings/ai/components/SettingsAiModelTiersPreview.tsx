@@ -9,8 +9,6 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { AiModelTierIndicator } from '@/ai/components/AiModelTierIndicator';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 import { type ResolvedAiModelTier } from '@/ai/types/ResolvedAiModelTier';
-import { getAiModelModeDescription } from '@/settings/ai/utils/getAiModelModeDescription';
-import { getModelIcon } from '@/settings/ai/utils/getModelIcon';
 import { Table } from '@/ui/layout/table/components/Table';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { TableHeader } from '@/ui/layout/table/components/TableHeader';
@@ -83,35 +81,10 @@ export const SettingsAiModelTiersPreview = () => {
         {tiers.map((tier) => (
           <TableRow key={tier.tier} gridTemplateColumns={GRID_TEMPLATE_COLUMNS}>
             <TableCell color={themeCssVariables.font.color.primary}>
-              <StyledMode
-                data-tooltip-id={`ai-model-mode-${tier.tier}`}
-                tabIndex={0}
-              >
+              <StyledMode>
                 <AiModelTierIndicator tier={tier.tier} />
                 {tier.label}
               </StyledMode>
-              <AppTooltip
-                anchorSelect={`[data-tooltip-id="ai-model-mode-${tier.tier}"]`}
-                Icon={
-                  isDefined(tier.model)
-                    ? getModelIcon(
-                        tier.model.modelFamily,
-                        tier.model.providerName,
-                      )
-                    : undefined
-                }
-                title={getAiModelModeDescription(tier, {
-                  showAutomatic: false,
-                })}
-                description={
-                  !isDefined(tier.model)
-                    ? t`No model is available for this mode.`
-                    : tier.isPinned
-                      ? t`Manually selected for this mode.`
-                      : t`Automatically selected by Desync for this mode.`
-                }
-                delay={TooltipDelay.shortDelay}
-              />
             </TableCell>
             <TableCell align="right">
               {renderBenchmarkValue(tier, formatSpeed(tier))}

@@ -1,11 +1,15 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { type ChangeEvent } from 'react';
-import { AI_MODEL_TIERS, type AiModelTier } from 'twenty-shared/ai';
+import { type AiModelTier } from 'twenty-shared/ai';
 import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierInformationButton } from '@/ai/components/AiModelTierInformationButton';
+import {
+  SELECTABLE_AI_MODEL_TIERS,
+  clampToSelectableAiModelTier,
+} from '@/ai/constants/selectableAiModelTiers';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 
 const TRACK_HEIGHT_PX = 24;
@@ -13,7 +17,7 @@ const TRACK_INSET_PX = 0;
 const DOT_CENTER_INSET_PX = 18;
 const HANDLE_WIDTH_PX = 12;
 const HANDLE_HEIGHT_PX = 28;
-const LAST_STEP = AI_MODEL_TIERS.length - 1;
+const LAST_STEP = SELECTABLE_AI_MODEL_TIERS.length - 1;
 
 const StyledContainer = styled.div`
   display: flex;
@@ -143,10 +147,12 @@ export const AiModelTierSlider = ({
   const { t } = useLingui();
   const tiers = useAiModelTiers();
 
-  const selectedStep = AI_MODEL_TIERS.indexOf(selectedTier);
+  const selectedStep = SELECTABLE_AI_MODEL_TIERS.indexOf(
+    clampToSelectableAiModelTier(selectedTier),
+  );
   const resolvedTier = tiers[selectedStep];
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const tier = AI_MODEL_TIERS[Number(event.target.value)];
+    const tier = SELECTABLE_AI_MODEL_TIERS[Number(event.target.value)];
 
     if (isDefined(tier)) {
       onTierChange(tier);
@@ -167,7 +173,7 @@ export const AiModelTierSlider = ({
           <StyledHandle />
         </StyledFill>
         <StyledDots>
-          {AI_MODEL_TIERS.map((tier, index) => (
+          {SELECTABLE_AI_MODEL_TIERS.map((tier, index) => (
             <StyledDot key={tier} isReached={index <= selectedStep} />
           ))}
         </StyledDots>

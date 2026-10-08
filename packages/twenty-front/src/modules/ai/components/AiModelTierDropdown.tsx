@@ -1,11 +1,14 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { AI_MODEL_TIERS, type AiModelTier } from 'twenty-shared/ai';
-import { isDefined } from 'twenty-shared/utils';
+import { type AiModelTier } from 'twenty-shared/ai';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierBars } from '@/ai/components/AiModelTierBars';
 import { AiModelTierSlider } from '@/ai/components/AiModelTierSlider';
+import {
+  SELECTABLE_AI_MODEL_TIERS,
+  clampToSelectableAiModelTier,
+} from '@/ai/constants/selectableAiModelTiers';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 import { useIsWorkspaceSetupChat } from '@/ai/hooks/useIsWorkspaceSetupChat';
 import { useWorkspaceAiModelTiers } from '@/ai/hooks/useWorkspaceAiModelTiers';
@@ -38,10 +41,15 @@ export const AiModelTierDropdown = ({
 
   // The setup chat runs on the fast tier server-side whatever the workspace
   // setting says, so the control shows what will actually answer.
-  const workspaceTier: AiModelTier = isWorkspaceSetupChat ? 'fast' : chatTier;
+  const workspaceTier = clampToSelectableAiModelTier(
+    isWorkspaceSetupChat ? 'fast' : chatTier,
+  );
 
-  const selectedTier = agentChatUserSelectedModelTier ?? workspaceTier;
-  const selectedResolvedTier = tiers[AI_MODEL_TIERS.indexOf(selectedTier)];
+  const selectedTier = clampToSelectableAiModelTier(
+    agentChatUserSelectedModelTier ?? workspaceTier,
+  );
+  const selectedResolvedTier =
+    tiers[SELECTABLE_AI_MODEL_TIERS.indexOf(selectedTier)];
 
   const handleTierChange = (tier: AiModelTier) => {
     setAgentChatUserSelectedModelTier(tier === workspaceTier ? null : tier);
@@ -55,11 +63,7 @@ export const AiModelTierDropdown = ({
       clickableComponent={
         <AiModelTierBars
           selectedTier={selectedTier}
-          label={
-            isDefined(selectedResolvedTier.model)
-              ? t`${selectedResolvedTier.label}: ${selectedResolvedTier.model.label}`
-              : selectedResolvedTier.label
-          }
+          label={selectedResolvedTier?.label ?? ''}
           disabled={disabled}
         />
       }

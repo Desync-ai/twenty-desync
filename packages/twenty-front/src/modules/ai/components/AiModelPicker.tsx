@@ -1,22 +1,19 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useState } from 'react';
 import {
   AUTO_SELECT_MODEL_ID_BY_TIER,
   AUTO_SELECT_WORKSPACE_DEFAULT_MODEL_ID,
 } from 'twenty-shared/ai';
 import { isDefined } from 'twenty-shared/utils';
-import { LightButton } from 'twenty-ui/components';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierSlider } from '@/ai/components/AiModelTierSlider';
+import { clampToSelectableAiModelTier } from '@/ai/constants/selectableAiModelTiers';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 import { useWorkspaceAiModelTiers } from '@/ai/hooks/useWorkspaceAiModelTiers';
 import { getAiModelTierForAgentModelId } from '@/ai/utils/getAiModelTierForAgentModelId';
 import { getNearestAiModelTier } from '@/ai/utils/getNearestAiModelTier';
 import { aiModelsState } from '@/client-config/states/aiModelsState';
-import { AiModelPinSelect } from '@/settings/ai/components/AiModelPinSelect';
-import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/GenericDropdownContentWidth';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 
 const StyledContainer = styled.div`
@@ -62,15 +59,15 @@ export const AiModelPicker = ({
 
   const isWorkspaceDefault = modelId === AUTO_SELECT_WORKSPACE_DEFAULT_MODEL_ID;
   const tierFromModelId = getAiModelTierForAgentModelId(modelId, agentTier);
-  const hasPinnedModel = !isDefined(tierFromModelId);
-  const pinnedModel = hasPinnedModel
+  // A legacy agent may still be pinned to a concrete model; we position the
+  // slider on the nearest tier but never surface the model's name.
+  const pinnedModel = !isDefined(tierFromModelId)
     ? aiModels.find((model) => model.modelId === modelId)
     : undefined;
 
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(hasPinnedModel);
-
-  const selectedTier =
-    tierFromModelId ?? getNearestAiModelTier(pinnedModel, tiers);
+  const selectedTier = clampToSelectableAiModelTier(
+    tierFromModelId ?? getNearestAiModelTier(pinnedModel, tiers),
+  );
 
   return (
     <StyledContainer>
@@ -80,7 +77,6 @@ export const AiModelPicker = ({
           onTierChange={(tier) =>
             onModelIdChange(AUTO_SELECT_MODEL_ID_BY_TIER[tier])
           }
-          title={hasPinnedModel ? (pinnedModel?.label ?? modelId) : undefined}
           disabled={disabled}
         />
       </StyledSliderCard>
@@ -88,34 +84,9 @@ export const AiModelPicker = ({
         <StyledHint>
           {isWorkspaceDefault
             ? t`Follows the workspace default for agents`
-            : hasPinnedModel
-              ? t`Pinned to a specific model`
-              : t`Set for this agent only`}
+            : t`Set for this agent only`}
         </StyledHint>
-        {!isAdvancedOpen && !disabled && (
-          <LightButton
-            emphasis="subtle"
-            onClick={() => setIsAdvancedOpen(true)}
-          >{t`Advanced`}</LightButton>
-        )}
       </StyledFooter>
-      {isAdvancedOpen && (
-        <AiModelPinSelect
-          dropdownId="ai-model-picker-pinned-model"
-          label={t`Pin a specific model`}
-          description={t`Overrides the mode above until you switch back to automatic`}
-          modelId={hasPinnedModel ? modelId : null}
-          onChange={(pinnedModelId) =>
-            onModelIdChange(
-              pinnedModelId ?? AUTO_SELECT_WORKSPACE_DEFAULT_MODEL_ID,
-            )
-          }
-          aiModels={aiModels}
-          emptyOptionLabel={t`Automatic`}
-          disabled={disabled}
-          dropdownWidth={GenericDropdownContentWidth.ExtraLarge}
-        />
-      )}
     </StyledContainer>
   );
 };
