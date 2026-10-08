@@ -134,6 +134,20 @@ const StyledGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 `;
 
+// Stretch the whole Card -> CardContent -> inner chain to the grid row height so
+// every card is equally tall and the action row can bottom-anchor uniformly.
+const StyledCard = styled(Card)`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const StyledCardContent = styled(CardContent)`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+`;
+
 const StyledCardInner = styled.div`
   display: flex;
   flex-direction: column;
@@ -336,8 +350,8 @@ const ConnectIntegrationCard = ({
   }, [plugin, name, enqueueToast, t]);
 
   return (
-    <Card rounded>
-      <CardContent>
+    <StyledCard rounded>
+      <StyledCardContent>
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
@@ -355,7 +369,7 @@ const ConnectIntegrationCard = ({
                 {t`Checking…`}
               </Button>
             ) : connected ? (
-              <>
+              integration.agentTool ? (
                 <Button
                   variant="outline"
                   disabled
@@ -363,18 +377,17 @@ const ConnectIntegrationCard = ({
                 >
                   {t`Connected`}
                 </Button>
-                {!integration.agentTool && (
-                  <Button
-                    variant="solid"
-                    color="accent"
-                    startIcon={<IconRefresh size={16} />}
-                    onClick={handleSync}
-                    loading={isSyncing}
-                  >
-                    {t`Sync`}
-                  </Button>
-                )}
-              </>
+              ) : (
+                <Button
+                  variant="solid"
+                  color="accent"
+                  startIcon={<IconRefresh size={16} />}
+                  onClick={handleSync}
+                  loading={isSyncing}
+                >
+                  {t`Sync`}
+                </Button>
+              )
             ) : (
               <Button
                 variant="solid"
@@ -388,8 +401,8 @@ const ConnectIntegrationCard = ({
             )}
           </StyledCardActions>
         </StyledCardInner>
-      </CardContent>
-    </Card>
+      </StyledCardContent>
+    </StyledCard>
   );
 };
 
@@ -403,8 +416,8 @@ const McpIntegrationCard = ({
   const { name } = integration;
 
   return (
-    <Card rounded>
-      <CardContent>
+    <StyledCard rounded>
+      <StyledCardContent>
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
@@ -423,8 +436,8 @@ const McpIntegrationCard = ({
             </Button>
           </StyledCardActions>
         </StyledCardInner>
-      </CardContent>
-    </Card>
+      </StyledCardContent>
+    </StyledCard>
   );
 };
 
