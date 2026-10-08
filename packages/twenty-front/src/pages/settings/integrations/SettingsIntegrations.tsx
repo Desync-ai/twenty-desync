@@ -98,6 +98,16 @@ const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'gmail',
+    name: 'Gmail',
+    kind: 'connect',
+    tags: ['Productivity'],
+    logoDomain: 'gmail.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant read & answer questions about your email',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'claude',
     name: 'Claude',
     kind: 'mcp',

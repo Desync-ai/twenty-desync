@@ -12,6 +12,7 @@ import { Injectable, Logger } from '@nestjs/common';
 //   COMPOSIO_API_KEY                   platform API key (ak_...), used as x-api-key
 //   COMPOSIO_SLACK_AUTH_CONFIG_ID         managed-OAuth auth config for Slack (ac_...)
 //   COMPOSIO_AIRTABLE_AUTH_CONFIG_ID      managed-OAuth auth config for Airtable (ac_...)
+//   COMPOSIO_GMAIL_AUTH_CONFIG_ID         managed-OAuth auth config for Gmail (ac_...)
 //   COMPOSIO_GRANOLA_MCP_AUTH_CONFIG_ID   DCR-OAuth auth config for Granola (ac_...)
 //   COMPOSIO_GRANOLA_MCP_SERVER_URL       Composio MCP server URL for Granola (.../mcp)
 //   FRONTEND_URL / SERVER_URL             used to build the post-OAuth return URL
@@ -110,6 +111,38 @@ export const COMPOSIO_AIRTABLE_TOOLS: ComposioTool[] = [
   },
 ];
 
+// Curated Gmail tools exposed to the copilot — READ-ONLY, so the assistant can
+// answer questions about the user's inbox without sending or modifying mail.
+export const COMPOSIO_GMAIL_TOOLS: ComposioTool[] = [
+  {
+    slug: 'GMAIL_FETCH_EMAILS',
+    description:
+      "Search/list the user's emails. Supports a Gmail search `query` (e.g. from:, subject:, newer_than:1d, is:unread, has:attachment) plus pagination. Use this to find or summarize emails.",
+  },
+  {
+    slug: 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID',
+    description: 'Fetch the full content of a single email by its message id.',
+  },
+  {
+    slug: 'GMAIL_FETCH_MESSAGE_BY_THREAD_ID',
+    description: 'Fetch all messages in an email thread by its thread id.',
+  },
+  {
+    slug: 'GMAIL_LIST_THREADS',
+    description:
+      'List email threads, optionally filtered by a Gmail search `query`.',
+  },
+  {
+    slug: 'GMAIL_LIST_LABELS',
+    description: "List the account's Gmail labels / folders.",
+  },
+  {
+    slug: 'GMAIL_GET_PROFILE',
+    description:
+      'Get the connected Gmail account profile (email address, message/thread totals).',
+  },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -151,6 +184,12 @@ export class ComposioService {
         label: 'Airtable',
         authConfigId: process.env.COMPOSIO_AIRTABLE_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_AIRTABLE_TOOLS,
+      },
+      {
+        slug: 'gmail',
+        label: 'Gmail',
+        authConfigId: process.env.COMPOSIO_GMAIL_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GMAIL_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.
