@@ -345,6 +345,10 @@ export class ComposioService {
     { slugs: Set<string>; at: number }
   >();
   private static readonly STATUS_TTL_MS = 30_000;
+  // Coalesces concurrent status lookups for the same user — every integration
+  // card asks at once on page load / right after an OAuth redirect — into one
+  // upstream call, so the burst can't stampede or rate-limit Composio.
+  private readonly inflightConnected = new Map<string, Promise<Set<string>>>();
 
   get isConfigured(): boolean {
     return Boolean(this.apiKey) && Object.keys(this.toolkits).length > 0;
@@ -435,34 +439,51 @@ export class ComposioService {
       return cached.slugs;
     }
 
-    let slugs = new Set<string>();
+    // Share one in-flight request across all concurrent callers.
+    const existing = this.inflightConnected.get(userId);
 
-    try {
-      const res = await this.request<{ items?: ConnectedAccount[] }>(
-        'GET',
-        `/connected_accounts?user_ids=${encodeURIComponent(userId)}`,
-      );
-      const enabled = new Set(Object.keys(this.toolkits));
-
-      slugs = new Set(
-        (res.items ?? [])
-          .filter(
-            (account) =>
-              account.status === 'ACTIVE' &&
-              account.toolkit?.slug !== undefined &&
-              enabled.has(account.toolkit.slug),
-          )
-          .map((account) => account.toolkit!.slug as string),
-      );
-    } catch (error) {
-      this.logger.warn(
-        `Composio status check failed: ${(error as Error).message}`,
-      );
-      slugs = new Set();
+    if (existing) {
+      return existing;
     }
-    this.statusCache.set(userId, { slugs, at: Date.now() });
 
-    return slugs;
+    const promise = (async () => {
+      try {
+        const res = await this.request<{ items?: ConnectedAccount[] }>(
+          'GET',
+          `/connected_accounts?user_ids=${encodeURIComponent(userId)}`,
+        );
+        const enabled = new Set(Object.keys(this.toolkits));
+        const slugs = new Set(
+          (res.items ?? [])
+            .filter(
+              (account) =>
+                account.status === 'ACTIVE' &&
+                account.toolkit?.slug !== undefined &&
+                enabled.has(account.toolkit.slug),
+            )
+            .map((account) => account.toolkit!.slug as string),
+        );
+
+        // Cache only a successful lookup, so a transient failure can't stick a
+        // user as "disconnected" for the whole TTL (the bug behind every card
+        // flashing "Connect" after an OAuth redirect).
+        this.statusCache.set(userId, { slugs, at: Date.now() });
+
+        return slugs;
+      } catch (error) {
+        this.logger.warn(
+          `Composio status check failed: ${(error as Error).message}`,
+        );
+
+        return new Set<string>();
+      } finally {
+        this.inflightConnected.delete(userId);
+      }
+    })();
+
+    this.inflightConnected.set(userId, promise);
+
+    return promise;
   }
 
   async isConnected(toolkitSlug: string, userId: string): Promise<boolean> {
