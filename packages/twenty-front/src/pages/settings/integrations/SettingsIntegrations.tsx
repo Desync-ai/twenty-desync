@@ -56,6 +56,13 @@ const INTEGRATIONS: IntegrationDef[] = [
     disconnectedBlurb: 'Connect so the AI assistant can post & read Slack for you',
     agentTool: true,
   },
+  {
+    plugin: 'airtable',
+    name: 'Airtable',
+    connectedBlurb: 'Available to your AI assistant — read & write your bases & records',
+    disconnectedBlurb: 'Connect so the AI assistant can read & update your Airtable',
+    agentTool: true,
+  },
 ];
 
 const StyledRow = styled.div`
