@@ -47,6 +47,11 @@ export class IntegrationsController {
     return (request as { user?: { email?: string } }).user?.email;
   }
 
+  // Composio-backed integrations (e.g. Slack) are keyed by the Twenty user id.
+  private userId(request: AuthenticatedRequest): string | undefined {
+    return (request as { user?: { id?: string } }).user?.id;
+  }
+
   @Get(':plugin/status')
   async getStatus(
     @Param('plugin') plugin: string,
@@ -57,6 +62,7 @@ export class IntegrationsController {
       this.requireTenant(workspaceMemberId),
       plugin,
       this.userEmail(request),
+      this.userId(request),
     );
   }
 
@@ -70,6 +76,7 @@ export class IntegrationsController {
       this.requireTenant(workspaceMemberId),
       plugin,
       this.userEmail(request),
+      this.userId(request),
     );
   }
 

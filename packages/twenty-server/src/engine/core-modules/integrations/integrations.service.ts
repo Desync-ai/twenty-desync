@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { ApiKeyService } from 'src/engine/core-modules/api-key/services/api-key.service';
+import { ComposioService } from 'src/engine/core-modules/composio/composio.service';
 import { RoleService } from 'src/engine/metadata-modules/role/role.service';
 
 /**
@@ -40,6 +41,7 @@ export class IntegrationsService {
   constructor(
     private readonly apiKeyService: ApiKeyService,
     private readonly roleService: RoleService,
+    private readonly composioService: ComposioService,
   ) {}
 
   get isConfigured(): boolean {
@@ -79,16 +81,36 @@ export class IntegrationsService {
 
   // `email` is only used by the Desync (Gabriel CRM) source, which resolves the
   // user's workspace by email rather than an OAuth account.
-  status(tenant: string, plugin: string, email?: string) {
+  async status(tenant: string, plugin: string, email?: string, userId?: string) {
+    // Slack is a Composio-backed copilot integration (per-user, keyed by the
+    // Twenty user id), not a Corsair sync source.
+    if (plugin === 'slack') {
+      const connected = userId
+        ? await this.composioService.isSlackConnected(userId)
+        : false;
+
+      return { plugin: 'slack', connected };
+    }
     const emailQs =
       plugin === 'desync' && email ? `&email=${encodeURIComponent(email)}` : '';
+
     return this.call<{ plugin: string; connected: boolean }>(
       'GET',
       `/integrations/${encodeURIComponent(plugin)}/status?userId=${encodeURIComponent(tenant)}${emailQs}`,
     );
   }
 
-  connect(tenant: string, plugin: string, email?: string) {
+  async connect(tenant: string, plugin: string, email?: string, userId?: string) {
+    // Slack connects via Composio's hosted OAuth, keyed by the Twenty user id
+    // (the same id the copilot's ComposioToolProvider executes against).
+    if (plugin === 'slack') {
+      if (!userId) {
+        throw new BadRequestException('No user in session for Slack connect');
+      }
+
+      return this.composioService.getSlackConnectUrl(userId);
+    }
+
     return this.call<{ connectUrl: string | null; connected?: boolean; expiresAt: string | null }>(
       'POST',
       `/integrations/${encodeURIComponent(plugin)}/connect`,

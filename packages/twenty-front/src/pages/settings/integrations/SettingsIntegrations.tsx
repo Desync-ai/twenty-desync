@@ -25,6 +25,9 @@ type IntegrationDef = {
   name: string;
   connectedBlurb: string;
   disconnectedBlurb: string;
+  // Copilot-tool integrations (e.g. Slack via Composio) are used by the AI
+  // assistant rather than synced, so they show no "Sync now" action.
+  agentTool?: boolean;
 };
 
 const INTEGRATIONS: IntegrationDef[] = [
@@ -45,6 +48,13 @@ const INTEGRATIONS: IntegrationDef[] = [
     name: 'Desync Leads',
     connectedBlurb: 'Import your leads from the Desync platform',
     disconnectedBlurb: 'No Desync workspace found for your account',
+  },
+  {
+    plugin: 'slack',
+    name: 'Slack',
+    connectedBlurb: 'Available to your AI assistant — post, search & read messages',
+    disconnectedBlurb: 'Connect so the AI assistant can post & read Slack for you',
+    agentTool: true,
   },
 ];
 
@@ -230,15 +240,17 @@ const IntegrationCard = ({ integration }: { integration: IntegrationDef }) => {
           </StyledLeft>
           <StyledActions>
             {connected ? (
-              <Button
-                variant="solid"
-                color="accent"
-                startIcon={<IconRefresh size={16} />}
-                onClick={handleSync}
-                loading={isSyncing}
-              >
-                {t`Sync now`}
-              </Button>
+              integration.agentTool ? null : (
+                <Button
+                  variant="solid"
+                  color="accent"
+                  startIcon={<IconRefresh size={16} />}
+                  onClick={handleSync}
+                  loading={isSyncing}
+                >
+                  {t`Sync now`}
+                </Button>
+              )
             ) : (
               <Button
                 variant="solid"
