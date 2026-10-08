@@ -88,6 +88,16 @@ const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'granola_mcp',
+    name: 'Granola',
+    kind: 'connect',
+    tags: ['Productivity'],
+    logoDomain: 'granola.ai',
+    agentTool: true,
+    blurb: 'Let the AI assistant read your meeting notes & transcripts',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'claude',
     name: 'Claude',
     kind: 'mcp',

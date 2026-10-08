@@ -10,9 +10,17 @@ import { Injectable, Logger } from '@nestjs/common';
 //
 // Config (env on the server/worker — fork convention, NOT config-variables.ts):
 //   COMPOSIO_API_KEY                   platform API key (ak_...), used as x-api-key
-//   COMPOSIO_SLACK_AUTH_CONFIG_ID      managed-OAuth auth config for Slack (ac_...)
-//   COMPOSIO_AIRTABLE_AUTH_CONFIG_ID   managed-OAuth auth config for Airtable (ac_...)
-//   FRONTEND_URL / SERVER_URL          used to build the post-OAuth return URL
+//   COMPOSIO_SLACK_AUTH_CONFIG_ID         managed-OAuth auth config for Slack (ac_...)
+//   COMPOSIO_AIRTABLE_AUTH_CONFIG_ID      managed-OAuth auth config for Airtable (ac_...)
+//   COMPOSIO_GRANOLA_MCP_AUTH_CONFIG_ID   DCR-OAuth auth config for Granola (ac_...)
+//   COMPOSIO_GRANOLA_MCP_SERVER_URL       Composio MCP server URL for Granola (.../mcp)
+//   FRONTEND_URL / SERVER_URL             used to build the post-OAuth return URL
+//
+// Most toolkits are plain REST tools (POST /tools/execute/<slug>). "MCP" toolkits
+// (e.g. Granola) instead proxy an upstream MCP server: their tools are NOT in
+// Composio's REST tool catalog, so they are discovered and executed over MCP
+// JSON-RPC at the toolkit's `mcpServerUrl` (see mcpRequest). Connect/status are
+// identical to REST toolkits (a Composio connected account keyed by user id).
 const COMPOSIO_BASE_URL = 'https://backend.composio.dev/api/v3';
 
 export type ComposioTool = { slug: string; description: string };
@@ -21,7 +29,10 @@ export type ComposioToolkit = {
   slug: string; // Composio toolkit slug (= connected_accounts toolkit.slug)
   label: string;
   authConfigId: string; // managed-OAuth auth config (ac_...)
-  tools: ComposioTool[];
+  tools: ComposioTool[]; // curated REST tools; empty for MCP toolkits (discovered)
+  // When set, this toolkit is an MCP proxy: its tools are listed/executed over
+  // MCP JSON-RPC at this URL instead of Composio's REST /tools/execute path.
+  mcpServerUrl?: string;
 };
 
 // Curated Slack tools exposed to the copilot (slug -> short description). Kept
@@ -141,11 +152,24 @@ export class ComposioService {
         authConfigId: process.env.COMPOSIO_AIRTABLE_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_AIRTABLE_TOOLS,
       },
+      {
+        // Granola is an MCP toolkit: tools come from its MCP server, not REST.
+        slug: 'granola_mcp',
+        label: 'Granola',
+        authConfigId: process.env.COMPOSIO_GRANOLA_MCP_AUTH_CONFIG_ID ?? '',
+        tools: [],
+        mcpServerUrl: process.env.COMPOSIO_GRANOLA_MCP_SERVER_URL ?? '',
+      },
     ];
     const map: Record<string, ComposioToolkit> = {};
 
     for (const def of defs) {
-      if (def.authConfigId) {
+      // Every toolkit needs an auth config to connect; an MCP toolkit also needs
+      // its server URL to list/run tools — without it, leave the toolkit off.
+      const isMcp = def.mcpServerUrl !== undefined;
+      const enabled = Boolean(def.authConfigId) && (!isMcp || Boolean(def.mcpServerUrl));
+
+      if (enabled) {
         map[def.slug] = def;
       }
     }
@@ -155,6 +179,12 @@ export class ComposioService {
 
   // Lazily-fetched, process-lifetime cache of tool JSON schemas.
   private schemaCache: Record<string, object> | null = null;
+  // Process-lifetime cache of each MCP toolkit's tools (static), keyed by toolkit
+  // slug — so the MCP tools/list runs once per process, not per chat turn.
+  private readonly mcpToolsCache = new Map<
+    string,
+    { tools: ComposioTool[]; schemas: Record<string, object> }
+  >();
   // Short-lived per-user cache of the connected toolkit slugs, so the copilot
   // doesn't hit Composio on every single chat turn.
   private readonly statusCache = new Map<
@@ -313,7 +343,8 @@ export class ComposioService {
     }
   }
 
-  // Curated tool descriptors for the user's CONNECTED toolkits only.
+  // Curated tool descriptors for the user's CONNECTED toolkits only. MCP toolkits
+  // contribute the tools their MCP server advertises (cached, static schemas).
   async getToolsForUser(userId: string): Promise<ComposioTool[]> {
     const connected = await this.getConnectedToolkits(userId);
     const out: ComposioTool[] = [];
@@ -321,7 +352,21 @@ export class ComposioService {
     for (const slug of connected) {
       const toolkit = this.toolkits[slug];
 
-      if (toolkit) {
+      if (!toolkit) {
+        continue;
+      }
+
+      if (toolkit.mcpServerUrl) {
+        try {
+          const { tools } = await this.getMcpToolkitTools(toolkit, userId);
+
+          out.push(...tools);
+        } catch (error) {
+          this.logger.warn(
+            `Composio MCP tools/list failed for ${slug}: ${(error as Error).message}`,
+          );
+        }
+      } else {
         out.push(...toolkit.tools);
       }
     }
@@ -329,41 +374,64 @@ export class ComposioService {
     return out;
   }
 
-  // JSON schema for every curated tool across enabled toolkits, fetched once.
+  // JSON schema for every tool across enabled toolkits, fetched once. REST
+  // toolkits resolve via a bulk /tools query; MCP toolkits via their tools/list.
   async getToolSchemas(): Promise<Record<string, object>> {
     if (this.schemaCache) {
       return this.schemaCache;
     }
-    const slugs = this.enabledToolkits.flatMap((toolkit) =>
-      toolkit.tools.map((tool) => tool.slug),
-    );
     const map: Record<string, object> = {};
+    let ok = true;
 
-    if (slugs.length === 0) {
-      return map;
-    }
+    const restSlugs = this.enabledToolkits
+      .filter((toolkit) => !toolkit.mcpServerUrl)
+      .flatMap((toolkit) => toolkit.tools.map((tool) => tool.slug));
 
-    try {
-      const res = await this.request<{
-        items?: { slug: string; input_parameters?: object }[];
-      }>('GET', `/tools?tool_slugs=${encodeURIComponent(slugs.join(','))}&limit=200`);
+    if (restSlugs.length > 0) {
+      try {
+        const res = await this.request<{
+          items?: { slug: string; input_parameters?: object }[];
+        }>(
+          'GET',
+          `/tools?tool_slugs=${encodeURIComponent(restSlugs.join(','))}&limit=200`,
+        );
 
-      for (const item of res.items ?? []) {
-        if (item.slug && item.input_parameters) {
-          map[item.slug] = item.input_parameters;
+        for (const item of res.items ?? []) {
+          if (item.slug && item.input_parameters) {
+            map[item.slug] = item.input_parameters;
+          }
         }
+      } catch (error) {
+        ok = false;
+        this.logger.warn(
+          `Composio tool-schema fetch failed: ${(error as Error).message}`,
+        );
       }
-      this.schemaCache = map;
-    } catch (error) {
-      // Don't cache a failure — retry on the next request.
-      this.logger.warn(
-        `Composio tool-schema fetch failed: ${(error as Error).message}`,
-      );
-
-      return map;
     }
 
-    return this.schemaCache;
+    for (const toolkit of this.enabledToolkits) {
+      if (!toolkit.mcpServerUrl) {
+        continue;
+      }
+
+      try {
+        const { schemas } = await this.getMcpToolkitTools(toolkit, 'schema');
+
+        Object.assign(map, schemas);
+      } catch (error) {
+        ok = false;
+        this.logger.warn(
+          `Composio MCP schema fetch failed for ${toolkit.slug}: ${(error as Error).message}`,
+        );
+      }
+    }
+
+    // Only cache a fully-successful fetch, so a transient failure is retried.
+    if (ok) {
+      this.schemaCache = map;
+    }
+
+    return map;
   }
 
   // Execute any Composio tool by slug, scoped to the user (Composio routes by
@@ -375,6 +443,14 @@ export class ComposioService {
   ): Promise<{ ok: boolean; data?: unknown; error?: string }> {
     if (!this.apiKey) {
       return { ok: false, error: 'Composio is not configured' };
+    }
+
+    // MCP toolkits (e.g. Granola) aren't in the REST execute path — route their
+    // slugs to the MCP server instead.
+    const mcpToolkit = this.mcpToolkitForSlug(toolSlug);
+
+    if (mcpToolkit) {
+      return this.executeMcp(mcpToolkit, userId, toolSlug, args);
     }
 
     try {
@@ -398,6 +474,174 @@ export class ComposioService {
       }
 
       return { ok: true, data: res.data ?? res };
+    } catch (error) {
+      return { ok: false, error: (error as Error).message };
+    }
+  }
+
+  // ---- MCP-toolkit support (e.g. Granola) -----------------------------------
+  // Some Composio toolkits proxy an upstream MCP server and are absent from the
+  // REST tool catalog. Their tools are listed/called over MCP JSON-RPC at the
+  // toolkit's `mcpServerUrl`. Composio's MCP server is stateless (no initialize
+  // or session needed) and answers as SSE, so one POST per call is enough.
+
+  private mcpToolkitForSlug(toolSlug: string): ComposioToolkit | undefined {
+    return this.enabledToolkits.find(
+      (toolkit) =>
+        Boolean(toolkit.mcpServerUrl) &&
+        toolSlug.startsWith(`${toolkit.slug.toUpperCase()}_`),
+    );
+  }
+
+  private async mcpRequest(
+    serverUrl: string,
+    userId: string,
+    method: string,
+    params: Record<string, unknown>,
+  ): Promise<{ result?: any; error?: any }> {
+    const sep = serverUrl.includes('?') ? '&' : '?';
+    const url = `${serverUrl}${sep}user_id=${encodeURIComponent(userId)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'x-api-key': this.apiKey,
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+    });
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(
+        `Composio MCP ${method} -> ${res.status} ${text.slice(0, 160)}`,
+      );
+    }
+
+    return this.parseMcpBody(text);
+  }
+
+  // Composio's MCP server replies with SSE frames ("data: {json}"); return the
+  // JSON-RPC message carrying the result/error.
+  private parseMcpBody(text: string): { result?: any; error?: any } {
+    const frames: { result?: any; error?: any }[] = [];
+
+    for (const line of text.split('\n')) {
+      const trimmed = line.trim();
+
+      if (!trimmed.startsWith('data:')) {
+        continue;
+      }
+
+      try {
+        frames.push(JSON.parse(trimmed.slice(5).trim()));
+      } catch {
+        // skip keepalive / non-JSON frames
+      }
+    }
+
+    if (frames.length === 0) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        return {};
+      }
+    }
+
+    return (
+      frames.find(
+        (frame) =>
+          frame && (frame.result !== undefined || frame.error !== undefined),
+      ) ?? frames[frames.length - 1]
+    );
+  }
+
+  private async getMcpToolkitTools(
+    toolkit: ComposioToolkit,
+    userId: string,
+  ): Promise<{ tools: ComposioTool[]; schemas: Record<string, object> }> {
+    const cached = this.mcpToolsCache.get(toolkit.slug);
+
+    if (cached) {
+      return cached;
+    }
+    // tools/list returns static schemas and needs no connection, so any user id
+    // resolves the same catalog.
+    const payload = await this.mcpRequest(
+      toolkit.mcpServerUrl as string,
+      userId,
+      'tools/list',
+      {},
+    );
+    const listed = (payload?.result?.tools ?? []) as {
+      name?: string;
+      description?: string;
+      inputSchema?: object;
+    }[];
+    const tools: ComposioTool[] = [];
+    const schemas: Record<string, object> = {};
+
+    for (const tool of listed) {
+      if (!tool?.name) {
+        continue;
+      }
+      tools.push({ slug: tool.name, description: tool.description ?? '' });
+
+      if (tool.inputSchema) {
+        schemas[tool.name] = tool.inputSchema;
+      }
+    }
+    const result = { tools, schemas };
+
+    // Only cache a non-empty catalog (a transient failure returns nothing).
+    if (tools.length > 0) {
+      this.mcpToolsCache.set(toolkit.slug, result);
+    }
+
+    return result;
+  }
+
+  private async executeMcp(
+    toolkit: ComposioToolkit,
+    userId: string,
+    toolSlug: string,
+    args: Record<string, unknown>,
+  ): Promise<{ ok: boolean; data?: unknown; error?: string }> {
+    try {
+      const payload = await this.mcpRequest(
+        toolkit.mcpServerUrl as string,
+        userId,
+        'tools/call',
+        { name: toolSlug, arguments: args ?? {} },
+      );
+
+      if (payload?.error) {
+        return {
+          ok: false,
+          error:
+            typeof payload.error === 'string'
+              ? payload.error
+              : JSON.stringify(payload.error),
+        };
+      }
+      const result = (payload?.result ?? {}) as {
+        content?: { type?: string; text?: string }[];
+        structuredContent?: unknown;
+        isError?: boolean;
+      };
+      const text = (result.content ?? [])
+        .filter((block) => block?.type === 'text' && Boolean(block.text))
+        .map((block) => block.text)
+        .join('\n');
+
+      if (result.isError) {
+        return { ok: false, error: text || 'Granola tool returned an error' };
+      }
+
+      return {
+        ok: true,
+        data: result.structuredContent ?? (text ? { text } : result),
+      };
     } catch (error) {
       return { ok: false, error: (error as Error).message };
     }
