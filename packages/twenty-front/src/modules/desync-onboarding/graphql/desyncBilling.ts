@@ -209,3 +209,20 @@ export const DESYNC_GET_ROLES = gql`
     }
   }
 `;
+
+// Onboarding: scrape + analyze the user's website to pre-fill the questionnaire.
+// Fail-silent on the server (ok=false on any failure) — the UI treats a non-ok /
+// errored result as "no prefill" and leaves the form blank.
+export const ANALYZE_WEBSITE_MUTATION = gql`
+  mutation AnalyzeWebsite($website: String!) {
+    analyzeWebsite(website: $website) {
+      ok
+      company
+      product
+      who
+      businessType
+      outreach
+      tags
+    }
+  }
+`;

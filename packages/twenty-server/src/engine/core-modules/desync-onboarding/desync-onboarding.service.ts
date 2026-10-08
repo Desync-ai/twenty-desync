@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+import { type DesyncWebsiteAnalysis } from './dtos/desync-billing.dto';
+
 /**
  * Desync: proxy the signup questionnaire to the private Twenty backend, which
  * writes it to the shared lead-gen `user_data.onboarding_*` (the columns the
@@ -102,6 +104,75 @@ export class DesyncOnboardingService {
     const data = (await response.json()) as { success?: boolean };
 
     return data.success === true;
+  }
+
+  /**
+   * Best-effort website → structured prefill for the questionnaire. FAILS SILENT:
+   * returns an empty (ok=false) result on any error, timeout, or unset backend, so
+   * the form just stays blank and onboarding is never blocked. Uses a longer
+   * timeout than the other calls because the backend crawls pages + runs an LLM.
+   */
+  async analyzeWebsite(website: string): Promise<DesyncWebsiteAnalysis> {
+    const empty: DesyncWebsiteAnalysis = {
+      ok: false,
+      company: '',
+      product: '',
+      who: '',
+      businessType: '',
+      outreach: [],
+      tags: [],
+    };
+
+    if (!this.baseUrl || !website?.trim()) {
+      return empty;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      const response = await fetch(`${this.baseUrl}/analyze-website`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Service-Token': process.env.TWENTY_BACKEND_SERVICE_TOKEN ?? '',
+        },
+        body: JSON.stringify({ website }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        return empty;
+      }
+
+      const d = (await response.json()) as {
+        ok?: boolean;
+        company?: string;
+        product?: string;
+        who?: string;
+        business_type?: string;
+        outreach?: string[];
+        tags?: string[];
+      };
+
+      return {
+        ok: d.ok === true,
+        company: d.company ?? '',
+        product: d.product ?? '',
+        who: d.who ?? '',
+        businessType: d.business_type ?? '',
+        outreach: Array.isArray(d.outreach) ? d.outreach : [],
+        tags: Array.isArray(d.tags) ? d.tags : [],
+      };
+    } catch (error) {
+      this.logger.warn(
+        `analyze-website failed (silent): ${(error as Error)?.message}`,
+      );
+
+      return empty;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   // --- Paid checkout (proxied to twenty-backend's Stripe endpoints) -----------

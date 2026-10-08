@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 import { useMutation } from '@apollo/client/react';
 import { styled } from '@linaria/react';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -12,13 +12,20 @@ import { StyledOnboardingStepTitle } from '@/onboarding/components/StyledOnboard
 import { ONBOARDING_CONTENT_BLOCK_WIDTH } from '@/onboarding/constants/OnboardingContentBlockWidth';
 import { TextInput } from '@/ui/input/components/TextInput';
 
-// Desync signup questionnaire. Rendered on the CENTRAL domain as a step in the
-// SignInUp flow (so the workspace nav hotkeys that stole the "g" key aren't
-// mounted). Submitted to the core-schema `saveDesyncOnboarding` mutation (served
-// at /metadata, the default Apollo client), which writes scraper_db
-// `user_data.onboarding_*` + the best customers (match_requests) and grants the
-// free Referral plan. The user must answer the 5 required questions AND add at
-// least one best customer before continuing.
+import { ANALYZE_WEBSITE_MUTATION } from '../graphql/desyncBilling';
+
+// Desync signup questionnaire — a 3-step wizard rendered on the CENTRAL domain as
+// a SignInUp step. Submitted to `saveDesyncOnboarding` (writes scraper_db
+// `user_data.onboarding_*` + the best customers as match_requests, grants the
+// free Referral plan).
+//
+// Step 1 (website + company): entering the website fires `analyzeWebsite`
+// (scrape + Claude) in the BACKGROUND; it keeps running while the user does
+// steps 2-3, so the details are pre-filled by the time they reach step 3 — it
+// feels instant. Step 2: best customers (the one thing we can't infer). Step 3:
+// the auto-filled details + tag chips, editable. FAIL-SILENT: a failed/slow scrape
+// just leaves step 3 blank for manual entry. Only company + website + >=1 customer
+// are required, so a failed scrape never blocks completion / workspace creation.
 const SAVE_DESYNC_ONBOARDING = gql`
   mutation SaveDesyncOnboarding($answers: JSON!) {
     saveDesyncOnboarding(answers: $answers)
@@ -34,6 +41,8 @@ const DEAL_SIZE_OPTIONS = [
   { value: '100k+', label: '$100k+' },
 ];
 
+const TOTAL_STEPS = 3;
+
 const StyledForm = styled.div`
   display: flex;
   flex-direction: column;
@@ -43,10 +52,63 @@ const StyledForm = styled.div`
   width: ${ONBOARDING_CONTENT_BLOCK_WIDTH}px;
 `;
 
+const StyledGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+`;
+
+const StyledStepIndicator = styled.div`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.xs};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+`;
+
 const StyledSectionLabel = styled.div`
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.sm};
   font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledHint = styled.div`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.xs};
+`;
+
+const StyledTagRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledTag = styled.span`
+  align-items: center;
+  background: ${themeCssVariables.background.tertiary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.primary};
+  display: inline-flex;
+  font-size: ${themeCssVariables.font.size.sm};
+  gap: ${themeCssVariables.spacing[1]};
+  padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+`;
+
+const StyledTagRemove = styled.button`
+  background: none;
+  border: none;
+  color: ${themeCssVariables.font.color.light};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.md};
+  line-height: 1;
+  padding: 0;
+`;
+
+const StyledAddTagRow = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledCustomerRow = styled.div`
@@ -93,13 +155,35 @@ const StyledRemoveButton = styled.button`
   padding: 0 ${themeCssVariables.spacing[1]};
 `;
 
-const StyledButtonContainer = styled.div`
+const StyledNav = styled.div`
+  align-items: center;
   display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
   max-width: 100%;
   width: ${ONBOARDING_CONTENT_BLOCK_WIDTH}px;
 `;
 
+const StyledBackButton = styled.button`
+  background: none;
+  border: none;
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: 0;
+`;
+
 type Customer = { id: number; website: string; contact: string; dealSize: string };
+
+type WebsiteAnalysis = {
+  ok: boolean;
+  company: string;
+  product: string;
+  who: string;
+  businessType: string;
+  outreach: string[];
+  tags: string[];
+};
 
 type Props = {
   onCompleted: () => void;
@@ -113,8 +197,13 @@ const emptyCustomer = (): Customer => ({
   dealSize: '',
 });
 
+// Crude "looks like a domain" test — enough to avoid firing on every keystroke.
+const looksLikeDomain = (value: string) => /\.[a-z]{2,}/i.test(value.trim());
+
 export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
   const { enqueueToast } = useToast();
+
+  const [step, setStep] = useState(1);
 
   const [company, setCompany] = useState('');
   const [website, setWebsite] = useState('');
@@ -122,11 +211,75 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
   const [who, setWho] = useState('');
   const [outreach, setOutreach] = useState('');
   const [businessType, setBusinessType] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([emptyCustomer()]);
+
+  const analyzedForRef = useRef('');
 
   const [saveDesyncOnboarding, { loading }] = useMutation(
     SAVE_DESYNC_ONBOARDING,
   );
+  const [analyzeWebsiteMutation] = useMutation(ANALYZE_WEBSITE_MUTATION);
+
+  // Background website analysis: pre-fill only EMPTY fields (never clobber the
+  // user's edits) + set tags. Fail-silent — any failure leaves fields blank.
+  const runAnalyze = useCallback(
+    (rawUrl: string) => {
+      const url = rawUrl.trim();
+
+      if (url === '' || url === analyzedForRef.current || !looksLikeDomain(url)) {
+        return;
+      }
+
+      analyzedForRef.current = url;
+      setAnalyzing(true);
+
+      void analyzeWebsiteMutation({ variables: { website: url } })
+        .then(({ data }) => {
+          const r = (data as { analyzeWebsite?: WebsiteAnalysis } | undefined)
+            ?.analyzeWebsite;
+
+          if (r?.ok !== true) {
+            return;
+          }
+
+          setCompany((v) => (v.trim() === '' ? r.company ?? '' : v));
+          setProduct((v) => (v.trim() === '' ? r.product ?? '' : v));
+          setWho((v) => (v.trim() === '' ? r.who ?? '' : v));
+          setBusinessType((v) => (v.trim() === '' ? r.businessType ?? '' : v));
+          setOutreach((v) =>
+            v.trim() === '' ? (r.outreach ?? []).join(', ') : v,
+          );
+          setTags((prev) => (prev.length === 0 ? r.tags ?? [] : prev));
+        })
+        .catch(() => {
+          // fail-silent — leave fields blank for manual entry
+        })
+        .finally(() => setAnalyzing(false));
+    },
+    [analyzeWebsiteMutation],
+  );
+
+  // Fire (debounced) as soon as the website looks complete, so the analysis is
+  // usually done by the time the user reaches step 3.
+  useEffect(() => {
+    const handle = setTimeout(() => runAnalyze(website), 800);
+
+    return () => clearTimeout(handle);
+  }, [website, runAnalyze]);
+
+  const addTag = () => {
+    const tag = newTag.trim();
+    if (tag !== '' && !tags.includes(tag)) {
+      setTags((prev) => [...prev, tag]);
+    }
+    setNewTag('');
+  };
+
+  const removeTag = (tag: string) =>
+    setTags((prev) => prev.filter((t) => t !== tag));
 
   const updateCustomer = (id: number, patch: Partial<Customer>) =>
     setCustomers((rows) =>
@@ -140,21 +293,23 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
       rows.length > 1 ? rows.filter((row) => row.id !== id) : rows,
     );
 
-  const customersWithWebsite = customers.filter(
-    (c) => c.website.trim() !== '',
-  );
+  const customersWithWebsite = customers.filter((c) => c.website.trim() !== '');
 
-  // The 5 required answers + at least one best customer (a row with a website).
-  const isValid =
-    company.trim() !== '' &&
-    website.trim() !== '' &&
-    product.trim() !== '' &&
-    who.trim() !== '' &&
-    outreach.trim() !== '' &&
-    customersWithWebsite.length >= 1;
+  const step1Valid = company.trim() !== '' && website.trim() !== '';
+  const step2Valid = customersWithWebsite.length >= 1;
+
+  const goNext = () => {
+    // Make sure the analysis is running before we leave step 1.
+    if (step === 1) {
+      runAnalyze(website);
+    }
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  };
+
+  const goBack = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = async () => {
-    if (!isValid || loading) {
+    if (!step1Valid || !step2Valid || loading) {
       return;
     }
 
@@ -168,6 +323,7 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
             who,
             outreach,
             business_type: businessType,
+            tags,
             customers: customersWithWebsite.map((c) => ({
               website: c.website.trim(),
               contact: c.contact.trim(),
@@ -193,120 +349,206 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
     }
   };
 
+  const stepMeta = [
+    {
+      title: 'Tell us about your business',
+      subtitle: "Start with your website — we'll fill in the rest.",
+    },
+    {
+      title: 'Your best customers',
+      subtitle: 'Add a customer or two so we can find more like them.',
+    },
+    {
+      title: "Here's what we found",
+      subtitle: 'Pulled from your site — tweak anything, then continue.',
+    },
+  ][step - 1];
+
   return (
     <>
       <StyledOnboardingStepHeading>
-        <StyledOnboardingStepTitle>
-          Tell us about your business
-        </StyledOnboardingStepTitle>
+        <StyledStepIndicator>
+          Step {step} of {TOTAL_STEPS}
+        </StyledStepIndicator>
+        <StyledOnboardingStepTitle>{stepMeta.title}</StyledOnboardingStepTitle>
         <StyledOnboardingStepSubtitle>
-          A few quick questions so we can find the right leads for you.
+          {stepMeta.subtitle}
         </StyledOnboardingStepSubtitle>
       </StyledOnboardingStepHeading>
 
       <StyledForm>
-        <TextInput
-          label="What's your company?"
-          value={company}
-          onChange={setCompany}
-          placeholder="Acme Inc."
-          fullWidth
-          autoFocus
-        />
-        <TextInput
-          label="Company website"
-          value={website}
-          onChange={setWebsite}
-          placeholder="https://acme.com"
-          fullWidth
-        />
-        <TextInput
-          label="What do you sell?"
-          value={product}
-          onChange={setProduct}
-          placeholder="Product or service"
-          fullWidth
-        />
-        <TextInput
-          label="Who are your ideal customers?"
-          value={who}
-          onChange={setWho}
-          placeholder="e.g. mid-size Catholic parishes"
-          fullWidth
-        />
-        <TextInput
-          label="How do you do outreach today?"
-          value={outreach}
-          onChange={setOutreach}
-          placeholder="e.g. email, LinkedIn, cold calls"
-          fullWidth
-        />
-        <TextInput
-          label="What type of business are you? (optional)"
-          value={businessType}
-          onChange={setBusinessType}
-          placeholder="e.g. B2B SaaS, agency, nonprofit"
-          fullWidth
-        />
+        {step === 1 && (
+          <>
+            <StyledGroup>
+              <TextInput
+                label="Your website"
+                value={website}
+                onChange={setWebsite}
+                placeholder="https://acme.com"
+                fullWidth
+                autoFocus
+              />
+              {analyzing && (
+                <StyledHint>Reading your site in the background…</StyledHint>
+              )}
+            </StyledGroup>
+            <TextInput
+              label="Company"
+              value={company}
+              onChange={setCompany}
+              placeholder="Acme Inc."
+              fullWidth
+            />
+          </>
+        )}
 
-        <StyledSectionLabel>
-          Your best customers (add at least one)
-        </StyledSectionLabel>
-        {customers.map((c) => (
-          <StyledCustomerRow key={c.id}>
-            <StyledCustomerFields>
-              <TextInput
-                label=""
-                value={c.website}
-                onChange={(value) => updateCustomer(c.id, { website: value })}
-                placeholder="Customer website (required)"
-                fullWidth
-              />
-              <TextInput
-                label=""
-                value={c.contact}
-                onChange={(value) => updateCustomer(c.id, { contact: value })}
-                placeholder="Contact name (optional)"
-                fullWidth
-              />
-              <StyledDealSelect
-                value={c.dealSize}
-                onChange={(event) =>
-                  updateCustomer(c.id, { dealSize: event.target.value })
-                }
-              >
-                {DEAL_SIZE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </StyledDealSelect>
-            </StyledCustomerFields>
-            {customers.length > 1 && (
-              <StyledRemoveButton
-                type="button"
-                aria-label="Remove customer"
-                onClick={() => removeCustomer(c.id)}
-              >
-                ×
-              </StyledRemoveButton>
+        {step === 2 && (
+          <StyledGroup>
+            <StyledSectionLabel>
+              Your best customers (add at least one)
+            </StyledSectionLabel>
+            {customers.map((c) => (
+              <StyledCustomerRow key={c.id}>
+                <StyledCustomerFields>
+                  <TextInput
+                    label=""
+                    value={c.website}
+                    onChange={(value) => updateCustomer(c.id, { website: value })}
+                    placeholder="Customer website (required)"
+                    fullWidth
+                  />
+                  <TextInput
+                    label=""
+                    value={c.contact}
+                    onChange={(value) => updateCustomer(c.id, { contact: value })}
+                    placeholder="Contact name (optional)"
+                    fullWidth
+                  />
+                  <StyledDealSelect
+                    value={c.dealSize}
+                    onChange={(event) =>
+                      updateCustomer(c.id, { dealSize: event.target.value })
+                    }
+                  >
+                    {DEAL_SIZE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </StyledDealSelect>
+                </StyledCustomerFields>
+                {customers.length > 1 && (
+                  <StyledRemoveButton
+                    type="button"
+                    aria-label="Remove customer"
+                    onClick={() => removeCustomer(c.id)}
+                  >
+                    ×
+                  </StyledRemoveButton>
+                )}
+              </StyledCustomerRow>
+            ))}
+            <StyledLinkButton type="button" onClick={addCustomer}>
+              + Add another customer
+            </StyledLinkButton>
+          </StyledGroup>
+        )}
+
+        {step === 3 && (
+          <>
+            {analyzing && (
+              <StyledHint>Still reading your site — filling this in…</StyledHint>
             )}
-          </StyledCustomerRow>
-        ))}
-        <StyledLinkButton type="button" onClick={addCustomer}>
-          + Add another customer
-        </StyledLinkButton>
+            <StyledGroup>
+              <StyledSectionLabel>Tags</StyledSectionLabel>
+              {tags.length > 0 && (
+                <StyledTagRow>
+                  {tags.map((tag) => (
+                    <StyledTag key={tag}>
+                      {tag}
+                      <StyledTagRemove
+                        type="button"
+                        aria-label={`Remove ${tag}`}
+                        onClick={() => removeTag(tag)}
+                      >
+                        ×
+                      </StyledTagRemove>
+                    </StyledTag>
+                  ))}
+                </StyledTagRow>
+              )}
+              <StyledAddTagRow>
+                <TextInput
+                  label=""
+                  value={newTag}
+                  onChange={setNewTag}
+                  placeholder="Add a tag"
+                  fullWidth
+                />
+                <StyledLinkButton type="button" onClick={addTag}>
+                  + Add
+                </StyledLinkButton>
+              </StyledAddTagRow>
+            </StyledGroup>
+
+            <StyledGroup>
+              <TextInput
+                label="What do you sell?"
+                value={product}
+                onChange={setProduct}
+                placeholder="Product or service"
+                fullWidth
+              />
+              <TextInput
+                label="Who are your ideal customers?"
+                value={who}
+                onChange={setWho}
+                placeholder="e.g. mid-size Catholic parishes"
+                fullWidth
+              />
+              <TextInput
+                label="How do you do outreach today?"
+                value={outreach}
+                onChange={setOutreach}
+                placeholder="e.g. email, LinkedIn, cold calls"
+                fullWidth
+              />
+              <TextInput
+                label="What type of business are you?"
+                value={businessType}
+                onChange={setBusinessType}
+                placeholder="e.g. B2B SaaS, agency, nonprofit"
+                fullWidth
+              />
+            </StyledGroup>
+          </>
+        )}
       </StyledForm>
 
-      <StyledButtonContainer>
-        <MainButton
-          onClick={handleSubmit}
-          disabled={!isValid || loading}
-          fullWidth
-        >
-          Continue
-        </MainButton>
-      </StyledButtonContainer>
+      <StyledNav>
+        {step < TOTAL_STEPS ? (
+          <MainButton
+            onClick={goNext}
+            disabled={(step === 1 && !step1Valid) || (step === 2 && !step2Valid)}
+            fullWidth
+          >
+            Next
+          </MainButton>
+        ) : (
+          <MainButton
+            onClick={handleSubmit}
+            disabled={!step1Valid || !step2Valid || loading}
+            fullWidth
+          >
+            Continue
+          </MainButton>
+        )}
+        {step > 1 && (
+          <StyledBackButton type="button" onClick={goBack}>
+            ← Back
+          </StyledBackButton>
+        )}
+      </StyledNav>
     </>
   );
 };
