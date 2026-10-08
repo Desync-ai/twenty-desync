@@ -196,13 +196,17 @@ export const COMPOSIO_MICROSOFT_TEAMS_TOOLS: ComposioTool[] = [
   { slug: 'MICROSOFT_TEAMS_CREATE_MEETING', description: 'Create a Teams online meeting (subject, start/end).' },
 ];
 
-// Curated Google Drive tools — find and read files.
+// Curated Google Drive tools — find/read files + create files/folders & upload.
+// (Delete and external-sharing are intentionally left out.)
 export const COMPOSIO_GOOGLEDRIVE_TOOLS: ComposioTool[] = [
   { slug: 'GOOGLEDRIVE_FIND_FILE', description: "Find files in the user's Drive by name or query." },
   { slug: 'GOOGLEDRIVE_LIST_FILES', description: 'List files/folders in Drive, optionally filtered.' },
   { slug: 'GOOGLEDRIVE_FIND_FOLDER', description: 'Find folders by name or query.' },
   { slug: 'GOOGLEDRIVE_GET_FILE_METADATA', description: "Get a file's metadata (name, type, owners, links)." },
   { slug: 'GOOGLEDRIVE_PARSE_FILE', description: 'Extract the text content of a Drive file (docs/pdf) so the assistant can read it.' },
+  { slug: 'GOOGLEDRIVE_CREATE_FILE_FROM_TEXT', description: 'Create a new Drive file (e.g. a doc) from text content, optionally in a folder.' },
+  { slug: 'GOOGLEDRIVE_CREATE_FOLDER', description: 'Create a folder in Drive, optionally within a parent folder.' },
+  { slug: 'GOOGLEDRIVE_UPLOAD_FILE', description: 'Upload a file (max 5MB) to Drive, optionally into a folder.' },
 ];
 
 // Curated Google Sheets tools — find sheets, read values, append rows.
