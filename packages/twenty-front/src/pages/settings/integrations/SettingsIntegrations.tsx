@@ -181,7 +181,8 @@ const StyledStatus = styled.span`
 
 const StyledCardActions = styled.div`
   display: flex;
-  justify-content: flex-end;
+  gap: ${themeCssVariables.spacing[2]};
+  justify-content: flex-start;
   margin-top: ${themeCssVariables.spacing[1]};
 `;
 
@@ -334,13 +335,6 @@ const ConnectIntegrationCard = ({
     }
   }, [plugin, name, enqueueToast, t]);
 
-  const statusLabel =
-    connected === null
-      ? t`Checking…`
-      : connected
-        ? t`Connected`
-        : t`Not connected`;
-
   return (
     <Card rounded>
       <CardContent>
@@ -354,20 +348,33 @@ const ConnectIntegrationCard = ({
           <StyledBlurb>
             {connected ? integration.connectedBlurb ?? integration.blurb : integration.blurb}
           </StyledBlurb>
-          <StyledStatus>{isSyncing && progress ? progress : statusLabel}</StyledStatus>
+          {isSyncing && progress ? <StyledStatus>{progress}</StyledStatus> : null}
           <StyledCardActions>
-            {connected ? (
-              integration.agentTool ? null : (
+            {connected === null ? (
+              <Button variant="outline" disabled>
+                {t`Checking…`}
+              </Button>
+            ) : connected ? (
+              <>
                 <Button
-                  variant="solid"
-                  color="accent"
-                  startIcon={<IconRefresh size={16} />}
-                  onClick={handleSync}
-                  loading={isSyncing}
+                  variant="outline"
+                  disabled
+                  startIcon={<IconCheck size={16} />}
                 >
-                  {t`Sync now`}
+                  {t`Connected`}
                 </Button>
-              )
+                {!integration.agentTool && (
+                  <Button
+                    variant="solid"
+                    color="accent"
+                    startIcon={<IconRefresh size={16} />}
+                    onClick={handleSync}
+                    loading={isSyncing}
+                  >
+                    {t`Sync`}
+                  </Button>
+                )}
+              </>
             ) : (
               <Button
                 variant="solid"
