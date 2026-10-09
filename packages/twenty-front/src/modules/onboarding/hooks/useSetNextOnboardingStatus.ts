@@ -57,12 +57,11 @@ const getNextOnboardingStatus = ({
   }
 
   if (currentUser?.onboardingStatus === OnboardingStatus.SYNC_EMAIL) {
-    if (currentWorkspace?.workspaceMembersCount === 1) {
-      return OnboardingStatus.APPS_INSTALLATION;
-    }
+    // Apps-installation step removed from onboarding — go straight to profile.
     return OnboardingStatus.PROFILE_CREATION;
   }
 
+  // Safety: if a stored status is ever APPS_INSTALLATION, advance past it.
   if (currentUser?.onboardingStatus === OnboardingStatus.APPS_INSTALLATION) {
     return OnboardingStatus.PROFILE_CREATION;
   }
