@@ -146,9 +146,6 @@ export class OnboardingService {
       userVars.get(OnboardingStepKeys.ONBOARDING_CONNECT_ACCOUNT_PENDING) ===
       true;
 
-    const isInviteTeamPending =
-      userVars.get(OnboardingStepKeys.ONBOARDING_INVITE_TEAM_PENDING) === true;
-
     const isBookCallPending =
       userVars.get(OnboardingStepKeys.ONBOARDING_BOOK_CALL_PENDING) === true;
 
@@ -163,9 +160,8 @@ export class OnboardingService {
       return OnboardingStatus.PROFILE_CREATION;
     }
 
-    if (isInviteTeamPending) {
-      return OnboardingStatus.INVITE_TEAM;
-    }
+    // Invite-team onboarding step removed: users are no longer asked to invite
+    // teammates during onboarding. They can still invite from Settings later.
 
     const isPlanRequired =
       await this.billingService.isSubscriptionIncompleteOnboardingStatus(

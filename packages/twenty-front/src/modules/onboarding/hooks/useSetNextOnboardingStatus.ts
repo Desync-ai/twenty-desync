@@ -67,11 +67,10 @@ const getNextOnboardingStatus = ({
   }
 
   if (currentUser?.onboardingStatus === OnboardingStatus.PROFILE_CREATION) {
-    if (currentWorkspace?.workspaceMembersCount === 1) {
-      return OnboardingStatus.INVITE_TEAM;
-    }
+    // Invite-team step removed from onboarding — skip straight past it.
     return statusAfterInviteTeam;
   }
+  // Safety: if a stored status is ever INVITE_TEAM, advance past it.
   if (currentUser?.onboardingStatus === OnboardingStatus.INVITE_TEAM) {
     return statusAfterInviteTeam;
   }

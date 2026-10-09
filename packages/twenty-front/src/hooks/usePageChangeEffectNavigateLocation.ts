@@ -143,14 +143,7 @@ export const usePageChangeEffectNavigateLocation = () => {
     return AppPath.SyncEmails;
   }
 
-  // Apps-installation onboarding step removed — never route users to it.
-
-  if (
-    onboardingStatus === OnboardingStatus.INVITE_TEAM &&
-    !isMatchingLocation(location, AppPath.InviteTeam)
-  ) {
-    return AppPath.InviteTeam;
-  }
+  // Apps-installation and invite-team onboarding steps removed — never route to them.
 
   if (
     onboardingStatus === OnboardingStatus.BOOK_CALL &&
