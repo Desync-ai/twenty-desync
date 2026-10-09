@@ -3,15 +3,12 @@ import { DesyncQuestionnaire } from '@/desync-onboarding/components/DesyncQuesti
 import { useSignInUp } from '@/auth/sign-in-up/hooks/useSignInUp';
 import { useSignInUpForm } from '@/auth/sign-in-up/hooks/useSignInUpForm';
 import { isCreatingWorkspaceState } from '@/auth/states/isCreatingWorkspaceState';
-import { pendingWorkspaceLandingState } from '@/auth/states/pendingWorkspaceLandingState';
 import {
   SignInUpStep,
   signInUpStepState,
 } from '@/auth/states/signInUpStepState';
 import { workspacePublicDataState } from '@/auth/states/workspacePublicDataState';
-import { useRedirectToWorkspaceDomain } from '@/domain-manager/hooks/useRedirectToWorkspaceDomain';
 import { styled } from '@linaria/react';
-import { AppPath } from 'twenty-shared/types';
 
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
@@ -30,7 +27,7 @@ import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWork
 import { useGetPublicWorkspaceDataByDomain } from '@/domain-manager/hooks/useGetPublicWorkspaceDataByDomain';
 import { useIsCurrentLocationOnAWorkspace } from '@/domain-manager/hooks/useIsCurrentLocationOnAWorkspace';
 import { useIsCurrentLocationOnDefaultDomain } from '@/domain-manager/hooks/useIsCurrentLocationOnDefaultDomain';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { SignInUpGlobalScopeFormEffect } from '@/auth/sign-in-up/components/internal/SignInUpGlobalScopeFormEffect';
 import { SignInUpSsoExchangeTokenEffect } from '@/auth/sign-in-up/components/internal/SignInUpSsoExchangeTokenEffect';
@@ -84,44 +81,11 @@ export const SignInUp = () => {
   const { workspaceInviteHash, workspace: workspaceFromInviteHash } =
     useWorkspaceFromInviteHash();
 
+  // Desync: after the questionnaire, re-load the user and run the step machine.
+  // The questionnaire gate (in navigateAfterMultiWorkspaceSignInUp) now passes
+  // (onboarding complete), so the flow falls through to the workspace step
+  // (create for a new user; accept/choose for an invited one).
   const { clerkCentralLanding } = useAuth();
-  const { redirectToWorkspaceDomain } = useRedirectToWorkspaceDomain();
-  const pendingWorkspaceLanding = useAtomStateValue(
-    pendingWorkspaceLandingState,
-  );
-  const setPendingWorkspaceLanding = useSetAtomState(
-    pendingWorkspaceLandingState,
-  );
-
-  // Desync: what to do when the signup questionnaire finishes.
-  // - New-user path: the workspace was already created (before the
-  //   questionnaire) and is activating in the background; createWorkspace stashed
-  //   its subdomain URL + loginToken. Redirect straight into it — by now it's
-  //   usually ACTIVE, so there's little/no activation wait left.
-  // - Legacy/existing-user path (no stashed landing): re-run the step machine,
-  //   which now passes the onboarding gate and lands on the workspace choice.
-  const handleQuestionnaireCompleted = useCallback(async () => {
-    if (isDefined(pendingWorkspaceLanding)) {
-      const landing = pendingWorkspaceLanding;
-      setPendingWorkspaceLanding(null);
-
-      await redirectToWorkspaceDomain(
-        landing.workspaceUrl,
-        AppPath.Verify,
-        { loginToken: landing.loginToken },
-        '_self',
-      );
-
-      return;
-    }
-
-    await clerkCentralLanding();
-  }, [
-    pendingWorkspaceLanding,
-    setPendingWorkspaceLanding,
-    redirectToWorkspaceDomain,
-    clerkCentralLanding,
-  ]);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -199,7 +163,7 @@ export const SignInUp = () => {
     // isDefaultDomain/global-scope catch-all below so it actually renders on the
     // central domain (where the workspace nav hotkeys aren't mounted).
     if (signInUpStep === SignInUpStep.DesyncQuestionnaire) {
-      return <DesyncQuestionnaire onCompleted={handleQuestionnaireCompleted} />;
+      return <DesyncQuestionnaire onCompleted={clerkCentralLanding} />;
     }
 
     if (isDefaultDomain && isMultiWorkspaceEnabled) {
@@ -251,7 +215,7 @@ export const SignInUp = () => {
     getPublicWorkspaceDataLoading,
     signInUpStep,
     workspacePublicData,
-    handleQuestionnaireCompleted,
+    clerkCentralLanding,
   ]);
 
   return (

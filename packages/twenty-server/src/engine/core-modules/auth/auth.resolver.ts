@@ -1,5 +1,4 @@
 import { Logger, UseFilters, UseGuards, UsePipes } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
 import { Args, Context, Mutation, Query } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -47,7 +46,6 @@ import { ResetPasswordService } from 'src/engine/core-modules/auth/services/rese
 import { ThrottlerGraphqlApiExceptionFilter } from 'src/engine/core-modules/throttler/filters/throttler-graphql-api-exception.filter';
 import { ThrottlerService } from 'src/engine/core-modules/throttler/throttler.service';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
-import { WorkspaceService } from 'src/engine/core-modules/workspace/services/workspace.service';
 import { AccessTokenService } from 'src/engine/core-modules/auth/token/services/access-token.service';
 import { EmailVerificationTokenService } from 'src/engine/core-modules/auth/token/services/email-verification-token.service';
 import { LoginTokenService } from 'src/engine/core-modules/auth/token/services/login-token.service';
@@ -171,7 +169,6 @@ export class AuthResolver {
     private readonly fileCorePictureService: FileCorePictureService,
     private readonly userSessionService: UserSessionService,
     private readonly userSessionCookieService: UserSessionCookieService,
-    private readonly moduleRef: ModuleRef,
   ) {}
 
   @UseGuards(CaptchaGuard, PublicEndpointGuard, NoPermissionGuard)
@@ -619,30 +616,20 @@ export class AuthResolver {
 
     const fullUser = await this.userService.findUserByIdOrThrow(currentUser.id);
 
-    // Desync: entitlement gate for workspace creation. The signup flow now
-    // creates the workspace BEFORE the questionnaire (which grants the free
-    // Referral plan) so activation can run in the background while the user fills
-    // it out. So we must allow a brand-new user's FIRST workspace even though
-    // they're not entitled yet — the use-time paywall (DesyncEntitlementGate /
-    // myEntitlement) still blocks them from USING the CRM until the questionnaire
-    // grants Referral, so this is not a freeloading hole. ADDITIONAL workspaces
-    // still require entitlement (prevents a non-entitled user spamming creation).
+    // Desync: entitlement is enforced at workspace CREATION now (moved off the
+    // Clerk exchange so a new user can reach the questionnaire first). The
+    // questionnaire grants the Referral plan → entitled; a user who has not
+    // onboarded/subscribed is refused here.
     const entitled = await this.entitlementService.isEntitled(
       fullUser.email,
       fullUser.clerkId ?? '',
     );
 
     if (!entitled) {
-      const existingWorkspaceCount = await this.userWorkspaceRepository.count({
-        where: { userId: fullUser.id },
-      });
-
-      if (existingWorkspaceCount > 0) {
-        throw new AuthException(
-          'Complete onboarding before creating a workspace.',
-          AuthExceptionCode.FORBIDDEN_EXCEPTION,
-        );
-      }
+      throw new AuthException(
+        'Complete onboarding before creating a workspace.',
+        AuthExceptionCode.FORBIDDEN_EXCEPTION,
+      );
     }
 
     const { user, workspace } = await this.signInUpService.signUpOnNewWorkspace(
@@ -655,36 +642,6 @@ export class AuthResolver {
       workspace.id,
       authProvider,
     );
-
-    // Desync: kick the heavy workspace activation (schema + ~1k metadata rows)
-    // NOW, fire-and-forget, so it runs while the user fills the questionnaire
-    // instead of blocking them on a spinner once they land on the subdomain. The
-    // activateWorkspace lock is idempotent + has a concurrent-wait path, so the
-    // subdomain's activate-on-mount safely becomes a no-op / short wait. Resolved
-    // lazily via ModuleRef to avoid an Auth<->Workspace module DI cycle, and
-    // wrapped so a failure here can NEVER break signup — the on-mount activation
-    // (and stale-lock reclaim) remains the guaranteed fallback.
-    try {
-      const workspaceService = this.moduleRef.get(WorkspaceService, {
-        strict: false,
-      });
-
-      void workspaceService
-        .activateWorkspace(currentUser, workspace)
-        .catch((error: unknown) =>
-          this.logger.error(
-            `Background activateWorkspace failed for ${workspace.id}: ${
-              (error as Error)?.message
-            }`,
-          ),
-        );
-    } catch (error) {
-      this.logger.error(
-        `Could not kick background activateWorkspace for ${workspace.id}: ${
-          (error as Error)?.message
-        }`,
-      );
-    }
 
     return {
       loginToken,
