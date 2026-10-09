@@ -12,6 +12,7 @@ import { Injectable, Logger } from '@nestjs/common';
 //   COMPOSIO_API_KEY                   platform API key (ak_...), used as x-api-key
 //   COMPOSIO_SLACK_AUTH_CONFIG_ID         managed-OAuth auth config for Slack (ac_...)
 //   COMPOSIO_AIRTABLE_AUTH_CONFIG_ID      managed-OAuth auth config for Airtable (ac_...)
+//   COMPOSIO_GMAIL_AUTH_CONFIG_ID         managed-OAuth auth config for Gmail (ac_...)
 //   COMPOSIO_GRANOLA_MCP_AUTH_CONFIG_ID   DCR-OAuth auth config for Granola (ac_...)
 //   COMPOSIO_GRANOLA_MCP_SERVER_URL       Composio MCP server URL for Granola (.../mcp)
 //   FRONTEND_URL / SERVER_URL             used to build the post-OAuth return URL
@@ -110,6 +111,114 @@ export const COMPOSIO_AIRTABLE_TOOLS: ComposioTool[] = [
   },
 ];
 
+// Curated Gmail tools exposed to the copilot — READ-ONLY, so the assistant can
+// answer questions about the user's inbox without sending or modifying mail.
+export const COMPOSIO_GMAIL_TOOLS: ComposioTool[] = [
+  {
+    slug: 'GMAIL_FETCH_EMAILS',
+    description:
+      "Search/list the user's emails. Supports a Gmail search `query` (e.g. from:, subject:, newer_than:1d, is:unread, has:attachment) plus pagination. Use this to find or summarize emails.",
+  },
+  {
+    slug: 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID',
+    description: 'Fetch the full content of a single email by its message id.',
+  },
+  {
+    slug: 'GMAIL_FETCH_MESSAGE_BY_THREAD_ID',
+    description: 'Fetch all messages in an email thread by its thread id.',
+  },
+  {
+    slug: 'GMAIL_LIST_THREADS',
+    description:
+      'List email threads, optionally filtered by a Gmail search `query`.',
+  },
+  {
+    slug: 'GMAIL_LIST_LABELS',
+    description: "List the account's Gmail labels / folders.",
+  },
+  {
+    slug: 'GMAIL_GET_PROFILE',
+    description:
+      'Get the connected Gmail account profile (email address, message/thread totals).',
+  },
+];
+
+// Curated Outlook (Microsoft 365) tools — mail read/search + calendar. Email is
+// read-only; calendar create is allowed.
+export const COMPOSIO_OUTLOOK_TOOLS: ComposioTool[] = [
+  { slug: 'OUTLOOK_OUTLOOK_LIST_MESSAGES', description: "List the user's Outlook emails (optionally by folder), newest first." },
+  { slug: 'OUTLOOK_OUTLOOK_SEARCH_MESSAGES', description: 'Search the mailbox by sender, subject, keywords, or dates.' },
+  { slug: 'OUTLOOK_OUTLOOK_GET_MESSAGE', description: 'Fetch the full content of one Outlook email by id.' },
+  { slug: 'OUTLOOK_OUTLOOK_LIST_MAIL_FOLDERS', description: 'List the mailbox folders.' },
+  { slug: 'OUTLOOK_OUTLOOK_LIST_EVENTS', description: "List events on the user's Outlook calendar for a time range." },
+  { slug: 'OUTLOOK_OUTLOOK_GET_EVENT', description: 'Get a single Outlook calendar event by id.' },
+  { slug: 'OUTLOOK_OUTLOOK_CALENDAR_CREATE_EVENT', description: 'Create an Outlook calendar event (subject, attendees, start/end).' },
+  { slug: 'OUTLOOK_OUTLOOK_GET_PROFILE', description: 'Get the connected Outlook account profile (name, email).' },
+];
+
+// Curated Google Calendar tools — read schedule, free/busy, manage events.
+export const COMPOSIO_GOOGLECALENDAR_TOOLS: ComposioTool[] = [
+  { slug: 'GOOGLECALENDAR_FIND_EVENT', description: "Find/list events on the user's calendar by time range or text query." },
+  { slug: 'GOOGLECALENDAR_FREE_BUSY_QUERY', description: 'Check when the user is free or busy across a time range.' },
+  { slug: 'GOOGLECALENDAR_GET_CALENDAR', description: "Get metadata for one of the user's calendars." },
+  { slug: 'GOOGLECALENDAR_CREATE_EVENT', description: 'Create a calendar event (title, attendees, start/end, conferencing).' },
+  { slug: 'GOOGLECALENDAR_UPDATE_EVENT', description: 'Update or reschedule an existing calendar event.' },
+  { slug: 'GOOGLECALENDAR_DELETE_EVENT', description: 'Delete/cancel a calendar event by id.' },
+];
+
+// Curated Notion tools — search + read pages/databases, create pages.
+export const COMPOSIO_NOTION_TOOLS: ComposioTool[] = [
+  { slug: 'NOTION_SEARCH_NOTION_PAGE', description: "Search the user's Notion workspace for pages/databases by title." },
+  { slug: 'NOTION_FETCH_DATA', description: 'Fetch a Notion page with its properties and content.' },
+  { slug: 'NOTION_FETCH_BLOCK_CONTENTS', description: 'Fetch the block contents (text) of a Notion page/block.' },
+  { slug: 'NOTION_QUERY_DATABASE', description: 'Query rows of a Notion database with filters and sorts.' },
+  { slug: 'NOTION_FETCH_DATABASE', description: 'Fetch a Notion database schema/metadata.' },
+  { slug: 'NOTION_CREATE_NOTION_PAGE', description: 'Create a new Notion page (title, parent, content).' },
+];
+
+// Curated Calendly tools — scheduled events, availability, booking links.
+export const COMPOSIO_CALENDLY_TOOLS: ComposioTool[] = [
+  { slug: 'CALENDLY_GET_CURRENT_USER', description: 'Get the connected Calendly user (needed to scope other calls).' },
+  { slug: 'CALENDLY_LIST_EVENTS', description: "List the user's scheduled Calendly events by status or time." },
+  { slug: 'CALENDLY_GET_EVENT', description: 'Get details of one scheduled Calendly event.' },
+  { slug: 'CALENDLY_LIST_EVENT_INVITEES', description: 'List invitees/attendees of a scheduled event.' },
+  { slug: 'CALENDLY_LIST_USER_S_EVENT_TYPES', description: "List the user's Calendly event types (meeting templates)." },
+  { slug: 'CALENDLY_CREATE_SINGLE_USE_SCHEDULING_LINK', description: 'Create a single-use booking link for an event type.' },
+];
+
+// Curated Microsoft Teams tools — read teams/channels/messages + create meetings.
+export const COMPOSIO_MICROSOFT_TEAMS_TOOLS: ComposioTool[] = [
+  { slug: 'MICROSOFT_TEAMS_GET_TEAM', description: 'Get a Microsoft Teams team by id.' },
+  { slug: 'MICROSOFT_TEAMS_GET_CHANNEL', description: 'Get a channel in a team.' },
+  { slug: 'MICROSOFT_TEAMS_GET_CHAT_MESSAGE', description: 'Get a specific chat or channel message.' },
+  { slug: 'MICROSOFT_TEAMS_LIST_MESSAGE_REPLIES', description: 'List replies to a channel message.' },
+  { slug: 'MICROSOFT_TEAMS_LIST_TEAM_MEMBERS', description: 'List members of a team.' },
+  { slug: 'MICROSOFT_TEAMS_CREATE_MEETING', description: 'Create a Teams online meeting (subject, start/end).' },
+];
+
+// Curated Google Drive tools — find/read files + create files/folders & upload.
+// (Delete and external-sharing are intentionally left out.)
+export const COMPOSIO_GOOGLEDRIVE_TOOLS: ComposioTool[] = [
+  { slug: 'GOOGLEDRIVE_FIND_FILE', description: "Find files in the user's Drive by name or query." },
+  { slug: 'GOOGLEDRIVE_LIST_FILES', description: 'List files/folders in Drive, optionally filtered.' },
+  { slug: 'GOOGLEDRIVE_FIND_FOLDER', description: 'Find folders by name or query.' },
+  { slug: 'GOOGLEDRIVE_GET_FILE_METADATA', description: "Get a file's metadata (name, type, owners, links)." },
+  { slug: 'GOOGLEDRIVE_PARSE_FILE', description: 'Extract the text content of a Drive file (docs/pdf) so the assistant can read it.' },
+  { slug: 'GOOGLEDRIVE_CREATE_FILE_FROM_TEXT', description: 'Create a new Drive file (e.g. a doc) from text content, optionally in a folder.' },
+  { slug: 'GOOGLEDRIVE_CREATE_FOLDER', description: 'Create a folder in Drive, optionally within a parent folder.' },
+  { slug: 'GOOGLEDRIVE_UPLOAD_FILE', description: 'Upload a file (max 5MB) to Drive, optionally into a folder.' },
+];
+
+// Curated Google Sheets tools — find sheets, read values, append rows.
+export const COMPOSIO_GOOGLESHEETS_TOOLS: ComposioTool[] = [
+  { slug: 'GOOGLESHEETS_SEARCH_SPREADSHEETS', description: "Search the user's Google Sheets by name." },
+  { slug: 'GOOGLESHEETS_GET_SPREADSHEET_INFO', description: "Get a spreadsheet's metadata (sheets, title, ids)." },
+  { slug: 'GOOGLESHEETS_GET_SHEET_NAMES', description: 'List the tab/sheet names in a spreadsheet.' },
+  { slug: 'GOOGLESHEETS_BATCH_GET', description: 'Read cell values from one or more ranges.' },
+  { slug: 'GOOGLESHEETS_LOOKUP_SPREADSHEET_ROW', description: 'Find a row matching a value.' },
+  { slug: 'GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', description: 'Append a row of values to a sheet.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -153,6 +262,54 @@ export class ComposioService {
         tools: COMPOSIO_AIRTABLE_TOOLS,
       },
       {
+        slug: 'gmail',
+        label: 'Gmail',
+        authConfigId: process.env.COMPOSIO_GMAIL_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GMAIL_TOOLS,
+      },
+      {
+        slug: 'outlook',
+        label: 'Outlook',
+        authConfigId: process.env.COMPOSIO_OUTLOOK_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_OUTLOOK_TOOLS,
+      },
+      {
+        slug: 'googlecalendar',
+        label: 'Google Calendar',
+        authConfigId: process.env.COMPOSIO_GOOGLECALENDAR_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GOOGLECALENDAR_TOOLS,
+      },
+      {
+        slug: 'notion',
+        label: 'Notion',
+        authConfigId: process.env.COMPOSIO_NOTION_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_NOTION_TOOLS,
+      },
+      {
+        slug: 'calendly',
+        label: 'Calendly',
+        authConfigId: process.env.COMPOSIO_CALENDLY_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_CALENDLY_TOOLS,
+      },
+      {
+        slug: 'microsoft_teams',
+        label: 'Microsoft Teams',
+        authConfigId: process.env.COMPOSIO_MICROSOFT_TEAMS_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_MICROSOFT_TEAMS_TOOLS,
+      },
+      {
+        slug: 'googledrive',
+        label: 'Google Drive',
+        authConfigId: process.env.COMPOSIO_GOOGLEDRIVE_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GOOGLEDRIVE_TOOLS,
+      },
+      {
+        slug: 'googlesheets',
+        label: 'Google Sheets',
+        authConfigId: process.env.COMPOSIO_GOOGLESHEETS_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_GOOGLESHEETS_TOOLS,
+      },
+      {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.
         slug: 'granola_mcp',
         label: 'Granola',
@@ -192,6 +349,10 @@ export class ComposioService {
     { slugs: Set<string>; at: number }
   >();
   private static readonly STATUS_TTL_MS = 30_000;
+  // Coalesces concurrent status lookups for the same user — every integration
+  // card asks at once on page load / right after an OAuth redirect — into one
+  // upstream call, so the burst can't stampede or rate-limit Composio.
+  private readonly inflightConnected = new Map<string, Promise<Set<string>>>();
 
   get isConfigured(): boolean {
     return Boolean(this.apiKey) && Object.keys(this.toolkits).length > 0;
@@ -282,34 +443,51 @@ export class ComposioService {
       return cached.slugs;
     }
 
-    let slugs = new Set<string>();
+    // Share one in-flight request across all concurrent callers.
+    const existing = this.inflightConnected.get(userId);
 
-    try {
-      const res = await this.request<{ items?: ConnectedAccount[] }>(
-        'GET',
-        `/connected_accounts?user_ids=${encodeURIComponent(userId)}`,
-      );
-      const enabled = new Set(Object.keys(this.toolkits));
-
-      slugs = new Set(
-        (res.items ?? [])
-          .filter(
-            (account) =>
-              account.status === 'ACTIVE' &&
-              account.toolkit?.slug !== undefined &&
-              enabled.has(account.toolkit.slug),
-          )
-          .map((account) => account.toolkit!.slug as string),
-      );
-    } catch (error) {
-      this.logger.warn(
-        `Composio status check failed: ${(error as Error).message}`,
-      );
-      slugs = new Set();
+    if (existing) {
+      return existing;
     }
-    this.statusCache.set(userId, { slugs, at: Date.now() });
 
-    return slugs;
+    const promise = (async () => {
+      try {
+        const res = await this.request<{ items?: ConnectedAccount[] }>(
+          'GET',
+          `/connected_accounts?user_ids=${encodeURIComponent(userId)}`,
+        );
+        const enabled = new Set(Object.keys(this.toolkits));
+        const slugs = new Set(
+          (res.items ?? [])
+            .filter(
+              (account) =>
+                account.status === 'ACTIVE' &&
+                account.toolkit?.slug !== undefined &&
+                enabled.has(account.toolkit.slug),
+            )
+            .map((account) => account.toolkit!.slug as string),
+        );
+
+        // Cache only a successful lookup, so a transient failure can't stick a
+        // user as "disconnected" for the whole TTL (the bug behind every card
+        // flashing "Connect" after an OAuth redirect).
+        this.statusCache.set(userId, { slugs, at: Date.now() });
+
+        return slugs;
+      } catch (error) {
+        this.logger.warn(
+          `Composio status check failed: ${(error as Error).message}`,
+        );
+
+        return new Set<string>();
+      } finally {
+        this.inflightConnected.delete(userId);
+      }
+    })();
+
+    this.inflightConnected.set(userId, promise);
+
+    return promise;
   }
 
   async isConnected(toolkitSlug: string, userId: string): Promise<boolean> {
