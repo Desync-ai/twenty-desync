@@ -10,6 +10,7 @@ import { StyledOnboardingStepHeading } from '@/onboarding/components/StyledOnboa
 import { StyledOnboardingStepSubtitle } from '@/onboarding/components/StyledOnboardingStepSubtitle';
 import { StyledOnboardingStepTitle } from '@/onboarding/components/StyledOnboardingStepTitle';
 import { ONBOARDING_CONTENT_BLOCK_WIDTH } from '@/onboarding/constants/OnboardingContentBlockWidth';
+import { TextArea } from '@/ui/input/components/TextArea';
 import { TextInput } from '@/ui/input/components/TextInput';
 
 import { ANALYZE_WEBSITE_MUTATION } from '../graphql/desyncBilling';
@@ -249,9 +250,8 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
           setProduct((v) => (v.trim() === '' ? r.product ?? '' : v));
           setWho((v) => (v.trim() === '' ? r.who ?? '' : v));
           setBusinessType((v) => (v.trim() === '' ? r.businessType ?? '' : v));
-          setOutreach((v) =>
-            v.trim() === '' ? (r.outreach ?? []).join(', ') : v,
-          );
+          // Intentionally NOT prefilling outreach — the user fills in how they do
+          // outreach today themselves.
           setTags((prev) => (prev.length === 0 ? r.tags ?? [] : prev));
         })
         .catch(() => {
@@ -392,12 +392,13 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
                 <StyledHint>Reading your site in the background…</StyledHint>
               )}
             </StyledGroup>
-            <TextInput
+            <TextArea
+              textAreaId="onboarding-company"
               label="Company"
               value={company}
               onChange={setCompany}
               placeholder="Acme Inc."
-              fullWidth
+              minRows={2}
             />
           </>
         )}
@@ -492,19 +493,21 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
             </StyledGroup>
 
             <StyledGroup>
-              <TextInput
+              <TextArea
+                textAreaId="onboarding-product"
                 label="What do you sell?"
                 value={product}
                 onChange={setProduct}
                 placeholder="Product or service"
-                fullWidth
+                minRows={3}
               />
-              <TextInput
+              <TextArea
+                textAreaId="onboarding-who"
                 label="Who are your ideal customers?"
                 value={who}
                 onChange={setWho}
                 placeholder="e.g. mid-size Catholic parishes"
-                fullWidth
+                minRows={3}
               />
               <TextInput
                 label="How do you do outreach today?"
@@ -513,12 +516,13 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
                 placeholder="e.g. email, LinkedIn, cold calls"
                 fullWidth
               />
-              <TextInput
+              <TextArea
+                textAreaId="onboarding-business-type"
                 label="What type of business are you?"
                 value={businessType}
                 onChange={setBusinessType}
                 placeholder="e.g. B2B SaaS, agency, nonprofit"
-                fullWidth
+                minRows={3}
               />
             </StyledGroup>
           </>

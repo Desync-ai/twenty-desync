@@ -65,7 +65,9 @@ export const SettingsDiscoveryHeroCard = ({
   const { t } = useLingui();
   const { colorScheme } = useContext(ThemeContext);
   const { openModal } = useModal();
-  const shouldDisplayVideo = tabs.length > 0;
+  // Videos removed from the platform — never surface the play button or the
+  // demo-video modal; the hero card renders as a static cover image.
+  const shouldDisplayVideo = false;
 
   const modalInstanceId = `${instanceIdPrefix}-modal`;
   const tabsInstanceId = `${instanceIdPrefix}-tabs`;
