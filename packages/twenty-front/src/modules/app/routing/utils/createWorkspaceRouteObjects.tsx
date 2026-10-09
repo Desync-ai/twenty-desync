@@ -145,6 +145,15 @@ export const createWorkspaceRouteObjects = ({
       element: <Navigate to={getSettingsPath(SettingsPath.LegalDpa)} replace />,
     },
     {
+      // Clerk's configured sign-in path ("/login") doesn't exist on workspace
+      // subdomains (auth is centralized via Clerk on the root domain). When the
+      // Clerk SDK bounces there — e.g. after a login token expires during a slow
+      // workspace activation — send it to the workspace root so the normal gate /
+      // Clerk exchange runs, instead of 404ing. Mirrors clicking "Home".
+      path: '/login',
+      element: <Navigate to={AppPath.Index} replace />,
+    },
+    {
       path: AppPath.NotFoundWildcard,
       element: (
         <LazyRoute>
