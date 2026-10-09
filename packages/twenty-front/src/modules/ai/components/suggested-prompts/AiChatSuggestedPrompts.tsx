@@ -80,7 +80,7 @@ export const AiChatSuggestedPrompts = ({
   return (
     <StyledContainer isCentered={isCentered}>
       <StyledTitle isCentered={isCentered}>
-        {t`What can I help you with?`}
+        {t`Hi 👋 I'm your Desync AI agent — what can I help you find?`}
       </StyledTitle>
       <StyledPromptList isCentered={isCentered}>
         {suggestedPrompts.map((suggestedPrompt) =>

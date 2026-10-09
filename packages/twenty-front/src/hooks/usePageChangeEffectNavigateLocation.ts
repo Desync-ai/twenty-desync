@@ -11,6 +11,7 @@ import { useDefaultHomePagePath } from '@/navigation/hooks/useDefaultHomePagePat
 import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
 import { useOnboardingStatus } from '@/onboarding/hooks/useOnboardingStatus';
 import { isOnboardingCheckoutPendingState } from '@/onboarding/states/isOnboardingCheckoutPendingState';
+import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useIsWorkspaceActivationStatusEqualsTo } from '@/workspace/hooks/useIsWorkspaceActivationStatusEqualsTo';
 import { isValidReturnToPath } from '@/auth/utils/isValidReturnToPath';
@@ -18,12 +19,13 @@ import { useQuery } from '@apollo/client/react';
 import { isNonEmptyString } from '@sniptt/guards';
 import { matchPath, useLocation } from 'react-router-dom';
 import { AppPath, SettingsPath } from 'twenty-shared/types';
-import { isDefined } from 'twenty-shared/utils';
+import { getAppPath, isDefined } from 'twenty-shared/utils';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
   FindOnePageLayoutTypeDocument,
   OnboardingStatus,
   PageLayoutType,
+  PermissionFlagType,
 } from '~/generated-metadata/graphql';
 import { isMatchingLocation } from '~/utils/isMatchingLocation';
 
@@ -42,6 +44,7 @@ export const usePageChangeEffectNavigateLocation = () => {
     WorkspaceActivationStatus.SUSPENDED,
   );
   const { defaultHomePagePath } = useDefaultHomePagePath();
+  const hasAiPermission = useHasPermissionFlag(PermissionFlagType.AI);
   const location = useLocation();
   const billing = useAtomStateValue(billingState);
   const isBillingEnabled = billing?.isBillingEnabled ?? false;
@@ -182,7 +185,15 @@ export const usePageChangeEffectNavigateLocation = () => {
   }
 
   if (isMatchingLocation(location, AppPath.Index) && isLogged) {
-    return resolvedReturnToPath ?? defaultHomePagePath;
+    // Desync: land on the AI agent chat by default when opening the workspace
+    // (instead of the Companies/People record index). An explicit returnToPath
+    // still wins; users without the AI permission fall back to the record index.
+    return (
+      resolvedReturnToPath ??
+      (hasAiPermission
+        ? getAppPath(AppPath.AiChat, { threadId: null })
+        : defaultHomePagePath)
+    );
   }
 
   if (
