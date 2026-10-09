@@ -10,42 +10,18 @@ import { type AiModelTier } from 'twenty-shared/ai';
 
 // Efforts are pinned so a tier runs at the effort its benchmark was measured
 // at, and so one model family can back neighbouring tiers at different speeds.
+// Desync CRM runs copilot/agent inference on Anthropic only, surfaced to users
+// as three unnamed tiers (Fast / Balanced / Max Thinking). Each tier pins one
+// Claude model at a fixed reasoning effort so "more thinking" scales with the
+// tier. The extraFast / extraSmart keys are kept (stored values may reference
+// them) but map onto the same three models; the UI only offers fast/balanced/
+// smart. No OpenAI/Google/xAI/Mistral/Fable in any chain.
 export const DEFAULT_MODELS_BY_TIER: Record<AiModelTier, string[]> = {
-  extraFast: [
-    'openai/gpt-5.6-luna@low',
-    'google/gemini-3.8-flash@low',
-    'anthropic/claude-sonnet-5@low',
-    'xai/grok-4.5@low',
-    'mistral/mistral-small-latest@none',
-  ],
-  fast: [
-    'openai/gpt-5.6-luna@medium',
-    'google/gemini-3.8-flash@medium',
-    'anthropic/claude-sonnet-5@medium',
-    'xai/grok-4.5@medium',
-    'mistral/mistral-medium-latest',
-  ],
-  balanced: [
-    'openai/gpt-5.6-luna@high',
-    'google/gemini-3.8-flash@high',
-    'anthropic/claude-sonnet-5@high',
-    'xai/grok-4.6@medium',
-    'mistral/mistral-large-latest',
-  ],
-  smart: [
-    'openai/gpt-5.6-sol@high',
-    'google/gemini-3.8-flash@high',
-    'anthropic/claude-opus-5@high',
-    'xai/grok-4.6@high',
-    'mistral/mistral-large-latest',
-  ],
-  extraSmart: [
-    'openai/gpt-6-astra@xhigh',
-    'google/gemini-3.8-flash@high',
-    'anthropic/claude-fable-5-1@xhigh',
-    'xai/grok-4.6@xhigh',
-    'mistral/mistral-large-latest',
-  ],
+  extraFast: ['anthropic/claude-haiku-5-5@low'],
+  fast: ['anthropic/claude-haiku-5-5@low'],
+  balanced: ['anthropic/claude-sonnet-5-5@medium'],
+  smart: ['anthropic/claude-opus-5-5@high'],
+  extraSmart: ['anthropic/claude-opus-5-5@max'],
 };
 
 export const DEFAULT_DISABLED_MODELS: string[] = [];

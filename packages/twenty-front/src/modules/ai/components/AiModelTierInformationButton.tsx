@@ -21,7 +21,6 @@ import { isDefined } from 'twenty-shared/utils';
 import {
   IconBrain,
   IconChartBar,
-  IconCpu,
   IconCurrencyDollar,
   IconGauge,
   IconInfoCircle,
@@ -34,7 +33,6 @@ import {
 
 import { type ResolvedAiModelTier } from '@/ai/types/ResolvedAiModelTier';
 import { getAiModelEffortLabel } from '@/ai/utils/getAiModelEffortLabel';
-import { getAiModelModeDescription } from '@/settings/ai/utils/getAiModelModeDescription';
 import { UsageProgressRow } from '@/ui/feedback/progress-ring/components/UsageProgressRow';
 import { StyledInformationCard } from '@/ui/layout/information-card/components/StyledInformationCard';
 import { formatNumber } from '~/utils/format/formatNumber';
@@ -123,14 +121,6 @@ export const AiModelTierInformationButton = ({
       : t`Not available`;
 
   const rows = [
-    {
-      label: t`Model`,
-      Icon: IconCpu,
-      value: getAiModelModeDescription(resolvedTier, {
-        showAutomatic: false,
-        showEffort: false,
-      }),
-    },
     {
       label: t`Effort`,
       Icon: IconBrain,

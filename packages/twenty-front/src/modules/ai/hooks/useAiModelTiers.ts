@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { AI_MODEL_TIERS, type AiModelTier } from 'twenty-shared/ai';
+import { type AiModelTier } from 'twenty-shared/ai';
 import { isDefined } from 'twenty-shared/utils';
 
+import { SELECTABLE_AI_MODEL_TIERS } from '@/ai/constants/selectableAiModelTiers';
 import { type ResolvedAiModelTier } from '@/ai/types/ResolvedAiModelTier';
 import { getAiModelTierLabel } from '@/ai/utils/getAiModelTierLabel';
 import { getPercentDelta } from '@/ai/utils/getPercentDelta';
@@ -54,7 +55,7 @@ export const useAiModelTiers = (): ResolvedAiModelTier[] => {
     const findModel = (modelId: string | undefined) =>
       aiModels.find((model) => model.modelId === modelId);
 
-    const resolvedModels = AI_MODEL_TIERS.map((tier) => {
+    const resolvedModels = SELECTABLE_AI_MODEL_TIERS.map((tier) => {
       const pinnedModel = isAutoModelSelectionEnabled
         ? undefined
         : findModel(aiModelIdByTier?.[tier]);
