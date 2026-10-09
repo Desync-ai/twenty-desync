@@ -12,6 +12,7 @@ import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMeta
 import { useOnboardingStatus } from '@/onboarding/hooks/useOnboardingStatus';
 import { isOnboardingCheckoutPendingState } from '@/onboarding/states/isOnboardingCheckoutPendingState';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
+import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useIsWorkspaceActivationStatusEqualsTo } from '@/workspace/hooks/useIsWorkspaceActivationStatusEqualsTo';
 import { isValidReturnToPath } from '@/auth/utils/isValidReturnToPath';
@@ -45,6 +46,7 @@ export const usePageChangeEffectNavigateLocation = () => {
   );
   const { defaultHomePagePath } = useDefaultHomePagePath();
   const hasAiPermission = useHasPermissionFlag(PermissionFlagType.AI);
+  const isMobile = useIsMobile();
   const location = useLocation();
   const billing = useAtomStateValue(billingState);
   const isBillingEnabled = billing?.isBillingEnabled ?? false;
@@ -83,6 +85,17 @@ export const usePageChangeEffectNavigateLocation = () => {
   const resolvedReturnToPath = isNonEmptyString(returnToPath)
     ? returnToPath
     : readReturnToPathFromUrlSearchParams();
+
+  // Desync: the default landing is the AI agent chat for AI-enabled desktop
+  // users — for BOTH opening the workspace (Index) and the post-login /
+  // post-onboarding redirect (a COMPLETED user sitting on an onboarding path).
+  // Falls back to the records home otherwise. defaultHomePagePath itself is left
+  // unchanged so the nav "home" / return destinations still point at records
+  // (avoids the return-to-home → chat loop).
+  const landingPath =
+    hasAiPermission && !isMobile
+      ? getAppPath(AppPath.AiChat, { threadId: null })
+      : defaultHomePagePath;
 
   const isOnboardingCheckoutPending = useAtomStateValue(
     isOnboardingCheckoutPendingState,
@@ -181,19 +194,11 @@ export const usePageChangeEffectNavigateLocation = () => {
       return;
     }
 
-    return resolvedReturnToPath ?? defaultHomePagePath;
+    return resolvedReturnToPath ?? landingPath;
   }
 
   if (isMatchingLocation(location, AppPath.Index) && isLogged) {
-    // Desync: land on the AI agent chat by default when opening the workspace
-    // (instead of the Companies/People record index). An explicit returnToPath
-    // still wins; users without the AI permission fall back to the record index.
-    return (
-      resolvedReturnToPath ??
-      (hasAiPermission
-        ? getAppPath(AppPath.AiChat, { threadId: null })
-        : defaultHomePagePath)
-    );
+    return resolvedReturnToPath ?? landingPath;
   }
 
   if (
