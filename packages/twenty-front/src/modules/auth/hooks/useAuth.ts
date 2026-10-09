@@ -166,9 +166,33 @@ export const useAuth = () => {
       availableWorkspaces: Parameters<typeof countAvailableWorkspaces>[0],
       email: string,
     ) => {
-      // Desync: gate the whole post-signup flow on the questionnaire. Until it's
-      // complete, show the questionnaire step (on the central domain) BEFORE any
-      // workspace choice/creation. Fails open so a backend blip can't trap the user.
+      const availableWorkspacesCount =
+        countAvailableWorkspaces(availableWorkspaces);
+
+      // The in-app "Create Workspace" entry point redirects here with this
+      // signal so an existing user with workspaces lands on the creation form
+      // instead of the workspace selection step.
+      const wantsToCreateNewWorkspace =
+        new URLSearchParams(window.location.search).get('action') ===
+        'create-new-workspace';
+
+      // Desync: a user with no workspace (or who explicitly wants a new one)
+      // creates it FIRST — the signup questionnaire now runs AFTER creation,
+      // overlapping the background workspace activation that createWorkspace
+      // kicks off. createWorkspace defers the subdomain redirect to the
+      // questionnaire's onCompleted, so the ~activation time is hidden behind the
+      // questionnaire instead of being a blocking spinner afterwards.
+      if (availableWorkspacesCount === 0 || wantsToCreateNewWorkspace) {
+        await apolloClient.query({
+          query: GetWorkspaceCreationDefaultsDocument,
+        });
+        setSignInUpStep(SignInUpStep.WorkspaceCreation);
+        return;
+      }
+
+      // Desync: existing-user fallback — if a user who already has a workspace
+      // somehow still owes the questionnaire, show it before the workspace
+      // choice (legacy behavior). Fails open so a backend blip can't trap them.
       try {
         const { data } = await apolloClient.query({
           query: DESYNC_ONBOARDING_STATUS_QUERY,
@@ -181,24 +205,6 @@ export const useAuth = () => {
         }
       } catch {
         // fall through — don't trap the user if the check errors.
-      }
-
-      const availableWorkspacesCount =
-        countAvailableWorkspaces(availableWorkspaces);
-
-      // The in-app "Create Workspace" entry point redirects here with this
-      // signal so an existing user with workspaces lands on the creation form
-      // instead of the workspace selection step.
-      const wantsToCreateNewWorkspace =
-        new URLSearchParams(window.location.search).get('action') ===
-        'create-new-workspace';
-
-      if (availableWorkspacesCount === 0 || wantsToCreateNewWorkspace) {
-        await apolloClient.query({
-          query: GetWorkspaceCreationDefaultsDocument,
-        });
-        setSignInUpStep(SignInUpStep.WorkspaceCreation);
-        return;
       }
 
       if (availableWorkspacesCount === 1) {

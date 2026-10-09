@@ -3,7 +3,12 @@ import { OnboardingAnimatedReveal } from '@/onboarding/components/OnboardingAnim
 import { OnboardingStepAnimatedItem } from '@/onboarding/components/OnboardingStepAnimatedItem';
 import { ONBOARDING_CONTENT_BLOCK_WIDTH } from '@/onboarding/constants/OnboardingContentBlockWidth';
 import { useWorkspaceSubdomainField } from '@/auth/sign-in-up/hooks/useWorkspaceSubdomainField';
+import { pendingWorkspaceLandingState } from '@/auth/states/pendingWorkspaceLandingState';
 import { isCreatingWorkspaceState } from '@/auth/states/isCreatingWorkspaceState';
+import {
+  SignInUpStep,
+  signInUpStepState,
+} from '@/auth/states/signInUpStepState';
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
 import { domainConfigurationState } from '@/domain-manager/states/domainConfigurationState';
 import { TextInput } from '@/ui/input/components/TextInput';
@@ -12,6 +17,7 @@ import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomStat
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { isNonEmptyString } from '@sniptt/guards';
+import { useStore } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
 import { Key } from 'ts-key-enum';
 import { isDefined } from 'twenty-shared/utils';
@@ -146,6 +152,8 @@ export const SignInUpWorkspaceCreationForm = () => {
 
   const isCreatingWorkspace = useAtomStateValue(isCreatingWorkspaceState);
   const setIsCreatingWorkspace = useSetAtomState(isCreatingWorkspaceState);
+  const setSignInUpStep = useSetAtomState(signInUpStepState);
+  const store = useStore();
   const [logo, setLogo] = useState<File | undefined>(undefined);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | undefined>(
     undefined,
@@ -212,6 +220,18 @@ export const SignInUpWorkspaceCreationForm = () => {
     });
 
     if (!isWorkspaceCreated) {
+      setIsCreatingWorkspace(false);
+
+      return;
+    }
+
+    // Desync: a brand-new user's workspace creation is deferred — createWorkspace
+    // stashes the landing instead of redirecting so we can run the questionnaire
+    // while the workspace activates in the background. Advance to it here. (On the
+    // legacy/existing-user path the atom is null and a redirect is already under
+    // way, so we keep the loader on.)
+    if (isDefined(store.get(pendingWorkspaceLandingState.atom))) {
+      setSignInUpStep(SignInUpStep.DesyncQuestionnaire);
       setIsCreatingWorkspace(false);
     }
   };
