@@ -508,19 +508,12 @@ const ConnectIntegrationCard = ({
 
 const McpIntegrationCard = ({
   integration,
-  connectionCount = 0,
 }: {
   integration: IntegrationDef;
-  connectionCount?: number;
 }) => {
   const { t } = useLingui();
   const navigate = useNavigate();
   const { name } = integration;
-
-  const connectionLabel =
-    connectionCount === 1
-      ? t`1 active connection`
-      : t`${connectionCount} active connections`;
 
   return (
     <StyledCard rounded>
@@ -535,13 +528,11 @@ const McpIntegrationCard = ({
           <StyledBlurb>{integration.blurb}</StyledBlurb>
           {/* This integration runs inside the user's own AI app over MCP: they
               paste our endpoint + key INTO it, so it does not run in Desync.
-              Once their agent connects we stamp its self-reported name on the
-              initialize handshake and show a live count; with zero connections
-              we explain, nicely, why nothing shows as connected yet. */}
+              Because it lives entirely inside their agent, there is no
+              connection state we can observe or show here, so we say so plainly
+              rather than imply a status will appear. */}
           <StyledStatus>
-            {connectionCount > 0
-              ? connectionLabel
-              : t`This runs inside ${name}, not in Desync. Add the connection details in ${name}, and it'll show here as an active connection once it connects.`}
+            {t`This runs inside ${name}, not in Desync, so there is no connection status to show here. Add the connection details in ${name} and you are all set.`}
           </StyledStatus>
           <StyledCardActions>
             <Button
@@ -590,23 +581,6 @@ export const SettingsIntegrations = () => {
   const [feedbackKind, setFeedbackKind] = useState<'request' | 'problem'>('request');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
-
-  // Per-AI-client active MCP connection counts (keyed 'claude'|'cursor'|
-  // 'chatgpt'|'grok'|'other'), fetched once for the MCP cards. Fail-soft.
-  const [mcpCounts, setMcpCounts] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const res = await callIntegrations('/mcp-connections', 'GET');
-        setMcpCounts(
-          res && typeof res === 'object' ? (res as Record<string, number>) : {},
-        );
-      } catch {
-        setMcpCounts({});
-      }
-    })();
-  }, []);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -684,7 +658,6 @@ export const SettingsIntegrations = () => {
                 <McpIntegrationCard
                   key={integration.plugin}
                   integration={integration}
-                  connectionCount={mcpCounts[integration.plugin] ?? 0}
                 />
               ) : (
                 <ConnectIntegrationCard key={integration.plugin} integration={integration} />
