@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
+import { MCP_CLIENT_CONNECTIONS_KV_KEY } from 'src/engine/api/mcp/constants/mcp-client-connections-kv-key.const';
 import { ApiKeyService } from 'src/engine/core-modules/api-key/services/api-key.service';
 import { ComposioService } from 'src/engine/core-modules/composio/composio.service';
+import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
+import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
 import { RoleService } from 'src/engine/metadata-modules/role/role.service';
 
 /**
@@ -42,7 +45,60 @@ export class IntegrationsService {
     private readonly apiKeyService: ApiKeyService,
     private readonly roleService: RoleService,
     private readonly composioService: ComposioService,
+    private readonly keyValuePairService: KeyValuePairService,
   ) {}
+
+  // Desync: per-AI-client active MCP connection counts for the integrations page.
+  // Reads the workspace KV map the MCP initialize handshake stamps (apiKeyId ->
+  // { name, lastSeenAt }), keeps only entries whose API key is still active
+  // (non-revoked + non-expired), and buckets by client. Self-reported client
+  // name, so it's a best-effort signal; unknowns fall into "other".
+  async mcpConnectionCounts(workspaceId: string): Promise<Record<string, number>> {
+    const rows = await this.keyValuePairService.get({
+      userId: null,
+      workspaceId,
+      applicationId: null,
+      key: MCP_CLIENT_CONNECTIONS_KV_KEY,
+      type: KeyValuePairType.USER_VARIABLE,
+    });
+    const connectionsByApiKeyId = (rows[0]?.value ?? {}) as Record<
+      string,
+      { name?: string; lastSeenAt?: string }
+    >;
+
+    const activeKeys = await this.apiKeyService.findActiveByWorkspaceId(
+      workspaceId,
+    );
+    const now = Date.now();
+    const activeApiKeyIds = new Set(
+      activeKeys
+        .filter((k) => !k.expiresAt || new Date(k.expiresAt).getTime() > now)
+        .map((k) => k.id),
+    );
+
+    const counts: Record<string, number> = {};
+
+    for (const [apiKeyId, info] of Object.entries(connectionsByApiKeyId)) {
+      if (!activeApiKeyIds.has(apiKeyId)) {
+        continue;
+      }
+
+      const name = (info?.name ?? '').toLowerCase();
+      const bucket = name.includes('claude')
+        ? 'claude'
+        : name.includes('cursor')
+          ? 'cursor'
+          : name.includes('chatgpt') || name.includes('openai')
+            ? 'chatgpt'
+            : name.includes('grok')
+              ? 'grok'
+              : 'other';
+
+      counts[bucket] = (counts[bucket] ?? 0) + 1;
+    }
+
+    return counts;
+  }
 
   get isConfigured(): boolean {
     return Boolean(this.baseUrl && this.serviceToken);

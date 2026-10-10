@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ApiKeyModule } from 'src/engine/core-modules/api-key/api-key.module';
 import { AuthModule } from 'src/engine/core-modules/auth/auth.module';
 import { ComposioModule } from 'src/engine/core-modules/composio/composio.module';
+import { KeyValuePairModule } from 'src/engine/core-modules/key-value-pair/key-value-pair.module';
 import { IntegrationsController } from 'src/engine/core-modules/integrations/integrations.controller';
 import { IntegrationsService } from 'src/engine/core-modules/integrations/integrations.service';
 import { PermissionsModule } from 'src/engine/metadata-modules/permissions/permissions.module';
@@ -19,6 +20,7 @@ import { WorkspaceCacheStorageModule } from 'src/engine/workspace-cache-storage/
     ComposioModule,
     WorkspaceCacheStorageModule,
     ApiKeyModule,
+    KeyValuePairModule,
     RoleModule,
     PermissionsModule,
   ],

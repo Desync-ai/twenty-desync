@@ -52,6 +52,21 @@ export class IntegrationsController {
     return (request as { user?: { id?: string } }).user?.id;
   }
 
+  // Desync: per-AI-client active MCP connection counts for the integrations page
+  // (Claude/Cursor/ChatGPT/Grok). Single-segment path so it can't collide with
+  // the :plugin/status route; declared first to be safe about route ordering.
+  @Get('mcp-connections')
+  async getMcpConnections(@Req() request: AuthenticatedRequest) {
+    const workspaceId = (request as { workspace?: { id?: string } }).workspace
+      ?.id;
+
+    if (!workspaceId) {
+      throw new BadRequestException('No workspace in session');
+    }
+
+    return this.integrationsService.mcpConnectionCounts(workspaceId);
+  }
+
   @Get(':plugin/status')
   async getStatus(
     @Param('plugin') plugin: string,

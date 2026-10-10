@@ -507,11 +507,18 @@ const ConnectIntegrationCard = ({
 
 const McpIntegrationCard = ({
   integration,
+  connectionCount = 0,
 }: {
   integration: IntegrationDef;
+  connectionCount?: number;
 }) => {
   const { t } = useLingui();
   const { name } = integration;
+
+  const connectionLabel =
+    connectionCount === 1
+      ? t`1 active connection`
+      : t`${connectionCount} active connections`;
 
   return (
     <StyledCard rounded>
@@ -524,12 +531,15 @@ const McpIntegrationCard = ({
             <StyledName>{name}</StyledName>
           </StyledHeader>
           <StyledBlurb>{integration.blurb}</StyledBlurb>
-          {/* Set expectations: an MCP connection is one-way — the user pastes
-              Desync's endpoint + key INTO their AI app, so we never see it
-              "connect" and this card can't show a Connected state. Users kept
-              expecting it to flip to Connected; this copy tells them it won't. */}
+          {/* Once an AI client connects over MCP we stamp its self-reported name
+              (on the initialize handshake) and show a live per-client count here.
+              Until then, set expectations: it's one-way — the user pastes our
+              endpoint + key INTO their AI app, so with zero connections there's
+              nothing to show as "Connected". */}
           <StyledStatus>
-            {t`You set this up inside ${name} — it won't show as connected here`}
+            {connectionCount > 0
+              ? connectionLabel
+              : t`You set this up inside ${name}`}
           </StyledStatus>
           <StyledCardActions>
             <Button
@@ -585,6 +595,23 @@ export const SettingsIntegrations = () => {
   const [feedbackKind, setFeedbackKind] = useState<'request' | 'problem'>('request');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+
+  // Per-AI-client active MCP connection counts (keyed 'claude'|'cursor'|
+  // 'chatgpt'|'grok'|'other'), fetched once for the MCP cards. Fail-soft.
+  const [mcpCounts, setMcpCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await callIntegrations('/mcp-connections', 'GET');
+        setMcpCounts(
+          res && typeof res === 'object' ? (res as Record<string, number>) : {},
+        );
+      } catch {
+        setMcpCounts({});
+      }
+    })();
+  }, []);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -659,7 +686,11 @@ export const SettingsIntegrations = () => {
           <StyledGrid>
             {visible.map((integration) =>
               integration.kind === 'mcp' ? (
-                <McpIntegrationCard key={integration.plugin} integration={integration} />
+                <McpIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                  connectionCount={mcpCounts[integration.plugin] ?? 0}
+                />
               ) : (
                 <ConnectIntegrationCard key={integration.plugin} integration={integration} />
               ),
