@@ -219,6 +219,22 @@ export const COMPOSIO_GOOGLESHEETS_TOOLS: ComposioTool[] = [
   { slug: 'GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND', description: 'Append a row of values to a sheet.' },
 ];
 
+// Curated Instantly tools — cold-outreach campaigns, leads, analytics. Unlike the
+// managed-OAuth toolkits, Instantly is API_KEY auth: the user pastes their own
+// Instantly v2 API key on Composio's hosted connect page (Composio stores it).
+export const COMPOSIO_INSTANTLY_TOOLS: ComposioTool[] = [
+  { slug: 'INSTANTLY_LIST_CAMPAIGNS', description: "List the user's Instantly outreach campaigns." },
+  { slug: 'INSTANTLY_GET_CAMPAIGN', description: 'Get one Instantly campaign by id (settings, status).' },
+  { slug: 'INSTANTLY_CREATE_CAMPAIGN', description: 'Create a new Instantly outreach campaign.' },
+  { slug: 'INSTANTLY_GET_CAMPAIGN_ANALYTICS', description: 'Get analytics for a campaign (sent, opens, replies, bounces).' },
+  { slug: 'INSTANTLY_LIST_LEADS', description: 'List leads, optionally filtered by campaign or lead list.' },
+  { slug: 'INSTANTLY_CREATE_LEAD', description: 'Add a lead (email, name, company, custom vars) to a campaign/list.' },
+  { slug: 'INSTANTLY_UPDATE_LEAD', description: 'Update an existing Instantly lead.' },
+  { slug: 'INSTANTLY_UPDATE_LEAD_INTEREST_STATUS', description: "Set a lead's interest status (e.g. interested, not interested, meeting booked)." },
+  { slug: 'INSTANTLY_LIST_LEAD_LISTS', description: "List the user's Instantly lead lists." },
+  { slug: 'INSTANTLY_LIST_ACCOUNTS', description: 'List the connected sending email accounts.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -308,6 +324,15 @@ export class ComposioService {
         label: 'Google Sheets',
         authConfigId: process.env.COMPOSIO_GOOGLESHEETS_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_GOOGLESHEETS_TOOLS,
+      },
+      {
+        // Instantly uses API_KEY auth (the user pastes their own key on
+        // Composio's hosted connect page); otherwise identical to the REST
+        // toolkits — enabled only when its auth-config id is set.
+        slug: 'instantly',
+        label: 'Instantly',
+        authConfigId: process.env.COMPOSIO_INSTANTLY_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_INSTANTLY_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.

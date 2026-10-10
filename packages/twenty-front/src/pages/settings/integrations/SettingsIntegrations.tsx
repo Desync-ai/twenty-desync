@@ -178,6 +178,16 @@ const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'instantly',
+    name: 'Instantly',
+    kind: 'connect',
+    tags: ['Email'],
+    logoDomain: 'instantly.ai',
+    agentTool: true,
+    blurb: 'Let the AI assistant run your cold-outreach campaigns & leads',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'claude',
     name: 'Claude',
     kind: 'mcp',
