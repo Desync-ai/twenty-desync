@@ -1,10 +1,9 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconCheck, IconPlug, IconRefresh } from 'twenty-ui/icon';
+import { IconCheck, IconExternalLink, IconPlug, IconRefresh } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/primitives/input';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Section } from 'twenty-ui/primitives/layout';
@@ -512,7 +511,6 @@ const McpIntegrationCard = ({
   integration: IntegrationDef;
 }) => {
   const { t } = useLingui();
-  const navigate = useNavigate();
   const { name } = integration;
 
   return (
@@ -536,7 +534,14 @@ const McpIntegrationCard = ({
           <StyledCardActions>
             <Button
               variant="outline"
-              onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
+              startIcon={<IconExternalLink size={16} />}
+              onClick={() =>
+                window.open(
+                  getSettingsPath(SettingsPath.ApiWebhooks),
+                  '_blank',
+                  'noopener',
+                )
+              }
             >
               {t`Get connection details`}
             </Button>
