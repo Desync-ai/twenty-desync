@@ -526,13 +526,19 @@ const McpIntegrationCard = ({
             <StyledName>{name}</StyledName>
           </StyledHeader>
           <StyledBlurb>{integration.blurb}</StyledBlurb>
-          <StyledStatus>{t`Connects via MCP`}</StyledStatus>
+          {/* Set expectations: an MCP connection is one-way — the user pastes
+              Desync's endpoint + key INTO their AI app, so we never see it
+              "connect" and this card can't show a Connected state. Users kept
+              expecting it to flip to Connected; this copy tells them it won't. */}
+          <StyledStatus>
+            {t`You set this up inside ${name} — it won't show as connected here`}
+          </StyledStatus>
           <StyledCardActions>
             <Button
               variant="outline"
               onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
             >
-              {t`Set up`}
+              {t`Get connection details`}
             </Button>
           </StyledCardActions>
         </StyledCardInner>
