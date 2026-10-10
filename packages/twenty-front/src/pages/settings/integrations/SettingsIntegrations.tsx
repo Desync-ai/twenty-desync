@@ -3,7 +3,8 @@ import { useLingui } from '@lingui/react/macro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconCheck, IconExternalLink, IconPlug, IconRefresh } from 'twenty-ui/icon';
+import { useNavigate } from 'react-router-dom';
+import { IconCheck, IconPlug, IconRefresh } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/primitives/input';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Section } from 'twenty-ui/primitives/layout';
@@ -513,6 +514,7 @@ const McpIntegrationCard = ({
   connectionCount?: number;
 }) => {
   const { t } = useLingui();
+  const navigate = useNavigate();
   const { name } = integration;
 
   const connectionLabel =
@@ -531,27 +533,20 @@ const McpIntegrationCard = ({
             <StyledName>{name}</StyledName>
           </StyledHeader>
           <StyledBlurb>{integration.blurb}</StyledBlurb>
-          {/* Once an AI client connects over MCP we stamp its self-reported name
-              (on the initialize handshake) and show a live per-client count here.
-              Until then, set expectations: it's one-way — the user pastes our
-              endpoint + key INTO their AI app, so with zero connections there's
-              nothing to show as "Connected". */}
+          {/* This integration runs inside the user's own AI app over MCP — they
+              paste our endpoint + key INTO it, so it does not run in Desync.
+              Once their agent connects we stamp its self-reported name on the
+              initialize handshake and show a live count; with zero connections
+              we explain, nicely, why nothing shows as connected yet. */}
           <StyledStatus>
             {connectionCount > 0
               ? connectionLabel
-              : t`You set this up inside ${name}`}
+              : t`This runs inside ${name}, not in Desync — add the connection details in ${name}, and it'll show here as an active connection once it connects.`}
           </StyledStatus>
           <StyledCardActions>
             <Button
               variant="outline"
-              startIcon={<IconExternalLink size={16} />}
-              onClick={() =>
-                window.open(
-                  getSettingsPath(SettingsPath.ApiWebhooks),
-                  '_blank',
-                  'noopener',
-                )
-              }
+              onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
             >
               {t`Get connection details`}
             </Button>
