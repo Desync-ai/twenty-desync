@@ -425,7 +425,7 @@ const ConnectIntegrationCard = ({
       if (final?.status === 'succeeded') {
         enqueueToast({
           variant: 'success',
-          children: t`${name} synced — ${c.created ?? 0} imported, ${c.skipped ?? 0} already up to date${(c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''}.`,
+          children: t`${name} synced: ${c.created ?? 0} imported, ${c.skipped ?? 0} already up to date${(c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''}.`,
         });
       } else if (final?.status === 'failed') {
         enqueueToast({
@@ -435,7 +435,7 @@ const ConnectIntegrationCard = ({
       } else {
         enqueueToast({
           variant: 'success',
-          children: t`${name} sync is still running in the background — check back shortly.`,
+          children: t`${name} sync is still running in the background. Check back shortly.`,
         });
       }
     } catch (error) {
@@ -533,7 +533,7 @@ const McpIntegrationCard = ({
             <StyledName>{name}</StyledName>
           </StyledHeader>
           <StyledBlurb>{integration.blurb}</StyledBlurb>
-          {/* This integration runs inside the user's own AI app over MCP — they
+          {/* This integration runs inside the user's own AI app over MCP: they
               paste our endpoint + key INTO it, so it does not run in Desync.
               Once their agent connects we stamp its self-reported name on the
               initialize handshake and show a live count; with zero connections
@@ -541,7 +541,7 @@ const McpIntegrationCard = ({
           <StyledStatus>
             {connectionCount > 0
               ? connectionLabel
-              : t`This runs inside ${name}, not in Desync — add the connection details in ${name}, and it'll show here as an active connection once it connects.`}
+              : t`This runs inside ${name}, not in Desync. Add the connection details in ${name}, and it'll show here as an active connection once it connects.`}
           </StyledStatus>
           <StyledCardActions>
             <Button
@@ -638,7 +638,7 @@ export const SettingsIntegrations = () => {
     setSending(true);
     try {
       await callIntegrations('/feedback', 'POST', { kind: feedbackKind, message: text });
-      enqueueToast({ variant: 'success', children: t`Thanks — sent to the Desync team.` });
+      enqueueToast({ variant: 'success', children: t`Thanks, sent to the Desync team.` });
       setMessage('');
       closeModal(FEEDBACK_MODAL_ID);
     } catch (error) {
