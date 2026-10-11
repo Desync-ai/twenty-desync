@@ -1,5 +1,6 @@
 import { useIsSettingsDrawer } from '@/navigation/hooks/useIsSettingsDrawer';
 
+import { DesyncHelpSection } from '@/navigation/components/DesyncHelpSection';
 import { DesyncUsageWidget } from '@/desync-onboarding/components/DesyncUsageWidget';
 import { MainNavigationDrawerContent } from '@/navigation/components/MainNavigationDrawerContent';
 import { MainNavigationDrawerModeSwitcher } from '@/navigation/components/MainNavigationDrawerModeSwitcher';
@@ -40,8 +41,16 @@ export const AppNavigationDrawer = ({
         <MainNavigationDrawerContent />
       )}
 
+      {/* Desync: Help (book a call + report a bug) pinned on the main sidebar
+          (not the settings drawer), so support is one click from anywhere. */}
+      {!isSettingsDrawer && (
+        <NavigationDrawerFixedContent>
+          <DesyncHelpSection />
+        </NavigationDrawerFixedContent>
+      )}
+
       {/* Desync: plan + usage summary pinned above logout on the main sidebar
-          (not the settings drawer) — same meters a user sees on lead-gen. */}
+          (not the settings drawer); same meters a user sees on lead-gen. */}
       {!isSettingsDrawer && (
         <NavigationDrawerFixedContent>
           <DesyncUsageWidget />

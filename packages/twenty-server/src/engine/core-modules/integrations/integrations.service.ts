@@ -174,20 +174,34 @@ export class IntegrationsService {
     );
   }
 
-  // Send a user's integration request / problem report to the team via Resend.
+  // Send a user's integration request / bug report / feedback to the team via Resend.
   async feedback(
-    kind: 'request' | 'problem',
+    kind: 'request' | 'problem' | 'bug' | 'feedback',
     message: string,
     fromEmail?: string,
+    severity?: 1 | 2 | 3,
   ): Promise<{ ok: boolean }> {
     if (!this.resendKey) {
       throw new Error('Feedback email is not configured (RESEND_KEY)');
     }
-    const label = kind === 'request' ? 'Integration request' : 'Problem report';
+    const label =
+      kind === 'request'
+        ? 'Integration request'
+        : kind === 'bug'
+          ? 'Bug report'
+          : kind === 'feedback'
+            ? 'Feedback'
+            : 'Problem report';
+    const severityText =
+      severity !== undefined
+        ? { 1: '1 (Critical)', 2: '2 (Major)', 3: '3 (Minor)' }[severity]
+        : undefined;
     const escape = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const html =
-      `<p><strong>${label}</strong> from ${escape(fromEmail ?? 'a Twenty CRM user')}:</p>` +
+      `<p><strong>${label}</strong>` +
+      (severityText ? ` (severity ${escape(severityText)})` : '') +
+      ` from ${escape(fromEmail ?? 'a Twenty CRM user')}:</p>` +
       `<p style="white-space:pre-wrap">${escape(message)}</p>`;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -199,7 +213,8 @@ export class IntegrationsService {
         from: IntegrationsService.FEEDBACK_FROM,
         to: IntegrationsService.FEEDBACK_TO,
         ...(fromEmail ? { reply_to: fromEmail } : {}),
-        subject: `Desync CRM — ${label}`,
+        subject:
+          `Desync CRM: ${label}` + (severity !== undefined ? ` (S${severity})` : ''),
         html,
       }),
     });

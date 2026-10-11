@@ -125,17 +125,32 @@ export class IntegrationsController {
     return this.integrationsService.syncStatus(this.requireTenant(workspaceMemberId), plugin);
   }
 
-  // Integration-request / problem-report from the Settings UI → emails the team.
+  // Integration request / bug / feedback from the UI → emails the team.
   @Post('feedback')
   async feedback(
-    @Body() body: { kind?: string; message?: string },
+    @Body() body: { kind?: string; message?: string; severity?: number },
     @Req() request: AuthenticatedRequest,
   ) {
     const message = (body?.message ?? '').trim();
     if (!message) {
       throw new BadRequestException('message required');
     }
-    const kind = body?.kind === 'request' ? 'request' : 'problem';
-    return this.integrationsService.feedback(kind, message, this.userEmail(request));
+    const kind = (['request', 'problem', 'bug', 'feedback'] as const).includes(
+      body?.kind as never,
+    )
+      ? (body?.kind as 'request' | 'problem' | 'bug' | 'feedback')
+      : 'problem';
+    const severityRaw = Number(body?.severity);
+    const severity =
+      Number.isInteger(severityRaw) && severityRaw >= 1 && severityRaw <= 3
+        ? (severityRaw as 1 | 2 | 3)
+        : undefined;
+
+    return this.integrationsService.feedback(
+      kind,
+      message,
+      this.userEmail(request),
+      severity,
+    );
   }
 }
