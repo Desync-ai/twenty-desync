@@ -5,6 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 
+import { Pool } from 'pg';
 import { PermissionFlagType } from 'twenty-shared/constants';
 
 import { DesyncOnboardingService } from 'src/engine/core-modules/desync-onboarding/desync-onboarding.service';
@@ -64,6 +65,12 @@ export class FioAdsService {
   private readonly resendKey =
     process.env.RESEND_KEY ?? process.env.RESEND_API_KEY ?? '';
   private static readonly FROM = 'Desync CRM <noreply@desync.support>';
+  // Small/fast model for the ad-script assistant (short copy, iterative).
+  private static readonly ASSIST_MODEL = 'claude-haiku-4-5-20251001';
+  private readonly anthropicKey = process.env.ANTHROPIC_API_KEY ?? '';
+  // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
+  // EntitlementService. Reads only the user's own onboarding company + URL.
+  private prefillPool: Pool | null = null;
 
   constructor(
     private readonly desyncOnboardingService: DesyncOnboardingService,
@@ -85,6 +92,146 @@ export class FioAdsService {
   // one-ad-per-user rule when unset.
   private get allowMultiple(): boolean {
     return process.env.FIO_ADS_ALLOW_MULTIPLE === 'true';
+  }
+
+  private getPrefillPool(): Pool | null {
+    const connectionString = process.env.ENTITLEMENT_DATABASE_URL;
+
+    if (!connectionString) {
+      return null;
+    }
+    if (!this.prefillPool) {
+      this.prefillPool = new Pool({
+        connectionString,
+        max: 2,
+        ssl: connectionString.includes('sslmode=require')
+          ? { rejectUnauthorized: false }
+          : undefined,
+      });
+    }
+
+    return this.prefillPool;
+  }
+
+  // What we already know about the user, to prefill the form. Only returns fields
+  // we actually have (brand name + website from the onboarding company captured
+  // in scraper_db). Everything is editable client-side; nothing is invented.
+  async getPrefill(
+    email?: string,
+  ): Promise<{ brandName: string | null; website: string | null }> {
+    const empty = { brandName: null, website: null };
+
+    if (!email) {
+      return empty;
+    }
+
+    const pool = this.getPrefillPool();
+
+    if (!pool) {
+      return empty;
+    }
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT onboarding_company, onboarding_company_url
+           FROM user_data
+          WHERE lower(email) = lower($1)
+          LIMIT 1`,
+        [email],
+      );
+      const row = rows[0];
+
+      return {
+        brandName: (row?.onboarding_company as string) || null,
+        website: (row?.onboarding_company_url as string) || null,
+      };
+    } catch (error) {
+      this.logger.warn(
+        `Fio ads: prefill lookup failed for ${email}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+
+      return empty;
+    }
+  }
+
+  // Agentic helper: a short, multi-turn assistant that drafts/refines the audio
+  // ad script. Stateless on the server (the client sends the running history);
+  // brand context is injected into the system prompt. Returns the assistant's
+  // reply text. Caller gates this on eligibility (it spends AI budget).
+  async assist({
+    brand,
+    messages,
+  }: {
+    brand?: { name?: string; website?: string };
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  }): Promise<{ reply: string }> {
+    if (!this.anthropicKey) {
+      throw new Error('The ad assistant is not configured (ANTHROPIC_API_KEY).');
+    }
+
+    const cleaned = (Array.isArray(messages) ? messages : [])
+      .filter(
+        (m) =>
+          (m?.role === 'user' || m?.role === 'assistant') &&
+          typeof m?.content === 'string' &&
+          m.content.trim().length > 0,
+      )
+      .slice(-20)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
+
+    if (cleaned.length === 0) {
+      throw new BadRequestException('No message to respond to.');
+    }
+
+    const brandLine =
+      brand?.name || brand?.website
+        ? `The user's brand is ${brand?.name ?? 'their organization'}${
+            brand?.website ? ` (${brand.website})` : ''
+          }.`
+        : 'The user has not named their brand yet; ask for it if helpful.';
+
+    const system =
+      `You help a Desync CRM user write a short audio advertisement to run on ` +
+      `Fio, a Catholic podcast network. ${brandLine} ` +
+      `The spoken ad must be 20 to 30 seconds, which is roughly 50 to 75 words. ` +
+      `Write warm, clear, broadcast-ready copy suitable for a Catholic audience; ` +
+      `avoid hype and anything off-brand for that context. When the user asks for ` +
+      `a script, reply with just the script text they can read aloud, no stage ` +
+      `directions or labels. Keep within the time limit. You may also suggest a ` +
+      `headline (<=45 chars) and subtitle (<=100 chars) if asked.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': this.anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: FioAdsService.ASSIST_MODEL,
+        max_tokens: 600,
+        system,
+        messages: cleaned,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Assistant error ${res.status}: ${text.slice(0, 200)}`);
+    }
+
+    const data = (await res.json()) as {
+      content?: Array<{ type?: string; text?: string }>;
+    };
+    const reply = (data.content ?? [])
+      .filter((block) => block?.type === 'text' && typeof block.text === 'string')
+      .map((block) => block.text)
+      .join('\n')
+      .trim();
+
+    return { reply: reply || 'Sorry, I could not generate a response.' };
   }
 
   async getStatus({

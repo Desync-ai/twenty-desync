@@ -5,8 +5,11 @@ import { useToast } from 'twenty-ui/primitives/feedback';
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { currentUserState } from '@/auth/states/currentUserState';
+import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { TextArea } from '@/ui/input/components/TextArea';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
 
 // Desync: "Launch a Fio ad" as its own page (reached from the sidebar), with a
@@ -180,6 +183,52 @@ const StyledMessage = styled.div`
   line-height: 1.5;
 `;
 
+const StyledChat = styled.div`
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+  padding: ${themeCssVariables.spacing[3]};
+`;
+
+const StyledChatMessages = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+  max-height: 280px;
+  overflow-y: auto;
+`;
+
+const StyledChatMsg = styled.div`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.5;
+  white-space: pre-wrap;
+
+  &[data-role='user'] {
+    color: ${themeCssVariables.font.color.secondary};
+  }
+`;
+
+const StyledChatRole = styled.div`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.xs};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  margin-bottom: ${themeCssVariables.spacing[1]};
+`;
+
+const StyledChatInputRow = styled.div`
+  align-items: flex-end;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+
+  & > *:first-child {
+    flex: 1;
+  }
+`;
+
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -275,6 +324,15 @@ export const FioAdsPage = () => {
   const adImageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
+  const currentUser = useAtomStateValue(currentUserState);
+  const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
+
+  const [assistantMessages, setAssistantMessages] = useState<
+    Array<{ role: 'user' | 'assistant'; content: string }>
+  >([]);
+  const [assistantInput, setAssistantInput] = useState('');
+  const [assistantLoading, setAssistantLoading] = useState(false);
+
   const refreshStatus = useCallback(async () => {
     setLoadingStatus(true);
     try {
@@ -290,6 +348,89 @@ export const FioAdsPage = () => {
   useEffect(() => {
     void refreshStatus();
   }, [refreshStatus]);
+
+  // Prefill the contact from the signed-in user once it loads, only if the
+  // user hasn't already typed something (functional set keeps their edits).
+  useEffect(() => {
+    const name = [
+      currentWorkspaceMember?.name?.firstName,
+      currentWorkspaceMember?.name?.lastName,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    if (name) setContactName((prev) => prev || name);
+    if (currentUser?.email) {
+      setContactEmail((prev) => prev || currentUser.email);
+    }
+  }, [currentUser, currentWorkspaceMember]);
+
+  // Prefill brand name + website from what we already know (scraper_db), once.
+  // Only fills empty fields; everything stays editable.
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch(`${FIO_BASE}/prefill`, {
+          credentials: 'include',
+        });
+        const j = (await res.json()) as {
+          brandName?: string | null;
+          website?: string | null;
+        };
+        if (j?.brandName) setBrandName((prev) => prev || (j.brandName as string));
+        if (j?.website) setWebsite((prev) => prev || (j.website as string));
+      } catch {
+        // best-effort prefill
+      }
+    })();
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const sendAssistant = async () => {
+    const text = assistantInput.trim();
+    if (!text || assistantLoading) return;
+    const next = [
+      ...assistantMessages,
+      { role: 'user' as const, content: text },
+    ];
+    setAssistantMessages(next);
+    setAssistantInput('');
+    setAssistantLoading(true);
+    try {
+      const res = await fetch(`${FIO_BASE}/assistant`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand: { name: brandName.trim(), website: website.trim() },
+          messages: next,
+        }),
+      });
+      if (!res.ok) {
+        let msg = `Request failed (${res.status})`;
+        try {
+          const j = await res.json();
+          msg = j?.error ?? j?.message ?? msg;
+        } catch {
+          // keep default
+        }
+        throw new Error(msg);
+      }
+      const j = (await res.json()) as { reply?: string };
+      setAssistantMessages((cur) => [
+        ...cur,
+        { role: 'assistant', content: String(j?.reply ?? '') },
+      ]);
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Assistant error: ${String((error as Error)?.message ?? error)}`,
+      });
+    } finally {
+      setAssistantLoading(false);
+    }
+  };
 
   const handleImage = async (
     file: File | undefined,
@@ -600,6 +741,57 @@ export const FioAdsPage = () => {
                 onChange={setLearnMoreUrl}
                 fullWidth
               />
+            </StyledFieldset>
+
+            <StyledFieldset>
+              <StyledGroupTitle>{t`Script assistant`}</StyledGroupTitle>
+              <StyledHelper>
+                {t`Describe what you want to promote and the assistant will draft a 20 to 30 second script. Edit anything it gives you.`}
+              </StyledHelper>
+              <StyledChat>
+                {assistantMessages.length > 0 && (
+                  <StyledChatMessages>
+                    {assistantMessages.map((m, i) => (
+                      <div key={i}>
+                        <StyledChatRole>
+                          {m.role === 'user' ? t`You` : t`Assistant`}
+                        </StyledChatRole>
+                        <StyledChatMsg data-role={m.role}>
+                          {m.content}
+                        </StyledChatMsg>
+                        {m.role === 'assistant' && (
+                          <div style={{ marginTop: '6px' }}>
+                            <Button
+                              variant="outline"
+                              onClick={() => setTranscript(m.content)}
+                            >
+                              {t`Use as transcript`}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </StyledChatMessages>
+                )}
+                <StyledChatInputRow>
+                  <TextArea
+                    textAreaId="fio-assistant-input"
+                    placeholder={t`e.g. Promote our parish youth retreat in July`}
+                    value={assistantInput}
+                    onChange={setAssistantInput}
+                    minRows={2}
+                    maxRows={4}
+                  />
+                  <Button
+                    variant="solid"
+                    color="accent"
+                    onClick={sendAssistant}
+                    disabled={!assistantInput.trim() || assistantLoading}
+                  >
+                    {assistantLoading ? t`Thinking...` : t`Send`}
+                  </Button>
+                </StyledChatInputRow>
+              </StyledChat>
             </StyledFieldset>
 
             <StyledFieldset>

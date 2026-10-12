@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Post,
   Req,
@@ -51,6 +52,42 @@ export class FioAdsController {
       email: this.userEmail(request),
       workspaceId: this.workspaceId(request),
       userWorkspaceId: this.userWorkspaceId(request),
+    });
+  }
+
+  @Get('prefill')
+  async prefill(@Req() request: AuthenticatedRequest) {
+    return this.fioAdsService.getPrefill(this.userEmail(request));
+  }
+
+  @Post('assistant')
+  async assistant(
+    @Body()
+    body: {
+      brand?: { name?: string; website?: string };
+      messages?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    },
+    @Req() request: AuthenticatedRequest,
+  ) {
+    // The assistant spends AI budget, so gate it on the same eligibility as launch.
+    const status = await this.fioAdsService.getStatus({
+      userId: this.userId(request),
+      email: this.userEmail(request),
+      workspaceId: this.workspaceId(request),
+      userWorkspaceId: this.userWorkspaceId(request),
+    });
+
+    if (!status.eligible) {
+      throw new ForbiddenException(
+        status.reason === 'not_admin'
+          ? 'Only workspace admins can use the Fio ad assistant.'
+          : 'The Fio ad assistant is available on Starter and above.',
+      );
+    }
+
+    return this.fioAdsService.assist({
+      brand: body?.brand,
+      messages: body?.messages ?? [],
     });
   }
 
