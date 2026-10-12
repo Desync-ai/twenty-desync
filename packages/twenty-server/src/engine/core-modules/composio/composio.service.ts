@@ -258,6 +258,24 @@ export const COMPOSIO_TWITTER_TOOLS: ComposioTool[] = [
   { slug: 'TWITTER_GET_DM_EVENTS_FOR_A_DM_CONVERSATION', description: 'Read messages in a specific DM conversation.' },
 ];
 
+// Curated Apollo tools. API_KEY auth (user pastes their own Apollo key on
+// Composio's hosted connect page, Composio stores it) — same model as Instantly,
+// runs on the user's own Apollo account. Sales-intelligence + lightweight CRM.
+export const COMPOSIO_APOLLO_TOOLS: ComposioTool[] = [
+  { slug: 'APOLLO_PEOPLE_SEARCH', description: "Search Apollo's database for people (leads) by title, company, location, etc." },
+  { slug: 'APOLLO_ORGANIZATION_SEARCH', description: 'Search Apollo for organizations/companies.' },
+  { slug: 'APOLLO_PEOPLE_ENRICHMENT', description: 'Enrich a person (email, title, company, socials) from Apollo.' },
+  { slug: 'APOLLO_ORGANIZATION_ENRICHMENT', description: 'Enrich a company with Apollo firmographic data.' },
+  { slug: 'APOLLO_SEARCH_CONTACTS', description: "Search the user's own Apollo contacts." },
+  { slug: 'APOLLO_CREATE_CONTACT', description: 'Create an Apollo contact.' },
+  { slug: 'APOLLO_UPDATE_CONTACT', description: 'Update an existing Apollo contact.' },
+  { slug: 'APOLLO_SEARCH_ACCOUNTS', description: "Search the user's Apollo accounts." },
+  { slug: 'APOLLO_CREATE_DEAL', description: 'Create an Apollo deal.' },
+  { slug: 'APOLLO_LIST_DEALS', description: 'List Apollo deals.' },
+  { slug: 'APOLLO_CREATE_TASK', description: 'Create an Apollo task.' },
+  { slug: 'APOLLO_ADD_CONTACTS_TO_SEQUENCE', description: 'Add contacts to an Apollo outreach sequence.' },
+];
+
 // Curated Attio tools — the user's existing CRM. Read + safe writes; the two
 // destructive deletes (ATTIO_DELETE_RECORD / ATTIO_DELETE_NOTE) are held back.
 // Managed OAuth, so no Attio dev app on our side.
@@ -386,6 +404,13 @@ export class ComposioService {
         label: 'X (Twitter)',
         authConfigId: process.env.COMPOSIO_TWITTER_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_TWITTER_TOOLS,
+      },
+      {
+        // Apollo: API_KEY auth (user brings their own Apollo key, like Instantly).
+        slug: 'apollo',
+        label: 'Apollo',
+        authConfigId: process.env.COMPOSIO_APOLLO_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_APOLLO_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.

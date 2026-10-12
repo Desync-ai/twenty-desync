@@ -208,6 +208,16 @@ const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'apollo',
+    name: 'Apollo',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'apollo.io',
+    agentTool: true,
+    blurb: 'Let the AI assistant search, enrich, and manage leads in Apollo',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'claude',
     name: 'Claude',
     kind: 'mcp',
