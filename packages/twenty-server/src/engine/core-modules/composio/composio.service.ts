@@ -249,6 +249,13 @@ export const COMPOSIO_TWITTER_TOOLS: ComposioTool[] = [
   { slug: 'TWITTER_FOLLOW_USER', description: 'Follow an X user.' },
   { slug: 'TWITTER_USER_LIKE_POST', description: 'Like a post.' },
   { slug: 'TWITTER_RETWEET_POST', description: 'Repost (retweet) a post.' },
+  // Direct messages (needs the X app's "Read and write and Direct Messages"
+  // permission + the dm.read/dm.write scopes granted on connect).
+  { slug: 'TWITTER_SEND_A_NEW_MESSAGE_TO_A_USER', description: 'Send a direct message to an X user.' },
+  { slug: 'TWITTER_CREATE_A_NEW_DM_CONVERSATION', description: 'Start a new DM conversation.' },
+  { slug: 'TWITTER_SEND_A_NEW_MESSAGE_TO_A_DM_CONVERSATION', description: 'Send a message in an existing DM conversation.' },
+  { slug: 'TWITTER_GET_RECENT_DM_EVENTS', description: 'Read recent direct-message events (the DM inbox).' },
+  { slug: 'TWITTER_GET_DM_EVENTS_FOR_A_DM_CONVERSATION', description: 'Read messages in a specific DM conversation.' },
 ];
 
 // Curated Attio tools — the user's existing CRM. Read + safe writes; the two
