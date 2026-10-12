@@ -204,10 +204,12 @@ export class FioAdsService {
       `ready-to-read script, put the spoken words ONLY (no title, no word count, ` +
       `no markdown, no quotation marks, no labels) between a line reading ` +
       `[SCRIPT] and a line reading [/SCRIPT], so it can be lifted straight into ` +
-      `the transcript. Keep it within the time limit. Any headline (<=45 chars) ` +
-      `or subtitle (<=100 chars) suggestions, or other commentary, go OUTSIDE ` +
-      `those markers. Never use em dashes or en dashes anywhere in your output; ` +
-      `use commas, periods, or parentheses instead.`;
+      `the transcript. Keep it within the time limit. If you suggest a headline ` +
+      `it must be at most 45 characters; if you suggest a subtitle it must be at ` +
+      `most 100 characters. Count the characters and never exceed those limits. ` +
+      `Put any headline or subtitle suggestion, or other commentary, OUTSIDE the ` +
+      `[SCRIPT] markers. Never use em dashes or en dashes anywhere in your ` +
+      `output; use commas, periods, or parentheses instead.`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
