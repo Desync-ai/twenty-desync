@@ -441,7 +441,14 @@ export class FioAdsService {
 
     this.validateUpload('logo', p.logo, ['image/jpeg', 'image/png'], FIO_AD_LIMITS.imageMaxBytes);
     this.validateUpload('advertisement image', p.adImage, ['image/jpeg', 'image/png'], FIO_AD_LIMITS.imageMaxBytes);
-    this.validateUpload('audio', p.audio, ['audio/mpeg'], FIO_AD_LIMITS.audioMaxBytes);
+    // MP3 for uploads; the in-browser recorder produces webm/mp4/ogg (no native
+    // MP3 in browsers). All accepted; delivery-to-Fio MP3 conversion is a later step.
+    this.validateUpload(
+      'audio',
+      p.audio,
+      ['audio/mpeg', 'audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'],
+      FIO_AD_LIMITS.audioMaxBytes,
+    );
   }
 
   private validateUpload(

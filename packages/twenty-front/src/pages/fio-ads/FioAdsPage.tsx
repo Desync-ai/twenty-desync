@@ -28,6 +28,20 @@ const AUDIO_MIN_SEC = 20;
 const AUDIO_MAX_SEC = 30;
 const MAX_CATEGORIES = 5;
 
+// In-browser recording: browsers don't record MP3 natively, so we capture the
+// first supported container (webm/opus on Chrome/Firefox, mp4/aac on Safari).
+// The backend accepts these alongside MP3; MP3 conversion for Fio delivery is a
+// later step.
+const RECORD_MIME_CANDIDATES = ['audio/webm', 'audio/mp4', 'audio/ogg'];
+const RECORD_EXT: Record<string, string> = {
+  'audio/webm': 'webm',
+  'audio/mp4': 'm4a',
+  'audio/ogg': 'ogg',
+};
+
+const formatSeconds = (s: number) =>
+  `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
 const FIO_CATEGORIES = [
   'Apologetics', 'Arts', 'AudioDramas', 'Business', 'Catechism', 'Children',
   'Coaching', 'Comedy', 'Dating&Relationships', 'Development&Philanthropy',
@@ -229,7 +243,7 @@ const StyledChatInputRow = styled.div`
   }
 `;
 
-const fileToBase64 = (file: File): Promise<string> =>
+const fileToBase64 = (file: Blob): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -316,6 +330,9 @@ export const FioAdsPage = () => {
   const [adImageError, setAdImageError] = useState<string | null>(null);
   const [audio, setAudio] = useState<UploadedFile | null>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recordSeconds, setRecordSeconds] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -323,6 +340,11 @@ export const FioAdsPage = () => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const adImageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordChunksRef = useRef<Blob[]>([]);
+  const recordStreamRef = useRef<MediaStream | null>(null);
+  const recordTimerRef = useRef<number | null>(null);
+  const recordStartRef = useRef<number>(0);
 
   const currentUser = useAtomStateValue(currentUserState);
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
@@ -487,10 +509,111 @@ export const FioAdsPage = () => {
       }
       const dataBase64 = await fileToBase64(file);
       setAudio({ filename: file.name, contentType: 'audio/mpeg', dataBase64 });
+      if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(null);
     } catch {
       setAudioError(t`Could not read that audio file.`);
     }
   };
+
+  const finalizeRecording = async () => {
+    recordStreamRef.current?.getTracks().forEach((track) => track.stop());
+    recordStreamRef.current = null;
+    const elapsed = Math.round((Date.now() - recordStartRef.current) / 1000);
+    const mime = (mediaRecorderRef.current?.mimeType || 'audio/webm').split(
+      ';',
+    )[0];
+    const blob = new Blob(recordChunksRef.current, { type: mime });
+    mediaRecorderRef.current = null;
+    recordChunksRef.current = [];
+    if (elapsed < AUDIO_MIN_SEC) {
+      setAudioError(
+        t`Recording must be at least 20 seconds (this one was ${elapsed}s).`,
+      );
+      return;
+    }
+    try {
+      const dataBase64 = await fileToBase64(blob);
+      const ext = RECORD_EXT[mime] ?? 'webm';
+      setAudioError(null);
+      setAudio({ filename: `recording.${ext}`, contentType: mime, dataBase64 });
+      if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(URL.createObjectURL(blob));
+    } catch {
+      setAudioError(t`Could not process the recording.`);
+    }
+  };
+
+  const stopRecording = () => {
+    if (recordTimerRef.current !== null) {
+      window.clearInterval(recordTimerRef.current);
+      recordTimerRef.current = null;
+    }
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state !== 'inactive') {
+      mr.stop(); // fires onstop -> finalizeRecording
+    }
+    setRecording(false);
+  };
+
+  const startRecording = async () => {
+    setAudioError(null);
+    if (
+      typeof MediaRecorder === 'undefined' ||
+      !navigator.mediaDevices?.getUserMedia
+    ) {
+      setAudioError(
+        t`Recording isn't supported in this browser. Upload an MP3 instead.`,
+      );
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordStreamRef.current = stream;
+      recordChunksRef.current = [];
+      const mime = RECORD_MIME_CANDIDATES.find((m) =>
+        MediaRecorder.isTypeSupported(m),
+      );
+      const mr = new MediaRecorder(
+        stream,
+        mime ? { mimeType: mime } : undefined,
+      );
+      mediaRecorderRef.current = mr;
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) recordChunksRef.current.push(e.data);
+      };
+      mr.onstop = () => {
+        void finalizeRecording();
+      };
+      recordStartRef.current = Date.now();
+      setRecordSeconds(0);
+      mr.start();
+      setRecording(true);
+      recordTimerRef.current = window.setInterval(() => {
+        const elapsed = Math.round(
+          (Date.now() - recordStartRef.current) / 1000,
+        );
+        setRecordSeconds(elapsed);
+        if (elapsed >= AUDIO_MAX_SEC) {
+          stopRecording();
+        }
+      }, 500);
+    } catch {
+      setAudioError(
+        t`Couldn't access the microphone. Check this site's microphone permission.`,
+      );
+    }
+  };
+
+  // Stop the mic + timer if the user navigates away mid-recording.
+  useEffect(() => {
+    return () => {
+      if (recordTimerRef.current !== null) {
+        window.clearInterval(recordTimerRef.current);
+      }
+      recordStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   const toggleCategory = (category: string) => {
     setCategories((prev) =>
@@ -797,15 +920,37 @@ export const FioAdsPage = () => {
             <StyledFieldset>
               <StyledGroupTitle>{t`Audio`}</StyledGroupTitle>
               <StyledField>
-                <StyledFieldLabel>{t`MP3 (20 to 30 seconds)`}</StyledFieldLabel>
+                <StyledFieldLabel>{t`Audio (20 to 30 seconds)`}</StyledFieldLabel>
+                <StyledHelper>
+                  {t`Upload an MP3, or record one right here in your browser.`}
+                </StyledHelper>
                 <StyledUploadRow>
                   <Button
                     variant="outline"
                     onClick={() => audioInputRef.current?.click()}
+                    disabled={recording}
                   >
-                    {audio ? t`Replace audio` : t`Choose MP3`}
+                    {audio ? t`Replace with MP3` : t`Choose MP3`}
                   </Button>
-                  {audio && <StyledHelper>{audio.filename}</StyledHelper>}
+                  {recording ? (
+                    <Button
+                      variant="solid"
+                      color="accent"
+                      onClick={stopRecording}
+                    >
+                      {t`Stop (${formatSeconds(recordSeconds)})`}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => void startRecording()}
+                    >
+                      {t`Record`}
+                    </Button>
+                  )}
+                  {audio && !recording && (
+                    <StyledHelper>{audio.filename}</StyledHelper>
+                  )}
                   <input
                     ref={audioInputRef}
                     type="file"
@@ -814,6 +959,18 @@ export const FioAdsPage = () => {
                     onChange={(e) => void handleAudio(e.target.files?.[0])}
                   />
                 </StyledUploadRow>
+                {recording && (
+                  <StyledHelper>
+                    {t`Recording, up to 30 seconds. Speak your ad, then press Stop.`}
+                  </StyledHelper>
+                )}
+                {audioPreviewUrl && !recording && (
+                  <audio
+                    controls
+                    src={audioPreviewUrl}
+                    style={{ marginTop: '4px', maxWidth: '100%' }}
+                  />
+                )}
                 {audioError && <StyledError>{audioError}</StyledError>}
               </StyledField>
               <TextArea
