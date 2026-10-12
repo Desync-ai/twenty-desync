@@ -313,7 +313,16 @@ const readImageMeta = (
     img.src = url;
   });
 
-const readAudioDuration = (file: File): Promise<number> =>
+const base64ToBlob = (b64: string, type: string): Blob => {
+  const bytes = atob(b64);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i += 1) {
+    arr[i] = bytes.charCodeAt(i);
+  }
+  return new Blob([arr], { type });
+};
+
+const readAudioDuration = (file: Blob): Promise<number> =>
   new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const audio = document.createElement('audio');
@@ -357,6 +366,7 @@ export const FioAdsPage = () => {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [transcribing, setTranscribing] = useState(false);
+  const [generatingVoiceover, setGeneratingVoiceover] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -541,6 +551,65 @@ export const FioAdsPage = () => {
       // best-effort; the user can still type the transcript
     } finally {
       setTranscribing(false);
+    }
+  };
+
+  // Optional: generate the ad audio from the script via ElevenLabs TTS (returns
+  // an MP3). Uses the current transcript as the script; fills the audio slot.
+  const generateVoiceover = async () => {
+    const script = transcript.trim();
+    if (!script) {
+      setAudioError(t`Write or generate a script first, then I can voice it.`);
+      return;
+    }
+    setGeneratingVoiceover(true);
+    try {
+      const res = await fetch(`${FIO_BASE}/voiceover`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: script }),
+      });
+      if (!res.ok) {
+        let msg = `Request failed (${res.status})`;
+        try {
+          const j = await res.json();
+          msg = j?.error ?? j?.message ?? msg;
+        } catch {
+          // keep default
+        }
+        throw new Error(msg);
+      }
+      const j = (await res.json()) as {
+        audio?: { filename: string; contentType: string; dataBase64: string };
+      };
+      if (!j.audio?.dataBase64) {
+        throw new Error('No audio returned');
+      }
+      const blob = base64ToBlob(j.audio.dataBase64, 'audio/mpeg');
+      let duration = 0;
+      try {
+        duration = await readAudioDuration(blob);
+      } catch {
+        // non-fatal; keep the audio
+      }
+      setAudio(j.audio);
+      if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(URL.createObjectURL(blob));
+      if (duration && (duration < AUDIO_MIN_SEC || duration > AUDIO_MAX_SEC)) {
+        setAudioError(
+          t`The voiceover is ${Math.round(duration)}s; aim for a script that reads in 20 to 30 seconds, then regenerate.`,
+        );
+      } else {
+        setAudioError(null);
+      }
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Couldn't generate voiceover: ${String((error as Error)?.message ?? error)}`,
+      });
+    } finally {
+      setGeneratingVoiceover(false);
     }
   };
 
@@ -989,7 +1058,7 @@ export const FioAdsPage = () => {
               <StyledField>
                 <StyledFieldLabel>{t`Audio (20 to 30 seconds)`}</StyledFieldLabel>
                 <StyledHelper>
-                  {t`Upload an MP3, or record one right here in your browser.`}
+                  {t`Upload an MP3, record one in your browser, or generate an AI voiceover of your script.`}
                 </StyledHelper>
                 <StyledUploadRow>
                   <Button
@@ -1015,6 +1084,15 @@ export const FioAdsPage = () => {
                       {t`Record`}
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    onClick={() => void generateVoiceover()}
+                    disabled={recording || generatingVoiceover}
+                  >
+                    {generatingVoiceover
+                      ? t`Generating...`
+                      : t`Generate AI voiceover`}
+                  </Button>
                   {audio && !recording && (
                     <StyledHelper>{audio.filename}</StyledHelper>
                   )}

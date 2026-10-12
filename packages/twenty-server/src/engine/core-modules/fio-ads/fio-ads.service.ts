@@ -71,6 +71,10 @@ export class FioAdsService {
   // Groq-hosted Whisper for optional auto-transcription of the ad audio.
   private static readonly TRANSCRIBE_MODEL = 'whisper-large-v3-turbo';
   private readonly groqKey = process.env.GROQ_API_KEY ?? '';
+  // ElevenLabs TTS for optional AI voiceover of the script (returns MP3).
+  private static readonly VOICEOVER_MODEL = 'eleven_multilingual_v2';
+  private static readonly DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel (premade)
+  private readonly elevenLabsKey = process.env.ELEVENLABS_API_KEY ?? '';
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
   private prefillPool: Pool | null = null;
@@ -293,6 +297,65 @@ export class FioAdsService {
     const data = (await res.json()) as { text?: string };
 
     return { text: (data.text ?? '').trim() };
+  }
+
+  // Optional AI voiceover of the script via ElevenLabs TTS. Returns an MP3 the
+  // client drops in as the ad audio. Caller gates on eligibility (spends our
+  // ElevenLabs credits).
+  async generateVoiceover({
+    text,
+    voiceId,
+  }: {
+    text?: string;
+    voiceId?: string;
+  }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
+    if (!this.elevenLabsKey) {
+      throw new Error('AI voiceover is not configured (ELEVENLABS_API_KEY).');
+    }
+    const script = (text ?? '').trim();
+    if (!script) {
+      throw new BadRequestException('No script to voice.');
+    }
+    if (script.length > 2500) {
+      throw new BadRequestException('Script is too long for a 20-30s ad.');
+    }
+
+    const voice =
+      (voiceId && voiceId.trim()) ||
+      process.env.ELEVENLABS_VOICE_ID ||
+      FioAdsService.DEFAULT_VOICE_ID;
+
+    const res = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(
+        voice,
+      )}?output_format=mp3_44100_128`,
+      {
+        method: 'POST',
+        headers: {
+          'xi-api-key': this.elevenLabsKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: script,
+          model_id: FioAdsService.VOICEOVER_MODEL,
+        }),
+      },
+    );
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`Voiceover error ${res.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+
+    return {
+      audio: {
+        filename: 'voiceover.mp3',
+        contentType: 'audio/mpeg',
+        dataBase64: buffer.toString('base64'),
+      },
+    };
   }
 
   async getStatus({

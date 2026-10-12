@@ -118,6 +118,32 @@ export class FioAdsController {
     return this.fioAdsService.transcribe({ audio: body?.audio });
   }
 
+  @Post('voiceover')
+  async voiceover(
+    @Body() body: { text?: string; voiceId?: string },
+    @Req() request: AuthenticatedRequest,
+  ) {
+    const status = await this.fioAdsService.getStatus({
+      userId: this.userId(request),
+      email: this.userEmail(request),
+      workspaceId: this.workspaceId(request),
+      userWorkspaceId: this.userWorkspaceId(request),
+    });
+
+    if (!status.eligible) {
+      throw new ForbiddenException(
+        status.reason === 'not_admin'
+          ? 'Only workspace admins can use Fio ad AI voiceover.'
+          : 'Fio ad AI voiceover is available on Starter and above.',
+      );
+    }
+
+    return this.fioAdsService.generateVoiceover({
+      text: body?.text,
+      voiceId: body?.voiceId,
+    });
+  }
+
   @Post('launch')
   async launch(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
     const userId = this.userId(request);
