@@ -356,6 +356,7 @@ export const FioAdsPage = () => {
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [transcript, setTranscript] = useState('');
+  const [transcribing, setTranscribing] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -513,6 +514,36 @@ export const FioAdsPage = () => {
     }
   };
 
+  // Optional: once audio is added and the transcript is still blank, transcribe
+  // it (Groq Whisper) and fill the transcript. Never overwrites typed text;
+  // fails silently so it can't block submission.
+  const autoTranscribe = async (file: UploadedFile) => {
+    if (transcript.trim()) {
+      return;
+    }
+    setTranscribing(true);
+    try {
+      const res = await fetch(`${FIO_BASE}/transcribe`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audio: file }),
+      });
+      if (!res.ok) {
+        return;
+      }
+      const j = (await res.json()) as { text?: string };
+      const text = String(j?.text ?? '').trim();
+      if (text) {
+        setTranscript((prev) => (prev.trim() ? prev : text));
+      }
+    } catch {
+      // best-effort; the user can still type the transcript
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
   const handleAudio = async (file: File | undefined) => {
     setAudioError(null);
     setAudio(null);
@@ -530,9 +561,15 @@ export const FioAdsPage = () => {
         return;
       }
       const dataBase64 = await fileToBase64(file);
-      setAudio({ filename: file.name, contentType: 'audio/mpeg', dataBase64 });
+      const uploaded = {
+        filename: file.name,
+        contentType: 'audio/mpeg',
+        dataBase64,
+      };
+      setAudio(uploaded);
       if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
       setAudioPreviewUrl(null);
+      void autoTranscribe(uploaded);
     } catch {
       setAudioError(t`Could not read that audio file.`);
     }
@@ -557,10 +594,16 @@ export const FioAdsPage = () => {
     try {
       const dataBase64 = await fileToBase64(blob);
       const ext = RECORD_EXT[mime] ?? 'webm';
+      const recorded = {
+        filename: `recording.${ext}`,
+        contentType: mime,
+        dataBase64,
+      };
       setAudioError(null);
-      setAudio({ filename: `recording.${ext}`, contentType: mime, dataBase64 });
+      setAudio(recorded);
       if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
       setAudioPreviewUrl(URL.createObjectURL(blob));
+      void autoTranscribe(recorded);
     } catch {
       setAudioError(t`Could not process the recording.`);
     }
@@ -1000,12 +1043,15 @@ export const FioAdsPage = () => {
               <TextArea
                 textAreaId="fio-transcript"
                 label={t`Full transcript`}
-                placeholder={t`Paste the full transcript of the audio ad.`}
+                placeholder={t`Paste the transcript, or add audio and we'll fill it in for you.`}
                 value={transcript}
                 onChange={setTranscript}
                 minRows={3}
                 maxRows={8}
               />
+              {transcribing && (
+                <StyledHelper>{t`Transcribing your audio...`}</StyledHelper>
+              )}
             </StyledFieldset>
 
             <StyledFieldset>

@@ -68,6 +68,9 @@ export class FioAdsService {
   // Small/fast model for the ad-script assistant (short copy, iterative).
   private static readonly ASSIST_MODEL = 'claude-haiku-4-5-20251001';
   private readonly anthropicKey = process.env.ANTHROPIC_API_KEY ?? '';
+  // Groq-hosted Whisper for optional auto-transcription of the ad audio.
+  private static readonly TRANSCRIBE_MODEL = 'whisper-large-v3-turbo';
+  private readonly groqKey = process.env.GROQ_API_KEY ?? '';
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
   private prefillPool: Pool | null = null;
@@ -238,6 +241,56 @@ export class FioAdsService {
       .replace(/\s*[—–]\s*/g, ', ');
 
     return { reply: reply || 'Sorry, I could not generate a response.' };
+  }
+
+  // Optional auto-transcription of the ad audio via Groq-hosted Whisper. Returns
+  // the transcript text; the client only uses it when the transcript is blank.
+  async transcribe({
+    audio,
+  }: {
+    audio?: { filename?: string; contentType?: string; dataBase64?: string };
+  }): Promise<{ text: string }> {
+    if (!this.groqKey) {
+      throw new Error('Transcription is not configured (GROQ_API_KEY).');
+    }
+    if (!audio?.dataBase64) {
+      throw new BadRequestException('No audio to transcribe.');
+    }
+
+    const buffer = Buffer.from(audio.dataBase64, 'base64');
+    if (buffer.length > FIO_AD_LIMITS.audioMaxBytes) {
+      throw new BadRequestException('Audio is too large to transcribe.');
+    }
+
+    const form = new FormData();
+    form.append(
+      'file',
+      new Blob([new Uint8Array(buffer)], {
+        type: audio.contentType || 'audio/webm',
+      }),
+      audio.filename || 'audio.webm',
+    );
+    form.append('model', FioAdsService.TRANSCRIBE_MODEL);
+    form.append('response_format', 'json');
+    form.append('language', 'en');
+
+    const res = await fetch(
+      'https://api.groq.com/openai/v1/audio/transcriptions',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.groqKey}` },
+        body: form,
+      },
+    );
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Transcription error ${res.status}: ${text.slice(0, 200)}`);
+    }
+
+    const data = (await res.json()) as { text?: string };
+
+    return { text: (data.text ?? '').trim() };
   }
 
   async getStatus({

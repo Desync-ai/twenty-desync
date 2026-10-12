@@ -91,6 +91,33 @@ export class FioAdsController {
     });
   }
 
+  @Post('transcribe')
+  async transcribe(
+    @Body()
+    body: {
+      audio?: { filename?: string; contentType?: string; dataBase64?: string };
+    },
+    @Req() request: AuthenticatedRequest,
+  ) {
+    // Gate the same way as the assistant (it calls an external STT service).
+    const status = await this.fioAdsService.getStatus({
+      userId: this.userId(request),
+      email: this.userEmail(request),
+      workspaceId: this.workspaceId(request),
+      userWorkspaceId: this.userWorkspaceId(request),
+    });
+
+    if (!status.eligible) {
+      throw new ForbiddenException(
+        status.reason === 'not_admin'
+          ? 'Only workspace admins can use Fio ad transcription.'
+          : 'Fio ad transcription is available on Starter and above.',
+      );
+    }
+
+    return this.fioAdsService.transcribe({ audio: body?.audio });
+  }
+
   @Post('launch')
   async launch(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
     const userId = this.userId(request);
