@@ -780,7 +780,7 @@ export const FioAdsPage = () => {
 
   const blockedMessage = () => {
     if (status?.alreadyLaunched && !status?.allowMultiple) {
-      return t`You've already submitted your Fio ad. We'll be in touch; reach out if you need to change it.`;
+      return t`This workspace has already submitted its Fio ad. We'll be in touch; reach out if you need to change it.`;
     }
     if (status?.reason === 'not_admin') {
       return t`Only workspace admins can launch a Fio ad. Ask an admin on your workspace to set it up.`;

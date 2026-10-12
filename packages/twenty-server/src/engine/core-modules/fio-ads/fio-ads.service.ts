@@ -353,7 +353,9 @@ export class FioAdsService {
     // requirement; the rule is workspace-admins only.
     const planOk = isPaid || isInternal;
     const eligible = isAdmin && planOk;
-    const alreadyLaunched = userId ? await this.hasLaunched(userId) : false;
+    const alreadyLaunched = workspaceId
+      ? await this.hasLaunched(workspaceId)
+      : false;
 
     let reason: FioAdStatus['reason'];
     if (!isAdmin) {
@@ -375,10 +377,13 @@ export class FioAdsService {
     };
   }
 
-  private async hasLaunched(userId: string): Promise<boolean> {
+  // One ad per WORKSPACE (keyed by workspaceId), so any admin on a paid
+  // workspace consumes the workspace's single slot. (Paid multi-ad is a future
+  // feature.)
+  private async hasLaunched(workspaceId: string): Promise<boolean> {
     const rows = await this.keyValuePairService.get({
-      userId,
-      workspaceId: null,
+      userId: null,
+      workspaceId,
       applicationId: null,
       type: KeyValuePairType.USER_VARIABLE,
       key: FIO_AD_SUBMISSION_KV_KEY,
@@ -417,7 +422,12 @@ export class FioAdsService {
       );
     }
     if (status.alreadyLaunched && !this.allowMultiple) {
-      throw new BadRequestException('You have already submitted a Fio ad.');
+      throw new BadRequestException(
+        'This workspace has already submitted a Fio ad.',
+      );
+    }
+    if (!workspaceId) {
+      throw new BadRequestException('No workspace in session');
     }
 
     this.validate(payload);
@@ -444,13 +454,14 @@ export class FioAdsService {
     await this.sendEmail(email, payload, dataFile, submittedAt);
 
     await this.keyValuePairService.set({
-      userId,
-      workspaceId: null,
+      userId: null,
+      workspaceId,
       applicationId: null,
       key: FIO_AD_SUBMISSION_KV_KEY,
       type: KeyValuePairType.USER_VARIABLE,
       value: {
         submittedAt,
+        submittedByEmail: email,
         brandName: payload.brand?.brandName ?? '',
         sentTo: this.recipient,
       },
