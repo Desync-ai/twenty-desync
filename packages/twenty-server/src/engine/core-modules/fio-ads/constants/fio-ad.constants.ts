@@ -39,3 +39,22 @@ export const FIO_AD_CATEGORIES = [
 export const FIO_AD_CATEGORY_SET: ReadonlySet<string> = new Set(
   FIO_AD_CATEGORIES,
 );
+
+// A small picker of standard ElevenLabs premade voices (stable public ids,
+// usable by any account with the Text-to-Speech scope). First entry is the
+// default. Users can pick one for the AI voiceover.
+export const FIO_VOICES: ReadonlyArray<{
+  id: string;
+  name: string;
+  description: string;
+}> = [
+  { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', description: 'Female, calm, clear narration' },
+  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam', description: 'Male, deep, confident' },
+  { id: 'ErXwobaYiN019PkySvjV', name: 'Antoni', description: 'Male, warm, friendly' },
+  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella', description: 'Female, soft, gentle' },
+  { id: 'TxGEqnHWrfWFTfGW9XjX', name: 'Josh', description: 'Male, young, upbeat' },
+];
+
+export const FIO_VOICE_IDS: ReadonlySet<string> = new Set(
+  FIO_VOICES.map((v) => v.id),
+);

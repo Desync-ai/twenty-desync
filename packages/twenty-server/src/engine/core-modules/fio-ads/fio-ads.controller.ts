@@ -88,7 +88,13 @@ export class FioAdsController {
     return this.fioAdsService.assist({
       brand: body?.brand,
       messages: body?.messages ?? [],
+      email: this.userEmail(request),
     });
+  }
+
+  @Get('voices')
+  voices() {
+    return { voices: this.fioAdsService.listVoices() };
   }
 
   @Post('transcribe')

@@ -14,6 +14,8 @@ import {
   FIO_AD_LIMITS,
   FIO_AD_SUBMISSION_KV_KEY,
   FIO_ADS_FALLBACK_RECIPIENT,
+  FIO_VOICES,
+  FIO_VOICE_IDS,
 } from 'src/engine/core-modules/fio-ads/constants/fio-ad.constants';
 import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
 import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
@@ -78,6 +80,9 @@ export class FioAdsService {
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
   private prefillPool: Pool | null = null;
+  // In-memory cache of website analysis (slow scrape) so the script assistant
+  // doesn't re-scrape on every message. Keyed by website URL, 15-min TTL.
+  private readonly websiteCache = new Map<string, { at: number; summary: string }>();
 
   constructor(
     private readonly desyncOnboardingService: DesyncOnboardingService,
@@ -163,16 +168,127 @@ export class FioAdsService {
     }
   }
 
+  listVoices(): ReadonlyArray<{ id: string; name: string; description: string }> {
+    return FIO_VOICES;
+  }
+
+  // The user's signup answers (scraper_db) summarized for the script writer.
+  private async getOnboardingSummary(email?: string): Promise<string> {
+    if (!email) {
+      return '';
+    }
+    const pool = this.getPrefillPool();
+    if (!pool) {
+      return '';
+    }
+    try {
+      const { rows } = await pool.query(
+        `SELECT onboarding_company, onboarding_company_url, onboarding_who,
+                onboarding_business_type, onboarding_outreach, onboarding_tools,
+                onboarding_messages_per_month, onboarding_deals_per_month
+           FROM user_data WHERE lower(email) = lower($1) LIMIT 1`,
+        [email],
+      );
+      const r = rows[0];
+      if (!r) {
+        return '';
+      }
+      const parts: string[] = [];
+      const add = (label: string, v: unknown) => {
+        if (typeof v === 'string' && v.trim()) parts.push(`${label}: ${v.trim()}`);
+      };
+      add('Company', r.onboarding_company);
+      add('Website', r.onboarding_company_url);
+      add('Business type', r.onboarding_business_type);
+      add('Who they serve', r.onboarding_who);
+      add('Outreach goals', r.onboarding_outreach);
+      add('Tools they use', r.onboarding_tools);
+      add('Messages per month', r.onboarding_messages_per_month);
+      add('Deals per month', r.onboarding_deals_per_month);
+
+      return parts.join('\n');
+    } catch (error) {
+      this.logger.warn(
+        `Fio ads: onboarding context lookup failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+
+      return '';
+    }
+  }
+
+  // A scrape+analysis of the user's company site (1-3 pages, via the twenty-backend
+  // analyze-website path), cached 15 min so the chat doesn't re-scrape each turn.
+  private async getWebsiteSummary(website?: string): Promise<string> {
+    const url = (website ?? '').trim();
+    if (!url) {
+      return '';
+    }
+    const cached = this.websiteCache.get(url);
+    if (cached && Date.now() - cached.at < 15 * 60 * 1000) {
+      return cached.summary;
+    }
+    let summary = '';
+    try {
+      const a = await this.desyncOnboardingService.analyzeWebsite(url);
+      if (a?.ok) {
+        const parts: string[] = [];
+        if (a.company) parts.push(`Company: ${a.company}`);
+        if (a.product) parts.push(`Offering: ${a.product}`);
+        if (a.who) parts.push(`Audience: ${a.who}`);
+        if (a.businessType) parts.push(`Business type: ${a.businessType}`);
+        if (Array.isArray(a.outreach) && a.outreach.length) {
+          parts.push(`Outreach angles: ${a.outreach.join('; ')}`);
+        }
+        if (Array.isArray(a.tags) && a.tags.length) {
+          parts.push(`Themes: ${a.tags.join(', ')}`);
+        }
+        summary = parts.join('\n');
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Fio ads: website analysis failed for ${url}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+    this.websiteCache.set(url, { at: Date.now(), summary });
+
+    return summary;
+  }
+
+  private async getScriptContext(
+    email?: string,
+    website?: string,
+  ): Promise<string> {
+    const [onboarding, site] = await Promise.all([
+      this.getOnboardingSummary(email),
+      this.getWebsiteSummary(website),
+    ]);
+    const blocks: string[] = [];
+    if (onboarding) {
+      blocks.push(`What the user told us at signup:\n${onboarding}`);
+    }
+    if (site) {
+      blocks.push(`From their website:\n${site}`);
+    }
+
+    return blocks.join('\n\n');
+  }
+
   // Agentic helper: a short, multi-turn assistant that drafts/refines the audio
   // ad script. Stateless on the server (the client sends the running history);
-  // brand context is injected into the system prompt. Returns the assistant's
-  // reply text. Caller gates this on eligibility (it spends AI budget).
+  // brand + the user's signup answers + a scrape of their site are injected into
+  // the system prompt. Returns the reply. Caller gates on eligibility (spends AI).
   async assist({
     brand,
     messages,
+    email,
   }: {
     brand?: { name?: string; website?: string };
     messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    email?: string;
   }): Promise<{ reply: string }> {
     if (!this.anthropicKey) {
       throw new Error('The ad assistant is not configured (ANTHROPIC_API_KEY).');
@@ -215,6 +331,15 @@ export class FioAdsService {
       `[SCRIPT] markers. Never use em dashes or en dashes anywhere in your ` +
       `output; use commas, periods, or parentheses instead.`;
 
+    // Ground the writer in the user's real signup answers + a scrape of their
+    // site, so a "recommend a script" request is specific, not generic.
+    const context = await this.getScriptContext(email, brand?.website);
+    const systemWithContext = context
+      ? `${system}\n\nUse this real context about the user and their business ` +
+        `to make the ad specific and accurate; do not contradict or invent ` +
+        `beyond it:\n${context}`
+      : system;
+
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -225,7 +350,7 @@ export class FioAdsService {
       body: JSON.stringify({
         model: FioAdsService.ASSIST_MODEL,
         max_tokens: 600,
-        system,
+        system: systemWithContext,
         messages: cleaned,
       }),
     });
@@ -320,10 +445,13 @@ export class FioAdsService {
       throw new BadRequestException('Script is too long for a 20-30s ad.');
     }
 
+    // Only allow a voice from our picker list; otherwise fall back to the
+    // default (prevents arbitrary voice ids being driven through our key).
+    const requested = (voiceId ?? '').trim();
     const voice =
-      (voiceId && voiceId.trim()) ||
-      process.env.ELEVENLABS_VOICE_ID ||
-      FioAdsService.DEFAULT_VOICE_ID;
+      requested && FIO_VOICE_IDS.has(requested)
+        ? requested
+        : process.env.ELEVENLABS_VOICE_ID || FioAdsService.DEFAULT_VOICE_ID;
 
     const res = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(
