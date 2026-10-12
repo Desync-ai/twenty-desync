@@ -41,6 +41,12 @@ const AiChatPage = lazy(() =>
   })),
 );
 
+const FioAdsPage = lazy(() =>
+  import('~/pages/fio-ads/FioAdsPage').then((module) => ({
+    default: module.FioAdsPage,
+  })),
+);
+
 const MobileHomePage = lazy(() =>
   import('~/pages/mobile-home/MobileHomePage').then((module) => ({
     default: module.MobileHomePage,
@@ -124,6 +130,14 @@ export const createWorkspaceRouteObjects = ({
       element: (
         <LazyRoute>
           <AiChatPage />
+        </LazyRoute>
+      ),
+    },
+    {
+      path: AppPath.FioAds,
+      element: (
+        <LazyRoute>
+          <FioAdsPage />
         </LazyRoute>
       ),
     },

@@ -36,11 +36,21 @@ export class FioAdsController {
     return (request as { user?: { email?: string } }).user?.email;
   }
 
+  private workspaceId(request: AuthenticatedRequest): string | undefined {
+    return (request as { workspace?: { id?: string } }).workspace?.id;
+  }
+
+  private userWorkspaceId(request: AuthenticatedRequest): string | undefined {
+    return (request as { userWorkspaceId?: string }).userWorkspaceId;
+  }
+
   @Get('status')
   async status(@Req() request: AuthenticatedRequest) {
     return this.fioAdsService.getStatus({
       userId: this.userId(request),
       email: this.userEmail(request),
+      workspaceId: this.workspaceId(request),
+      userWorkspaceId: this.userWorkspaceId(request),
     });
   }
 
@@ -54,6 +64,8 @@ export class FioAdsController {
     return this.fioAdsService.launch({
       userId,
       email: this.userEmail(request) ?? '',
+      workspaceId: this.workspaceId(request),
+      userWorkspaceId: this.userWorkspaceId(request),
       payload: (body ?? {}) as Parameters<FioAdsService['launch']>[0]['payload'],
     });
   }

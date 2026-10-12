@@ -5,6 +5,8 @@ import {
   Logger,
 } from '@nestjs/common';
 
+import { PermissionFlagType } from 'twenty-shared/constants';
+
 import { DesyncOnboardingService } from 'src/engine/core-modules/desync-onboarding/desync-onboarding.service';
 import {
   FIO_AD_CATEGORY_SET,
@@ -14,6 +16,7 @@ import {
 } from 'src/engine/core-modules/fio-ads/constants/fio-ad.constants';
 import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
 import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
+import { PermissionsService } from 'src/engine/metadata-modules/permissions/permissions.service';
 
 type FioUpload = {
   filename?: string;
@@ -43,7 +46,13 @@ type FioAdPayload = {
 
 export type FioAdStatus = {
   eligible: boolean;
-  reason: 'ok' | 'not_paid' | 'referral' | 'already_launched' | 'ineligible';
+  reason:
+    | 'ok'
+    | 'not_admin'
+    | 'not_paid'
+    | 'referral'
+    | 'already_launched'
+    | 'ineligible';
   alreadyLaunched: boolean;
   allowMultiple: boolean;
   plan: string;
@@ -59,6 +68,7 @@ export class FioAdsService {
   constructor(
     private readonly desyncOnboardingService: DesyncOnboardingService,
     private readonly keyValuePairService: KeyValuePairService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   // SAFETY: only an explicit FIO_ADS_EMAIL env var can change the recipient.
@@ -80,9 +90,13 @@ export class FioAdsService {
   async getStatus({
     userId,
     email,
+    workspaceId,
+    userWorkspaceId,
   }: {
     userId?: string;
     email?: string;
+    workspaceId?: string;
+    userWorkspaceId?: string;
   }): Promise<FioAdStatus> {
     const normalizedEmail = (email ?? '').toLowerCase();
     const isInternal = normalizedEmail.endsWith('@desync.ai');
@@ -107,13 +121,36 @@ export class FioAdsService {
       );
     }
 
-    const eligible = isInternal || isPaid;
-    const alreadyLaunched = userId
-      ? await this.hasLaunched(userId)
-      : false;
+    // Only workspace admins may launch (WORKSPACE settings permission == admin).
+    let isAdmin = false;
+    if (workspaceId && userWorkspaceId) {
+      try {
+        isAdmin = await this.permissionsService.userHasWorkspaceSettingPermission(
+          {
+            userWorkspaceId,
+            workspaceId,
+            setting: PermissionFlagType.WORKSPACE,
+          },
+        );
+      } catch (error) {
+        this.logger.warn(
+          `Fio ads: admin check failed for ${normalizedEmail}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    // Internal (@desync.ai) relaxes only the PAID requirement, never the admin
+    // requirement; the rule is workspace-admins only.
+    const planOk = isPaid || isInternal;
+    const eligible = isAdmin && planOk;
+    const alreadyLaunched = userId ? await this.hasLaunched(userId) : false;
 
     let reason: FioAdStatus['reason'];
-    if (!eligible) {
+    if (!isAdmin) {
+      reason = 'not_admin';
+    } else if (!planOk) {
       reason = plan === 'Referral' ? 'referral' : 'not_paid';
     } else if (alreadyLaunched && !this.allowMultiple) {
       reason = 'already_launched';
@@ -145,18 +182,30 @@ export class FioAdsService {
   async launch({
     userId,
     email,
+    workspaceId,
+    userWorkspaceId,
     payload,
   }: {
     userId: string;
     email: string;
+    workspaceId?: string;
+    userWorkspaceId?: string;
     payload: FioAdPayload;
   }): Promise<{ ok: true }> {
-    // Never trust the client: re-check eligibility + the one-ad rule server-side.
-    const status = await this.getStatus({ userId, email });
+    // Never trust the client: re-check eligibility (incl. admin) + the one-ad
+    // rule server-side.
+    const status = await this.getStatus({
+      userId,
+      email,
+      workspaceId,
+      userWorkspaceId,
+    });
 
     if (!status.eligible) {
       throw new ForbiddenException(
-        'Fio ads are available on Starter and above.',
+        status.reason === 'not_admin'
+          ? 'Only workspace admins can launch a Fio ad.'
+          : 'Fio ads are available on Starter and above.',
       );
     }
     if (status.alreadyLaunched && !this.allowMultiple) {

@@ -678,9 +678,6 @@ export const SettingsIntegrations = () => {
             <Button variant="outline" onClick={() => openFeedback('request')}>
               {t`Request an integration`}
             </Button>
-            <Button variant="outline" onClick={() => openFeedback('problem')}>
-              {t`Report a problem`}
-            </Button>
           </StyledFooter>
         </Section>
       </SettingsPageContainer>
