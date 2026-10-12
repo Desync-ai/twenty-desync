@@ -235,6 +235,21 @@ export const COMPOSIO_INSTANTLY_TOOLS: ComposioTool[] = [
   { slug: 'INSTANTLY_LIST_ACCOUNTS', description: 'List the connected sending email accounts.' },
 ];
 
+// Curated Attio tools — the user's existing CRM. Read + safe writes; the two
+// destructive deletes (ATTIO_DELETE_RECORD / ATTIO_DELETE_NOTE) are held back.
+// Managed OAuth, so no Attio dev app on our side.
+export const COMPOSIO_ATTIO_TOOLS: ComposioTool[] = [
+  { slug: 'ATTIO_LIST_OBJECTS', description: "List the workspace's objects (people, companies, deals, custom objects)." },
+  { slug: 'ATTIO_GET_OBJECT', description: 'Get one object and its attributes by id or slug.' },
+  { slug: 'ATTIO_LIST_RECORDS', description: 'List records for an object, with optional filters and sorting.' },
+  { slug: 'ATTIO_FIND_RECORD', description: 'Find a specific record (e.g. a person or company) in an object.' },
+  { slug: 'ATTIO_LIST_LISTS', description: "List the workspace's lists." },
+  { slug: 'ATTIO_LIST_NOTES', description: 'List notes, optionally for a given record.' },
+  { slug: 'ATTIO_CREATE_RECORD', description: 'Create a record (person, company, deal, custom object entry).' },
+  { slug: 'ATTIO_UPDATE_RECORD', description: "Update an existing record's attributes." },
+  { slug: 'ATTIO_CREATE_NOTE', description: 'Add a note to a record.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -333,6 +348,12 @@ export class ComposioService {
         label: 'Instantly',
         authConfigId: process.env.COMPOSIO_INSTANTLY_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_INSTANTLY_TOOLS,
+      },
+      {
+        slug: 'attio',
+        label: 'Attio',
+        authConfigId: process.env.COMPOSIO_ATTIO_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_ATTIO_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.

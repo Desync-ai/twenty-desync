@@ -188,6 +188,16 @@ const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'attio',
+    name: 'Attio',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'attio.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant read and update your Attio CRM',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'claude',
     name: 'Claude',
     kind: 'mcp',

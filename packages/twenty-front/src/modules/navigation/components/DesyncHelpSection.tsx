@@ -2,7 +2,7 @@ import { isNonEmptyString } from '@sniptt/guards';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useState } from 'react';
-import { IconBug, IconCalendarEvent } from 'twenty-ui/icon';
+import { IconAlertTriangle, IconCalendarEvent } from 'twenty-ui/icon';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Button } from 'twenty-ui/primitives/input';
 import { H1Title, H1TitleFontColor } from 'twenty-ui/primitives/typography';
@@ -174,7 +174,7 @@ export const DesyncHelpSection = () => {
         )}
         <NavigationDrawerItem
           label={t`Report a bug`}
-          Icon={IconBug}
+          Icon={IconAlertTriangle}
           onClick={openBugReport}
         />
       </StyledSection>
