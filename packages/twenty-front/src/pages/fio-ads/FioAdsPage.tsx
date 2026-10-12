@@ -42,6 +42,28 @@ const RECORD_EXT: Record<string, string> = {
 const formatSeconds = (s: number) =>
   `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
+// The assistant wraps the spoken script in [SCRIPT]...[/SCRIPT]. "Use as
+// transcript" lifts just that; if the markers are missing it falls back to
+// stripping markdown headings, horizontal rules, and any trailing
+// headline/subtitle labels so only the readable copy lands in the transcript.
+const extractScript = (content: string): string => {
+  const marked = content.match(/\[SCRIPT\]([\s\S]*?)\[\/SCRIPT\]/i);
+  if (marked) {
+    return marked[1].trim();
+  }
+  let text = content.replace(/^#.*$/gm, '').replace(/^\s*-{3,}\s*$/gm, '');
+  const labelAt = text.search(/\*{0,2}(headline|subtitle)\b[^:\n]*:/i);
+  if (labelAt !== -1) {
+    text = text.slice(0, labelAt);
+  }
+
+  return text.trim();
+};
+
+// Hide the raw [SCRIPT] markers when showing the message so it reads naturally.
+const stripScriptMarkers = (content: string): string =>
+  content.replace(/\[\/?SCRIPT\]/gi, '').trim();
+
 const FIO_CATEGORIES = [
   'Apologetics', 'Arts', 'AudioDramas', 'Business', 'Catechism', 'Children',
   'Coaching', 'Comedy', 'Dating&Relationships', 'Development&Philanthropy',
@@ -880,13 +902,15 @@ export const FioAdsPage = () => {
                           {m.role === 'user' ? t`You` : t`Assistant`}
                         </StyledChatRole>
                         <StyledChatMsg data-role={m.role}>
-                          {m.content}
+                          {m.role === 'assistant'
+                            ? stripScriptMarkers(m.content)
+                            : m.content}
                         </StyledChatMsg>
                         {m.role === 'assistant' && (
                           <div style={{ marginTop: '6px' }}>
                             <Button
                               variant="outline"
-                              onClick={() => setTranscript(m.content)}
+                              onClick={() => setTranscript(extractScript(m.content))}
                             >
                               {t`Use as transcript`}
                             </Button>

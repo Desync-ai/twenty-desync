@@ -197,10 +197,14 @@ export class FioAdsService {
       `Fio, a Catholic podcast network. ${brandLine} ` +
       `The spoken ad must be 20 to 30 seconds, which is roughly 50 to 75 words. ` +
       `Write warm, clear, broadcast-ready copy suitable for a Catholic audience; ` +
-      `avoid hype and anything off-brand for that context. When the user asks for ` +
-      `a script, reply with just the script text they can read aloud, no stage ` +
-      `directions or labels. Keep within the time limit. You may also suggest a ` +
-      `headline (<=45 chars) and subtitle (<=100 chars) if asked.`;
+      `avoid hype and anything off-brand for that context. When you provide a ` +
+      `ready-to-read script, put the spoken words ONLY (no title, no word count, ` +
+      `no markdown, no quotation marks, no labels) between a line reading ` +
+      `[SCRIPT] and a line reading [/SCRIPT], so it can be lifted straight into ` +
+      `the transcript. Keep it within the time limit. Any headline (<=45 chars) ` +
+      `or subtitle (<=100 chars) suggestions, or other commentary, go OUTSIDE ` +
+      `those markers. Never use em dashes or en dashes anywhere in your output; ` +
+      `use commas, periods, or parentheses instead.`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -229,7 +233,9 @@ export class FioAdsService {
       .filter((block) => block?.type === 'text' && typeof block.text === 'string')
       .map((block) => block.text)
       .join('\n')
-      .trim();
+      .trim()
+      // Backstop the no-em-dash rule even if the model slips one in.
+      .replace(/\s*[—–]\s*/g, ', ');
 
     return { reply: reply || 'Sorry, I could not generate a response.' };
   }
