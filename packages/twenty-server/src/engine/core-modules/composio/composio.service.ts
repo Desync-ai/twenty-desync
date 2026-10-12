@@ -235,6 +235,22 @@ export const COMPOSIO_INSTANTLY_TOOLS: ComposioTool[] = [
   { slug: 'INSTANTLY_LIST_ACCOUNTS', description: 'List the connected sending email accounts.' },
 ];
 
+// Curated X (Twitter) tools. OAuth2 via OUR OWN X app (BYO OAuth; no managed
+// auth, no API key). Kept tight + cost-aware: X API is pay-per-use, so we
+// deliberately EXCLUDE the expensive full-archive search, DMs (need extra
+// scopes), lists and spaces. Each user still connects their OWN X account.
+export const COMPOSIO_TWITTER_TOOLS: ComposioTool[] = [
+  { slug: 'TWITTER_CREATION_OF_A_POST', description: 'Post a tweet from the connected X account.' },
+  { slug: 'TWITTER_POST_DELETE_BY_POST_ID', description: "Delete one of the connected account's own posts." },
+  { slug: 'TWITTER_RECENT_SEARCH', description: 'Search posts from the last 7 days by query.' },
+  { slug: 'TWITTER_POST_LOOKUP_BY_POST_ID', description: 'Read a specific post by its id.' },
+  { slug: 'TWITTER_USER_LOOKUP_ME', description: "Look up the connected account's own X profile." },
+  { slug: 'TWITTER_USER_LOOKUP_BY_USERNAME', description: 'Look up an X user by @username.' },
+  { slug: 'TWITTER_FOLLOW_USER', description: 'Follow an X user.' },
+  { slug: 'TWITTER_USER_LIKE_POST', description: 'Like a post.' },
+  { slug: 'TWITTER_RETWEET_POST', description: 'Repost (retweet) a post.' },
+];
+
 // Curated Attio tools — the user's existing CRM. Read + safe writes; the two
 // destructive deletes (ATTIO_DELETE_RECORD / ATTIO_DELETE_NOTE) are held back.
 // Managed OAuth, so no Attio dev app on our side.
@@ -354,6 +370,15 @@ export class ComposioService {
         label: 'Attio',
         authConfigId: process.env.COMPOSIO_ATTIO_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_ATTIO_TOOLS,
+      },
+      {
+        // X (Twitter): OAuth2 via OUR OWN X app (BYO OAuth, no managed/API-key).
+        // Enabled only when its auth-config id is set. Pay-per-use API, so the
+        // curated tool set is deliberately tight (no full-archive search/DMs).
+        slug: 'twitter',
+        label: 'X (Twitter)',
+        authConfigId: process.env.COMPOSIO_TWITTER_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_TWITTER_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.

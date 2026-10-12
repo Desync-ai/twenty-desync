@@ -198,6 +198,16 @@ const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'twitter',
+    name: 'X (Twitter)',
+    kind: 'connect',
+    tags: ['Messaging'],
+    logoDomain: 'x.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant post and engage on X for you',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'claude',
     name: 'Claude',
     kind: 'mcp',
