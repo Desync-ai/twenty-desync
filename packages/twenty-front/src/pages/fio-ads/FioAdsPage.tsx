@@ -12,11 +12,10 @@ import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
 
-// Desync: "Launch a Fio ad" as its own page (reached from the sidebar), with a
-// short explainer of what Fio is, Fio's full submission spec, and client-side
-// validation. On submit the server emails the package to the Fio inbox, which
-// stays on jackson@desync.ai until FIO_ADS_EMAIL is set. Admin-only + paid gate
-// is enforced server-side; this page reflects it via /fio-ads/status.
+// Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
+// Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
+// (reflected via /fio-ads/status); emails stay on jackson@desync.ai until
+// FIO_ADS_EMAIL is set.
 
 const FIO_BASE = `${REACT_APP_SERVER_BASE_URL}/fio-ads`;
 
@@ -28,10 +27,6 @@ const AUDIO_MIN_SEC = 20;
 const AUDIO_MAX_SEC = 30;
 const MAX_CATEGORIES = 5;
 
-// In-browser recording: browsers don't record MP3 natively, so we capture the
-// first supported container (webm/opus on Chrome/Firefox, mp4/aac on Safari).
-// The backend accepts these alongside MP3; MP3 conversion for Fio delivery is a
-// later step.
 const RECORD_MIME_CANDIDATES = ['audio/webm', 'audio/mp4', 'audio/ogg'];
 const RECORD_EXT: Record<string, string> = {
   'audio/webm': 'webm',
@@ -39,13 +34,11 @@ const RECORD_EXT: Record<string, string> = {
   'audio/ogg': 'ogg',
 };
 
+const STEPS = ['Brand', 'Creative', 'Audio', 'Review'];
+
 const formatSeconds = (s: number) =>
   `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-// The assistant wraps the spoken script in [SCRIPT]...[/SCRIPT]. "Use as
-// transcript" lifts just that; if the markers are missing it falls back to
-// stripping markdown headings, horizontal rules, and any trailing
-// headline/subtitle labels so only the readable copy lands in the transcript.
 const extractScript = (content: string): string => {
   const marked = content.match(/\[SCRIPT\]([\s\S]*?)\[\/SCRIPT\]/i);
   if (marked) {
@@ -60,7 +53,6 @@ const extractScript = (content: string): string => {
   return text.trim();
 };
 
-// Hide the raw [SCRIPT] markers when showing the message so it reads naturally.
 const stripScriptMarkers = (content: string): string =>
   content.replace(/\[\/?SCRIPT\]/gi, '').trim();
 
@@ -80,6 +72,7 @@ const FIO_CATEGORIES = [
 ];
 
 type UploadedFile = { filename: string; contentType: string; dataBase64: string };
+type Voice = { id: string; name: string; description: string };
 type StatusResponse = {
   eligible: boolean;
   reason: string;
@@ -102,7 +95,7 @@ const StyledContent = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[6]};
   margin: 0 auto;
-  max-width: 720px;
+  max-width: 680px;
   padding: ${themeCssVariables.spacing[8]} ${themeCssVariables.spacing[6]};
   width: 100%;
 `;
@@ -129,6 +122,37 @@ const StyledBlurb = styled.p`
   a {
     color: ${themeCssVariables.color.blue};
   }
+`;
+
+const StyledStepper = styled.div`
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledStep = styled.div`
+  border-bottom: 2px solid ${themeCssVariables.border.color.medium};
+  color: ${themeCssVariables.font.color.light};
+  flex: 1;
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  padding-bottom: ${themeCssVariables.spacing[2]};
+  text-align: center;
+
+  &[data-done='true'] {
+    border-bottom-color: ${themeCssVariables.color.blue};
+    color: ${themeCssVariables.font.color.secondary};
+  }
+  &[data-active='true'] {
+    border-bottom-color: ${themeCssVariables.color.blue};
+    color: ${themeCssVariables.font.color.primary};
+  }
+`;
+
+const StyledStepCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[5]};
+  min-height: 180px;
 `;
 
 const StyledFieldset = styled.div`
@@ -169,6 +193,7 @@ const StyledField = styled.div`
 const StyledUploadRow = styled.div`
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[3]};
 `;
 
@@ -178,6 +203,16 @@ const StyledThumb = styled.img`
   height: 56px;
   object-fit: cover;
   width: 56px;
+`;
+
+const StyledSelect = styled.select`
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.sm};
+  max-width: 320px;
+  padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
 `;
 
 const StyledCategoryGrid = styled.div`
@@ -207,10 +242,12 @@ const StyledChip = styled.button`
   }
 `;
 
-const StyledActions = styled.div`
+const StyledNav = styled.div`
+  border-top: 1px solid ${themeCssVariables.border.color.light};
   display: flex;
   gap: ${themeCssVariables.spacing[3]};
-  padding-top: ${themeCssVariables.spacing[2]};
+  justify-content: space-between;
+  padding-top: ${themeCssVariables.spacing[4]};
 `;
 
 const StyledMessage = styled.div`
@@ -233,7 +270,7 @@ const StyledChatMessages = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
-  max-height: 280px;
+  max-height: 240px;
   overflow-y: auto;
 `;
 
@@ -263,6 +300,24 @@ const StyledChatInputRow = styled.div`
   & > *:first-child {
     flex: 1;
   }
+`;
+
+const StyledReviewRow = styled.div`
+  display: flex;
+  font-size: ${themeCssVariables.font.size.sm};
+  gap: ${themeCssVariables.spacing[3]};
+`;
+
+const StyledReviewLabel = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  flex: 0 0 130px;
+`;
+
+const StyledReviewValue = styled.span`
+  color: ${themeCssVariables.font.color.primary};
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 `;
 
 const fileToBase64 = (file: Blob): Promise<string> =>
@@ -344,6 +399,7 @@ export const FioAdsPage = () => {
 
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
+  const [step, setStep] = useState(0);
 
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -367,6 +423,8 @@ export const FioAdsPage = () => {
   const [transcript, setTranscript] = useState('');
   const [transcribing, setTranscribing] = useState(false);
   const [generatingVoiceover, setGeneratingVoiceover] = useState(false);
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const [voiceId, setVoiceId] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -404,8 +462,7 @@ export const FioAdsPage = () => {
     void refreshStatus();
   }, [refreshStatus]);
 
-  // Prefill the contact from the signed-in user once it loads, only if the
-  // user hasn't already typed something (functional set keeps their edits).
+  // Prefill contact from the signed-in user once it loads (only if empty).
   useEffect(() => {
     const name = [
       currentWorkspaceMember?.name?.firstName,
@@ -420,8 +477,7 @@ export const FioAdsPage = () => {
     }
   }, [currentUser, currentWorkspaceMember]);
 
-  // Prefill brand name + website from what we already know (scraper_db), once.
-  // Only fills empty fields; everything stays editable.
+  // Prefill brand + website from what we know (scraper_db) + load voices, once.
   useEffect(() => {
     void (async () => {
       try {
@@ -436,6 +492,18 @@ export const FioAdsPage = () => {
         if (j?.website) setWebsite((prev) => prev || (j.website as string));
       } catch {
         // best-effort prefill
+      }
+    })();
+    void (async () => {
+      try {
+        const res = await fetch(`${FIO_BASE}/voices`, { credentials: 'include' });
+        const j = (await res.json()) as { voices?: Voice[] };
+        if (Array.isArray(j?.voices) && j.voices.length > 0) {
+          setVoices(j.voices);
+          setVoiceId((prev) => prev || j.voices![0].id);
+        }
+      } catch {
+        // no picker; backend uses its default voice
       }
     })();
     // run once on mount
@@ -524,9 +592,8 @@ export const FioAdsPage = () => {
     }
   };
 
-  // Optional: once audio is added and the transcript is still blank, transcribe
-  // it (Groq Whisper) and fill the transcript. Never overwrites typed text;
-  // fails silently so it can't block submission.
+  // Once audio is added and the transcript is blank, transcribe it (Groq) and
+  // fill the transcript. Never overwrites typed text; fails silently.
   const autoTranscribe = async (file: UploadedFile) => {
     if (transcript.trim()) {
       return;
@@ -548,14 +615,13 @@ export const FioAdsPage = () => {
         setTranscript((prev) => (prev.trim() ? prev : text));
       }
     } catch {
-      // best-effort; the user can still type the transcript
+      // best-effort
     } finally {
       setTranscribing(false);
     }
   };
 
-  // Optional: generate the ad audio from the script via ElevenLabs TTS (returns
-  // an MP3). Uses the current transcript as the script; fills the audio slot.
+  // Generate the ad audio from the script via ElevenLabs (returns an MP3).
   const generateVoiceover = async () => {
     const script = transcript.trim();
     if (!script) {
@@ -568,7 +634,7 @@ export const FioAdsPage = () => {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: script }),
+        body: JSON.stringify({ text: script, voiceId }),
       });
       if (!res.ok) {
         let msg = `Request failed (${res.status})`;
@@ -580,9 +646,7 @@ export const FioAdsPage = () => {
         }
         throw new Error(msg);
       }
-      const j = (await res.json()) as {
-        audio?: { filename: string; contentType: string; dataBase64: string };
-      };
+      const j = (await res.json()) as { audio?: UploadedFile };
       if (!j.audio?.dataBase64) {
         throw new Error('No audio returned');
       }
@@ -591,7 +655,7 @@ export const FioAdsPage = () => {
       try {
         duration = await readAudioDuration(blob);
       } catch {
-        // non-fatal; keep the audio
+        // non-fatal
       }
       setAudio(j.audio);
       if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
@@ -685,7 +749,7 @@ export const FioAdsPage = () => {
     }
     const mr = mediaRecorderRef.current;
     if (mr && mr.state !== 'inactive') {
-      mr.stop(); // fires onstop -> finalizeRecording
+      mr.stop();
     }
     setRecording(false);
   };
@@ -759,21 +823,25 @@ export const FioAdsPage = () => {
     );
   };
 
-  const isValid =
+  const step0Valid = Boolean(
     contactName.trim() &&
-    /.+@.+\..+/.test(contactEmail) &&
-    brandName.trim() &&
-    /^https?:\/\//.test(website) &&
+      /.+@.+\..+/.test(contactEmail) &&
+      brandName.trim() &&
+      /^https?:\/\//.test(website),
+  );
+  const step1Valid = Boolean(
     headline.trim() &&
-    headline.length <= HEADLINE_MAX &&
-    subtitle.length <= SUBTITLE_MAX &&
-    /^https?:\/\//.test(ctaUrl) &&
-    /^https?:\/\//.test(learnMoreUrl) &&
-    logo &&
-    adImage &&
-    audio &&
-    transcript.trim() &&
-    categories.length >= 1;
+      headline.length <= HEADLINE_MAX &&
+      subtitle.length <= SUBTITLE_MAX &&
+      /^https?:\/\//.test(ctaUrl) &&
+      /^https?:\/\//.test(learnMoreUrl) &&
+      logo &&
+      adImage &&
+      categories.length >= 1,
+  );
+  const step2Valid = Boolean(audio && transcript.trim());
+  const isValid = step0Valid && step1Valid && step2Valid;
+  const canAdvance = [step0Valid, step1Valid, step2Valid, true][step];
 
   const resetForm = () => {
     setContactName('');
@@ -789,8 +857,11 @@ export const FioAdsPage = () => {
     setAdImage(null);
     setAdImagePreview(null);
     setAudio(null);
+    setAudioPreviewUrl(null);
     setTranscript('');
     setCategories([]);
+    setAssistantMessages([]);
+    setStep(0);
   };
 
   const submit = async () => {
@@ -866,6 +937,13 @@ export const FioAdsPage = () => {
   const canShowForm =
     status?.eligible && !(status?.alreadyLaunched && !status?.allowMultiple);
 
+  const reviewRow = (label: string, value: string) => (
+    <StyledReviewRow>
+      <StyledReviewLabel>{label}</StyledReviewLabel>
+      <StyledReviewValue>{value || t`not set`}</StyledReviewValue>
+    </StyledReviewRow>
+  );
+
   return (
     <StyledPage>
       <StyledContent>
@@ -878,7 +956,7 @@ export const FioAdsPage = () => {
               fio.fm
             </a>
             ).{' '}
-            {t`Run a 20 to 30 second audio ad for your brand across their shows. Fill in the details below and submit, and we'll handle delivery.`}
+            {t`Run a 20 to 30 second audio ad for your brand across their shows. A few quick steps and we'll handle delivery.`}
           </StyledBlurb>
         </StyledHeader>
 
@@ -886,285 +964,383 @@ export const FioAdsPage = () => {
           <StyledMessage>{blockedMessage()}</StyledMessage>
         ) : (
           <>
-            <StyledFieldset>
-              <StyledGroupTitle>{t`Brand`}</StyledGroupTitle>
-              <SettingsTextInput
-                instanceId="fio-contact-name"
-                label={t`Contact full name`}
-                value={contactName}
-                onChange={setContactName}
-                fullWidth
-              />
-              <SettingsTextInput
-                instanceId="fio-contact-email"
-                label={t`Contact email`}
-                value={contactEmail}
-                onChange={setContactEmail}
-                fullWidth
-              />
-              <SettingsTextInput
-                instanceId="fio-brand-name"
-                label={t`Brand name`}
-                value={brandName}
-                onChange={setBrandName}
-                fullWidth
-              />
-              <SettingsTextInput
-                instanceId="fio-website"
-                label={t`Website (https://...)`}
-                value={website}
-                onChange={setWebsite}
-                fullWidth
-              />
-            </StyledFieldset>
+            <StyledStepper>
+              {STEPS.map((label, i) => (
+                <StyledStep
+                  key={label}
+                  data-active={i === step ? 'true' : 'false'}
+                  data-done={i < step ? 'true' : 'false'}
+                >
+                  {i + 1}. {label}
+                </StyledStep>
+              ))}
+            </StyledStepper>
 
-            <StyledFieldset>
-              <StyledGroupTitle>{t`Images`}</StyledGroupTitle>
-              <StyledField>
-                <StyledFieldLabel>{t`Logo`}</StyledFieldLabel>
-                <StyledHelper>{t`At least 500x500, up to 1MB. JPG or transparent PNG.`}</StyledHelper>
-                <StyledUploadRow>
-                  {logoPreview && <StyledThumb src={logoPreview} alt="logo" />}
-                  <Button
-                    variant="outline"
-                    onClick={() => logoInputRef.current?.click()}
-                  >
-                    {logo ? t`Replace logo` : t`Choose logo`}
-                  </Button>
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    style={{ display: 'none' }}
-                    onChange={(e) => void handleImage(e.target.files?.[0], 'logo')}
+            <StyledStepCard>
+              {step === 0 && (
+                <StyledFieldset>
+                  <StyledGroupTitle>{t`About your brand`}</StyledGroupTitle>
+                  <SettingsTextInput
+                    instanceId="fio-contact-name"
+                    label={t`Contact full name`}
+                    value={contactName}
+                    onChange={setContactName}
+                    fullWidth
                   />
-                </StyledUploadRow>
-                {logoError && <StyledError>{logoError}</StyledError>}
-              </StyledField>
-              <StyledField>
-                <StyledFieldLabel>{t`Advertisement image`}</StyledFieldLabel>
-                <StyledHelper>{t`At least 500x500, up to 1MB. JPG or non-transparent PNG.`}</StyledHelper>
-                <StyledUploadRow>
-                  {adImagePreview && <StyledThumb src={adImagePreview} alt="ad" />}
-                  <Button
-                    variant="outline"
-                    onClick={() => adImageInputRef.current?.click()}
-                  >
-                    {adImage ? t`Replace image` : t`Choose image`}
-                  </Button>
-                  <input
-                    ref={adImageInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    style={{ display: 'none' }}
-                    onChange={(e) =>
-                      void handleImage(e.target.files?.[0], 'adImage')
-                    }
+                  <SettingsTextInput
+                    instanceId="fio-contact-email"
+                    label={t`Contact email`}
+                    value={contactEmail}
+                    onChange={setContactEmail}
+                    fullWidth
                   />
-                </StyledUploadRow>
-                {adImageError && <StyledError>{adImageError}</StyledError>}
-              </StyledField>
-            </StyledFieldset>
-
-            <StyledFieldset>
-              <StyledGroupTitle>{t`Copy & links`}</StyledGroupTitle>
-              <SettingsTextInput
-                instanceId="fio-headline"
-                label={t`Headline (${headline.length}/${HEADLINE_MAX})`}
-                value={headline}
-                onChange={(v) => setHeadline(v.slice(0, HEADLINE_MAX))}
-                maxLength={HEADLINE_MAX}
-                fullWidth
-              />
-              <SettingsTextInput
-                instanceId="fio-subtitle"
-                label={t`Subtitle (${subtitle.length}/${SUBTITLE_MAX})`}
-                value={subtitle}
-                onChange={(v) => setSubtitle(v.slice(0, SUBTITLE_MAX))}
-                maxLength={SUBTITLE_MAX}
-                fullWidth
-              />
-              <SettingsTextInput
-                instanceId="fio-cta-url"
-                label={t`Call-to-action button URL (https://...)`}
-                value={ctaUrl}
-                onChange={setCtaUrl}
-                fullWidth
-              />
-              <SettingsTextInput
-                instanceId="fio-learn-more-url"
-                label={t`Learn More URL (https://...)`}
-                value={learnMoreUrl}
-                onChange={setLearnMoreUrl}
-                fullWidth
-              />
-            </StyledFieldset>
-
-            <StyledFieldset>
-              <StyledGroupTitle>{t`Script assistant`}</StyledGroupTitle>
-              <StyledHelper>
-                {t`Describe what you want to promote and the assistant will draft a 20 to 30 second script. Edit anything it gives you.`}
-              </StyledHelper>
-              <StyledChat>
-                {assistantMessages.length > 0 && (
-                  <StyledChatMessages>
-                    {assistantMessages.map((m, i) => (
-                      <div key={i}>
-                        <StyledChatRole>
-                          {m.role === 'user' ? t`You` : t`Assistant`}
-                        </StyledChatRole>
-                        <StyledChatMsg data-role={m.role}>
-                          {m.role === 'assistant'
-                            ? stripScriptMarkers(m.content)
-                            : m.content}
-                        </StyledChatMsg>
-                        {m.role === 'assistant' && (
-                          <div style={{ marginTop: '6px' }}>
-                            <Button
-                              variant="outline"
-                              onClick={() => setTranscript(extractScript(m.content))}
-                            >
-                              {t`Use as transcript`}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </StyledChatMessages>
-                )}
-                <StyledChatInputRow>
-                  <TextArea
-                    textAreaId="fio-assistant-input"
-                    placeholder={t`e.g. Promote our parish youth retreat in July`}
-                    value={assistantInput}
-                    onChange={setAssistantInput}
-                    minRows={2}
-                    maxRows={4}
+                  <SettingsTextInput
+                    instanceId="fio-brand-name"
+                    label={t`Brand name`}
+                    value={brandName}
+                    onChange={setBrandName}
+                    fullWidth
                   />
-                  <Button
-                    variant="solid"
-                    color="accent"
-                    onClick={sendAssistant}
-                    disabled={!assistantInput.trim() || assistantLoading}
-                  >
-                    {assistantLoading ? t`Thinking...` : t`Send`}
-                  </Button>
-                </StyledChatInputRow>
-              </StyledChat>
-            </StyledFieldset>
-
-            <StyledFieldset>
-              <StyledGroupTitle>{t`Audio`}</StyledGroupTitle>
-              <StyledField>
-                <StyledFieldLabel>{t`Audio (20 to 30 seconds)`}</StyledFieldLabel>
-                <StyledHelper>
-                  {t`Upload an MP3, record one in your browser, or generate an AI voiceover of your script.`}
-                </StyledHelper>
-                <StyledUploadRow>
-                  <Button
-                    variant="outline"
-                    onClick={() => audioInputRef.current?.click()}
-                    disabled={recording}
-                  >
-                    {audio ? t`Replace with MP3` : t`Choose MP3`}
-                  </Button>
-                  {recording ? (
-                    <Button
-                      variant="solid"
-                      color="accent"
-                      onClick={stopRecording}
-                    >
-                      {t`Stop (${formatSeconds(recordSeconds)})`}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={() => void startRecording()}
-                    >
-                      {t`Record`}
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    onClick={() => void generateVoiceover()}
-                    disabled={recording || generatingVoiceover}
-                  >
-                    {generatingVoiceover
-                      ? t`Generating...`
-                      : t`Generate AI voiceover`}
-                  </Button>
-                  {audio && !recording && (
-                    <StyledHelper>{audio.filename}</StyledHelper>
-                  )}
-                  <input
-                    ref={audioInputRef}
-                    type="file"
-                    accept="audio/mpeg,.mp3"
-                    style={{ display: 'none' }}
-                    onChange={(e) => void handleAudio(e.target.files?.[0])}
+                  <SettingsTextInput
+                    instanceId="fio-website"
+                    label={t`Website (https://...)`}
+                    value={website}
+                    onChange={setWebsite}
+                    fullWidth
                   />
-                </StyledUploadRow>
-                {recording && (
-                  <StyledHelper>
-                    {t`Recording, up to 30 seconds. Speak your ad, then press Stop.`}
-                  </StyledHelper>
-                )}
-                {audioPreviewUrl && !recording && (
-                  <audio
-                    controls
-                    src={audioPreviewUrl}
-                    style={{ marginTop: '4px', maxWidth: '100%' }}
-                  />
-                )}
-                {audioError && <StyledError>{audioError}</StyledError>}
-              </StyledField>
-              <TextArea
-                textAreaId="fio-transcript"
-                label={t`Full transcript`}
-                placeholder={t`Paste the transcript, or add audio and we'll fill it in for you.`}
-                value={transcript}
-                onChange={setTranscript}
-                minRows={3}
-                maxRows={8}
-              />
-              {transcribing && (
-                <StyledHelper>{t`Transcribing your audio...`}</StyledHelper>
+                  <StyledHelper>{t`We prefilled what we already know. Edit anything.`}</StyledHelper>
+                </StyledFieldset>
               )}
-            </StyledFieldset>
 
-            <StyledFieldset>
-              <StyledGroupTitle>
-                {t`Categories (${categories.length}/${MAX_CATEGORIES})`}
-              </StyledGroupTitle>
-              <StyledHelper>{t`Pick up to 5 listening categories to target.`}</StyledHelper>
-              <StyledCategoryGrid>
-                {FIO_CATEGORIES.map((category) => {
-                  const selected = categories.includes(category);
-                  return (
-                    <StyledChip
-                      key={category}
-                      type="button"
-                      data-selected={selected ? 'true' : 'false'}
-                      onClick={() => toggleCategory(category)}
-                      disabled={!selected && categories.length >= MAX_CATEGORIES}
-                    >
-                      {category}
-                    </StyledChip>
-                  );
-                })}
-              </StyledCategoryGrid>
-            </StyledFieldset>
+              {step === 1 && (
+                <>
+                  <StyledFieldset>
+                    <StyledGroupTitle>{t`Copy & links`}</StyledGroupTitle>
+                    <SettingsTextInput
+                      instanceId="fio-headline"
+                      label={t`Headline (${headline.length}/${HEADLINE_MAX})`}
+                      value={headline}
+                      onChange={(v) => setHeadline(v.slice(0, HEADLINE_MAX))}
+                      maxLength={HEADLINE_MAX}
+                      fullWidth
+                    />
+                    <SettingsTextInput
+                      instanceId="fio-subtitle"
+                      label={t`Subtitle (${subtitle.length}/${SUBTITLE_MAX})`}
+                      value={subtitle}
+                      onChange={(v) => setSubtitle(v.slice(0, SUBTITLE_MAX))}
+                      maxLength={SUBTITLE_MAX}
+                      fullWidth
+                    />
+                    <SettingsTextInput
+                      instanceId="fio-cta-url"
+                      label={t`Call-to-action button URL (https://...)`}
+                      value={ctaUrl}
+                      onChange={setCtaUrl}
+                      fullWidth
+                    />
+                    <SettingsTextInput
+                      instanceId="fio-learn-more-url"
+                      label={t`Learn More URL (https://...)`}
+                      value={learnMoreUrl}
+                      onChange={setLearnMoreUrl}
+                      fullWidth
+                    />
+                  </StyledFieldset>
 
-            <StyledActions>
+                  <StyledFieldset>
+                    <StyledGroupTitle>{t`Images`}</StyledGroupTitle>
+                    <StyledField>
+                      <StyledFieldLabel>{t`Logo`}</StyledFieldLabel>
+                      <StyledHelper>{t`At least 500x500, up to 1MB. JPG or transparent PNG.`}</StyledHelper>
+                      <StyledUploadRow>
+                        {logoPreview && <StyledThumb src={logoPreview} alt="logo" />}
+                        <Button
+                          variant="outline"
+                          onClick={() => logoInputRef.current?.click()}
+                        >
+                          {logo ? t`Replace logo` : t`Choose logo`}
+                        </Button>
+                        <input
+                          ref={logoInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png"
+                          style={{ display: 'none' }}
+                          onChange={(e) =>
+                            void handleImage(e.target.files?.[0], 'logo')
+                          }
+                        />
+                      </StyledUploadRow>
+                      {logoError && <StyledError>{logoError}</StyledError>}
+                    </StyledField>
+                    <StyledField>
+                      <StyledFieldLabel>{t`Advertisement image`}</StyledFieldLabel>
+                      <StyledHelper>{t`At least 500x500, up to 1MB. JPG or non-transparent PNG.`}</StyledHelper>
+                      <StyledUploadRow>
+                        {adImagePreview && (
+                          <StyledThumb src={adImagePreview} alt="ad" />
+                        )}
+                        <Button
+                          variant="outline"
+                          onClick={() => adImageInputRef.current?.click()}
+                        >
+                          {adImage ? t`Replace image` : t`Choose image`}
+                        </Button>
+                        <input
+                          ref={adImageInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png"
+                          style={{ display: 'none' }}
+                          onChange={(e) =>
+                            void handleImage(e.target.files?.[0], 'adImage')
+                          }
+                        />
+                      </StyledUploadRow>
+                      {adImageError && <StyledError>{adImageError}</StyledError>}
+                    </StyledField>
+                  </StyledFieldset>
+
+                  <StyledFieldset>
+                    <StyledGroupTitle>
+                      {t`Categories (${categories.length}/${MAX_CATEGORIES})`}
+                    </StyledGroupTitle>
+                    <StyledHelper>{t`Pick up to 5 listening categories to target.`}</StyledHelper>
+                    <StyledCategoryGrid>
+                      {FIO_CATEGORIES.map((category) => {
+                        const selected = categories.includes(category);
+                        return (
+                          <StyledChip
+                            key={category}
+                            type="button"
+                            data-selected={selected ? 'true' : 'false'}
+                            onClick={() => toggleCategory(category)}
+                            disabled={
+                              !selected && categories.length >= MAX_CATEGORIES
+                            }
+                          >
+                            {category}
+                          </StyledChip>
+                        );
+                      })}
+                    </StyledCategoryGrid>
+                  </StyledFieldset>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <StyledFieldset>
+                    <StyledGroupTitle>{t`Script assistant`}</StyledGroupTitle>
+                    <StyledHelper>
+                      {t`Describe what you want to promote and the assistant will draft a 20 to 30 second script from your brand and website. Edit anything it gives you.`}
+                    </StyledHelper>
+                    <StyledChat>
+                      {assistantMessages.length > 0 && (
+                        <StyledChatMessages>
+                          {assistantMessages.map((m, i) => (
+                            <div key={i}>
+                              <StyledChatRole>
+                                {m.role === 'user' ? t`You` : t`Assistant`}
+                              </StyledChatRole>
+                              <StyledChatMsg data-role={m.role}>
+                                {m.role === 'assistant'
+                                  ? stripScriptMarkers(m.content)
+                                  : m.content}
+                              </StyledChatMsg>
+                              {m.role === 'assistant' && (
+                                <div style={{ marginTop: '6px' }}>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                      setTranscript(extractScript(m.content))
+                                    }
+                                  >
+                                    {t`Use as script`}
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </StyledChatMessages>
+                      )}
+                      <StyledChatInputRow>
+                        <TextArea
+                          textAreaId="fio-assistant-input"
+                          placeholder={t`e.g. Promote our parish youth retreat in July`}
+                          value={assistantInput}
+                          onChange={setAssistantInput}
+                          minRows={2}
+                          maxRows={4}
+                        />
+                        <Button
+                          variant="solid"
+                          color="accent"
+                          onClick={sendAssistant}
+                          disabled={!assistantInput.trim() || assistantLoading}
+                        >
+                          {assistantLoading ? t`Thinking...` : t`Send`}
+                        </Button>
+                      </StyledChatInputRow>
+                    </StyledChat>
+                    <TextArea
+                      textAreaId="fio-transcript"
+                      label={t`Script / transcript`}
+                      placeholder={t`Paste the script, or add audio and we'll fill it in for you.`}
+                      value={transcript}
+                      onChange={setTranscript}
+                      minRows={3}
+                      maxRows={8}
+                    />
+                    {transcribing && (
+                      <StyledHelper>{t`Transcribing your audio...`}</StyledHelper>
+                    )}
+                  </StyledFieldset>
+
+                  <StyledFieldset>
+                    <StyledGroupTitle>{t`Audio (20 to 30 seconds)`}</StyledGroupTitle>
+                    <StyledHelper>
+                      {t`Generate an AI voiceover of your script, record one in your browser, or upload an MP3.`}
+                    </StyledHelper>
+                    {voices.length > 0 && (
+                      <StyledField>
+                        <StyledFieldLabel>{t`AI voice`}</StyledFieldLabel>
+                        <StyledSelect
+                          value={voiceId}
+                          onChange={(e) => setVoiceId(e.target.value)}
+                        >
+                          {voices.map((v) => (
+                            <option key={v.id} value={v.id}>
+                              {v.name} ({v.description})
+                            </option>
+                          ))}
+                        </StyledSelect>
+                      </StyledField>
+                    )}
+                    <StyledUploadRow>
+                      <Button
+                        variant="solid"
+                        color="accent"
+                        onClick={() => void generateVoiceover()}
+                        disabled={recording || generatingVoiceover}
+                      >
+                        {generatingVoiceover
+                          ? t`Generating...`
+                          : t`Generate AI voiceover`}
+                      </Button>
+                      {recording ? (
+                        <Button
+                          variant="solid"
+                          color="accent"
+                          onClick={stopRecording}
+                        >
+                          {t`Stop (${formatSeconds(recordSeconds)})`}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          onClick={() => void startRecording()}
+                        >
+                          {t`Record`}
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={() => audioInputRef.current?.click()}
+                        disabled={recording}
+                      >
+                        {audio ? t`Replace with MP3` : t`Upload MP3`}
+                      </Button>
+                      {audio && !recording && (
+                        <StyledHelper>{audio.filename}</StyledHelper>
+                      )}
+                      <input
+                        ref={audioInputRef}
+                        type="file"
+                        accept="audio/mpeg,.mp3"
+                        style={{ display: 'none' }}
+                        onChange={(e) => void handleAudio(e.target.files?.[0])}
+                      />
+                    </StyledUploadRow>
+                    {recording && (
+                      <StyledHelper>
+                        {t`Recording, up to 30 seconds. Speak your ad, then press Stop.`}
+                      </StyledHelper>
+                    )}
+                    {audioPreviewUrl && !recording && (
+                      <audio
+                        controls
+                        src={audioPreviewUrl}
+                        style={{ marginTop: '4px', maxWidth: '100%' }}
+                      />
+                    )}
+                    {audioError && <StyledError>{audioError}</StyledError>}
+                  </StyledFieldset>
+                </>
+              )}
+
+              {step === 3 && (
+                <StyledFieldset>
+                  <StyledGroupTitle>{t`Review & submit`}</StyledGroupTitle>
+                  {reviewRow(t`Contact`, `${contactName} (${contactEmail})`)}
+                  {reviewRow(t`Brand`, brandName)}
+                  {reviewRow(t`Website`, website)}
+                  {reviewRow(t`Headline`, headline)}
+                  {reviewRow(t`Subtitle`, subtitle)}
+                  {reviewRow(t`CTA URL`, ctaUrl)}
+                  {reviewRow(t`Learn More`, learnMoreUrl)}
+                  {reviewRow(t`Categories`, categories.join(', '))}
+                  {reviewRow(
+                    t`Logo / image`,
+                    `${logo ? t`logo set` : t`missing`}, ${adImage ? t`image set` : t`missing`}`,
+                  )}
+                  {reviewRow(t`Audio`, audio ? audio.filename : t`missing`)}
+                  {audioPreviewUrl && (
+                    <audio
+                      controls
+                      src={audioPreviewUrl}
+                      style={{ maxWidth: '100%' }}
+                    />
+                  )}
+                  {reviewRow(t`Transcript`, transcript)}
+                  {!isValid && (
+                    <StyledError>
+                      {t`Something's missing. Go back and complete the earlier steps.`}
+                    </StyledError>
+                  )}
+                </StyledFieldset>
+              )}
+            </StyledStepCard>
+
+            <StyledNav>
               <Button
-                variant="solid"
-                color="accent"
-                onClick={submit}
-                disabled={!isValid || submitting}
+                variant="outline"
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+                disabled={step === 0}
               >
-                {t`Submit Fio ad`}
+                {t`Back`}
               </Button>
-            </StyledActions>
+              {step < STEPS.length - 1 ? (
+                <Button
+                  variant="solid"
+                  color="accent"
+                  onClick={() =>
+                    setStep((s) => Math.min(STEPS.length - 1, s + 1))
+                  }
+                  disabled={!canAdvance}
+                >
+                  {t`Next`}
+                </Button>
+              ) : (
+                <Button
+                  variant="solid"
+                  color="accent"
+                  onClick={submit}
+                  disabled={!isValid || submitting}
+                >
+                  {submitting ? t`Submitting...` : t`Submit Fio ad`}
+                </Button>
+              )}
+            </StyledNav>
           </>
         )}
       </StyledContent>
