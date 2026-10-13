@@ -5,6 +5,7 @@ import { useIsLogged } from '@/auth/hooks/useIsLogged';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { returnToPathState } from '@/auth/states/returnToPathState';
 import { billingState } from '@/client-config/states/billingState';
+import { hasSeenGetStarted } from '@/desync-onboarding/utils/getStartedSeen';
 import { useIsCurrentLocationOnAWorkspace } from '@/domain-manager/hooks/useIsCurrentLocationOnAWorkspace';
 import { isMinimalMetadataReadyState } from '@/metadata-store/states/isMinimalMetadataReadyState';
 import { useDefaultHomePagePath } from '@/navigation/hooks/useDefaultHomePagePath';
@@ -86,14 +87,25 @@ export const usePageChangeEffectNavigateLocation = () => {
     ? returnToPath
     : readReturnToPathFromUrlSearchParams();
 
-  // Desync: the default landing is the AI agent chat for AI-enabled desktop
+  // Desync: the FIRST time a user enters a workspace (just created it / joined
+  // it), land them on the guided "Get started" page so they always have an
+  // obvious next step instead of a dense, empty grid. This fires once per
+  // workspace (tracked in localStorage, set when they reach the page — see
+  // getStartedSeen) and only for a COMPLETED onboarding, so it never interrupts
+  // the signup/onboarding flow and never hijacks a returning user's landing.
+  const shouldLandOnGetStartedFirst =
+    onboardingStatus === OnboardingStatus.COMPLETED &&
+    !hasSeenGetStarted(currentWorkspace?.id);
+
+  // Otherwise the default landing is the AI agent chat for AI-enabled desktop
   // users — for BOTH opening the workspace (Index) and the post-login /
   // post-onboarding redirect (a COMPLETED user sitting on an onboarding path).
   // Falls back to the records home otherwise. defaultHomePagePath itself is left
   // unchanged so the nav "home" / return destinations still point at records
   // (avoids the return-to-home → chat loop).
-  const landingPath =
-    hasAiPermission && !isMobile
+  const landingPath = shouldLandOnGetStartedFirst
+    ? AppPath.GetStarted
+    : hasAiPermission && !isMobile
       ? getAppPath(AppPath.AiChat, { threadId: null })
       : defaultHomePagePath;
 

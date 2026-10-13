@@ -1,6 +1,6 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
@@ -9,7 +9,10 @@ import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
+import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
 import { TextArea } from '@/ui/input/components/TextArea';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import {
   ConnectIntegrationCard,
@@ -174,8 +177,15 @@ export const GetStartedPage = () => {
   const { t } = useLingui();
   const navigate = useNavigate();
   const setAgentChatPreprompt = useSetAtomState(agentChatPrepromptState);
+  const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
   const [leadsSource, setLeadsSource] = useState('');
+
+  // Desync: once the user has reached Get-started, don't auto-land them here
+  // again on future entries to this workspace (the sidebar link still works).
+  useEffect(() => {
+    markGetStartedSeen(currentWorkspace?.id);
+  }, [currentWorkspace?.id]);
 
   const openCopilotWith = (text: string) => {
     setAgentChatPreprompt({ text, mode: 'PREFILL' });
