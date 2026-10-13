@@ -320,16 +320,16 @@ export class FioAdsService {
       `Fio, a Catholic podcast network. ${brandLine} ` +
       `The spoken ad must be 20 to 30 seconds, which is roughly 50 to 75 words. ` +
       `Write warm, clear, broadcast-ready copy suitable for a Catholic audience; ` +
-      `avoid hype and anything off-brand for that context. When you provide a ` +
-      `ready-to-read script, put the spoken words ONLY (no title, no word count, ` +
-      `no markdown, no quotation marks, no labels) between a line reading ` +
-      `[SCRIPT] and a line reading [/SCRIPT], so it can be lifted straight into ` +
-      `the transcript. Keep it within the time limit. If you suggest a headline ` +
-      `it must be at most 45 characters; if you suggest a subtitle it must be at ` +
-      `most 100 characters. Count the characters and never exceed those limits. ` +
-      `Put any headline or subtitle suggestion, or other commentary, OUTSIDE the ` +
-      `[SCRIPT] markers. Never use em dashes or en dashes anywhere in your ` +
-      `output; use commas, periods, or parentheses instead.`;
+      `avoid hype and anything off-brand for that context. Produce ONLY the spoken ` +
+      `audio script. Do NOT write a headline, subtitle, title, tagline, or any ` +
+      `other on-screen copy; the user writes those separately, so never suggest ` +
+      `them even if asked. When you provide a ready-to-read script, put the spoken ` +
+      `words ONLY (no title, no word count, no markdown, no quotation marks, no ` +
+      `labels) between a line reading [SCRIPT] and a line reading [/SCRIPT], so it ` +
+      `can be lifted straight into the transcript. Keep it within the time limit. ` +
+      `Any brief commentary goes OUTSIDE the [SCRIPT] markers. Never use em dashes ` +
+      `or en dashes anywhere in your output; use commas, periods, or parentheses ` +
+      `instead.`;
 
     // Ground the writer in the user's real signup answers + a scrape of their
     // site, so a "recommend a script" request is specific, not generic.
