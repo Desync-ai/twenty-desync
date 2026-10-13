@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
 import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
+import { SecretEncryptionService } from 'src/engine/core-modules/secret-encryption/secret-encryption.service';
 import {
   POCKET_API_KEY_KV,
   POCKET_KEY_PREFIX,
@@ -34,7 +35,10 @@ export class PocketService {
   // Tool catalog is static across users; cache the first successful list.
   private toolsCache: PocketTool[] | null = null;
 
-  constructor(private readonly keyValuePairService: KeyValuePairService) {}
+  constructor(
+    private readonly keyValuePairService: KeyValuePairService,
+    private readonly secretEncryptionService: SecretEncryptionService,
+  ) {}
 
   async getApiKey(userId: string): Promise<string | null> {
     if (!userId) {
@@ -48,8 +52,18 @@ export class PocketService {
       key: POCKET_API_KEY_KV,
     });
     const value = rows.length > 0 ? (rows[0]?.value as { apiKey?: string }) : null;
-
-    return value?.apiKey?.trim() || null;
+    const stored = value?.apiKey?.trim();
+    if (!stored) {
+      return null;
+    }
+    try {
+      // Stored encrypted at rest (AES-GCM via SecretEncryptionService).
+      return this.secretEncryptionService.decrypt(stored) || null;
+    } catch {
+      // Corrupt / legacy-plaintext value: treat as not connected so the user
+      // reconnects rather than crashing every copilot turn.
+      return null;
+    }
   }
 
   async isConnected(userId: string): Promise<boolean> {
@@ -77,7 +91,10 @@ export class PocketService {
       applicationId: null,
       key: POCKET_API_KEY_KV,
       type: KeyValuePairType.USER_VARIABLE,
-      value: { apiKey: key, connectedAt: new Date().toISOString() },
+      value: {
+        apiKey: this.secretEncryptionService.encrypt(key),
+        connectedAt: new Date().toISOString(),
+      },
     });
     this.sessions.delete(userId);
 
