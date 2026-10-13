@@ -9,10 +9,11 @@ import { NavigationDrawerItem } from '@/ui/navigation/navigation-drawer/componen
 // Desync: a prominent sidebar entry to the guided "Get started" page, so a new
 // user always has an obvious next step (the dense app grid is confusing cold).
 const StyledSection = styled.div`
+  border-top: 1px solid ${themeCssVariables.border.color.light};
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.betweenSiblingsGap};
-  padding-bottom: ${themeCssVariables.spacing[2]};
+  padding-top: ${themeCssVariables.spacing[2]};
 `;
 
 export const DesyncGetStartedSection = () => {
