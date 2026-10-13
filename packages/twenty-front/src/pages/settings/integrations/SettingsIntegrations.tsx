@@ -444,8 +444,12 @@ async function callDirect(
 
 export const ConnectIntegrationCard = ({
   integration,
+  compact = false,
 }: {
   integration: IntegrationDef;
+  // compact hides the description blurb (used on the Get-started page where
+  // space is tight); the Settings grid keeps the blurbs.
+  compact?: boolean;
 }) => {
   const { t } = useLingui();
   const { enqueueToast } = useToast();
@@ -555,9 +559,13 @@ export const ConnectIntegrationCard = ({
             </StyledLogoBox>
             <StyledName>{name}</StyledName>
           </StyledHeader>
-          <StyledBlurb>
-            {connected ? integration.connectedBlurb ?? integration.blurb : integration.blurb}
-          </StyledBlurb>
+          {!compact && (
+            <StyledBlurb>
+              {connected
+                ? integration.connectedBlurb ?? integration.blurb
+                : integration.blurb}
+            </StyledBlurb>
+          )}
           {isSyncing && progress ? <StyledStatus>{progress}</StyledStatus> : null}
           <StyledCardActions>
             {connected === null ? (

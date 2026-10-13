@@ -21,10 +21,12 @@ import {
 const LEAD_SOURCE_PLUGINS = [
   'hubspot',
   'salesforce',
-  'gmail',
-  'googlecalendar',
   'apollo',
+  'gmail',
+  'outlook',
   'attio',
+  'googlecalendar',
+  'calendly',
 ];
 const LEAD_SOURCE_INTEGRATIONS = INTEGRATIONS.filter((integration) =>
   LEAD_SOURCE_PLUGINS.includes(integration.plugin),
@@ -222,6 +224,7 @@ export const GetStartedPage = () => {
                 <ConnectIntegrationCard
                   key={integration.plugin}
                   integration={integration}
+                  compact
                 />
               ))}
             </StyledIntegrationsGrid>
