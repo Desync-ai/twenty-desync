@@ -291,6 +291,32 @@ export const COMPOSIO_ATTIO_TOOLS: ComposioTool[] = [
   { slug: 'ATTIO_CREATE_NOTE', description: 'Add a note to a record.' },
 ];
 
+// HubSpot via Composio agent tools (managed OAuth). Replaces the old sync-button
+// import: the copilot reads/writes HubSpot on demand, like the other toolkits.
+export const COMPOSIO_HUBSPOT_TOOLS: ComposioTool[] = [
+  { slug: 'HUBSPOT_HUBSPOT_LIST_CONTACTS', description: 'List HubSpot contacts.' },
+  { slug: 'HUBSPOT_SEARCH_CONTACTS_BY_CRITERIA', description: 'Search HubSpot contacts by criteria.' },
+  { slug: 'HUBSPOT_CREATE_CONTACT', description: 'Create a HubSpot contact.' },
+  { slug: 'HUBSPOT_HUBSPOT_UPDATE_CONTACT', description: "Update a HubSpot contact's properties." },
+  { slug: 'HUBSPOT_HUBSPOT_LIST_COMPANIES', description: 'List HubSpot companies.' },
+  { slug: 'HUBSPOT_CREATE_COMPANY', description: 'Create a HubSpot company.' },
+  { slug: 'HUBSPOT_HUBSPOT_LIST_DEALS', description: 'List HubSpot deals.' },
+  { slug: 'HUBSPOT_CREATE_DEAL', description: 'Create a HubSpot deal.' },
+];
+
+// Salesforce via Composio agent tools (managed OAuth). SOQL covers flexible reads.
+export const COMPOSIO_SALESFORCE_TOOLS: ComposioTool[] = [
+  { slug: 'SALESFORCE_EXECUTE_SOQL_QUERY', description: 'Run a SOQL query to read any Salesforce records.' },
+  { slug: 'SALESFORCE_LIST_ACCOUNTS', description: 'List Salesforce accounts.' },
+  { slug: 'SALESFORCE_GET_ACCOUNT', description: 'Get a Salesforce account by id.' },
+  { slug: 'SALESFORCE_CREATE_ACCOUNT', description: 'Create a Salesforce account.' },
+  { slug: 'SALESFORCE_GET_CONTACT', description: 'Get a Salesforce contact by id.' },
+  { slug: 'SALESFORCE_CREATE_CONTACT', description: 'Create a Salesforce contact.' },
+  { slug: 'SALESFORCE_CREATE_LEAD', description: 'Create a Salesforce lead.' },
+  { slug: 'SALESFORCE_CREATE_OPPORTUNITY', description: 'Create a Salesforce opportunity.' },
+  { slug: 'SALESFORCE_GET_OPPORTUNITY', description: 'Get a Salesforce opportunity by id.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -326,6 +352,22 @@ export class ComposioService {
         authConfigId:
           process.env.COMPOSIO_SLACK_AUTH_CONFIG_ID ?? 'ac_Ah0NHIAcp6XC',
         tools: COMPOSIO_SLACK_TOOLS,
+      },
+      {
+        // Desync: HubSpot is now an agent toolkit (was a sync-button import).
+        slug: 'hubspot',
+        label: 'HubSpot',
+        authConfigId:
+          process.env.COMPOSIO_HUBSPOT_AUTH_CONFIG_ID ?? 'ac_6AZ59Pryo_jX',
+        tools: COMPOSIO_HUBSPOT_TOOLS,
+      },
+      {
+        // Desync: Salesforce is now an agent toolkit (was a sync-button import).
+        slug: 'salesforce',
+        label: 'Salesforce',
+        authConfigId:
+          process.env.COMPOSIO_SALESFORCE_AUTH_CONFIG_ID ?? 'ac_YsLbeco-Kx7F',
+        tools: COMPOSIO_SALESFORCE_TOOLS,
       },
       {
         slug: 'airtable',
