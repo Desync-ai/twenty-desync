@@ -24,7 +24,9 @@ const INTEGRATIONS_BASE_URL = `${REACT_APP_SERVER_BASE_URL}/integrations`;
 // 'connect' = OAuth/sync via the integrations API. 'mcp' = an AI agent that
 // connects to the CRM through our built-in MCP server; the card just deep-links
 // to Settings -> API & MCP where the user makes a key + copies the endpoint.
-type IntegrationKind = 'connect' | 'mcp';
+// 'key' = bring-your-own-key: the user pastes an API key we store directly and
+// use on their behalf (e.g. Pocket, wired to its own MCP server, NOT Composio).
+type IntegrationKind = 'connect' | 'mcp' | 'key';
 
 type IntegrationDef = {
   plugin: string;
@@ -37,6 +39,9 @@ type IntegrationDef = {
   // Copilot-tool connects (Slack, Airtable) are used by the AI assistant rather
   // than synced, so they show no "Sync now" action once connected.
   agentTool?: boolean;
+  // For kind 'key': help text + input placeholder shown in the connect modal.
+  keyHelp?: string;
+  keyPlaceholder?: string;
 };
 
 const INTEGRATIONS: IntegrationDef[] = [
@@ -96,6 +101,19 @@ const INTEGRATIONS: IntegrationDef[] = [
     agentTool: true,
     blurb: 'Let the AI assistant read your meeting notes & transcripts',
     connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'pocket',
+    name: 'Pocket',
+    kind: 'key',
+    tags: ['Meeting Notes'],
+    logoDomain: 'heypocketai.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant search your Pocket recordings, transcripts & action items',
+    connectedBlurb: 'Available to your AI assistant',
+    keyHelp:
+      'Paste your Pocket API key (starts with pk_). Find it in the Pocket app under Settings > Developer > API Keys.',
+    keyPlaceholder: 'pk_...',
   },
   {
     plugin: 'gmail',
@@ -382,6 +400,32 @@ async function callIntegrations(
   return json;
 }
 
+// Bring-your-own-key integrations (Pocket) live at the server root (e.g.
+// /pocket/status), NOT under /integrations, since they are not Composio-backed.
+async function callDirect(
+  path: string,
+  method: 'GET' | 'POST',
+  body?: unknown,
+): Promise<any> {
+  const res = await fetch(`${REACT_APP_SERVER_BASE_URL}${path}`, {
+    method,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let json: any = {};
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    json = { raw: text };
+  }
+  if (!res.ok) {
+    throw new Error(json?.error ?? json?.message ?? `Request failed (${res.status})`);
+  }
+  return json;
+}
+
 const ConnectIntegrationCard = ({
   integration,
 }: {
@@ -599,6 +643,164 @@ const StyledModalActions = styled.div`
   }
 `;
 
+// Bring-your-own-key card: the user pastes an API key in a modal; we store it
+// directly and use it on their behalf (Pocket -> its own MCP server). Status /
+// connect / disconnect hit /<plugin>/{status,connect,disconnect} at the root.
+const KeyIntegrationCard = ({
+  integration,
+}: {
+  integration: IntegrationDef;
+}) => {
+  const { t } = useLingui();
+  const { enqueueToast } = useToast();
+  const { openModal, closeModal } = useModal();
+  const { plugin, name } = integration;
+  const modalId = `key-connect-${plugin}`;
+
+  const [connected, setConnected] = useState<boolean | null>(null);
+  const [apiKey, setApiKey] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const res = await callDirect(`/${plugin}/status`, 'GET');
+      setConnected(Boolean(res?.connected));
+    } catch {
+      setConnected(false);
+    }
+  }, [plugin]);
+
+  useEffect(() => {
+    void refreshStatus();
+  }, [refreshStatus]);
+
+  const submitKey = useCallback(async () => {
+    const key = apiKey.trim();
+    if (!key) return;
+    setBusy(true);
+    try {
+      await callDirect(`/${plugin}/connect`, 'POST', { apiKey: key });
+      enqueueToast({ variant: 'success', children: t`${name} connected.` });
+      setApiKey('');
+      closeModal(modalId);
+      await refreshStatus();
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Couldn't connect ${name}: ${String(
+          (error as Error)?.message ?? error,
+        )}`,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }, [apiKey, plugin, name, modalId, enqueueToast, t, closeModal, refreshStatus]);
+
+  const disconnect = useCallback(async () => {
+    setBusy(true);
+    try {
+      await callDirect(`/${plugin}/disconnect`, 'POST');
+      await refreshStatus();
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Couldn't disconnect ${name}: ${String(
+          (error as Error)?.message ?? error,
+        )}`,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }, [plugin, name, enqueueToast, t, refreshStatus]);
+
+  return (
+    <StyledCard rounded>
+      <StyledCardContent>
+        <StyledCardInner>
+          <StyledHeader>
+            <StyledLogoBox>
+              <IntegrationLogo domain={integration.logoDomain} name={name} />
+            </StyledLogoBox>
+            <StyledName>{name}</StyledName>
+          </StyledHeader>
+          <StyledBlurb>
+            {connected
+              ? integration.connectedBlurb ?? integration.blurb
+              : integration.blurb}
+          </StyledBlurb>
+          <StyledCardActions>
+            {connected === null ? (
+              <Button variant="outline" disabled>
+                {t`Checking…`}
+              </Button>
+            ) : connected ? (
+              <Button variant="outline" onClick={disconnect} loading={busy}>
+                {t`Disconnect`}
+              </Button>
+            ) : (
+              <Button
+                variant="solid"
+                color="accent"
+                startIcon={<IconCheck size={16} />}
+                onClick={() => {
+                  setApiKey('');
+                  openModal(modalId);
+                }}
+              >
+                {t`Connect`}
+              </Button>
+            )}
+          </StyledCardActions>
+        </StyledCardInner>
+      </StyledCardContent>
+
+      <ModalStatefulWrapper
+        modalInstanceId={modalId}
+        onClose={() => closeModal(modalId)}
+        isClosable
+        size="medium"
+        padding="large"
+        overlay="dark"
+        width="420px"
+        dataGloballyPreventClickOutside
+        renderInDocumentBody
+        smallBorderRadius
+        autoHeight
+      >
+        <H1Title title={t`Connect ${name}`} fontColor={H1TitleFontColor.Primary} />
+        <StyledModalBody>
+          {integration.keyHelp ? (
+            <StyledStatus>{integration.keyHelp}</StyledStatus>
+          ) : null}
+          <SettingsTextInput
+            instanceId={`${modalId}-key`}
+            label={t`API key`}
+            placeholder={integration.keyPlaceholder ?? t`Paste your API key`}
+            value={apiKey}
+            onChange={setApiKey}
+            autoFocusOnMount
+            fullWidth
+          />
+        </StyledModalBody>
+        <StyledModalActions>
+          <Button variant="outline" onClick={() => closeModal(modalId)} fullWidth>
+            {t`Cancel`}
+          </Button>
+          <Button
+            variant="solid"
+            color="accent"
+            onClick={submitKey}
+            disabled={!apiKey.trim() || busy}
+            fullWidth
+          >
+            {t`Connect`}
+          </Button>
+        </StyledModalActions>
+      </ModalStatefulWrapper>
+    </StyledCard>
+  );
+};
+
 const FEEDBACK_MODAL_ID = 'integrations-feedback-modal';
 const ALL_TAG = 'All';
 
@@ -686,6 +888,11 @@ export const SettingsIntegrations = () => {
             {visible.map((integration) =>
               integration.kind === 'mcp' ? (
                 <McpIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                />
+              ) : integration.kind === 'key' ? (
+                <KeyIntegrationCard
                   key={integration.plugin}
                   integration={integration}
                 />
