@@ -28,7 +28,7 @@ const INTEGRATIONS_BASE_URL = `${REACT_APP_SERVER_BASE_URL}/integrations`;
 // use on their behalf (e.g. Pocket, wired to its own MCP server, NOT Composio).
 type IntegrationKind = 'connect' | 'mcp' | 'key';
 
-type IntegrationDef = {
+export type IntegrationDef = {
   plugin: string;
   name: string;
   tags: string[];
@@ -46,7 +46,7 @@ type IntegrationDef = {
   keyPlaceholder?: string;
 };
 
-const INTEGRATIONS: IntegrationDef[] = [
+export const INTEGRATIONS: IntegrationDef[] = [
   {
     plugin: 'hubspot',
     name: 'HubSpot',
@@ -442,7 +442,7 @@ async function callDirect(
   return json;
 }
 
-const ConnectIntegrationCard = ({
+export const ConnectIntegrationCard = ({
   integration,
 }: {
   integration: IntegrationDef;

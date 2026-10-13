@@ -11,6 +11,24 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
 import { TextArea } from '@/ui/input/components/TextArea';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
+import {
+  ConnectIntegrationCard,
+  INTEGRATIONS,
+} from '~/pages/settings/integrations/SettingsIntegrations';
+
+// The integrations that are "places leads/contacts live", shown inline on the
+// Get-started page so the user can connect without leaving the tab.
+const LEAD_SOURCE_PLUGINS = [
+  'hubspot',
+  'salesforce',
+  'gmail',
+  'googlecalendar',
+  'apollo',
+  'attio',
+];
+const LEAD_SOURCE_INTEGRATIONS = INTEGRATIONS.filter((integration) =>
+  LEAD_SOURCE_PLUGINS.includes(integration.plugin),
+);
 
 // Desync "Get started": a painfully-obvious first-run page. New users land on a
 // dense, empty grid and do not know what to do or what the agent can do. This
@@ -18,9 +36,9 @@ import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomStat
 // to open the copilot pre-filled to clear the demo data and build their CRM.
 
 const EXAMPLE_PROMPTS = [
-  'Find me 5 leads that look like my best customers.',
-  'Summarize what I should know from my last 10 meetings.',
-  'Who should I follow up with this week?',
+  'Find leads that fit my business and add them to my CRM.',
+  'Research a specific company and add it with its key contacts.',
+  'Build a list of target companies in my market and add them.',
 ];
 
 const StyledPage = styled.div`
@@ -116,6 +134,12 @@ const StyledStepHint = styled.span`
   line-height: 1.4;
 `;
 
+const StyledIntegrationsGrid = styled.div`
+  display: grid;
+  gap: ${themeCssVariables.spacing[2]};
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+`;
+
 const StyledExamples = styled.div`
   display: flex;
   flex-direction: column;
@@ -161,12 +185,13 @@ export const GetStartedPage = () => {
     return [
       'Help me set up my CRM. Please do these in order:',
       '1. Remove the sample/demo data that came with this workspace (the example companies, people, notes and opportunities) so I start clean. Confirm with me before deleting anything.',
-      `2. Add my real customers and leads: pull them from the tools I have connected (email, calendar, meeting notes, HubSpot, and so on)${
+      `2. Add my real customers and leads: pull them from the tools I have connected (email, calendar, meeting notes, HubSpot, Salesforce, and so on)${
         src ? `, and from here: ${src}` : ''
       }. Create the matching People and Companies.`,
+      '3. Where it is clearly warranted (do not force it or invent anything), also create Opportunities and add Notes. For example: if you see payments I RECEIVED, invoices, or signed or won deals, add matching Opportunities and link them to the right person or company; add a Note when there is useful context like a deal thread or meeting summary. Do NOT turn my own purchases or vendor subscriptions into Opportunities, and skip this step entirely when there is no obvious signal.',
       src
         ? ''
-        : '3. I do not have a customer list yet, so search the web for 3 to 5 leads that fit my business and add them as People and Companies, tagged as AI-suggested.',
+        : '4. I do not have a customer list yet, so search the web for 3 to 5 leads that fit my business and add them as People and Companies, tagged as AI-suggested.',
       'When you are done, give me a short summary of what you added and 3 follow-ups I should do this week.',
     ]
       .filter(Boolean)
@@ -188,12 +213,20 @@ export const GetStartedPage = () => {
             <StyledStepTop>
               <StyledStepNumber>1</StyledStepNumber>
               <StyledStepText>
-                <StyledStepTitle>{t`Connect your tools`}</StyledStepTitle>
+                <StyledStepTitle>{t`Connect where your leads live`}</StyledStepTitle>
                 <StyledStepHint>
-                  {t`Link your email, calendar, meeting notes, or CRM so the agent can pull in your real contacts and companies.`}
+                  {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
                 </StyledStepHint>
               </StyledStepText>
             </StyledStepTop>
+            <StyledIntegrationsGrid>
+              {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
+                <ConnectIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                />
+              ))}
+            </StyledIntegrationsGrid>
             <div>
               <Button
                 variant="outline"
@@ -202,7 +235,7 @@ export const GetStartedPage = () => {
                   navigate(getSettingsPath(SettingsPath.Integrations))
                 }
               >
-                {t`Connect integrations`}
+                {t`See all integrations`}
               </Button>
             </div>
           </StyledStep>
@@ -252,7 +285,7 @@ export const GetStartedPage = () => {
 
         <StyledExamples>
           <StyledExamplesLabel>
-            {t`Or just ask the agent anything, for example:`}
+            {t`Or have the agent fill your CRM another way:`}
           </StyledExamplesLabel>
           {EXAMPLE_PROMPTS.map((prompt) => (
             <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
