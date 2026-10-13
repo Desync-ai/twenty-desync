@@ -4,6 +4,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { msg } from '@lingui/core/macro';
 import { TWENTY_ICONS_BASE_URL } from 'twenty-shared/constants';
 import { isDefined } from 'twenty-shared/utils';
+import { DEFAULT_AI_CHAT_MODEL_TIER } from 'twenty-shared/ai';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
   IsNull,
@@ -865,6 +866,11 @@ export class SignInUpService {
             displayName,
             inviteHash: v4(),
             activationStatus: WorkspaceActivationStatus.PENDING_CREATION,
+            // Desync: new workspaces default to the highest reasoning tier so the
+            // copilot (including onboarding) runs on Max Thinking out of the box.
+            // (The entity/DB column default is not relied on: core runs
+            // synchronize:false and the 2.40 migration created it as 'fast'.)
+            aiChatModelTier: DEFAULT_AI_CHAT_MODEL_TIER,
           });
 
           const workspace = await queryRunner.manager.save(
