@@ -189,9 +189,7 @@ export const GetStartedPage = () => {
         src ? `, and from here: ${src}` : ''
       }. Create the matching People and Companies.`,
       '3. Where it is clearly warranted (do not force it or invent anything), also create Opportunities and add Notes. For example: if you see payments I RECEIVED, invoices, or signed or won deals, add matching Opportunities and link them to the right person or company; add a Note when there is useful context like a deal thread or meeting summary. Do NOT turn my own purchases or vendor subscriptions into Opportunities, and skip this step entirely when there is no obvious signal.',
-      src
-        ? ''
-        : '4. I do not have a customer list yet, so search the web for 3 to 5 leads that fit my business and add them as People and Companies, tagged as AI-suggested.',
+      '4. If, after checking my connected tools and any source above, there are no real contacts to add, then (and only then) search the web for 3 to 5 leads that fit my business and add them as People and Companies, tagged as AI-suggested.',
       'When you are done, give me a short summary of what you added and 3 follow-ups I should do this week.',
     ]
       .filter(Boolean)
@@ -244,32 +242,21 @@ export const GetStartedPage = () => {
             <StyledStepTop>
               <StyledStepNumber>2</StyledStepNumber>
               <StyledStepText>
-                <StyledStepTitle>{t`Where are your customers?`}</StyledStepTitle>
+                <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
                 <StyledStepHint>
-                  {t`Tell the agent where your leads live, a tool, a spreadsheet, a website, a list of names. Leave it blank and the agent will find some for you.`}
+                  {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you.`}
                 </StyledStepHint>
               </StyledStepText>
             </StyledStepTop>
             <TextArea
               textAreaId="get-started-leads-source"
-              placeholder={t`e.g. my HubSpot, the attendees in my last meetings, or acme.com and 2 others`}
+              label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
+              placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
               value={leadsSource}
               onChange={setLeadsSource}
               minRows={2}
-              maxRows={4}
+              maxRows={3}
             />
-          </StyledStep>
-
-          <StyledStep>
-            <StyledStepTop>
-              <StyledStepNumber>3</StyledStepNumber>
-              <StyledStepText>
-                <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
-                <StyledStepHint>
-                  {t`This opens the agent with a ready-to-send plan: clear the sample data (it will confirm first), then add your real contacts, or find a few leads if you have none.`}
-                </StyledStepHint>
-              </StyledStepText>
-            </StyledStepTop>
             <div>
               <Button
                 variant="solid"
