@@ -76,6 +76,11 @@ export class FioAdsService {
   // ElevenLabs TTS for optional AI voiceover of the script (returns MP3).
   private static readonly VOICEOVER_MODEL = 'eleven_multilingual_v2';
   private static readonly DEFAULT_VOICE_ID = 'nPczCjzI2devNBz1zQrb'; // Brian (natural default voice; works on free plan)
+  // Short phrase used for the pre-generation voice preview (kept brief so it is
+  // cheap/fast); each voice is synthesized at most once then cached in-process.
+  private static readonly VOICE_SAMPLE_TEXT =
+    'Hi, this is a preview of how your Fio ad could sound.';
+  private readonly voiceSampleCache = new Map<string, string>(); // voiceId -> base64 mp3
   private readonly elevenLabsKey = process.env.ELEVENLABS_API_KEY ?? '';
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
@@ -453,6 +458,16 @@ export class FioAdsService {
         ? requested
         : process.env.ELEVENLABS_VOICE_ID || FioAdsService.DEFAULT_VOICE_ID;
 
+    const dataBase64 = await this.synthesizeMp3(voice, script);
+
+    return {
+      audio: { filename: 'voiceover.mp3', contentType: 'audio/mpeg', dataBase64 },
+    };
+  }
+
+  // Low-level ElevenLabs TTS -> base64 MP3. Shared by the full voiceover and the
+  // short voice preview. Throws on a non-2xx with the status + body snippet.
+  private async synthesizeMp3(voice: string, text: string): Promise<string> {
     const res = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(
         voice,
@@ -463,10 +478,7 @@ export class FioAdsService {
           'xi-api-key': this.elevenLabsKey,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          text: script,
-          model_id: FioAdsService.VOICEOVER_MODEL,
-        }),
+        body: JSON.stringify({ text, model_id: FioAdsService.VOICEOVER_MODEL }),
       },
     );
 
@@ -475,14 +487,32 @@ export class FioAdsService {
       throw new Error(`Voiceover error ${res.status}: ${errText.slice(0, 200)}`);
     }
 
-    const buffer = Buffer.from(await res.arrayBuffer());
+    return Buffer.from(await res.arrayBuffer()).toString('base64');
+  }
+
+  // A short, cached sample of one of our picker voices so the user can hear it
+  // before generating a full voiceover. Picker voices only; synthesized at most
+  // once per voice (cached in-process) to keep previews ~free. Caller gates.
+  async getVoiceSample({
+    voiceId,
+  }: {
+    voiceId?: string;
+  }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
+    if (!this.elevenLabsKey) {
+      throw new Error('AI voiceover is not configured (ELEVENLABS_API_KEY).');
+    }
+    const voice = (voiceId ?? '').trim();
+    if (!voice || !FIO_VOICE_IDS.has(voice)) {
+      throw new BadRequestException('Unknown voice.');
+    }
+    let dataBase64 = this.voiceSampleCache.get(voice);
+    if (!dataBase64) {
+      dataBase64 = await this.synthesizeMp3(voice, FioAdsService.VOICE_SAMPLE_TEXT);
+      this.voiceSampleCache.set(voice, dataBase64);
+    }
 
     return {
-      audio: {
-        filename: 'voiceover.mp3',
-        contentType: 'audio/mpeg',
-        dataBase64: buffer.toString('base64'),
-      },
+      audio: { filename: 'voice-sample.mp3', contentType: 'audio/mpeg', dataBase64 },
     };
   }
 

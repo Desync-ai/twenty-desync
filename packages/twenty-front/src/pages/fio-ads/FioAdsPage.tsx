@@ -425,12 +425,14 @@ export const FioAdsPage = () => {
   const [generatingVoiceover, setGeneratingVoiceover] = useState(false);
   const [voices, setVoices] = useState<Voice[]>([]);
   const [voiceId, setVoiceId] = useState('');
+  const [previewingVoice, setPreviewingVoice] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const adImageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  const voiceSampleCacheRef = useRef<Map<string, string>>(new Map());
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordChunksRef = useRef<Blob[]>([]);
   const recordStreamRef = useRef<MediaStream | null>(null);
@@ -674,6 +676,49 @@ export const FioAdsPage = () => {
       });
     } finally {
       setGeneratingVoiceover(false);
+    }
+  };
+
+  // Play a short sample of the selected voice before committing to a full
+  // voiceover. Cached per voice on both ends so it is cheap to click around.
+  const previewVoice = async () => {
+    if (!voiceId || previewingVoice) return;
+    setPreviewingVoice(true);
+    try {
+      let b64 = voiceSampleCacheRef.current.get(voiceId);
+      if (!b64) {
+        const res = await fetch(
+          `${FIO_BASE}/voice-sample?voiceId=${encodeURIComponent(voiceId)}`,
+          { credentials: 'include' },
+        );
+        if (!res.ok) {
+          let msg = `Request failed (${res.status})`;
+          try {
+            const j = await res.json();
+            msg = j?.error ?? j?.message ?? msg;
+          } catch {
+            // keep default
+          }
+          throw new Error(msg);
+        }
+        const j = (await res.json()) as { audio?: UploadedFile };
+        b64 = j.audio?.dataBase64;
+        if (!b64) {
+          throw new Error('No audio returned');
+        }
+        voiceSampleCacheRef.current.set(voiceId, b64);
+      }
+      const url = URL.createObjectURL(base64ToBlob(b64, 'audio/mpeg'));
+      const audioEl = new Audio(url);
+      audioEl.onended = () => URL.revokeObjectURL(url);
+      await audioEl.play();
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Couldn't play a sample: ${String((error as Error)?.message ?? error)}`,
+      });
+    } finally {
+      setPreviewingVoice(false);
     }
   };
 
@@ -1204,16 +1249,26 @@ export const FioAdsPage = () => {
                     {voices.length > 0 && (
                       <StyledField>
                         <StyledFieldLabel>{t`AI voice`}</StyledFieldLabel>
-                        <StyledSelect
-                          value={voiceId}
-                          onChange={(e) => setVoiceId(e.target.value)}
-                        >
-                          {voices.map((v) => (
-                            <option key={v.id} value={v.id}>
-                              {v.name} ({v.description})
-                            </option>
-                          ))}
-                        </StyledSelect>
+                        <StyledUploadRow>
+                          <StyledSelect
+                            value={voiceId}
+                            onChange={(e) => setVoiceId(e.target.value)}
+                          >
+                            {voices.map((v) => (
+                              <option key={v.id} value={v.id}>
+                                {v.name} ({v.description})
+                              </option>
+                            ))}
+                          </StyledSelect>
+                          <Button
+                            variant="outline"
+                            onClick={() => void previewVoice()}
+                            disabled={!voiceId || previewingVoice}
+                          >
+                            {previewingVoice ? t`Loading...` : t`Preview voice`}
+                          </Button>
+                        </StyledUploadRow>
+                        <StyledHelper>{t`Hear a short sample before generating.`}</StyledHelper>
                       </StyledField>
                     )}
                     <StyledUploadRow>
