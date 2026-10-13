@@ -25,6 +25,7 @@ import { McpModule } from 'src/engine/api/mcp/mcp.module';
 import { RestApiModule } from 'src/engine/api/rest/rest-api.module';
 import { IntegrationsModule } from 'src/engine/core-modules/integrations/integrations.module';
 import { FioAdsModule } from 'src/engine/core-modules/fio-ads/fio-ads.module';
+import { PocketModule } from 'src/engine/core-modules/pocket/pocket.module';
 import { WorkspaceAuthContextMiddleware } from 'src/engine/core-modules/auth/middlewares/workspace-auth-context.middleware';
 import { MetricsModule } from 'src/engine/core-modules/metrics/metrics.module';
 import { DataloaderModule } from 'src/engine/dataloaders/dataloader.module';
@@ -74,6 +75,7 @@ const MIGRATED_REST_METHODS = [
     RestApiModule,
     IntegrationsModule,
     FioAdsModule,
+    PocketModule,
     McpModule,
     MiddlewareModule,
     JwtModule,

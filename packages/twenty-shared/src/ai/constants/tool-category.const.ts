@@ -13,4 +13,7 @@ export enum ToolCategory {
   // can call on the user's behalf. Each provider owns a UNIQUE category because
   // the executor dispatches static tools by `descriptor.category`.
   COMPOSIO = 'COMPOSIO',
+  // Desync fork: Pocket (heypocketai.com) meeting-capture tools, wired DIRECTLY
+  // to Pocket's own MCP server (NOT via Composio), per-user bring-your-own-key.
+  POCKET = 'POCKET',
 }
