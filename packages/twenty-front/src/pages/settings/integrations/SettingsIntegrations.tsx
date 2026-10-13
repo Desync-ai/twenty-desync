@@ -120,6 +120,19 @@ const INTEGRATIONS: IntegrationDef[] = [
     keyPlaceholder: 'pk_...',
   },
   {
+    plugin: 'fathom',
+    name: 'Fathom',
+    kind: 'key',
+    tags: ['Meeting Notes'],
+    logoDomain: 'fathom.video',
+    agentTool: true,
+    blurb: 'Let the AI assistant search your Fathom meetings, transcripts & summaries',
+    connectedBlurb: 'Available to your AI assistant',
+    keyHelp:
+      'Paste your Fathom API key. Find it in Fathom under Settings > API.',
+    keyPlaceholder: 'Your Fathom API key',
+  },
+  {
     plugin: 'gmail',
     name: 'Gmail',
     kind: 'connect',

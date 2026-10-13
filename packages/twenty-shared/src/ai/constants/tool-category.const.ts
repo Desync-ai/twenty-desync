@@ -16,4 +16,7 @@ export enum ToolCategory {
   // Desync fork: Pocket (heypocketai.com) meeting-capture tools, wired DIRECTLY
   // to Pocket's own MCP server (NOT via Composio), per-user bring-your-own-key.
   POCKET = 'POCKET',
+  // Desync fork: Fathom (fathom.video) meeting tools, wired DIRECTLY to Fathom's
+  // own MCP server (NOT via Composio), per-user bring-your-own-key.
+  FATHOM = 'FATHOM',
 }
