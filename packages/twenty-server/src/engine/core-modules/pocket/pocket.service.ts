@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
 import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
+import { type EncryptedString } from 'src/engine/core-modules/secret-encryption/branded-strings/encrypted-string.type';
+import { type PlaintextString } from 'src/engine/core-modules/secret-encryption/branded-strings/plaintext-string.type';
 import { SecretEncryptionService } from 'src/engine/core-modules/secret-encryption/secret-encryption.service';
 import {
   POCKET_API_KEY_KV,
@@ -32,8 +34,14 @@ export class PocketService {
     { id: string | undefined; at: number }
   >();
   private static readonly SESSION_TTL_MS = 5 * 60 * 1000;
-  // Tool catalog is static across users; cache the first successful list.
-  private toolsCache: PocketTool[] | null = null;
+  // Cache each user's tool list (Pocket's catalog can differ by plan, e.g. the
+  // Pro-only tools), keyed by userId with a short TTL. NOT global: a non-Pro
+  // user's list must not be served to a Pro user and vice versa.
+  private readonly toolsCache = new Map<
+    string,
+    { at: number; tools: PocketTool[] }
+  >();
+  private static readonly TOOLS_TTL_MS = 10 * 60 * 1000;
 
   constructor(
     private readonly keyValuePairService: KeyValuePairService,
@@ -57,12 +65,22 @@ export class PocketService {
       return null;
     }
     try {
-      // Stored encrypted at rest (AES-GCM via SecretEncryptionService).
-      return this.secretEncryptionService.decrypt(stored) || null;
+      // Stored encrypted at rest with the authenticated AES-GCM v2 envelope.
+      return (
+        this.secretEncryptionService.decryptVersionedOrThrow(
+          stored as EncryptedString,
+        ) || null
+      );
     } catch {
-      // Corrupt / legacy-plaintext value: treat as not connected so the user
-      // reconnects rather than crashing every copilot turn.
-      return null;
+      // Fallback: a key written by an earlier build's legacy-CTR path. Read it
+      // so that user stays connected across the upgrade (connect rewrites v2).
+      try {
+        return this.secretEncryptionService.decrypt(stored) || null;
+      } catch {
+        // Corrupt / un-decryptable (e.g. post key-rotation): treat as not
+        // connected so the user reconnects rather than crashing copilot turns.
+        return null;
+      }
     }
   }
 
@@ -92,11 +110,14 @@ export class PocketService {
       key: POCKET_API_KEY_KV,
       type: KeyValuePairType.USER_VARIABLE,
       value: {
-        apiKey: this.secretEncryptionService.encrypt(key),
+        apiKey: this.secretEncryptionService.encryptVersioned(
+          key as PlaintextString,
+        ),
         connectedAt: new Date().toISOString(),
       },
     });
     this.sessions.delete(userId);
+    this.toolsCache.delete(userId);
 
     return { connected: true };
   }
@@ -111,6 +132,7 @@ export class PocketService {
       value: null,
     });
     this.sessions.delete(userId);
+    this.toolsCache.delete(userId);
   }
 
   // The tools Pocket exposes for this user (search_pocket_conversations, etc.).
@@ -120,8 +142,9 @@ export class PocketService {
     if (!apiKey) {
       return [];
     }
-    if (this.toolsCache) {
-      return this.toolsCache;
+    const cached = this.toolsCache.get(userId);
+    if (cached && Date.now() - cached.at < PocketService.TOOLS_TTL_MS) {
+      return cached.tools;
     }
     try {
       const payload = await this.call(userId, apiKey, 'tools/list', {});
@@ -142,7 +165,7 @@ export class PocketService {
         });
       }
       if (tools.length > 0) {
-        this.toolsCache = tools;
+        this.toolsCache.set(userId, { at: Date.now(), tools });
       }
 
       return tools;

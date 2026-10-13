@@ -34,6 +34,8 @@ type IntegrationDef = {
   tags: string[];
   kind: IntegrationKind;
   logoDomain?: string;
+  // Explicit logo image URL, tried before the clearbit/favicon domain fallback.
+  logoUrl?: string;
   blurb: string;
   connectedBlurb?: string;
   // Copilot-tool connects (Slack, Airtable) are used by the AI assistant rather
@@ -108,6 +110,8 @@ const INTEGRATIONS: IntegrationDef[] = [
     kind: 'key',
     tags: ['Meeting Notes'],
     logoDomain: 'heypocketai.com',
+    logoUrl:
+      'https://play-lh.googleusercontent.com/CqfEY5MnK7zPHmPLjzO7emJTsDEVpRld4Ri7XIDm6AjDwkGEK8ySTz9W7LSG-EdJwi9uTRzQKDuWtWatEylKjw=w240-h480-rw',
     agentTool: true,
     blurb: 'Let the AI assistant search your Pocket recordings, transcripts & action items',
     connectedBlurb: 'Available to your AI assistant',
@@ -351,27 +355,33 @@ const StyledCardActions = styled.div`
 const IntegrationLogo = ({
   domain,
   name,
+  url,
 }: {
   domain?: string;
   name: string;
+  url?: string;
 }) => {
-  // clearbit logo -> google favicon -> plug icon. Any external block (CSP/404)
-  // falls through gracefully so the card still renders.
-  const [stage, setStage] = useState<0 | 1 | 2>(0);
+  // Try an explicit logo URL first (if given), then clearbit, then the google
+  // favicon, then a plug icon. Any external block (CSP/404) falls through
+  // gracefully so the card still renders.
+  const sources = [
+    url,
+    domain ? `https://logo.clearbit.com/${domain}` : undefined,
+    domain
+      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+      : undefined,
+  ].filter(Boolean) as string[];
+  const [idx, setIdx] = useState(0);
 
-  if (!domain || stage === 2) {
+  if (idx >= sources.length) {
     return <IconPlug size={22} />;
   }
-  const src =
-    stage === 0
-      ? `https://logo.clearbit.com/${domain}`
-      : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
   return (
     <StyledLogoImg
-      src={src}
+      src={sources[idx]}
       alt={name}
-      onError={() => setStage((s) => (s + 1) as 0 | 1 | 2)}
+      onError={() => setIdx((i) => i + 1)}
     />
   );
 };
@@ -529,7 +539,11 @@ const ConnectIntegrationCard = ({
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
-              <IntegrationLogo domain={integration.logoDomain} name={name} />
+              <IntegrationLogo
+                domain={integration.logoDomain}
+                name={name}
+                url={integration.logoUrl}
+              />
             </StyledLogoBox>
             <StyledName>{name}</StyledName>
           </StyledHeader>
@@ -595,7 +609,11 @@ const McpIntegrationCard = ({
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
-              <IntegrationLogo domain={integration.logoDomain} name={name} />
+              <IntegrationLogo
+                domain={integration.logoDomain}
+                name={name}
+                url={integration.logoUrl}
+              />
             </StyledLogoBox>
             <StyledName>{name}</StyledName>
           </StyledHeader>
@@ -719,7 +737,11 @@ const KeyIntegrationCard = ({
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
-              <IntegrationLogo domain={integration.logoDomain} name={name} />
+              <IntegrationLogo
+                domain={integration.logoDomain}
+                name={name}
+                url={integration.logoUrl}
+              />
             </StyledLogoBox>
             <StyledName>{name}</StyledName>
           </StyledHeader>
