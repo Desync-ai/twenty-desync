@@ -75,7 +75,7 @@ export class FioAdsService {
   private readonly groqKey = process.env.GROQ_API_KEY ?? '';
   // ElevenLabs TTS for optional AI voiceover of the script (returns MP3).
   private static readonly VOICEOVER_MODEL = 'eleven_multilingual_v2';
-  private static readonly DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel (premade)
+  private static readonly DEFAULT_VOICE_ID = 'nPczCjzI2devNBz1zQrb'; // Brian (natural default voice; works on free plan)
   private readonly elevenLabsKey = process.env.ELEVENLABS_API_KEY ?? '';
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
