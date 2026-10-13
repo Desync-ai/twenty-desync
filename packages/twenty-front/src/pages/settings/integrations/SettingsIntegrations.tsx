@@ -472,7 +472,9 @@ export const ConnectIntegrationCard = ({
   const handleConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      const res = await callIntegrations(`/${plugin}/connect`, 'POST');
+      const res = await callIntegrations(`/${plugin}/connect`, 'POST', {
+        returnPath: window.location.pathname,
+      });
       if (res?.connectUrl) {
         window.location.href = res.connectUrl;
         return;

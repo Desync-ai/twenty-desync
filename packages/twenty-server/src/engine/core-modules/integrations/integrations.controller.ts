@@ -85,6 +85,7 @@ export class IntegrationsController {
   async connect(
     @Param('plugin') plugin: string,
     @AuthWorkspaceMemberId() workspaceMemberId: string,
+    @Body() body: { returnPath?: string },
     @Req() request: AuthenticatedRequest,
   ) {
     return this.integrationsService.connect(
@@ -92,7 +93,40 @@ export class IntegrationsController {
       plugin,
       this.userEmail(request),
       this.userId(request),
+      this.safeReturnUrl(request, body?.returnPath),
     );
+  }
+
+  // Post-OAuth return URL = the request's own Origin (the user's workspace
+  // subdomain) + a same-origin relative path the client sends. Path-only +
+  // host allow-list, so this cannot become an open redirect to another host.
+  private safeReturnUrl(
+    request: AuthenticatedRequest,
+    returnPath?: string,
+  ): string | undefined {
+    const origin =
+      ((request as { headers?: { origin?: string } }).headers?.origin ?? '') ||
+      '';
+    const path = (returnPath ?? '').trim();
+
+    if (!origin || !path.startsWith('/') || path.startsWith('//')) {
+      return undefined;
+    }
+    try {
+      const host = new URL(origin).hostname;
+      const ours =
+        host === 'desync.ai' ||
+        host.endsWith('.desync.ai') ||
+        host.endsWith('.onrender.com');
+
+      if (!ours) {
+        return undefined;
+      }
+    } catch {
+      return undefined;
+    }
+
+    return `${origin}${path}`;
   }
 
   // Triggering a sync mints a workspace write-token (an API-key operation), so it

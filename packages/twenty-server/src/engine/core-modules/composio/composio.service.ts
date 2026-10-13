@@ -552,19 +552,24 @@ export class ComposioService {
   async getConnectUrl(
     toolkitSlug: string,
     userId: string,
+    returnUrl?: string,
   ): Promise<ComposioConnectResult> {
     const toolkit = this.toolkits[toolkitSlug];
 
     if (!this.apiKey || !toolkit) {
       throw new Error(`Composio toolkit not configured: ${toolkitSlug}`);
     }
+    // Return the user to the page they started from (on their own workspace
+    // subdomain) after OAuth, instead of the hardcoded base integrations page
+    // (which drops the workspace session -> a "choose a workspace" re-prompt).
+    const callback = returnUrl ?? this.callbackUrl;
     const res = await this.request<{
       redirectUrl?: string;
       redirect_url?: string;
     }>('POST', '/connected_accounts/link', {
       auth_config_id: toolkit.authConfigId,
       user_id: userId,
-      ...(this.callbackUrl ? { callback_url: this.callbackUrl } : {}),
+      ...(callback ? { callback_url: callback } : {}),
     });
 
     // A fresh link may change connection state — invalidate the status cache.

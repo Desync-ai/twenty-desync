@@ -156,7 +156,13 @@ export class IntegrationsService {
     );
   }
 
-  async connect(tenant: string, plugin: string, email?: string, userId?: string) {
+  async connect(
+    tenant: string,
+    plugin: string,
+    email?: string,
+    userId?: string,
+    returnUrl?: string,
+  ) {
     // Composio toolkits (Slack, Airtable, …) connect via Composio's hosted OAuth,
     // keyed by the Twenty user id (the same id the copilot executes against).
     if (this.composioService.isToolkitEnabled(plugin)) {
@@ -164,7 +170,7 @@ export class IntegrationsService {
         throw new BadRequestException('No user in session for this connection');
       }
 
-      return this.composioService.getConnectUrl(plugin, userId);
+      return this.composioService.getConnectUrl(plugin, userId, returnUrl);
     }
 
     return this.call<{ connectUrl: string | null; connected?: boolean; expiresAt: string | null }>(
