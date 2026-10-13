@@ -1,0 +1,270 @@
+import { styled } from '@linaria/react';
+import { useLingui } from '@lingui/react/macro';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SettingsPath } from 'twenty-shared/types';
+import { getSettingsPath } from 'twenty-shared/utils';
+import { IconArrowRight, IconPlug, IconSparkles } from 'twenty-ui/icon';
+import { Button } from 'twenty-ui/primitives/input';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
+
+import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
+import { TextArea } from '@/ui/input/components/TextArea';
+import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
+
+// Desync "Get started": a painfully-obvious first-run page. New users land on a
+// dense, empty grid and do not know what to do or what the agent can do. This
+// walks them through it: connect tools -> say where their leads are -> one tap
+// to open the copilot pre-filled to clear the demo data and build their CRM.
+
+const EXAMPLE_PROMPTS = [
+  'Find me 5 leads that look like my best customers.',
+  'Summarize what I should know from my last 10 meetings.',
+  'Who should I follow up with this week?',
+];
+
+const StyledPage = styled.div`
+  background: ${themeCssVariables.background.primary};
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+`;
+
+const StyledContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[6]};
+  margin: 0 auto;
+  max-width: 640px;
+  padding: ${themeCssVariables.spacing[8]} ${themeCssVariables.spacing[6]};
+  width: 100%;
+`;
+
+const StyledHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledTitle = styled.h1`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.xl};
+  font-weight: ${themeCssVariables.font.weight.semiBold};
+  margin: 0;
+`;
+
+const StyledSubtitle = styled.p`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.md};
+  line-height: 1.5;
+  margin: 0;
+`;
+
+const StyledSteps = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[4]};
+`;
+
+const StyledStep = styled.div`
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+  padding: ${themeCssVariables.spacing[4]};
+`;
+
+const StyledStepTop = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[3]};
+`;
+
+const StyledStepNumber = styled.div`
+  align-items: center;
+  background: ${themeCssVariables.color.blue};
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  flex: 0 0 auto;
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.semiBold};
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+`;
+
+const StyledStepText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+`;
+
+const StyledStepTitle = styled.span`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledStepHint = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.4;
+`;
+
+const StyledExamples = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledExamplesLabel = styled.span`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledChip = styled.button`
+  background: ${themeCssVariables.background.primary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[3]};
+  text-align: left;
+
+  &:hover {
+    border-color: ${themeCssVariables.color.blue};
+    color: ${themeCssVariables.font.color.primary};
+  }
+`;
+
+export const GetStartedPage = () => {
+  const { t } = useLingui();
+  const navigate = useNavigate();
+  const setAgentChatPreprompt = useSetAtomState(agentChatPrepromptState);
+
+  const [leadsSource, setLeadsSource] = useState('');
+
+  const openCopilotWith = (text: string) => {
+    setAgentChatPreprompt({ text, mode: 'PREFILL' });
+    navigate('/chat');
+  };
+
+  const buildPopulatePrompt = () => {
+    const src = leadsSource.trim();
+    return [
+      'Help me set up my CRM. Please do these in order:',
+      '1. Remove the sample/demo data that came with this workspace (the example companies, people, notes and opportunities) so I start clean. Confirm with me before deleting anything.',
+      `2. Add my real customers and leads: pull them from the tools I have connected (email, calendar, meeting notes, HubSpot, and so on)${
+        src ? `, and from here: ${src}` : ''
+      }. Create the matching People and Companies.`,
+      src
+        ? ''
+        : '3. I do not have a customer list yet, so search the web for 3 to 5 leads that fit my business and add them as People and Companies, tagged as AI-suggested.',
+      'When you are done, give me a short summary of what you added and 3 follow-ups I should do this week.',
+    ]
+      .filter(Boolean)
+      .join('\n');
+  };
+
+  return (
+    <StyledPage>
+      <StyledContent>
+        <StyledHeader>
+          <StyledTitle>{t`Welcome to Desync. Let's set up your CRM.`}</StyledTitle>
+          <StyledSubtitle>
+            {t`Your built-in AI agent can fill your CRM for you, pull in your contacts, find new leads, and tell you who to follow up with. Three quick steps and it does the work.`}
+          </StyledSubtitle>
+        </StyledHeader>
+
+        <StyledSteps>
+          <StyledStep>
+            <StyledStepTop>
+              <StyledStepNumber>1</StyledStepNumber>
+              <StyledStepText>
+                <StyledStepTitle>{t`Connect your tools`}</StyledStepTitle>
+                <StyledStepHint>
+                  {t`Link your email, calendar, meeting notes, or CRM so the agent can pull in your real contacts and companies.`}
+                </StyledStepHint>
+              </StyledStepText>
+            </StyledStepTop>
+            <div>
+              <Button
+                variant="outline"
+                startIcon={<IconPlug size={16} />}
+                onClick={() =>
+                  navigate(getSettingsPath(SettingsPath.Integrations))
+                }
+              >
+                {t`Connect integrations`}
+              </Button>
+            </div>
+          </StyledStep>
+
+          <StyledStep>
+            <StyledStepTop>
+              <StyledStepNumber>2</StyledStepNumber>
+              <StyledStepText>
+                <StyledStepTitle>{t`Where are your customers?`}</StyledStepTitle>
+                <StyledStepHint>
+                  {t`Tell the agent where your leads live, a tool, a spreadsheet, a website, a list of names. Leave it blank and the agent will find some for you.`}
+                </StyledStepHint>
+              </StyledStepText>
+            </StyledStepTop>
+            <TextArea
+              textAreaId="get-started-leads-source"
+              placeholder={t`e.g. my HubSpot, the attendees in my last meetings, or acme.com and 2 others`}
+              value={leadsSource}
+              onChange={setLeadsSource}
+              minRows={2}
+              maxRows={4}
+            />
+          </StyledStep>
+
+          <StyledStep>
+            <StyledStepTop>
+              <StyledStepNumber>3</StyledStepNumber>
+              <StyledStepText>
+                <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
+                <StyledStepHint>
+                  {t`This opens the agent with a ready-to-send plan: clear the sample data (it will confirm first), then add your real contacts, or find a few leads if you have none.`}
+                </StyledStepHint>
+              </StyledStepText>
+            </StyledStepTop>
+            <div>
+              <Button
+                variant="solid"
+                color="accent"
+                startIcon={<IconSparkles size={16} />}
+                onClick={() => openCopilotWith(buildPopulatePrompt())}
+              >
+                {t`Build my CRM`}
+              </Button>
+            </div>
+          </StyledStep>
+        </StyledSteps>
+
+        <StyledExamples>
+          <StyledExamplesLabel>
+            {t`Or just ask the agent anything, for example:`}
+          </StyledExamplesLabel>
+          {EXAMPLE_PROMPTS.map((prompt) => (
+            <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
+              <IconArrowRight
+                size={14}
+                style={{ marginRight: 6, verticalAlign: 'middle' }}
+              />
+              {prompt}
+            </StyledChip>
+          ))}
+        </StyledExamples>
+      </StyledContent>
+    </StyledPage>
+  );
+};

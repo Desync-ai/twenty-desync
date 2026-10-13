@@ -1,5 +1,6 @@
 import { useIsSettingsDrawer } from '@/navigation/hooks/useIsSettingsDrawer';
 
+import { DesyncGetStartedSection } from '@/navigation/components/DesyncGetStartedSection';
 import { DesyncFioAdsSection } from '@/navigation/components/DesyncFioAdsSection';
 import { DesyncHelpSection } from '@/navigation/components/DesyncHelpSection';
 import { DesyncUsageWidget } from '@/desync-onboarding/components/DesyncUsageWidget';
@@ -44,6 +45,12 @@ export const AppNavigationDrawer = ({
 
       {/* Desync: Launch-a-Fio-ad entry (paid users) + Help (book a call +
           report a bug) pinned on the main sidebar (not the settings drawer). */}
+      {!isSettingsDrawer && (
+        <NavigationDrawerFixedContent>
+          <DesyncGetStartedSection />
+        </NavigationDrawerFixedContent>
+      )}
+
       {!isSettingsDrawer && (
         <NavigationDrawerFixedContent>
           <DesyncFioAdsSection />

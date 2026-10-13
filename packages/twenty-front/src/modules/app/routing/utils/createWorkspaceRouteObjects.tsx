@@ -47,6 +47,12 @@ const FioAdsPage = lazy(() =>
   })),
 );
 
+const GetStartedPage = lazy(() =>
+  import('~/pages/get-started/GetStartedPage').then((module) => ({
+    default: module.GetStartedPage,
+  })),
+);
+
 const MobileHomePage = lazy(() =>
   import('~/pages/mobile-home/MobileHomePage').then((module) => ({
     default: module.MobileHomePage,
@@ -138,6 +144,14 @@ export const createWorkspaceRouteObjects = ({
       element: (
         <LazyRoute>
           <FioAdsPage />
+        </LazyRoute>
+      ),
+    },
+    {
+      path: AppPath.GetStarted,
+      element: (
+        <LazyRoute>
+          <GetStartedPage />
         </LazyRoute>
       ),
     },
