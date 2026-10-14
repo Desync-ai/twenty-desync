@@ -19,7 +19,10 @@ jobs:
     uses: ./.github/workflows/changed-files.yaml
     with:
       files: |
+        .github/workflows/ci-emails.yaml
+        .github/actions/**
         package.json
+        yarn.lock
         packages/twenty-emails/**
   emails-test:
     needs: changed-files-check
@@ -64,5 +67,5 @@ jobs:
     needs: [changed-files-check, emails-test]
     steps:
       - name: Fail job if any needs failed
-        if: contains(needs.*.result, 'failure')
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: exit 1
