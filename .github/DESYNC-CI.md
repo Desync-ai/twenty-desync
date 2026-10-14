@@ -40,3 +40,21 @@ When merging upstream Twenty, git reports the deleted workflows as
 "deleted by us / modified by them": keep them deleted
 (`git rm` the path). New upstream workflows arrive as new files: review each
 one and delete it unless it checks code we change. Re-apply nothing else.
+
+## Quarantined checks (TODO)
+
+These steps still run and print their errors, plus a `::warning::`
+annotation, but use `continue-on-error` so a green check is not blocked by debt
+that predates CI being turned on. Remove the `continue-on-error` line once each
+item is fixed.
+
+- `ci-front` `lint` (22 errors) and `typecheck` (31 errors) in Desync front
+  code: mostly `desync-onboarding` / plan-billing calling `useQuery`/`useMutation`
+  with untyped `gql` documents (data typed `{}`), plus style rules
+  (hardcoded colors, prop naming, effect-component naming).
+- `ci-server` `server-validation` / "Check for Pending Migrations": Desync
+  entity changes have no generated instance command. The step prints the
+  generated file; commit it via `npx nx run twenty-server:database:migrate:generate`.
+- `ci-server` `server-validation` / "Check for Pending Code Generation": the
+  generated GraphQL clients (`twenty-front/src/generated*`, SDK metadata client)
+  lag the Desync schema additions.
