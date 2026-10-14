@@ -10,12 +10,13 @@ import { PermissionFlagType } from 'twenty-shared/constants';
 
 import { DesyncOnboardingService } from 'src/engine/core-modules/desync-onboarding/desync-onboarding.service';
 import {
+  CARTESIA_DEFAULT_VOICE_ID,
+  CARTESIA_EN_VOICE_ALLOWLIST,
   FIO_AD_CATEGORY_SET,
   FIO_AD_LIMITS,
   FIO_AD_SUBMISSION_KV_KEY,
   FIO_ADS_FALLBACK_RECIPIENT,
-  FIO_VOICES,
-  FIO_VOICE_IDS,
+  FIO_VOICE_FALLBACK,
 } from 'src/engine/core-modules/fio-ads/constants/fio-ad.constants';
 import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
 import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
@@ -73,15 +74,26 @@ export class FioAdsService {
   // Groq-hosted Whisper for optional auto-transcription of the ad audio.
   private static readonly TRANSCRIBE_MODEL = 'whisper-large-v3-turbo';
   private readonly groqKey = process.env.GROQ_API_KEY ?? '';
-  // ElevenLabs TTS for optional AI voiceover of the script (returns MP3).
-  private static readonly VOICEOVER_MODEL = 'eleven_multilingual_v2';
-  private static readonly DEFAULT_VOICE_ID = 'nPczCjzI2devNBz1zQrb'; // Brian (natural default voice; works on free plan)
+  // Cartesia (Sonic) TTS for optional AI voiceover of the script (returns MP3).
+  private static readonly CARTESIA_TTS_URL = 'https://api.cartesia.ai/tts/bytes';
+  private static readonly CARTESIA_VOICES_URL = 'https://api.cartesia.ai/voices?limit=200';
+  private static readonly CARTESIA_VERSION = '2026-08-14';
+  private static readonly CARTESIA_MODEL = 'sonic-3.6';
+  private static readonly DEFAULT_VOICE_ID = CARTESIA_DEFAULT_VOICE_ID;
   // Short phrase used for the pre-generation voice preview (kept brief so it is
   // cheap/fast); each voice is synthesized at most once then cached in-process.
   private static readonly VOICE_SAMPLE_TEXT =
     'Hi, this is a preview of how your Fio ad could sound.';
   private readonly voiceSampleCache = new Map<string, string>(); // voiceId -> base64 mp3
-  private readonly elevenLabsKey = process.env.ELEVENLABS_API_KEY ?? '';
+  private readonly cartesiaKey = process.env.CARTESIA_API_KEY ?? '';
+  // Curated voice list resolved from Cartesia's live catalog, cached in-process.
+  private static readonly VOICES_TTL_MS = 6 * 60 * 60 * 1000;
+  private voicesCache: ReadonlyArray<{
+    id: string;
+    name: string;
+    description: string;
+  }> | null = null;
+  private voicesCacheAt = 0;
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
   private prefillPool: Pool | null = null;
@@ -173,8 +185,102 @@ export class FioAdsService {
     }
   }
 
-  listVoices(): ReadonlyArray<{ id: string; name: string; description: string }> {
-    return FIO_VOICES;
+  // The curated voice selection shown in the picker: Cartesia's most natural
+  // English voices (our allowlist), resolved to real IDs from Cartesia's live
+  // catalog and cached. Falls back to the verified list if the fetch fails or
+  // the key isn't set yet, so the picker is never empty.
+  async listVoices(): Promise<
+    ReadonlyArray<{ id: string; name: string; description: string }>
+  > {
+    const now = Date.now();
+    if (
+      this.voicesCache &&
+      now - this.voicesCacheAt < FioAdsService.VOICES_TTL_MS
+    ) {
+      return this.voicesCache;
+    }
+    const curated = await this.fetchCuratedVoices();
+    this.voicesCache = curated;
+    this.voicesCacheAt = now;
+
+    return curated;
+  }
+
+  private async fetchCuratedVoices(): Promise<
+    ReadonlyArray<{ id: string; name: string; description: string }>
+  > {
+    if (!this.cartesiaKey) {
+      return FIO_VOICE_FALLBACK;
+    }
+    try {
+      const res = await fetch(FioAdsService.CARTESIA_VOICES_URL, {
+        headers: {
+          Authorization: `Bearer ${this.cartesiaKey}`,
+          'Cartesia-Version': FioAdsService.CARTESIA_VERSION,
+        },
+      });
+
+      if (!res.ok) {
+        this.logger.warn(`Fio ads: Cartesia /voices returned ${res.status}`);
+
+        return FIO_VOICE_FALLBACK;
+      }
+
+      const data = (await res.json()) as unknown;
+      const list = (
+        Array.isArray(data)
+          ? data
+          : Array.isArray((data as { data?: unknown })?.data)
+            ? (data as { data: unknown[] }).data
+            : []
+      ) as Array<{ id?: string; name?: string; language?: string }>;
+
+      // Index the English catalog by lowercased name (first match wins).
+      const byName = new Map<string, string>();
+      for (const v of list) {
+        const id = typeof v?.id === 'string' ? v.id : '';
+        const name = typeof v?.name === 'string' ? v.name : '';
+        const lang = typeof v?.language === 'string' ? v.language : '';
+        if (!id || !name) {
+          continue;
+        }
+        if (lang && !lang.toLowerCase().startsWith('en')) {
+          continue;
+        }
+        const key = name.toLowerCase();
+        if (!byName.has(key)) {
+          byName.set(key, id);
+        }
+      }
+
+      // Pick our allowlisted voices, in order, using their real catalog IDs.
+      const curated: Array<{ id: string; name: string; description: string }> = [];
+      for (const rec of CARTESIA_EN_VOICE_ALLOWLIST) {
+        const id = byName.get(rec.name.toLowerCase());
+        if (id) {
+          curated.push({ id, name: rec.name, description: rec.description });
+        }
+        if (curated.length >= 8) {
+          break;
+        }
+      }
+
+      return curated.length > 0 ? curated : FIO_VOICE_FALLBACK;
+    } catch (error) {
+      this.logger.warn(
+        `Fio ads: Cartesia /voices failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+
+      return FIO_VOICE_FALLBACK;
+    }
+  }
+
+  private async allowedVoiceIds(): Promise<Set<string>> {
+    const voices = await this.listVoices();
+
+    return new Set(voices.map((v) => v.id));
   }
 
   // The user's signup answers (scraper_db) summarized for the script writer.
@@ -429,9 +535,9 @@ export class FioAdsService {
     return { text: (data.text ?? '').trim() };
   }
 
-  // Optional AI voiceover of the script via ElevenLabs TTS. Returns an MP3 the
-  // client drops in as the ad audio. Caller gates on eligibility (spends our
-  // ElevenLabs credits).
+  // Optional AI voiceover of the script via Cartesia (Sonic) TTS. Returns an MP3
+  // the client drops in as the ad audio. Caller gates on eligibility (spends our
+  // Cartesia credits).
   async generateVoiceover({
     text,
     voiceId,
@@ -439,8 +545,8 @@ export class FioAdsService {
     text?: string;
     voiceId?: string;
   }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
-    if (!this.elevenLabsKey) {
-      throw new Error('AI voiceover is not configured (ELEVENLABS_API_KEY).');
+    if (!this.cartesiaKey) {
+      throw new Error('AI voiceover is not configured (CARTESIA_API_KEY).');
     }
     const script = (text ?? '').trim();
     if (!script) {
@@ -450,13 +556,14 @@ export class FioAdsService {
       throw new BadRequestException('Script is too long for a 20-30s ad.');
     }
 
-    // Only allow a voice from our picker list; otherwise fall back to the
+    // Only allow a voice from our curated picker list; otherwise fall back to the
     // default (prevents arbitrary voice ids being driven through our key).
     const requested = (voiceId ?? '').trim();
+    const allowed = await this.allowedVoiceIds();
     const voice =
-      requested && FIO_VOICE_IDS.has(requested)
+      requested && allowed.has(requested)
         ? requested
-        : process.env.ELEVENLABS_VOICE_ID || FioAdsService.DEFAULT_VOICE_ID;
+        : process.env.CARTESIA_VOICE_ID || FioAdsService.DEFAULT_VOICE_ID;
 
     const dataBase64 = await this.synthesizeMp3(voice, script);
 
@@ -465,22 +572,30 @@ export class FioAdsService {
     };
   }
 
-  // Low-level ElevenLabs TTS -> base64 MP3. Shared by the full voiceover and the
-  // short voice preview. Throws on a non-2xx with the status + body snippet.
+  // Low-level Cartesia (Sonic) TTS -> base64 MP3. Shared by the full voiceover
+  // and the short voice preview. POST /tts/bytes returns the MP3 bytes directly.
+  // Throws on a non-2xx with the status + body snippet. (If Cartesia ever rejects
+  // the voice shape, switch `voice` to a bare `{ id: voice }`.)
   private async synthesizeMp3(voice: string, text: string): Promise<string> {
-    const res = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(
-        voice,
-      )}?output_format=mp3_44100_128`,
-      {
-        method: 'POST',
-        headers: {
-          'xi-api-key': this.elevenLabsKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text, model_id: FioAdsService.VOICEOVER_MODEL }),
+    const res = await fetch(FioAdsService.CARTESIA_TTS_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.cartesiaKey}`,
+        'Cartesia-Version': FioAdsService.CARTESIA_VERSION,
+        'Content-Type': 'application/json',
       },
-    );
+      body: JSON.stringify({
+        model_id: FioAdsService.CARTESIA_MODEL,
+        transcript: text,
+        voice: { mode: 'id', id: voice },
+        language: 'en',
+        output_format: {
+          container: 'mp3',
+          sample_rate: 44100,
+          bit_rate: 128000,
+        },
+      }),
+    });
 
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
@@ -498,11 +613,12 @@ export class FioAdsService {
   }: {
     voiceId?: string;
   }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
-    if (!this.elevenLabsKey) {
-      throw new Error('AI voiceover is not configured (ELEVENLABS_API_KEY).');
+    if (!this.cartesiaKey) {
+      throw new Error('AI voiceover is not configured (CARTESIA_API_KEY).');
     }
     const voice = (voiceId ?? '').trim();
-    if (!voice || !FIO_VOICE_IDS.has(voice)) {
+    const allowed = await this.allowedVoiceIds();
+    if (!voice || !allowed.has(voice)) {
       throw new BadRequestException('Unknown voice.');
     }
     let dataBase64 = this.voiceSampleCache.get(voice);

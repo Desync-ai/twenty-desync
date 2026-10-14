@@ -94,8 +94,8 @@ export class FioAdsController {
   }
 
   @Get('voices')
-  voices() {
-    return { voices: this.fioAdsService.listVoices() };
+  async voices() {
+    return { voices: await this.fioAdsService.listVoices() };
   }
 
   @Get('voice-sample')
@@ -103,7 +103,7 @@ export class FioAdsController {
     @Query('voiceId') voiceId: string,
     @Req() request: AuthenticatedRequest,
   ) {
-    // Same eligibility as voiceover (it synthesizes through our ElevenLabs key).
+    // Same eligibility as voiceover (it synthesizes through our Cartesia key).
     const status = await this.fioAdsService.getStatus({
       userId: this.userId(request),
       email: this.userEmail(request),

@@ -40,26 +40,43 @@ export const FIO_AD_CATEGORY_SET: ReadonlySet<string> = new Set(
   FIO_AD_CATEGORIES,
 );
 
-// ElevenLabs' newer default voices. These sound far more natural than the old
-// v1 premade set (Rachel/Adam/Antoni/Bella/Josh), and (verified 2026-10-12) they
-// synthesize over the API even on a free plan, unlike the old library voices
-// which 402 "paid_plan_required". First entry is the default. Users pick one for
-// the AI voiceover. (Default voices are slated to retire 2026-12-31; revisit then.)
-export const FIO_VOICES: ReadonlyArray<{
+// Fio voiceovers use Cartesia (Sonic) TTS. We surface a curated selection of
+// Cartesia's most natural English voices. The real voice catalog is fetched live
+// from Cartesia (/voices) at runtime and intersected with this recommended-name
+// allowlist (see FioAdsService.fetchCuratedVoices), so the IDs stay correct as
+// Cartesia updates its library and we never hardcode a UUID that can drift.
+//
+// This allowlist is Cartesia's own "stable, realistic" English picks, in the
+// order we want them shown, each with a friendly tone description for the picker.
+export const CARTESIA_EN_VOICE_ALLOWLIST: ReadonlyArray<{
+  name: string;
+  description: string;
+}> = [
+  { name: 'Daniel', description: 'Male, warm and natural, great for ads' },
+  { name: 'Skylar', description: 'Female, friendly and clear' },
+  { name: 'Jacqueline', description: 'Female, warm and professional' },
+  { name: 'Parker', description: 'Male, calm and trustworthy' },
+  { name: 'Emma', description: 'Female, bright and conversational' },
+  { name: 'Jameson', description: 'Male, deep and smooth' },
+  { name: 'Gemma', description: 'Female, British, warm' },
+  { name: 'Archie', description: 'Male, British, confident' },
+  { name: 'Lauren', description: 'Female, expressive and engaging' },
+  { name: 'Corey', description: 'Male, clear and upbeat' },
+];
+
+// Verified Cartesia voice IDs, used ONLY as a fallback if the live /voices fetch
+// fails (or before the API key is set), so the picker is never empty.
+export const FIO_VOICE_FALLBACK: ReadonlyArray<{
   id: string;
   name: string;
   description: string;
 }> = [
-  { id: 'nPczCjzI2devNBz1zQrb', name: 'Brian', description: 'Male, deep and warm, great for ads' },
-  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', description: 'Female, warm and professional' },
-  { id: 'JBFqnCBsd6RMkjVDRZzb', name: 'George', description: 'Male, British, warm narration' },
-  { id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda', description: 'Female, warm and friendly' },
-  { id: 'pqHfZKP75CvOlQylNhV4', name: 'Bill', description: 'Male, friendly and trustworthy' },
-  { id: 'Xb7hH8MSUJpSbSDYk0k2', name: 'Alice', description: 'Female, British, clear and friendly' },
-  { id: 'cjVigY5qzO86Huf0OWal', name: 'Eric', description: 'Male, smooth and natural' },
-  { id: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica', description: 'Female, expressive and conversational' },
+  { id: '47c38ca4-5f35-497b-b1a3-415245fb35e1', name: 'Daniel', description: 'Male, warm and natural, great for ads' },
+  { id: 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4', name: 'Skylar', description: 'Female, friendly and clear' },
+  { id: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc', name: 'Jacqueline', description: 'Female, warm and professional' },
+  { id: '62ae83ad-4f6a-430b-af41-a9bede9286ca', name: 'Gemma', description: 'Female, British, warm' },
+  { id: 'ef191366-f52f-447a-a398-ed8c0f2943a1', name: 'Archie', description: 'Male, British, confident' },
 ];
 
-export const FIO_VOICE_IDS: ReadonlySet<string> = new Set(
-  FIO_VOICES.map((v) => v.id),
-);
+// Default voice when the user doesn't pick one (Daniel: warm male read).
+export const CARTESIA_DEFAULT_VOICE_ID = '47c38ca4-5f35-497b-b1a3-415245fb35e1';
