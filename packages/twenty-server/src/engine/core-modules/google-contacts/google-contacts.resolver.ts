@@ -5,6 +5,7 @@ import { type AuthContextUser } from 'src/engine/core-modules/auth/types/auth-co
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUser } from 'src/engine/decorators/auth/auth-user.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 
 import { GoogleContactsImportResult } from './dtos/google-contacts.dto';
@@ -23,6 +24,7 @@ export class GoogleContactsResolver {
   ) {}
 
   @Mutation(() => GoogleContactsImportResult)
+  @UseGuards(NoPermissionGuard)
   async importGoogleContacts(
     @AuthUser() user: AuthContextUser,
     @AuthWorkspace() workspace: WorkspaceEntity,

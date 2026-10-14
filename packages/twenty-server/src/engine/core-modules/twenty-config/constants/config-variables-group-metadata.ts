@@ -43,6 +43,12 @@ export const CONFIG_VARIABLES_GROUP_METADATA: Record<
     isHiddenOnLoad: false,
     isHiddenInAdminPanel: false,
   },
+  [ConfigVariablesGroup.CLERK_AUTH]: {
+    position: 550,
+    description: 'Configure Clerk sign-in (Desync)',
+    isHiddenOnLoad: false,
+    isHiddenInAdminPanel: false,
+  },
   [ConfigVariablesGroup.EMAIL_SETTINGS]: {
     position: 600,
     description:
