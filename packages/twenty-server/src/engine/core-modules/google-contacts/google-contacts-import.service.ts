@@ -2,7 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { google, type people_v1 } from 'googleapis';
-import { ConnectedAccountProvider, FieldActorSource } from 'twenty-shared/types';
+import {
+  ConnectedAccountProvider,
+  FieldActorSource,
+} from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { Repository } from 'typeorm';
 
@@ -142,12 +145,13 @@ export class GoogleContactsImportService {
     pageToken = undefined;
 
     do {
-      const res = await peopleApi.people.connections.list({
-        resourceName: 'people/me',
-        personFields: 'names,emailAddresses',
-        pageSize: PAGE_SIZE,
-        pageToken,
-      });
+      const res: { data: people_v1.Schema$ListConnectionsResponse } =
+        await peopleApi.people.connections.list({
+          resourceName: 'people/me',
+          personFields: 'names,emailAddresses',
+          pageSize: PAGE_SIZE,
+          pageToken,
+        });
 
       for (const person of res.data.connections ?? []) {
         this.addContact(byHandle, person);
