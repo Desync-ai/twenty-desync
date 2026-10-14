@@ -4,7 +4,7 @@ export const ILLUSTRATION_ICON_TOKENS = {
   color: {
     blue: token({
       light: '#4E938A',
-      dark: '#7EC3BC',
+      dark: 'color(display-p3 0.354 0.445 0.866)',
     }),
     gray: token({
       light: 'color(display-p3 0.6 0.6 0.6)',
@@ -14,7 +14,7 @@ export const ILLUSTRATION_ICON_TOKENS = {
   fill: {
     blue: token({
       light: '#B6D8D1',
-      dark: '#CDE7E3',
+      dark: 'color(display-p3 0.848 0.881 0.99)',
     }),
     gray: GRAY_SCALE_TOKENS.gray5,
   },

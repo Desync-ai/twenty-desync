@@ -17,6 +17,14 @@ jest.mock('@/navigation/components/MainNavigationDrawerModeSwitcher', () => ({
   ),
 }));
 
+jest.mock('@/desync-onboarding/components/DesyncUsageWidget', () => ({
+  DesyncUsageWidget: () => null,
+}));
+
+jest.mock('@/navigation/components/NavigationDrawerLogoutButton', () => ({
+  NavigationDrawerLogoutButton: () => null,
+}));
+
 jest.mock('@/navigation/components/SettingsNavigationDrawerContent', () => ({
   SettingsNavigationDrawerContent: () => <div>Settings content</div>,
 }));

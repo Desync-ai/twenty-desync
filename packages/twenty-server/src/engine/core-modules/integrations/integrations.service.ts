@@ -22,11 +22,15 @@ import { RoleService } from 'src/engine/metadata-modules/role/role.service';
 @Injectable()
 export class IntegrationsService {
   private readonly logger = new Logger(IntegrationsService.name);
-  private readonly baseUrl = (process.env.CORSAIR_BASE_URL ?? '').replace(/\/+$/, '');
+  private readonly baseUrl = (process.env.CORSAIR_BASE_URL ?? '').replace(
+    /\/+$/,
+    '',
+  );
   private readonly serviceToken = process.env.CORSAIR_SERVICE_TOKEN ?? '';
   // Feedback / integration-request emails go to the team via Resend (the same
   // provider + verified sender the lead-gen platform uses).
-  private readonly resendKey = process.env.RESEND_KEY ?? process.env.RESEND_API_KEY ?? '';
+  private readonly resendKey =
+    process.env.RESEND_KEY ?? process.env.RESEND_API_KEY ?? '';
   private static readonly FEEDBACK_FROM = 'Desync CRM <noreply@desync.support>';
   private static readonly FEEDBACK_TO = ['mark@desync.ai', 'jackson@desync.ai'];
 
@@ -81,7 +85,12 @@ export class IntegrationsService {
 
   // `email` is only used by the Desync (Gabriel CRM) source, which resolves the
   // user's workspace by email rather than an OAuth account.
-  async status(tenant: string, plugin: string, email?: string, userId?: string) {
+  async status(
+    tenant: string,
+    plugin: string,
+    email?: string,
+    userId?: string,
+  ) {
     // Composio-backed copilot integrations (Slack, Airtable, …) are per-user,
     // keyed by the Twenty user id — not Corsair sync sources.
     if (this.composioService.isToolkitEnabled(plugin)) {
@@ -100,7 +109,12 @@ export class IntegrationsService {
     );
   }
 
-  async connect(tenant: string, plugin: string, email?: string, userId?: string) {
+  async connect(
+    tenant: string,
+    plugin: string,
+    email?: string,
+    userId?: string,
+  ) {
     // Composio toolkits (Slack, Airtable, …) connect via Composio's hosted OAuth,
     // keyed by the Twenty user id (the same id the copilot executes against).
     if (this.composioService.isToolkitEnabled(plugin)) {
@@ -111,11 +125,14 @@ export class IntegrationsService {
       return this.composioService.getConnectUrl(plugin, userId);
     }
 
-    return this.call<{ connectUrl: string | null; connected?: boolean; expiresAt: string | null }>(
-      'POST',
-      `/integrations/${encodeURIComponent(plugin)}/connect`,
-      { userId: tenant, ...(plugin === 'desync' && email ? { email } : {}) },
-    );
+    return this.call<{
+      connectUrl: string | null;
+      connected?: boolean;
+      expiresAt: string | null;
+    }>('POST', `/integrations/${encodeURIComponent(plugin)}/connect`, {
+      userId: tenant,
+      ...(plugin === 'desync' && email ? { email } : {}),
+    });
   }
 
   // Send a user's integration request / problem report to the team via Resend.
@@ -154,11 +171,21 @@ export class IntegrationsService {
     return { ok: true };
   }
 
-  async sync(tenant: string, workspaceId: string, plugin: string, email?: string) {
+  async sync(
+    tenant: string,
+    workspaceId: string,
+    plugin: string,
+    email?: string,
+  ) {
     // Allow-list the plugin BEFORE minting any key. Otherwise an arbitrary
     // `:plugin` would create a persistent named write-key for a bogus integration
     // (keyName falls back to the raw plugin string).
-    if (!Object.prototype.hasOwnProperty.call(IntegrationsService.KEY_NAMES, plugin)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        IntegrationsService.KEY_NAMES,
+        plugin,
+      )
+    ) {
       throw new BadRequestException(`Unsupported integration: ${plugin}`);
     }
     const twentyApiUrl = (process.env.SERVER_URL ?? '').replace(/\/+$/, '');
@@ -175,12 +202,22 @@ export class IntegrationsService {
     return this.call<{ ok: boolean; jobId: string; status: string }>(
       'POST',
       `/integrations/${encodeURIComponent(plugin)}/sync`,
-      { userId: tenant, twentyApiUrl, twentyToken, ...(plugin === 'desync' && email ? { email } : {}) },
+      {
+        userId: tenant,
+        twentyApiUrl,
+        twentyToken,
+        ...(plugin === 'desync' && email ? { email } : {}),
+      },
     );
   }
 
   syncStatus(tenant: string, plugin: string) {
-    return this.call<{ status: string; phase: string | null; counts: unknown; error: string | null }>(
+    return this.call<{
+      status: string;
+      phase: string | null;
+      counts: unknown;
+      error: string | null;
+    }>(
       'GET',
       `/integrations/${encodeURIComponent(plugin)}/sync/status?userId=${encodeURIComponent(tenant)}`,
     );
@@ -188,9 +225,13 @@ export class IntegrationsService {
 
   // Find-or-create a named workspace API key with write access, then mint a
   // short-lived token from it for corsair to use against /rest.
-  private async mintWriteToken(workspaceId: string, keyName: string): Promise<string> {
+  private async mintWriteToken(
+    workspaceId: string,
+    keyName: string,
+  ): Promise<string> {
     const now = Date.now();
-    const activeKeys = await this.apiKeyService.findActiveByWorkspaceId(workspaceId);
+    const activeKeys =
+      await this.apiKeyService.findActiveByWorkspaceId(workspaceId);
 
     let key = activeKeys.find(
       (k) => k.name === keyName && new Date(k.expiresAt).getTime() > now,

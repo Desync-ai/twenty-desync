@@ -691,6 +691,23 @@ describe('JwtAuthStrategy', () => {
   });
 
   describe('Impersonation validation', () => {
+    // Desync gates impersonation on an operator email allowlist on top of the
+    // upstream permission checks.
+    const ALLOWED_IMPERSONATOR_EMAIL = 'support-operator@example.com';
+    const previousAllowedEmails = process.env.IMPERSONATION_ALLOWED_EMAILS;
+
+    beforeEach(() => {
+      process.env.IMPERSONATION_ALLOWED_EMAILS = ALLOWED_IMPERSONATOR_EMAIL;
+    });
+
+    afterEach(() => {
+      if (previousAllowedEmails === undefined) {
+        delete process.env.IMPERSONATION_ALLOWED_EMAILS;
+      } else {
+        process.env.IMPERSONATION_ALLOWED_EMAILS = previousAllowedEmails;
+      }
+    });
+
     it('should throw AuthException if impersonation token has missing impersonatorUserWorkspaceId', async () => {
       const validUserId = 'valid-user-id';
       const validUserWorkspaceId = randomUUID();
@@ -1166,7 +1183,11 @@ describe('JwtAuthStrategy', () => {
       userWorkspaceRepository.findOne
         .mockResolvedValueOnce({
           id: impersonatorUserWorkspaceId,
-          user: { id: 'valid-user-id', canImpersonate: false },
+          user: {
+            id: 'valid-user-id',
+            email: ALLOWED_IMPERSONATOR_EMAIL,
+            canImpersonate: false,
+          },
           workspace: mockWorkspace,
         })
         .mockResolvedValueOnce({
@@ -1247,7 +1268,11 @@ describe('JwtAuthStrategy', () => {
       userWorkspaceRepository.findOne
         .mockResolvedValueOnce({
           id: impersonatorUserWorkspaceId,
-          user: { id: 'valid-user-id', canImpersonate: true },
+          user: {
+            id: 'valid-user-id',
+            email: ALLOWED_IMPERSONATOR_EMAIL,
+            canImpersonate: true,
+          },
           workspace: { id: differentWorkspaceId },
         })
         .mockResolvedValueOnce({

@@ -44,8 +44,12 @@ export class GoogleApiScopesService {
       const scopes = response.data.scope.split(' ');
       const expectedScopes = getGoogleApisOauthScopes({
         gmail: this.twentyConfigService.get('MESSAGING_PROVIDER_GMAIL_ENABLED'),
-        calendar: this.twentyConfigService.get('CALENDAR_PROVIDER_GOOGLE_ENABLED'),
-        contacts: this.twentyConfigService.get('CONTACTS_PROVIDER_GOOGLE_ENABLED'),
+        calendar: this.twentyConfigService.get(
+          'CALENDAR_PROVIDER_GOOGLE_ENABLED',
+        ),
+        contacts: this.twentyConfigService.get(
+          'CONTACTS_PROVIDER_GOOGLE_ENABLED',
+        ),
       });
 
       return {

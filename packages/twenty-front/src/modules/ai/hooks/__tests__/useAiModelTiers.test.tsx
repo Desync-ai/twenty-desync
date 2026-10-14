@@ -101,23 +101,17 @@ describe('useAiModelTiers', () => {
     });
 
     const fast = result.current.tiers.find((tier) => tier.tier === 'fast');
-    const extraSmart = result.current.tiers.find(
-      (tier) => tier.tier === 'extraSmart',
-    );
 
+    // Desync exposes three selectable tiers (SELECTABLE_AI_MODEL_TIERS).
     expect(result.current.tiers.map((tier) => tier.tier)).toEqual([
-      'extraFast',
       'fast',
       'balanced',
       'smart',
-      'extraSmart',
     ]);
     expect(fast?.model?.modelId).toBe('openai/luna');
     expect(fast?.speedDeltaPercent).toBe(20);
     expect(fast?.intelligenceDeltaPercent).toBe(-10);
     expect(fast?.costDeltaPercent).toBe(-75);
-    expect(extraSmart?.model).toBeUndefined();
-    expect(extraSmart?.speedDeltaPercent).toBeUndefined();
   });
 
   it('uses the workspace pin only while automatic selection is off', () => {

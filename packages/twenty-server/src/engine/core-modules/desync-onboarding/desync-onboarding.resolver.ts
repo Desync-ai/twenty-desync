@@ -223,7 +223,10 @@ export class DesyncOnboardingResolver {
     @AuthUser() user: AuthContextUser,
     @Args('setupIntentId') setupIntentId: string,
   ): Promise<DesyncActionResult> {
-    return this.desyncOnboardingService.setDefaultCard(user.email, setupIntentId);
+    return this.desyncOnboardingService.setDefaultCard(
+      user.email,
+      setupIntentId,
+    );
   }
 
   // --- Multi-seat (buying seats for teammates) -------------------------------
