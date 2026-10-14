@@ -32,6 +32,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         task: [lint, typecheck, test]
     steps:

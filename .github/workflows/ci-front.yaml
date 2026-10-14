@@ -40,6 +40,7 @@ jobs:
       NODE_OPTIONS: '--max-old-space-size=6144'
       TASK_CACHE_KEY: front-task-${{ matrix.task }}
     strategy:
+      fail-fast: false
       matrix:
         task: [lint, typecheck, test, lingui:extract, lingui:compile]
     steps:
