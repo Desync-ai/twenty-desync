@@ -40,13 +40,19 @@ import { AgentChatStreamHeartbeatService } from 'src/engine/metadata-modules/ai/
 import { AgentChatStreamingService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-streaming.service';
 import { AgentChatService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat.service';
 import { ChatExecutionService } from 'src/engine/metadata-modules/ai/ai-chat/services/chat-execution.service';
+import { type AgentChatTurnError } from 'src/engine/metadata-modules/ai/ai-chat/types/agent-chat-turn-error.type';
 import { type AgentChatTurnOutcome } from 'src/engine/metadata-modules/ai/ai-chat/types/agent-chat-turn-outcome.type';
+import { buildAgentChatTurnError } from 'src/engine/metadata-modules/ai/ai-chat/utils/build-agent-chat-turn-error.util';
 import {
   classifyAgentChatTurnOutcome,
   resolveSupersededTurnOutcome,
 } from 'src/engine/metadata-modules/ai/ai-chat/utils/classify-agent-chat-turn-outcome.util';
+import { EmptyAgentChatResponseError } from 'src/engine/metadata-modules/ai/ai-chat/utils/empty-agent-chat-response.error';
 import { findPendingQuestionPart } from 'src/engine/metadata-modules/ai/ai-chat/utils/find-pending-question-part.util';
+import { isEmptyAgentChatResponse } from 'src/engine/metadata-modules/ai/ai-chat/utils/is-empty-agent-chat-response.util';
 import { AGENT_CHAT_CHECKPOINT_INTERVAL_MS } from 'src/engine/metadata-modules/ai/ai-chat/constants/agent-chat-checkpoint-interval-ms.constant';
+import { AGENT_CHAT_TURN_ERROR_CODES } from 'src/engine/metadata-modules/ai/ai-chat/constants/agent-chat-turn-error-codes.constant';
+import { AGENT_CHAT_TURN_ERROR_MESSAGES } from 'src/engine/metadata-modules/ai/ai-chat/constants/agent-chat-turn-error-messages.constant';
 import { getCancelChannel } from 'src/engine/metadata-modules/ai/ai-chat/utils/get-cancel-channel.util';
 import { mapErrorToStreamError } from 'src/engine/metadata-modules/ai/ai-chat/utils/map-error-to-stream-error.util';
 import { tagAiChatStreamScope } from 'src/engine/metadata-modules/ai/ai-chat/utils/tag-ai-chat-stream-scope.util';
@@ -74,6 +80,10 @@ export class StreamAgentChatJob {
   // after the stream already classified its outcome reaches the catch in
   // handle(), which would otherwise count the same turn a second time.
   private hasRecordedTurnOutcome = false;
+
+  // Same reason: a publish failure after the reply was saved must not add an
+  // error reply under it.
+  private hasPersistedTurnReply = false;
 
   constructor(
     @InjectWorkspaceScopedRepository(AgentChatThreadEntity)
@@ -199,6 +209,22 @@ export class StreamAgentChatJob {
           );
         });
 
+      // The thread error is cleared by the next message; the error reply
+      // keeps this turn from reading as silently ignored afterwards. An empty
+      // response may still have saved reasoning-only parts, which read as no
+      // answer.
+      if (
+        isDefined(data.existingTurnId) &&
+        (!this.hasPersistedTurnReply ||
+          error instanceof EmptyAgentChatResponseError)
+      ) {
+        await this.persistTurnError(
+          data,
+          data.existingTurnId,
+          buildAgentChatTurnError(error),
+        );
+      }
+
       await this.eventPublisherService
         .publish({
           threadId: data.threadId,
@@ -246,6 +272,25 @@ export class StreamAgentChatJob {
           });
       }
     }
+  }
+
+  private async persistTurnError(
+    data: StreamAgentChatJobData,
+    turnId: string,
+    turnError: AgentChatTurnError,
+  ): Promise<void> {
+    await this.agentChatService
+      .upsertTurnErrorMessage({
+        threadId: data.threadId,
+        turnId,
+        workspaceId: data.workspaceId,
+        turnError,
+      })
+      .catch((persistError) => {
+        this.logger.error(
+          `Failed to persist turn error for thread ${data.threadId}: ${persistError instanceof Error ? persistError.message : String(persistError)}`,
+        );
+      });
   }
 
   // The turn-started counter fires before the model is resolved downstream, so
@@ -397,6 +442,7 @@ export class StreamAgentChatJob {
       let streamError: unknown;
       let streamFinishError: unknown;
       let checkHasNoMoreAvailableCredits: () => boolean = () => false;
+      let hasReply = false;
 
       let persistChain: Promise<void> = Promise.resolve();
       let lastCheckpointAt = 0;
@@ -536,6 +582,19 @@ export class StreamAgentChatJob {
                     userMessagePromise,
                   });
                   await titleWritePromise;
+
+                  hasReply = !isEmptyAgentChatResponse(
+                    responseMessage.parts,
+                  );
+
+                  if (
+                    !isAborted &&
+                    !isDefined(streamError) &&
+                    !hasReply &&
+                    !checkHasNoMoreAvailableCredits()
+                  ) {
+                    streamFinishError = new EmptyAgentChatResponseError();
+                  }
                 } catch (error) {
                   streamFinishError = error;
                 } finally {
@@ -627,6 +686,15 @@ export class StreamAgentChatJob {
           } else if (streamFinishError) {
             reject(streamFinishError);
           } else if (checkHasNoMoreAvailableCredits()) {
+            const { turnId } = await userMessagePromise;
+
+            if (!hasReply && isDefined(turnId)) {
+              await this.persistTurnError(data, turnId, {
+                code: AGENT_CHAT_TURN_ERROR_CODES.BILLING_CREDITS_EXHAUSTED,
+                message: AGENT_CHAT_TURN_ERROR_MESSAGES.creditsExhausted,
+              });
+            }
+
             await this.eventPublisherService.publish({
               threadId: data.threadId,
               workspaceId: data.workspaceId,
@@ -872,6 +940,8 @@ export class StreamAgentChatJob {
         workspaceId,
       });
     }
+
+    this.hasPersistedTurnReply = outcome.kind !== 'failed';
 
     const totalsUpdate = await this.threadRepository.update(
       workspaceId,
