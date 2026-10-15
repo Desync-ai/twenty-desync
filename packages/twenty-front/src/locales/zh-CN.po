@@ -237,6 +237,12 @@ msgstr ""
 msgid "{0, plural, one {You do not have permission to access the {fieldsList} field} other {You do not have permission to access the {fieldsList} fields}}"
 msgstr "{0, plural, other {您无权访问 {fieldsList} 字段}}"
 
+#. js-lingui-id: srV4+B
+#. placeholder {0}: seat.planName
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "{0} · you pay"
+msgstr ""
+
 #. js-lingui-id: 6lE3tD
 #. placeholder {0}: formatNumber(counts.hardSuppressed)
 #: src/modules/activities/emails/utils/buildExcludedRecipientReasons.ts
@@ -376,13 +382,6 @@ msgstr "没有电子邮件地址的 {0} 位"
 #: src/modules/object-record/record-field/ui/form-types/components/FormWorkspaceMemberFilterValueInput.tsx
 msgid "{0} workspace members"
 msgstr "{0} 位工作区成员"
-
-#. js-lingui-id: kofqAN
-#. placeholder {0}: selectedResolvedTier.label
-#. placeholder {1}: selectedResolvedTier.model.label
-#: src/modules/ai/components/AiModelTierDropdown.tsx
-msgid "{0}: {1}"
-msgstr "{0}: {1}"
 
 #. js-lingui-id: qdQhzv
 #: src/modules/views/advanced-filter-chip/components/AdvancedFilterChip.tsx
@@ -600,6 +599,32 @@ msgstr "{minutes, plural, other {# 分钟}}"
 msgid "{morphRelationCount} Objects"
 msgstr "{morphRelationCount} 个对象"
 
+#. js-lingui-id: 6CXv6p
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} connected."
+msgstr ""
+
+#. js-lingui-id: apDNfL
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#. placeholder {0}: final?.error ?? 'unknown error'
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} sync failed: {0}"
+msgstr ""
+
+#. js-lingui-id: gylK9G
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} sync is still running in the background. Check back shortly."
+msgstr ""
+
+#. js-lingui-id: 1nOTVV
+#. placeholder {0}: c.created ?? 0
+#. placeholder {1}: c.skipped ?? 0
+#. placeholder {2}: (c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} synced: {0} imported, {1} already up to date{2}."
+msgstr ""
+
 #. js-lingui-id: g9mDO3
 #: src/utils/format/getOrdinalNumber.ts
 msgid "{num, selectordinal, one {{num}st} two {{num}nd} few {{num}rd} other {{num}th}}"
@@ -758,6 +783,11 @@ msgstr "{unitCount, plural, one {周} other {周}}"
 msgid "{unitCount, plural, one {Year} other {Years}}"
 msgstr "{unitCount, plural, one {年} other {年}}"
 
+#. js-lingui-id: DSD1of
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "{usedStr} of {quotaStr} leads used this period"
+msgstr ""
+
 #. js-lingui-id: YdwR4T
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCustomView.tsx
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownDefaultView.tsx
@@ -851,6 +881,11 @@ msgstr "0"
 #: src/modules/workflow/workflow-trigger/components/WorkflowEditTriggerCronForm.tsx
 msgid "0 */1 * * *"
 msgstr "0 */1 * * *"
+
+#. js-lingui-id: 3jxkNE
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "1 is most serious, 3 is least."
+msgstr ""
 
 #. js-lingui-id: 4pzLrc
 #: src/modules/settings/data-model/object-details/components/SettingsObjectRelationItemTableRow.tsx
@@ -1095,10 +1130,20 @@ msgstr "关于此工作区"
 msgid "About your app"
 msgstr "关于您的应用程序"
 
+#. js-lingui-id: iFAZVR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "About your brand"
+msgstr ""
+
 #. js-lingui-id: nJJAYH
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
 msgid "Accepted and signed DPAs for this workspace, with their template version and date."
 msgstr "此工作区已接受并签署的 DPA，包括其模板版本和日期。"
+
+#. js-lingui-id: Xcdlbt
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Access ends on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: pNW+Rt
 #: src/pages/settings/admin-panel/SettingsAdminNewAiProvider.tsx
@@ -1238,6 +1283,7 @@ msgstr "正在激活..."
 
 #. js-lingui-id: F6pfE9
 #: src/modules/ai/constants/AgentChatThreadFilterStatusLabels.ts
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
 #: src/modules/object-core/workflows/constants/CoreWorkflowStatusFilterOptions.ts
 #: src/modules/object-core/workflows/versions/constants/CoreWorkflowVersionStatusTagProps.ts
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
@@ -1248,6 +1294,7 @@ msgstr "正在激活..."
 #: src/pages/settings/applications/tabs/SettingsApplicationTimelineActivityTypeSettingsTab.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 #: src/pages/settings/profile/SettingsProfile.tsx
 msgid "Active"
 msgstr "活跃"
@@ -1311,11 +1358,6 @@ msgstr "添加地点"
 msgid "Add a meeting link"
 msgstr "添加会议链接"
 
-#. js-lingui-id: CZDwqQ
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Add a new company we're in touch with (e.g. name, website, industry). Details: "
-msgstr "添加一个我们正在联系的新公司 (例如：名称、网站、行业)。详细信息： "
-
 #. js-lingui-id: 5xxrhm
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Add a note"
@@ -1351,6 +1393,12 @@ msgstr "添加步骤"
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Add a step to this workflow that "
 msgstr "向此工作流添加一个步骤，该步骤"
+
+#. js-lingui-id: YQ9Rdn
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Add a teammate"
+msgstr ""
 
 #. js-lingui-id: KKfos4
 #: src/modules/workflow/workflow-diagram/workflow-nodes/components/WorkflowDiagramEmptyTriggerEditable.tsx
@@ -1463,6 +1511,11 @@ msgstr "添加自定义端点、私有网关或其他区域。"
 #: src/modules/settings/admin-panel/ai/components/SettingsAdminAiProviderListCard.tsx
 msgid "Add Custom Provider"
 msgstr "添加自定义提供商"
+
+#. js-lingui-id: cJbo96
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Add Desync as a Streamable HTTP extension in Goose."
+msgstr ""
 
 #. js-lingui-id: 094J9M
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -1679,40 +1732,45 @@ msgstr "添加 SSO 身份提供商"
 msgid "Add test input for evaluation (e.g., \"Find all customers in NY\")"
 msgstr ""
 
-#. js-lingui-id: FKGcEL
+#. js-lingui-id: YgJ55i
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server as a remote context server in Zed."
-msgstr "在 Zed 中将 Twenty MCP 服务器添加为远程上下文服务器。"
+msgid "Add the Desync MCP server as a remote context server in Zed."
+msgstr ""
 
-#. js-lingui-id: iA2nHX
+#. js-lingui-id: M7GPN5
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server from Augment Code settings."
-msgstr "在 Augment Code 设置中添加 Twenty MCP 服务器。"
+msgid "Add the Desync MCP server from Augment Code settings."
+msgstr ""
 
-#. js-lingui-id: l+NzAk
+#. js-lingui-id: SBNhsw
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server from Raycast's MCP commands or settings."
-msgstr "通过 Raycast 的 MCP 命令或设置添加 Twenty MCP 服务器。"
+msgid "Add the Desync MCP server from Raycast's MCP commands or settings."
+msgstr ""
 
-#. js-lingui-id: j6G/yI
+#. js-lingui-id: UmFYbe
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server in Gemini CLI settings."
-msgstr "在 Gemini CLI 设置中添加 Twenty MCP 服务器。"
+msgid "Add the Desync MCP server in Gemini CLI settings."
+msgstr ""
 
-#. js-lingui-id: /OyhlM
+#. js-lingui-id: Z8sy5Z
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server to your LibreChat configuration file."
-msgstr "在 LibreChat 配置文件中添加 Twenty MCP 服务器。"
+msgid "Add the Desync MCP server to your LibreChat configuration file."
+msgstr ""
 
-#. js-lingui-id: K0DXoj
+#. js-lingui-id: ghQ5RI
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty remote server with LM Studio's install link."
-msgstr "使用 LM Studio 的安装链接添加 Twenty 远程服务器。"
+msgid "Add the Desync remote server with LM Studio's install link."
+msgstr ""
 
-#. js-lingui-id: BTFMKE
+#. js-lingui-id: ppkvcg
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Add the people you email with — your saved Google contacts plus the \"other contacts\" Google collects automatically — to your People list."
+msgstr ""
+
+#. js-lingui-id: kNrza3
 #: src/pages/settings/communications/SettingsWorkspaceCommunicationGroupChannelDetail.tsx
-msgid "Add these records at your DNS provider. Twenty checks them automatically."
-msgstr "在您的 DNS 提供商处添加这些记录。Twenty 会自动检查它们。"
+msgid "Add these records at your DNS provider. Desync checks them automatically."
+msgstr ""
 
 #. js-lingui-id: 5+ttxv
 #: src/modules/settings/accounts/components/SettingsAccountsBlocklistInput.tsx
@@ -1728,11 +1786,6 @@ msgstr "添加到收藏夹"
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 msgid "Add topic"
 msgstr "添加主题"
-
-#. js-lingui-id: 4D/zWv
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add Twenty as a Streamable HTTP extension in Goose."
-msgstr "在 Goose 中将 Twenty 添加为可流式传输的 HTTP 扩展。"
 
 #. js-lingui-id: XnwceV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationRedirectURIsInput.tsx
@@ -1889,7 +1942,6 @@ msgid "Administrators"
 msgstr "管理员"
 
 #. js-lingui-id: sxkWRg
-#: src/modules/ai/components/AiModelPicker.tsx
 #: src/modules/navigation/components/SettingsNavigationDrawerContent.tsx
 #: src/modules/settings/components/SettingsMorphRelationMultiSelect.tsx
 #: src/modules/ui/input/components/AdvancedSettingsSwitch.tsx
@@ -1910,6 +1962,11 @@ msgstr "高级筛选"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionEmailBase.tsx
 msgid "Advanced options"
 msgstr "高级选项"
+
+#. js-lingui-id: jCxxQi
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Advertisement image"
+msgstr ""
 
 #. js-lingui-id: 1Cox/a
 #: src/localization/hooks/useLocaleOptions.ts
@@ -2000,7 +2057,6 @@ msgid "Aggregate Chart"
 msgstr ""
 
 #. js-lingui-id: jsQZMk
-#: src/modules/navigation/hooks/useNavigationDrawerModes.ts
 #: src/modules/settings/admin-panel/hooks/useSettingsAdminTabs.ts
 #: src/modules/settings/billing/constants/UsageLimitResourceTypeLabels.ts
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -2027,6 +2083,11 @@ msgstr "AI"
 msgid "AI & Automations"
 msgstr "AI 与自动化"
 
+#. js-lingui-id: MnmJG1
+#: src/modules/navigation/hooks/useNavigationDrawerModes.ts
+msgid "AI Agent"
+msgstr ""
+
 #. js-lingui-id: oI7HO0
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowRunStepLogsAiAgentDetail.tsx
 msgid "AI agent run"
@@ -2036,6 +2097,11 @@ msgstr "AI 智能体运行"
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
 msgid "AI agents"
 msgstr "AI 代理"
+
+#. js-lingui-id: eaVev5
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "AI budget used"
+msgstr ""
 
 #. js-lingui-id: n2fhCy
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
@@ -2073,6 +2139,11 @@ msgstr "AI 请求准备"
 #: src/modules/settings/logic-functions/components/triggers/SettingsLogicFunctionToolTriggerSection.tsx
 msgid "AI tool"
 msgstr "AI 工具"
+
+#. js-lingui-id: i1RFI2
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "AI usage"
+msgstr ""
 
 #. js-lingui-id: tzhisR
 #: src/pages/settings/ai/components/SettingsAiUsageTab.tsx
@@ -2135,10 +2206,20 @@ msgstr "已达到 AI 使用上限。请联系管理员升级方案。"
 msgid "AI usage limit reached. Contact support to upgrade."
 msgstr "已达到 AI 使用上限。请联系支持团队进行升级。"
 
+#. js-lingui-id: P3UoHx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "AI usage: {aiPct}% — ${aiUsedDollars} of ${aiQuotaDollars} this period"
+msgstr ""
+
 #. js-lingui-id: KLyZ6L
 #: src/pages/settings/ai/SettingsAiUsageUserDetail.tsx
 msgid "AI User Usage"
 msgstr "用户 AI 用量"
+
+#. js-lingui-id: AOCP2j
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "AI voice"
+msgstr ""
 
 #. js-lingui-id: TLbVxH
 #: src/modules/settings/usage/constants/UsageOperationTypeLabels.ts
@@ -2590,6 +2671,12 @@ msgstr "且"
 msgid "Annual"
 msgstr "按年"
 
+#. js-lingui-id: QyHYOr
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Annual (save 10%)"
+msgstr ""
+
 #. js-lingui-id: GqCA/t
 #: src/modules/settings/admin-panel/components/SettingsAdminChatAskQuestionsPart.tsx
 msgid "Answered"
@@ -2642,6 +2729,7 @@ msgstr "API 调用"
 #. js-lingui-id: iq3W+B
 #: src/modules/settings/billing/constants/UsageLimitSpenderGroups.ts
 #: src/modules/settings/billing/constants/UsageLimitSpenderTypeLabels.ts
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "API key"
 msgstr "API 密钥"
 
@@ -2981,6 +3069,11 @@ msgstr "确定吗？您当前的信息将不会被保存。"
 msgid "Armenian"
 msgstr "亚美尼亚语"
 
+#. js-lingui-id: 1kbfBv
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "As a workspace admin you can pay for a teammate’s plan (charged to your card) and invite them. Each seat is its own subscription you can cancel anytime."
+msgstr ""
+
 #. js-lingui-id: cybVUo
 #: src/modules/settings/members/components/MemberInfosTab.tsx
 msgid "As it will be displayed in the workspace"
@@ -3087,8 +3180,15 @@ msgid "Assignment"
 msgstr "分配"
 
 #. js-lingui-id: d/bvvp
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/ai/SettingsAgentTurnDetail.tsx
 msgid "Assistant"
+msgstr ""
+
+#. js-lingui-id: +BYU/g
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Assistant error: {0}"
 msgstr ""
 
 #. js-lingui-id: 4H6WHS
@@ -3131,6 +3231,16 @@ msgstr "一览"
 #: src/modules/workflow/workflow-steps/workflow-actions/delay-actions/components/WorkflowEditActionDelay.tsx
 msgid "At a specific date or time"
 msgstr "在特定日期或时间"
+
+#. js-lingui-id: ByxKBF
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "At least 500x500, up to 1MB. JPG or non-transparent PNG."
+msgstr ""
+
+#. js-lingui-id: YFUztS
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "At least 500x500, up to 1MB. JPG or transparent PNG."
+msgstr ""
 
 #. js-lingui-id: H8QGSx
 #: src/modules/auth/sign-in-up/components/internal/SignInUpPasswordField.tsx
@@ -3183,9 +3293,15 @@ msgid "Attendees"
 msgstr "参与者"
 
 #. js-lingui-id: /rTz0M
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Audio"
 msgstr "音频"
+
+#. js-lingui-id: sSZSHW
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Audio (20 to 30 seconds)"
+msgstr ""
 
 #. js-lingui-id: y2W2Hg
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
@@ -3289,12 +3405,6 @@ msgstr ""
 msgid "Auto-upgrade"
 msgstr "自动升级"
 
-#. js-lingui-id: Dnn2XG
-#: src/modules/ai/components/AiModelPicker.tsx
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Automatic"
-msgstr "自动"
-
 #. js-lingui-id: YRT7ZW
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarChannelDetails.tsx
 msgid "Automatically create contacts for people you've participated in an event with."
@@ -3314,11 +3424,6 @@ msgstr "接收或发送电子邮件时自动创建人员记录"
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationGeneralSwitches.tsx
 msgid "Automatically install this app on every newly created workspace"
 msgstr "在每个新建的工作区中自动安装此应用"
-
-#. js-lingui-id: MHsVk5
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "Automatically selected by Twenty for this mode."
-msgstr "Twenty 会自动为此模式选择。"
 
 #. js-lingui-id: XFGV21
 #: src/pages/settings/applications/tabs/SettingsApplicationGeneralSection.tsx
@@ -3356,6 +3461,7 @@ msgstr "轴名称"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification.tsx
 #: src/modules/side-panel/components/SidePanelBackButton.tsx
 #: src/modules/spreadsheet-import/components/StepNavigationButton.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/onboarding/BookCall.tsx
 msgid "Back"
 msgstr "返回"
@@ -3473,8 +3579,14 @@ msgstr "在第 {start} 和 {end} 分钟之间"
 msgid "between the {startOrdinal} and {endOrdinal} of the month"
 msgstr "在每月的第 {startOrdinal} 和 {endOrdinal} 之间"
 
+#. js-lingui-id: K9cTJe
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Billed annually"
+msgstr ""
+
 #. js-lingui-id: aIkeAd
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Billed monthly"
 msgstr "按月计费"
 
@@ -3512,6 +3624,12 @@ msgstr "账单历史"
 msgid "Billing interval"
 msgstr "账单间隔"
 
+#. js-lingui-id: 4CApuf
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Billing isn’t configured on this environment."
+msgstr ""
+
 #. js-lingui-id: 8tzR0k
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
 #: src/modules/settings/billing/constants/UsageLimitPeriodNameLabels.ts
@@ -3519,10 +3637,10 @@ msgstr "账单间隔"
 msgid "Billing period"
 msgstr "计费周期"
 
-#. js-lingui-id: xF/NXI
+#. js-lingui-id: JKKVdf
 #: src/modules/settings/billing/hooks/useBillingPortalSession.ts
-msgid "Billing portal session error. Please retry or contact Twenty team"
-msgstr "计费门户会话错误。请重试或联系 Twenty 团队"
+msgid "Billing portal session error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: 8kIU+G
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
@@ -3567,6 +3685,16 @@ msgstr "正文输入"
 msgid "Book a 30-minute call and we'll help you get your workspace production-ready."
 msgstr "预约一个 30 分钟的通话，我们将帮助你让工作区达到可投入生产使用的状态。"
 
+#. js-lingui-id: fxbNMG
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Book a 30-minute call with Mark or Jackson."
+msgstr ""
+
+#. js-lingui-id: MkvsWx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Book a call"
+msgstr ""
+
 #. js-lingui-id: 2yl5lQ
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
 msgid "Book a Call"
@@ -3598,6 +3726,16 @@ msgstr "两个"
 #: src/modules/settings/unsubscribers/utils/getMessageSuppressionReasonBadge.ts
 msgid "Bounce"
 msgstr "退信"
+
+#. js-lingui-id: peaanf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Brand"
+msgstr ""
+
+#. js-lingui-id: 7C7tMy
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Brand name"
+msgstr ""
 
 #. js-lingui-id: 1hGdwj
 #: src/pages/settings/ai/components/SettingsAiUsageTab.tsx
@@ -3645,6 +3783,11 @@ msgstr "浏览合作伙伴"
 msgid "BTREE (default, good for sorting and equality)"
 msgstr "BTREE（默认，适合排序和等值查询）"
 
+#. js-lingui-id: vXemf6
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Bug"
+msgstr ""
+
 #. js-lingui-id: pN5hZf
 #: src/pages/settings/applications/tabs/SettingsApplicationFrontComponentSettingsTab.tsx
 msgid "Build and runtime metadata for this component"
@@ -3659,6 +3802,11 @@ msgstr "构建校验和"
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "Build many-to-many relations"
 msgstr "创建多对多关系"
+
+#. js-lingui-id: 1JcBEO
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Build my CRM"
+msgstr ""
 
 #. js-lingui-id: uvoIrk
 #: src/pages/settings/admin-panel/SettingsAdminAiProviderDetail.tsx
@@ -3706,16 +3854,33 @@ msgstr "按钮"
 msgid "Button"
 msgstr "按钮"
 
+#. js-lingui-id: bvat20
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy & invite"
+msgstr ""
+
+#. js-lingui-id: 1kxw0W
+#. placeholder {0}: target.email
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy a seat for {0}"
+msgstr ""
+
+#. js-lingui-id: NXZz0n
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy seat"
+msgstr ""
+
 #. js-lingui-id: 8ds4Hj
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 #: src/pages/settings/applications/components/SettingsAvailableApplicationCard.tsx
 msgid "by {author}"
 msgstr "由 {author} 提供"
 
-#. js-lingui-id: 8Pfllj
+#. js-lingui-id: 3Rof1A
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
-msgid "By using Twenty, you agree to the"
-msgstr "使用 Twenty 即表示您同意"
+msgid "By using Desync, you agree to the"
+msgstr ""
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3892,6 +4057,11 @@ msgstr "此记录中没有可用的通话录音。"
 msgid "Call-to-action button"
 msgstr "CTA 按钮"
 
+#. js-lingui-id: wt+Dd/
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Call-to-action button URL (https://...)"
+msgstr ""
+
 #. js-lingui-id: qIlodj
 #: src/modules/object-record/record-field/ui/form-types/components/FormPhoneFieldInput.tsx
 msgid "Calling Code"
@@ -3927,8 +4097,15 @@ msgstr "无法更改标准对象的 API 名称"
 msgid "Can't scan? Copy the"
 msgstr "无法扫描？复制"
 
+#. js-lingui-id: d8/6/v
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "cancel"
+msgstr ""
+
 #. js-lingui-id: dEgA5A
 #: src/modules/applications/components/AuthorizeActionButtons.tsx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/object-record/record-update-multiple/components/UpdateMultipleRecordsFooter.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
 #: src/modules/settings/billing/components/AddCreditCardModal.tsx
@@ -3936,6 +4113,8 @@ msgstr "无法扫描？复制"
 #: src/modules/settings/billing/components/UpdatePaymentMethodModal.tsx
 #: src/modules/settings/components/SaveAndCancelButtons/CancelButton.tsx
 #: src/modules/settings/components/SaveAndCancelButtons/CancelButton.tsx
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/modules/spreadsheet-import/provider/components/SpreadsheetImport.tsx
 #: src/modules/spreadsheet-import/steps/components/ImportDataStep.tsx
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/MatchColumnsStep.tsx
@@ -3945,6 +4124,8 @@ msgstr "无法扫描？复制"
 #: src/modules/ui/feedback/toast/utils/getLocalizedToastProps.ts
 #: src/modules/ui/layout/modal/components/ConfirmationModal.tsx
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Cancel"
 msgstr "取消"
 
@@ -3974,6 +4155,11 @@ msgstr "取消周期切换"
 msgid "Cancel interval switching?"
 msgstr "取消周期切换？"
 
+#. js-lingui-id: Bu+BBn
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancel plan"
+msgstr ""
+
 #. js-lingui-id: rRK/Lf
 #: src/modules/settings/billing/components/SettingsBillingContent.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -3994,6 +4180,24 @@ msgstr "取消计划切换？"
 #: src/modules/page-layout/widgets/email-thread/components/EmailThreadComposer.tsx
 msgid "Cancel reply"
 msgstr "取消回复"
+
+#. js-lingui-id: XCBaVZ
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Cancel seat"
+msgstr ""
+
+#. js-lingui-id: fHXMPy
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancel subscription"
+msgstr ""
+
+#. js-lingui-id: BqbtvX
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Cancel this seat?"
+msgstr ""
 
 #. js-lingui-id: N6gPiD
 #: src/modules/settings/billing/components/SettingsBillingContent.tsx
@@ -4017,6 +4221,11 @@ msgstr "取消时间"
 msgid "Cancelling"
 msgstr "取消中"
 
+#. js-lingui-id: LP3MyV
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Cancels {dateStr}"
+msgstr ""
+
 #. js-lingui-id: zbbpgB
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 msgid "Cancels at"
@@ -4031,6 +4240,17 @@ msgstr "在计费周期结束时取消"
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Cancels on"
 msgstr "取消日期"
+
+#. js-lingui-id: Gnfo4D
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "cancels soon"
+msgstr ""
+
+#. js-lingui-id: TaH0sM
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancels soon"
+msgstr ""
 
 #. js-lingui-id: XDbjjW
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCustomView.tsx
@@ -4064,6 +4284,7 @@ msgid "Captcha (anti-bot check) is still loading, try again"
 msgstr "验证码（反机器人检查）仍在加载，请重试"
 
 #. js-lingui-id: kryGs+
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/side-panel/pages/page-layout/components/dropdown-content/FieldWidgetLayoutDropdownContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/record-page/SidePanelRecordPageFieldSettings.tsx
 msgid "Card"
@@ -4084,6 +4305,17 @@ msgstr "加泰罗尼亚语"
 #: src/pages/settings/applications/components/SettingsClaimApplicationSection.tsx
 msgid "Catalog sync started. Try your lookup again in a moment."
 msgstr "目录同步已开始。请稍后再尝试查找。"
+
+#. js-lingui-id: NUrY9o
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Categories"
+msgstr ""
+
+#. js-lingui-id: zrDM9A
+#. placeholder {0}: categories.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Categories ({0}/{MAX_CATEGORIES})"
+msgstr ""
 
 #. js-lingui-id: RpYfjZ
 #: src/modules/activities/emails/components/EmailComposerFields.tsx
@@ -4133,6 +4365,11 @@ msgstr "更改密码"
 #: src/pages/auth/PasswordReset.tsx
 msgid "Change Password"
 msgstr "更改密码"
+
+#. js-lingui-id: Ts/A07
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Change payment method"
+msgstr ""
 
 #. js-lingui-id: EYSFEW
 #: src/modules/settings/domains/components/SettingsSubdomain.tsx
@@ -4255,11 +4492,17 @@ msgstr "检查您的电子邮件"
 msgid "Check your inbox to verify your new email address."
 msgstr "请检查收件箱以验证您的新电子邮件地址。"
 
-#. js-lingui-id: SxwQE8
+#. js-lingui-id: RLe7Vk
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Checking…"
+msgstr ""
+
+#. js-lingui-id: yKu7Nn
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
-msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "结账会话错误。请重试或联系 Twenty 团队"
+msgid "Checkout session error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: SviKkE
 #: src/localization/hooks/useLocaleOptions.ts
@@ -4281,6 +4524,11 @@ msgstr "选择 {intervalAdjective} 积分"
 msgid "Choose a model mode"
 msgstr "选择模型模式"
 
+#. js-lingui-id: zMquA7
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Choose a plan"
+msgstr ""
+
 #. js-lingui-id: sHa2Dg
 #: src/modules/settings/billing/components/SettingsBillingLimitSpenderSelect.tsx
 msgid "Choose a spender"
@@ -4301,11 +4549,6 @@ msgstr "请先选择用量"
 msgid "Choose a Workspace"
 msgstr "选择工作区"
 
-#. js-lingui-id: KsP4Tg
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Choose automatically"
-msgstr "自动选择"
-
 #. js-lingui-id: Qz73jD
 #: src/modules/settings/security/components/sso/SettingsSsoIdentitiesProvidersForm.tsx
 msgid "Choose between OIDC and SAML protocols"
@@ -4321,6 +4564,16 @@ msgstr "选择简短或完整"
 msgid "Choose folders to sync"
 msgstr "选择要同步的文件夹"
 
+#. js-lingui-id: RrLmIw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Choose image"
+msgstr ""
+
+#. js-lingui-id: o1dp6g
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Choose logo"
+msgstr ""
+
 #. js-lingui-id: 5EMoSo
 #: src/modules/settings/billing/components/internal/SettingsBillingPlansWithoutSubscription.tsx
 msgid "Choose plan"
@@ -4331,10 +4584,10 @@ msgstr "选择方案"
 msgid "Choose the default currency that will apply"
 msgstr "选择将应用的默认货币"
 
-#. js-lingui-id: KoXi44
+#. js-lingui-id: XnAuzq
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Choose the default modes for people and agents"
-msgstr "选择人员和代理的默认模式"
+msgid "Choose the default mode for people and agents"
+msgstr ""
 
 #. js-lingui-id: LHce7q
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectSettings.tsx
@@ -4554,6 +4807,7 @@ msgstr "剪贴板功能需要安全连接 (HTTPS)。请通过 HTTPS 访问此应
 #: src/modules/settings/applications/components/SettingsApplicationScreenshotLightbox.tsx
 #: src/modules/ui/feedback/toast/components/__tests__/AppToaster.test.tsx
 #: src/modules/ui/feedback/toast/utils/getLocalizedToastProps.ts
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Close"
 msgstr "关闭"
 
@@ -4567,6 +4821,11 @@ msgstr "关闭横幅"
 #: src/modules/blocknote-editor/components/BlockEditor.tsx
 msgid "Close menu"
 msgstr "关闭菜单"
+
+#. js-lingui-id: sUQBA7
+#: src/modules/settings/data-model/graph-overview/components/SettingsDataModelOverview.tsx
+msgid "Close overview"
+msgstr ""
 
 #. js-lingui-id: saip/v
 #: src/modules/side-panel/components/SidePanelCloseButton.tsx
@@ -4759,7 +5018,6 @@ msgstr "通信"
 
 #. js-lingui-id: chL5IG
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
 #: src/pages/settings/community/SettingsCommunity.tsx
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Community"
@@ -4940,6 +5198,16 @@ msgstr "配置 IMAP 设置以接收和同步您的电子邮件。"
 msgid "Configure SMTP settings to send emails from your account."
 msgstr "配置 SMTP 设置以从您的账户发送电子邮件。"
 
+#. js-lingui-id: NOBg69
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Configure the Desync MCP server manually in Cascade."
+msgstr ""
+
+#. js-lingui-id: QTjg6Y
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Configure the Desync MCP server manually in Cline."
+msgstr ""
+
 #. js-lingui-id: CcCy4C
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Configure the remote MCP server through Warp's agent settings."
@@ -4949,16 +5217,6 @@ msgstr "通过 Warp 的代理设置配置远程 MCP 服务器。"
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Configure the remote server in Amazon Q Developer's MCP settings."
 msgstr "在 Amazon Q Developer 的 MCP 设置中配置远程服务器。"
-
-#. js-lingui-id: g1/8jH
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Configure the Twenty MCP server manually in Cascade."
-msgstr "在 Cascade 中手动配置 Twenty MCP 服务器。"
-
-#. js-lingui-id: XiyvRh
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Configure the Twenty MCP server manually in Cline."
-msgstr "在 Cline 中手动配置 Twenty MCP 服务器。"
 
 #. js-lingui-id: qA9AGQ
 #: src/modules/settings/domains/components/SettingsDomainRecords.tsx
@@ -5052,10 +5310,22 @@ msgstr "确认您的偏好："
 msgid "Confirming your payment"
 msgstr "正在确认您的付款"
 
+#. js-lingui-id: iSLIjg
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect"
+msgstr ""
+
 #. js-lingui-id: LOM1MR
 #: src/pages/auth/Authorize.tsx
 msgid "Connect {appName} to your account"
 msgstr "将 {appName} 连接到你的账户"
+
+#. js-lingui-id: UA993i
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect {name}"
+msgstr ""
 
 #. js-lingui-id: bFJIPh
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -5067,6 +5337,11 @@ msgstr "连接日历账户"
 msgid "Connect a new account to your workspace"
 msgstr "将新账户连接到工作区"
 
+#. js-lingui-id: SKFp0I
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply."
+msgstr ""
+
 #. js-lingui-id: CMrq4R
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Connect additional MCP clients using install links or client docs."
@@ -5077,6 +5352,11 @@ msgstr "使用安装链接或客户端文档连接更多 MCP 客户端。"
 msgid "Connect AI assistants like Claude or Cursor to your workspace via the Model Context Protocol"
 msgstr "通过 Model Context Protocol 将 Claude 或 Cursor 等 AI 助手连接到你的工作区"
 
+#. js-lingui-id: 7OVsRI
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Connect Google"
+msgstr ""
+
 #. js-lingui-id: TA7R1S
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 msgid "Connect Google, Microsoft or CalDAV and enable calendar sync before creating an event."
@@ -5086,6 +5366,11 @@ msgstr "在创建事件之前，请连接 Google、Microsoft 或 CalDAV 并启�
 #: src/modules/settings/accounts/components/SettingsAccountsListEmptyStateCard.tsx
 msgid "Connect via IMAP/SMTP"
 msgstr "通过 IMAP/SMTP 连接"
+
+#. js-lingui-id: H+M0h7
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Connect where your leads live"
+msgstr ""
 
 #. js-lingui-id: Zgi9Fd
 #: src/modules/settings/accounts/components/SettingsAccountsListEmptyStateCard.tsx
@@ -5102,9 +5387,20 @@ msgstr "连接 Microsoft"
 msgid "Connect your email and calendar to see your entire network instantly. Takes only 30 seconds."
 msgstr "连接您的电子邮件与日历，即刻查看整个关系网络，只需 30 秒。"
 
+#. js-lingui-id: NJKXTa
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Connect your Google account to add the people you email with to your People list."
+msgstr ""
+
+#. js-lingui-id: HPbRf3
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect your tools and AI agents to your CRM."
+msgstr ""
+
 #. js-lingui-id: QHcLEN
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/tabs/SettingsApplicationConnectionsSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Connected"
 msgstr "已连接"
 
@@ -5160,6 +5456,11 @@ msgstr ""
 msgid "Consider adding a filter to display more data."
 msgstr ""
 
+#. js-lingui-id: jfC/xh
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact"
+msgstr ""
+
 #. js-lingui-id: AOwjMZ
 #: src/modules/settings/billing/hooks/useBillingPlanActions.ts
 msgid "Contact admin"
@@ -5170,6 +5471,16 @@ msgstr "联系管理员"
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
 msgid "Contact auto-creation"
 msgstr "联系人自动创建"
+
+#. js-lingui-id: i3p844
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact email"
+msgstr ""
+
+#. js-lingui-id: /B41w4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact full name"
+msgstr ""
 
 #. js-lingui-id: cByGGA
 #: src/modules/information-banner/components/billing/InformationBannerEndTrialPeriod.tsx
@@ -5328,6 +5639,11 @@ msgstr "已复制到剪贴板"
 msgid "Copy"
 msgstr "复制"
 
+#. js-lingui-id: C03pZD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Copy & links"
+msgstr ""
+
 #. js-lingui-id: 6gAr5+
 #: src/modules/page-layout/widgets/call-recording-transcript/components/WidgetActionCallRecordingTranscript.tsx
 msgid "Copy audio download link"
@@ -5478,6 +5794,11 @@ msgstr "每百万 token 的成本（美元）"
 msgid "Cost per million tokens for cached input (USD)"
 msgstr "缓存输入的每百万 token 成本（美元）"
 
+#. js-lingui-id: Phb3rR
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Could not buy the seat."
+msgstr ""
+
 #. js-lingui-id: T8ACay
 #: src/pages/settings/applications/components/SettingsClaimApplicationSection.tsx
 msgid "Could not claim this application"
@@ -5503,6 +5824,11 @@ msgstr "无法下载该文档。"
 msgid "Could not generate the signed DPA. Please try again."
 msgstr "无法生成已签署的 DPA。请重试。"
 
+#. js-lingui-id: eOmcN6
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Could not import your Google contacts. Please try again."
+msgstr ""
+
 #. js-lingui-id: FR0Fbp
 #: src/modules/object-core/workflows/versions/components/SidePanelCoreWorkflowVersionsPage.tsx
 msgid "Could not load versions."
@@ -5522,6 +5848,21 @@ msgstr "无法打开 Stripe。请联系支持。"
 #: src/modules/settings/mcp-and-apis/hooks/useOpenPlayground.ts
 msgid "Could not open the API playground"
 msgstr "无法打开 API 操作台"
+
+#. js-lingui-id: pjCYgw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not process the recording."
+msgstr ""
+
+#. js-lingui-id: 6wgdTI
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not read that audio file."
+msgstr ""
+
+#. js-lingui-id: YbOI+l
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not read that image."
+msgstr ""
 
 #. js-lingui-id: w1HkE9
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -5569,6 +5910,16 @@ msgstr "无法转移组织密钥。请联系支持团队。"
 msgid "Could not update the instance type"
 msgstr "无法更新实例类型"
 
+#. js-lingui-id: sJJv5P
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Could not upgrade the seat."
+msgstr ""
+
+#. js-lingui-id: 1o1eYE
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't access the microphone. Check this site's microphone permission."
+msgstr ""
+
 #. js-lingui-id: PiYvMl
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
@@ -5580,20 +5931,63 @@ msgstr "无法添加到收藏夹"
 msgid "Couldn't check availability. Please try again."
 msgstr "无法检查可用性。请重试。"
 
+#. js-lingui-id: mQ0ZQF
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't connect {name}: {0}"
+msgstr ""
+
 #. js-lingui-id: s8lFtq
 #: src/hooks/useCopyToClipboard.tsx
 msgid "Couldn't copy to clipboard"
 msgstr "无法复制到剪贴板"
+
+#. js-lingui-id: rlnqM+
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't disconnect {name}: {0}"
+msgstr ""
+
+#. js-lingui-id: 9OXGgm
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't generate voiceover: {0}"
+msgstr ""
 
 #. js-lingui-id: TU+LOV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationInstalledWorkspaces.tsx
 msgid "Couldn't load installed workspaces"
 msgstr "无法加载已安装的工作区"
 
+#. js-lingui-id: Otslhr
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't play a sample: {0}"
+msgstr ""
+
 #. js-lingui-id: kjbTwZ
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
 msgid "Couldn't remove favorite"
 msgstr "无法取消收藏"
+
+#. js-lingui-id: CjWmm9
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't send: {0}"
+msgstr ""
+
+#. js-lingui-id: v5TABg
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't start {name} connection: {0}"
+msgstr ""
+
+#. js-lingui-id: e4RAJ8
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't submit: {0}"
+msgstr ""
 
 #. js-lingui-id: WSmI/y
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
@@ -5684,11 +6078,6 @@ msgstr ""
 msgid "Create a {0} to automate your work."
 msgstr "创建一个 {0} 以自动化您的工作。"
 
-#. js-lingui-id: fQFALn
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Create a new contact and link them to a company. Details: "
-msgstr "创建一个新联系人并将其关联到一家公司。详细信息： "
-
 #. js-lingui-id: j85EUk
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Create a new record in this view. Details: "
@@ -5696,7 +6085,6 @@ msgstr "在此视图中创建新记录。详细信息： "
 
 #. js-lingui-id: n1Nbbe
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
 msgid "Create a record"
 msgstr "创建记录"
 
@@ -5720,11 +6108,6 @@ msgstr "为此公司创建任务： "
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Create a task for this record: "
 msgstr "为此记录创建任务： "
-
-#. js-lingui-id: Xn2Nlq
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Create a workflow"
-msgstr "创建工作流"
 
 #. js-lingui-id: zNoOC2
 #: src/modules/object-record/record-table/empty-state/utils/getEmptyStateSubTitle.ts
@@ -5860,7 +6243,6 @@ msgid "Create workspace"
 msgstr "创建工作区"
 
 #. js-lingui-id: kdLGki
-#: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/MultiWorkspaceDropdownDefaultComponents.tsx
 #: src/utils/title-utils.ts
 msgid "Create Workspace"
 msgstr "创建工作区"
@@ -6079,6 +6461,11 @@ msgstr "CSV 导入和导出"
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
 msgid "cta"
 msgstr "cta"
+
+#. js-lingui-id: g2OLW6
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "CTA URL"
+msgstr ""
 
 #. js-lingui-id: J1QT+3
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
@@ -6755,8 +7142,11 @@ msgstr "删除"
 #: src/modules/settings/data-model/objects/components/SettingsObjectInactiveMenuDropDown.tsx
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
+#: src/modules/settings/domains/components/SettingPublicDomain.tsx
 #: src/modules/settings/domains/components/SettingPublicDomainRowDropdownMenu.tsx
+#: src/modules/settings/domains/components/SettingsCustomDomain.tsx
 #: src/modules/settings/security/components/sso/SettingsSecuritySsoRowDropdownMenu.tsx
+#: src/modules/side-panel/pages/page-layout/components/record-table-settings/RecordTableSettingsSortsContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/RegularTabSettingsContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/SingleWidgetTabSettingsContent.tsx
 #: src/modules/views/view-picker/components/ViewPickerCreateButton.tsx
@@ -6764,6 +7154,9 @@ msgstr "删除"
 #: src/modules/views/view-picker/components/ViewPickerOptionDropdown.tsx
 #: src/modules/workflow/workflow-steps/components/WorkflowStepFooter.tsx
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterOptionsDropdown.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/find-records-action/components/WorkflowFindRecordsSorts.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/KeyValuePairInput.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/KeyValuePairInput.tsx
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
 #: src/pages/settings/ai/components/SettingsAgentEvalsTab.tsx
 #: src/pages/settings/ai/components/SettingsAgentEvalsTab.tsx
@@ -7060,10 +7453,20 @@ msgstr "降序"
 msgid "Descending"
 msgstr "降序"
 
+#. js-lingui-id: EXihgB
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Describe the problem…"
+msgstr ""
+
 #. js-lingui-id: g+5exC
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowAiAgentPromptTab.tsx
 msgid "Describe what you want the AI to do..."
 msgstr "描述你希望 AI 执行的操作..."
+
+#. js-lingui-id: KepWTT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Describe what you want to promote and the assistant will draft a 20 to 30 second script from your brand and website. Edit anything it gives you."
+msgstr ""
 
 #. js-lingui-id: Nu4oKW
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -7117,6 +7520,11 @@ msgstr "销毁 {objectLabelPlural}"
 #: src/modules/settings/roles/role-permissions/objects-permissions/components/SettingsRolePermissionsObjectsSection.tsx
 msgid "Destroy Records on All Objects"
 msgstr "销毁所有对象上的记录"
+
+#. js-lingui-id: 5vinRl
+#: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
+msgid "Desync fields"
+msgstr ""
 
 #. js-lingui-id: FOcBn3
 #: src/modules/object-record/record-field-list/record-detail-section/relation/components/RecordDetailRelationRecordsListItem.tsx
@@ -7219,6 +7627,7 @@ msgstr "丢弃"
 #. js-lingui-id: +K0AvT
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Disconnect"
 msgstr "断开连接"
 
@@ -7332,7 +7741,6 @@ msgid "Document"
 msgstr "文档"
 
 #. js-lingui-id: TvY/XA
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
 #: src/pages/settings/api-webhooks/SettingsApiWebhooks.tsx
 msgid "Documentation"
 msgstr "文档"
@@ -7558,6 +7966,11 @@ msgstr "例如：2.50"
 msgid "e.g. 3.75"
 msgstr "例如：3.75"
 
+#. js-lingui-id: ed0cQX
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "e.g. acme.com and 2 other companies, or paste a list of names"
+msgstr ""
+
 #. js-lingui-id: QVVmxi
 #: src/modules/settings/developers/components/ApiKeyNameInput.tsx
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeyDetail.tsx
@@ -7595,6 +8008,16 @@ msgstr "例如 my-workspace"
 msgid "e.g. OpenAI EU"
 msgstr "例如：OpenAI EU"
 
+#. js-lingui-id: kHJglt
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "e.g. Pipedrive, Zoho, Notion…"
+msgstr ""
+
+#. js-lingui-id: tNWYAT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "e.g. Promote our parish youth retreat in July"
+msgstr ""
+
 #. js-lingui-id: p5P8NB
 #: src/pages/settings/ai/components/SettingsAiOverviewTab.tsx
 msgid "E.g., \"We are a B2B SaaS company. Always use formal language...\""
@@ -7609,6 +8032,11 @@ msgstr "例如：总结、状态、计数"
 #: src/pages/settings/data-model/new-index/SettingsObjectNewIndex.tsx
 msgid "Each index speeds up reads on the fields it covers, but slows down every insert and update, and uses disk space. Only add an index when you know which queries it serves."
 msgstr "每个索引都会加快其覆盖字段的读取速度，但会减慢每一次插入和更新操作，并占用磁盘空间。只有在明确知道它将服务于哪些查询时才添加索引。"
+
+#. js-lingui-id: 3caNlB
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Each seat is its own subscription on your card, cancel anytime. If they’re not on Desync yet, we’ll invite them and the seat activates when they join."
+msgstr ""
 
 #. js-lingui-id: 79hamt
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
@@ -7641,8 +8069,10 @@ msgstr "eddy@gmail.com, @apple.com"
 #: src/modules/object-record/record-field/ui/form-types/components/FormMultiSelectFieldInput.tsx
 #: src/modules/object-record/record-field/ui/meta-types/input/components/MultiItemFieldMenuItem.tsx
 #: src/modules/object-record/record-group/hooks/useRecordGroupActions.ts
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
 #: src/modules/settings/data-model/object-details/components/SettingsObjectFieldDisabledActionDropdown.tsx
 #: src/modules/settings/data-model/objects/components/SettingsObjectInactiveMenuDropDown.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRowOptionsDropdown.tsx
 #: src/modules/settings/roles/role-permissions/object-level-permissions/field-permissions/components/SettingsRolePermissionsObjectLevelObjectFieldPermissionTable.tsx
 #: src/modules/side-panel/hooks/useSidePanelMenu.ts
@@ -7677,6 +8107,11 @@ msgstr "编辑数据结构和字段"
 #: src/modules/side-panel/pages/email-block-settings/components/EmailBoxSidesInput.tsx
 msgid "Edit each side"
 msgstr "分别编辑每一侧"
+
+#. js-lingui-id: 48e2R8
+#: src/modules/settings/profile/components/EmailField.tsx
+msgid "Edit email"
+msgstr ""
 
 #. js-lingui-id: 9QCQIc
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownHiddenRecordGroupsContent.tsx
@@ -7767,6 +8202,11 @@ msgstr "编辑关系"
 #: src/modules/settings/translations/components/SettingsTranslationsButton.tsx
 msgid "Edit translations"
 msgstr "编辑翻译"
+
+#. js-lingui-id: 8TA4hU
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+msgid "Edit variable"
+msgstr ""
 
 #. js-lingui-id: eMFB6/
 #: src/modules/views/view-picker/components/ViewPickerContentEditMode.tsx
@@ -8567,10 +9007,10 @@ msgstr "取消周期切换时出错。"
 msgid "Error while cancelling plan switching."
 msgstr "取消计划切换时出错。"
 
-#. js-lingui-id: QmR+2U
+#. js-lingui-id: Pd6rw+
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
-msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "结束试用期时发生错误。请联系Twenty团队。"
+msgid "Error while ending trial period. Please contact Desync team."
+msgstr ""
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -8848,11 +9288,18 @@ msgid "Expiration Date"
 msgstr "到期日期"
 
 #. js-lingui-id: M1RnFv
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 #: src/modules/settings/developers/utils/formatExpiration.ts
 #: src/pages/settings/members/tabs/SettingsWorkspaceMembersInviteTab.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Expired"
 msgstr "已过期"
+
+#. js-lingui-id: Zx6GyO
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Expired on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: KnN1Tu
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
@@ -8921,16 +9368,6 @@ msgstr "表达式"
 #: src/modules/onboarding/components/upgrade-free-trial/OnboardingTrialExtensionTag.tsx
 msgid "Extended"
 msgstr "已延长"
-
-#. js-lingui-id: 4NR4Ja
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Extra Fast"
-msgstr "极快"
-
-#. js-lingui-id: Y64TrM
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Extra Smart"
-msgstr "极智能"
 
 #. js-lingui-id: 7Bj3x9
 #: src/modules/activities/calendar/components/CalendarEventCallRecorderAvatar.tsx
@@ -9405,6 +9842,11 @@ msgstr "功能"
 msgid "Features active until"
 msgstr "功能启用至"
 
+#. js-lingui-id: YirHq7
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Feedback"
+msgstr ""
+
 #. js-lingui-id: 2lOBKV
 #: src/modules/metadata-error-handler/hooks/useMetadataErrorHandler.ts
 msgid "field"
@@ -9664,6 +10106,31 @@ msgstr "筛选"
 msgid "Filters"
 msgstr "过滤器"
 
+#. js-lingui-id: BxSWR8
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find contacts at a company"
+msgstr ""
+
+#. js-lingui-id: eyqTxJ
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find leads"
+msgstr ""
+
+#. js-lingui-id: 41jxEH
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find marketing directors at mid-size ecommerce companies and add them to my CRM as contacts."
+msgstr ""
+
+#. js-lingui-id: kV/Gjb
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find me a list of SaaS companies in New York with 50-200 employees and add them to my CRM."
+msgstr ""
+
+#. js-lingui-id: eUmJ6S
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find the key people (name, title, email) at this company and add them to my CRM as contacts. Company: "
+msgstr ""
+
 #. js-lingui-id: YTaTdm
 #: src/modules/ai/constants/crud-tool-operation-verbs.constant.ts
 msgid "Finding {objectLabel}"
@@ -9684,16 +10151,6 @@ msgstr "完成"
 msgid "Finish editing the layout to expand chat"
 msgstr "完成布局编辑以展开聊天"
 
-#. js-lingui-id: yJoako
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Finish editing the layout to open AI"
-msgstr "完成布局编辑以打开 AI"
-
-#. js-lingui-id: 6cOXRd
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Finish editing the layout to open Settings"
-msgstr "完成布局编辑以打开设置"
-
 #. js-lingui-id: SNdnlf
 #: src/modules/spreadsheet-import/steps/components/ValidationStep/ValidationStep.tsx
 msgid "Finish flow with errors"
@@ -9708,6 +10165,26 @@ msgstr "完成设置"
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "Finnish"
 msgstr "芬兰语"
+
+#. js-lingui-id: cm6GQ8
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads are available on paid plans (Starter and above). Referral accounts aren't eligible."
+msgstr ""
+
+#. js-lingui-id: fZyUK0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads are available on Starter and above. Upgrade your plan to launch one."
+msgstr ""
+
+#. js-lingui-id: t2yzYY
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads aren't available on your account yet."
+msgstr ""
+
+#. js-lingui-id: VUoz0i
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio is a Catholic podcast network"
+msgstr ""
 
 #. js-lingui-id: hy+Mfg
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -9880,6 +10357,11 @@ msgstr "第四"
 msgid "Fourth"
 msgstr "第四"
 
+#. js-lingui-id: 2POOFK
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Free"
+msgstr ""
+
 #. js-lingui-id: lm4S7P
 #: src/modules/onboarding/components/import-contacts/OnboardingCreditsRewardTag.tsx
 #: src/modules/onboarding/components/OnboardingHeader.tsx
@@ -10032,6 +10514,16 @@ msgstr "通用 - 设置"
 msgid "Generate"
 msgstr "生成"
 
+#. js-lingui-id: SQq4cO
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generate AI voiceover"
+msgstr ""
+
+#. js-lingui-id: YQbBvj
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generate an AI voiceover of your script, record one in your browser, or upload an MP3."
+msgstr ""
+
 #. js-lingui-id: H3rta9
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
@@ -10053,10 +10545,20 @@ msgstr "生成的文件"
 msgid "Generates a Google Meet or Microsoft Teams link depending on the account."
 msgstr "根据帐户生成 Google Meet 或 Microsoft Teams 链接。"
 
+#. js-lingui-id: NOdFZR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generating..."
+msgstr ""
+
 #. js-lingui-id: DDcvSo
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "German"
 msgstr "德语"
+
+#. js-lingui-id: hd59yv
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Get connection details"
+msgstr ""
 
 #. js-lingui-id: gRFvyL
 #: src/modules/onboarding/constants/OnboardingInstallableApps.ts
@@ -10084,6 +10586,11 @@ msgstr "获取组织版"
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Get Organization Key"
 msgstr "获取组织密钥"
+
+#. js-lingui-id: ZDIydz
+#: src/modules/navigation/components/DesyncGetStartedSection.tsx
+msgid "Get started"
+msgstr ""
 
 #. js-lingui-id: wwPywk
 #: src/pages/onboarding/InstallAppsContent.tsx
@@ -10116,7 +10623,6 @@ msgid "Go back"
 msgstr "返回"
 
 #. js-lingui-id: y0SPQU
-#: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 #: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 msgid "Go to billing"
 msgstr "前往账单"
@@ -10408,6 +10914,17 @@ msgstr "无头"
 msgid "Headless component"
 msgstr "无头组件"
 
+#. js-lingui-id: +670Zw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Headline"
+msgstr ""
+
+#. js-lingui-id: f7ipCg
+#. placeholder {0}: headline.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Headline ({0}/{HEADLINE_MAX})"
+msgstr ""
+
 #. js-lingui-id: UPqS9C
 #: src/modules/settings/admin-panel/hooks/useSettingsAdminTabs.ts
 msgid "Health"
@@ -10423,6 +10940,11 @@ msgstr "最新实例命令的健康状态"
 msgid "Health Status"
 msgstr "健康状况"
 
+#. js-lingui-id: cbo/E4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Hear a short sample before generating."
+msgstr ""
+
 #. js-lingui-id: 3oTCgM
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "Hebrew"
@@ -10432,6 +10954,11 @@ msgstr "希伯来语"
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
 msgid "Help center"
 msgstr "帮助中心"
+
+#. js-lingui-id: mOS4do
+#: src/modules/ai/components/suggested-prompts/AiChatSuggestedPrompts.tsx
+msgid "Hi 👋 I'm your Desync AI agent — what can I help you find?"
+msgstr ""
 
 #. js-lingui-id: D+zLDD
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownHiddenRecordGroupsContent.tsx
@@ -10506,10 +11033,10 @@ msgstr "隐藏系统索引"
 msgid "High"
 msgstr "高"
 
-#. js-lingui-id: 1ETc0T
+#. js-lingui-id: MWp8n+
 #: src/pages/settings/community/SettingsCommunity.tsx
-msgid "Hire a partner to help you implement and customize Twenty."
-msgstr "聘请合作伙伴帮助你实施并自定义 Twenty。"
+msgid "Hire a partner to help you implement and customize Desync."
+msgstr ""
 
 #. js-lingui-id: i0qMbr
 #: src/modules/navigation/hooks/useMobileNavigationBarItems.ts
@@ -10676,6 +11203,11 @@ msgstr "人工输入"
 msgid "Hungarian"
 msgstr "匈牙利语"
 
+#. js-lingui-id: QiiPm6
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "I've already subscribed — continue"
+msgstr ""
+
 #. js-lingui-id: VNC0Db
 #: src/modules/settings/admin-panel/ai/components/SettingsAdminAiProviderListCard.tsx
 msgid "IAM credentials"
@@ -10787,10 +11319,20 @@ msgstr "图片"
 msgid "Image \"{fileName}\" exceeds {maxUploadSize}"
 msgstr "图片“{fileName}”超过 {maxUploadSize}"
 
+#. js-lingui-id: sYsiVD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "image set"
+msgstr ""
+
 #. js-lingui-id: VyUuZb
 #: src/modules/advanced-text-editor/components/AdvancedTextEditorInsertRail.tsx
 msgid "Image URL"
 msgstr "图片 URL"
+
+#. js-lingui-id: an5hVd
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Images"
+msgstr ""
 
 #. js-lingui-id: ijW9MW
 #: src/modules/settings/accounts/components/SettingsAccountsConnectionForm.tsx
@@ -10877,10 +11419,20 @@ msgstr "导入"
 msgid "Import all emails"
 msgstr "导入所有电子邮件"
 
+#. js-lingui-id: RQkDtT
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Import contacts"
+msgstr ""
+
 #. js-lingui-id: 2CeOI3
 #: src/modules/settings/roles/role-permissions/permission-flags/hooks/useActionRolePermissionFlagConfig.ts
 msgid "Import CSV"
 msgstr "导入CSV"
+
+#. js-lingui-id: gAxUg2
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Import from Google"
+msgstr ""
 
 #. js-lingui-id: D5QSQM
 #: src/modules/settings/accounts/components/SettingsAccountsMessageFolderCard.tsx
@@ -10896,6 +11448,17 @@ msgstr "从 JetBrains 设置中导入或添加 MCP 配置。"
 #: src/pages/onboarding/ImportContacts.tsx
 msgid "Import your contacts"
 msgstr "导入你的联系人"
+
+#. js-lingui-id: qlsHAs
+#. placeholder {0}: c.created ?? 0
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Imported {0} so far…"
+msgstr ""
+
+#. js-lingui-id: bPOBi2
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Imported {imported} new people from Google ({found} contacts found)."
+msgstr ""
 
 #. js-lingui-id: wsKZ+v
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
@@ -11191,6 +11754,13 @@ msgstr "指令"
 msgid "Instructions Editor"
 msgstr "指令编辑器"
 
+#. js-lingui-id: nbfdhU
+#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Integrations"
+msgstr ""
+
 #. js-lingui-id: RGm66q
 #: src/utils/title-utils.ts
 msgid "Integrations - Settings"
@@ -11206,6 +11776,12 @@ msgstr "智能"
 #: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
 msgid "Interface"
 msgstr "界面"
+
+#. js-lingui-id: wv1e0F
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Internal"
+msgstr ""
 
 #. js-lingui-id: a+PGuG
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
@@ -11380,6 +11956,11 @@ msgstr "邀请用户"
 #: src/pages/onboarding/InviteTeam.tsx
 msgid "Invite your team"
 msgstr "邀请您的团队"
+
+#. js-lingui-id: js9NdT
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Invited (seat active when they join)"
+msgstr ""
 
 #. js-lingui-id: 2InwTp
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
@@ -11934,6 +12515,12 @@ msgstr "纬度"
 msgid "Launch"
 msgstr "启动"
 
+#. js-lingui-id: KLsJEy
+#: src/modules/navigation/components/DesyncFioAdsSection.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Launch a Fio ad"
+msgstr ""
+
 #. js-lingui-id: 9BjbLR
 #: src/modules/side-panel/components/SidePanelWorkflowStepInfo.tsx
 msgid "Launch manually"
@@ -11982,11 +12569,31 @@ msgstr "布局模式：{0}"
 msgid "Layouts"
 msgstr "布局"
 
+#. js-lingui-id: LhgWCf
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Leads"
+msgstr ""
+
+#. js-lingui-id: o7Mb1h
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Leads generated this cycle"
+msgstr ""
+
 #. js-lingui-id: zwWKhA
 #: src/modules/information-banner/components/maintenance/InformationBannerMaintenance.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowEditActionFormBuilder.tsx
 msgid "Learn more"
 msgstr "了解更多"
+
+#. js-lingui-id: NgeSlx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Learn More"
+msgstr ""
+
+#. js-lingui-id: zfagGa
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Learn More URL (https://...)"
+msgstr ""
 
 #. js-lingui-id: wYPbcI
 #: src/modules/ai/utils/tool-display/get-tool-display-message.ts
@@ -12075,6 +12682,11 @@ msgstr "小于或等于"
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectOpenRecordInPicker.tsx
 msgid "Let each member decide for themselves"
 msgstr "让每位成员自行决定"
+
+#. js-lingui-id: r5kwln
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Let the agent build your CRM"
+msgstr ""
 
 #. js-lingui-id: vhRvfF
 #: src/modules/advanced-text-editor/constants/getAdvancedTextEditorTypographySettings.ts
@@ -12396,6 +13008,7 @@ msgstr "正在加载会话"
 #: src/modules/settings/admin-panel/components/SettingsAdminVersionDisplay.tsx
 #: src/modules/settings/roles/role-assignment/components/SettingsRoleAssignmentEntityPickerDropdown.tsx
 #: src/modules/views/hooks/useComputeRecordRelationFilterDisplayValue.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Loading..."
 msgstr "加载中……"
 
@@ -12423,13 +13036,10 @@ msgstr "区域设置"
 msgid "Location"
 msgstr "位置"
 
-#. js-lingui-id: B6ANJW
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Log a new deal (company, amount, stage, expected close). Details: "
-msgstr "记录一笔新交易 (公司、金额、阶段、预计成交日期)。详细信息： "
-
 #. js-lingui-id: FgAxTj
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
 #: src/modules/auth/sign-in-up/components/WorkspaceSelectionFooter.tsx
+#: src/modules/navigation/components/NavigationDrawerLogoutButton.tsx
 #: src/modules/onboarding/components/upgrade-free-trial/ChooseYourPlanErrorState.tsx
 #: src/modules/settings/profile/devices/components/SettingsDeviceSessionRowDropdownMenu.tsx
 #: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/MultiWorkspaceDropdownDefaultComponents.tsx
@@ -12485,10 +13095,20 @@ msgstr "逻辑函数"
 msgid "Login token missing. Two Factor Authentication setup can not be initiated."
 msgstr "登录令牌丢失。无法启动两因素身份验证设置。"
 
-#. js-lingui-id: nOhz3x
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
-msgid "Logout"
-msgstr "注销"
+#. js-lingui-id: iG7KNr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Logo"
+msgstr ""
+
+#. js-lingui-id: ao3wWA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Logo / image"
+msgstr ""
+
+#. js-lingui-id: 42GEJY
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "logo set"
+msgstr ""
 
 #. js-lingui-id: w/bY7R
 #: src/modules/logic-functions/components/LogicFunctionLogs.tsx
@@ -12643,6 +13263,11 @@ msgstr "管理视图"
 msgid "Manage workflows"
 msgstr "管理工作流"
 
+#. js-lingui-id: act4Md
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Manage your Desync subscription, billing cadence, and usage."
+msgstr ""
+
 #. js-lingui-id: FyFNsd
 #: src/pages/settings/accounts/SettingsAccounts.tsx
 msgid "Manage your internet accounts."
@@ -12666,11 +13291,6 @@ msgstr "手动"
 #: src/modules/settings/mcp-and-apis/components/SettingsMcpSetup.tsx
 msgid "Manual configuration"
 msgstr "手动配置"
-
-#. js-lingui-id: ospBFm
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "Manually selected for this mode."
-msgstr "已为此模式手动选择。"
 
 #. js-lingui-id: lkcAoj
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
@@ -12731,6 +13351,11 @@ msgstr "最大输出必须为正整数"
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
 msgid "Max range"
 msgstr "最大范围"
+
+#. js-lingui-id: uT7ydO
+#: src/modules/ai/utils/getAiModelTierLabel.ts
+msgid "Max Thinking"
+msgstr ""
 
 #. js-lingui-id: DBiUDH
 #: src/modules/settings/data-model/fields/forms/components/SettingsDataModelFieldMaxValuesForm.tsx
@@ -12821,6 +13446,11 @@ msgstr "中"
 #. js-lingui-id: IAcjOi
 #: src/modules/advanced-text-editor/extensions/slash-command/DefaultSlashCommands.ts
 msgid "Medium section heading"
+msgstr ""
+
+#. js-lingui-id: OvoEq7
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Member"
 msgstr ""
 
 #. js-lingui-id: Sma10A
@@ -12991,6 +13621,13 @@ msgstr "分钟"
 msgid "Minutes between triggers"
 msgstr "触发之间的分钟数"
 
+#. js-lingui-id: 8DvOLm
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "missing"
+msgstr ""
+
 #. js-lingui-id: cOFpUq
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
 msgid "Missing calendar permission."
@@ -13017,8 +13654,17 @@ msgstr "移动端"
 msgid "Mode"
 msgstr "模式"
 
+#. js-lingui-id: HPec50
+#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
+msgid "Mode agents use when they run on their own"
+msgstr ""
+
+#. js-lingui-id: /1sxVR
+#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
+msgid "Mode used when you chat with Desync"
+msgstr ""
+
 #. js-lingui-id: scu3wk
-#: src/modules/ai/components/AiModelTierInformationButton.tsx
 #: src/modules/ai/components/AiModelTierSlider.tsx
 msgid "Model"
 msgstr "模型"
@@ -13035,11 +13681,6 @@ msgstr "已添加模型 \"{0}\""
 msgid "Model \"{0}\" removed"
 msgstr "已移除模型 \"{0}\""
 
-#. js-lingui-id: 8jgO3g
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Model agents use when they run on their own"
-msgstr "代理自行运行时使用的模型"
-
 #. js-lingui-id: IzB3v0
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Model ID"
@@ -13054,11 +13695,6 @@ msgstr "模型 ID 为必填项"
 #: src/modules/ai/components/AiModelTierInformationButton.tsx
 msgid "Model information"
 msgstr "模型信息"
-
-#. js-lingui-id: iaurWj
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Model used when you chat with Twenty"
-msgstr "与 Twenty 聊天时使用的模型"
 
 #. js-lingui-id: //nm2/
 #: src/pages/settings/admin-panel/SettingsAdminAiProviderDetail.tsx
@@ -13119,10 +13755,12 @@ msgid "monthly"
 msgstr "每月"
 
 #. js-lingui-id: +8Nek/
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
 #: src/modules/settings/billing/constants/UsageLimitPeriodNameLabels.ts
 #: src/modules/settings/enterprise/components/EnterprisePlanModal.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Monthly"
 msgstr "每月"
 
@@ -13248,6 +13886,22 @@ msgstr "消息"
 msgid "Multiple answers"
 msgstr "多个回答"
 
+#. js-lingui-id: /BEbOG
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be 1MB or smaller."
+msgstr ""
+
+#. js-lingui-id: SFjemy
+#. placeholder {0}: Math.round(duration)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be 20 to 30 seconds (this one is {0}s)."
+msgstr ""
+
+#. js-lingui-id: EcE0u/
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be a JPG or PNG."
+msgstr ""
+
 #. js-lingui-id: asWVA5
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
 msgid "must be a number"
@@ -13267,6 +13921,16 @@ msgstr "必须是一个包含有效 URL 和标签的对象数组（格式：'[{\
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
 msgid "must be an array of valid emails"
 msgstr "必须是有效电子邮件的数组"
+
+#. js-lingui-id: pGNPM0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be an MP3."
+msgstr ""
+
+#. js-lingui-id: Yy/yCI
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be at least 500x500 pixels."
+msgstr ""
 
 #. js-lingui-id: OJCJh9
 #: src/pages/settings/applications/tabs/SettingsApplicationsDeveloperTab.tsx
@@ -13396,11 +14060,6 @@ msgstr "导航菜单项"
 #: src/pages/settings/applications/tabs/SettingsApplicationDetailContentTab.tsx
 msgid "Navigation menu items"
 msgstr "导航菜单项"
-
-#. js-lingui-id: aTTshK
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Navigation modes"
-msgstr "导航模式"
 
 #. js-lingui-id: IbVc4A
 #: src/modules/page-layout/widgets/record-table/utils/getRecordTableWidgetLayoutPickerOptions.ts
@@ -13687,6 +14346,7 @@ msgstr "新闻简报"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminQueueJobsTable.tsx
 #: src/modules/settings/billing/components/internal/SubscriptionInfoRowContainer.tsx
 #: src/modules/settings/components/SettingsPaginationControls.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/accounts/SettingsAccountsConfigurationStepEmail.tsx
 msgid "Next"
 msgstr "下一个"
@@ -14211,10 +14871,10 @@ msgstr "没有可用的麦克风。请连接一个麦克风后重试。"
 msgid "No model available"
 msgstr "没有可用模型"
 
-#. js-lingui-id: xo340M
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "No model is available for this mode."
-msgstr "此模式没有可用模型。"
+#. js-lingui-id: K6CQlq
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "No new people to import — your {found} Google contacts are already in the CRM."
+msgstr ""
 
 #. js-lingui-id: 9VrTfZ
 #: src/modules/activities/notes/components/NotesCardContent.tsx
@@ -14230,6 +14890,11 @@ msgstr "未找到具有视图的对象"
 #: src/modules/ui/field/input/components/MultiSelectInput.tsx
 msgid "No option found"
 msgstr "未找到选项"
+
+#. js-lingui-id: IWf5/9
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "No other members in this workspace yet."
+msgstr ""
 
 #. js-lingui-id: XRc1G9
 #: src/modules/ai/components/TerminalOutput.tsx
@@ -14268,6 +14933,13 @@ msgstr "未为此应用程序配置权限。"
 #: src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelSection.tsx
 msgid "No permissions have been set for individual objects."
 msgstr "尚未为个人对象设置权限。"
+
+#. js-lingui-id: 9+qP8v
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "No plan"
+msgstr ""
 
 #. js-lingui-id: pRxlf6
 #: src/pages/settings/applications/utils/getClaimErrorContent.ts
@@ -14683,6 +15355,11 @@ msgstr "未录音"
 msgid "Not Recorded"
 msgstr "未录音"
 
+#. js-lingui-id: 85VBFF
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "not set"
+msgstr ""
+
 #. js-lingui-id: MTqQMG
 #: src/modules/settings/emailing-domains/utils/getVerificationRecordGroupStatusDisplay.ts
 #: src/pages/settings/applications/tabs/SettingsApplicationCommandMenuItemSettingsTab.tsx
@@ -14738,6 +15415,11 @@ msgstr "尚未发送任何内容。营销活动将返回您的草稿，您可以
 #: src/pages/settings/applications/SettingsApplicationDetails.tsx
 msgid "Nothing to configure for this application"
 msgstr "此应用程序无需配置"
+
+#. js-lingui-id: hqYwbH
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Nothing to import for your account yet"
+msgstr ""
 
 #. js-lingui-id: DYCPYF
 #: src/modules/page-layout/widgets/components/StandaloneWidgetPlaceholder.tsx
@@ -15060,10 +15742,10 @@ msgstr "入门奖励"
 msgid "One or more filters reference deactivated or deleted fields and will be automatically removed on save."
 msgstr "一个或多个筛选器引用了已停用或已删除的字段，保存时将自动移除。"
 
-#. js-lingui-id: 1WZTTl
+#. js-lingui-id: w2yO3R
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
-msgid "One subscription provides one Organization key that powers one production instance and one potential staging or test instance. To run a staging or test environment, install Twenty on a second server, activate it with this same Organization key, then register that server as a development instance. Development instances unlock premium features without extra billing and do not count toward your production seats."
-msgstr "一个订阅提供一个组织密钥，该密钥可支持一个生产实例以及一个预备环境或测试实例。要运行预备或测试环境，请在第二台服务器上安装 Twenty，使用同一个组织密钥激活它，然后将该服务器注册为开发实例。开发实例可以在无需额外计费的情况下解锁高级功能，并且不计入您的生产席位数。"
+msgid "One subscription provides one Organization key that powers one production instance and one potential staging or test instance. To run a staging or test environment, install Desync on a second server, activate it with this same Organization key, then register that server as a development instance. Development instances unlock premium features without extra billing and do not count toward your production seats."
+msgstr ""
 
 #. js-lingui-id: JEtonz
 #: src/modules/settings/event-logs/components/SettingsLogs.tsx
@@ -15129,6 +15811,11 @@ msgstr "仅在 {remainingDays} 和 {0}"
 msgid "Only the subject is shared"
 msgstr "仅共享主题"
 
+#. js-lingui-id: VRnwi0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Only workspace admins can launch a Fio ad. Ask an admin on your workspace to set it up."
+msgstr ""
+
 #. js-lingui-id: P5aFS1
 #: src/modules/onboarding/components/import-contacts/OnboardingImportPrivacyNote.tsx
 msgid "Only you will be able to see your emails and events"
@@ -15146,6 +15833,11 @@ msgstr "打开"
 msgid "Open a maintained integration or prefill clients that accept MCP install links."
 msgstr "打开一个已维护的集成，或预填接受 MCP 安装链接的客户端。"
 
+#. js-lingui-id: JHmJS+
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Open a workspace first."
+msgstr ""
+
 #. js-lingui-id: 650kGT
 #: src/modules/side-panel/pages/email-block-settings/components/SidePanelEmailBlockSettingsPage.tsx
 msgid "Open an email editor to edit block settings."
@@ -15156,15 +15848,20 @@ msgstr "打开电子邮件编辑器以编辑区块设置。"
 msgid "Open as link"
 msgstr "作为链接打开"
 
-#. js-lingui-id: n0vVgf
+#. js-lingui-id: n7jeqv
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Claude with the Twenty connector name and MCP URL prefilled."
-msgstr "打开 Claude，并预填 Twenty 连接器名称和 MCP URL。"
+msgid "Open Claude with the Desync connector name and MCP URL prefilled."
+msgstr ""
 
-#. js-lingui-id: +n2jpB
+#. js-lingui-id: khtqoR
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Cursor's MCP installer with the Twenty remote server config."
-msgstr "打开 Cursor 的 MCP 安装程序，并使用 Twenty 远程服务器配置。"
+msgid "Open Cursor's MCP installer with the Desync remote server config."
+msgstr ""
+
+#. js-lingui-id: 5y9E/B
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Open Desync's official ChatGPT integration for your workspace."
+msgstr ""
 
 #. js-lingui-id: pZZH4Q
 #: src/modules/auth/sign-in-up/components/EmailVerificationSent.tsx
@@ -15224,20 +15921,25 @@ msgstr "在...中打开记录"
 msgid "Open records on a dedicated page"
 msgstr "在专用页面中打开记录"
 
-#. js-lingui-id: q170S2
+#. js-lingui-id: RLQ6Yx
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Replit with the Twenty remote server config."
-msgstr "打开 Replit，并使用 Twenty 远程服务器配置。"
+msgid "Open Replit with the Desync remote server config."
+msgstr ""
 
-#. js-lingui-id: sBd/cl
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Twenty's official ChatGPT integration for your workspace."
-msgstr "打开适用于你工作区的 Twenty 官方 ChatGPT 集成。"
+#. js-lingui-id: bY2Xkv
+#: src/modules/sign-in-background-mock/components/BackgroundMockPage.tsx
+msgid "Open side panel"
+msgstr ""
 
 #. js-lingui-id: OV5wZZ
 #: src/modules/navigation-menu-item/display/sections/components/NavigationDrawerOpenedSection.tsx
 msgid "Opened"
 msgstr "已打开"
+
+#. js-lingui-id: 9NJUeH
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you."
+msgstr ""
 
 #. js-lingui-id: Fzfj4N
 #: src/pages/settings/layout/SettingsLayoutViewDetail.tsx
@@ -15281,6 +15983,11 @@ msgstr "在首选项页面向收件人显示的可选说明内容。"
 msgid "Optional secret used to compute the HMAC signature for webhook payloads"
 msgstr "用于计算 webhook 负载的 HMAC 签名的可选密钥"
 
+#. js-lingui-id: 7ousH3
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)"
+msgstr ""
+
 #. js-lingui-id: 0zpgxV
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdown.tsx
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
@@ -15298,6 +16005,11 @@ msgstr "选项"
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterLogicalOperatorCell.tsx
 msgid "Or"
 msgstr "或"
+
+#. js-lingui-id: Hs1qcH
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Or have the agent fill your CRM another way:"
+msgstr ""
 
 #. js-lingui-id: 4OE5Sf
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectFormOptionRow.tsx
@@ -15473,11 +16185,6 @@ msgstr "输出令牌"
 msgid "Override Draft"
 msgstr "覆盖草稿"
 
-#. js-lingui-id: RQCK56
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Overrides the mode above until you switch back to automatic"
-msgstr "覆盖上述模式，直到您切换回自动模式"
-
 #. js-lingui-id: 6/dCYd
 #: src/pages/settings/ai/SettingsAI.tsx
 #: src/pages/settings/data-model/SettingsObjectOverview.tsx
@@ -15581,10 +16288,10 @@ msgstr "页面布局"
 msgid "Page name"
 msgstr "页面名称"
 
-#. js-lingui-id: NRvxzv
+#. js-lingui-id: W5RzSu
 #: src/pages/not-found/NotFound.tsx
-msgid "Page Not Found | Twenty"
-msgstr "页面未找到 | Twenty"
+msgid "Page Not Found | Desync"
+msgstr ""
 
 #. js-lingui-id: oIhFvf
 #: src/modules/side-panel/pages/email-block-settings/components/EmailPageStyleSection.tsx
@@ -15659,6 +16366,16 @@ msgstr "粘贴托管图片的链接"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification.tsx
 msgid "Paste the code below"
 msgstr "粘贴下面的代码"
+
+#. js-lingui-id: 0dOXmH
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Paste the script, or add audio and we'll fill it in for you."
+msgstr ""
+
+#. js-lingui-id: tsiTqO
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Paste your API key"
+msgstr ""
 
 #. js-lingui-id: M01WeF
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -15879,6 +16596,11 @@ msgstr "选择一个或多个字段。您选择它们的顺序将成为索引中
 msgid "Pick the index type. BTREE covers most queries; GIN is for full-text and JSONB."
 msgstr "选择索引类型。BTREE 覆盖大多数查询；GIN 用于全文搜索和 JSONB。"
 
+#. js-lingui-id: S07uak
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Pick up to 5 listening categories to target."
+msgstr ""
+
 #. js-lingui-id: N0+GsR
 #: src/modules/settings/members/components/MemberInfosTab.tsx
 #: src/pages/settings/general/SettingsGeneral.tsx
@@ -15891,11 +16613,6 @@ msgstr "图片"
 #: src/modules/side-panel/pages/page-layout/constants/GraphTypeInformation.ts
 msgid "Pie Chart"
 msgstr "饼图"
-
-#. js-lingui-id: 6U8nJN
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Pin a specific model"
-msgstr "固定到特定模型"
 
 #. js-lingui-id: 3pU8e+
 #: src/modules/side-panel/pages/page-layout/utils/getTabSettingsPlacementItems.ts
@@ -15919,11 +16636,6 @@ msgstr "已固定"
 msgid "Pinned tab, always shown on the left"
 msgstr "固定选项卡，始终显示在左侧"
 
-#. js-lingui-id: Iaw5/y
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Pinned to a specific model"
-msgstr "已固定到特定模型"
-
 #. js-lingui-id: hx1ePY
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowFormFieldSettingsNumber.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowFormFieldSettingsText.tsx
@@ -15942,10 +16654,23 @@ msgid "Plain text paragraph"
 msgstr ""
 
 #. js-lingui-id: GdgCoi
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "Plan"
 msgstr "计划"
+
+#. js-lingui-id: 6bnoVc
+#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Plan & Billing"
+msgstr ""
+
+#. js-lingui-id: jJWQWc
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Plan and usage"
+msgstr ""
 
 #. js-lingui-id: XduPHC
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
@@ -16149,6 +16874,11 @@ msgstr "无法预览"
 msgid "Preview of the page recipients see when they unsubscribe"
 msgstr "收件人在退订时看到的页面预览"
 
+#. js-lingui-id: ZuBYCT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Preview voice"
+msgstr ""
+
 #. js-lingui-id: DHhJ7s
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminQueueJobsTable.tsx
 #: src/modules/settings/components/SettingsPaginationControls.tsx
@@ -16255,6 +16985,11 @@ msgstr "正在处理录音"
 #: src/modules/workflow/components/WorkflowStepExecutionResult.tsx
 msgid "Processing..."
 msgstr "处理中……"
+
+#. js-lingui-id: CRDrF5
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Processing…"
+msgstr ""
 
 #. js-lingui-id: vERlcd
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -16633,6 +17368,7 @@ msgstr "记录"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionDeleteRecord.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionUpdateRecord.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/utils/getActionHeaderTypeOrThrow.ts
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Record"
 msgstr "记录"
 
@@ -16721,10 +17457,25 @@ msgstr "录音中"
 msgid "Recording Failed"
 msgstr "录制失败"
 
+#. js-lingui-id: 12j3xf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording isn't supported in this browser. Upload an MP3 instead."
+msgstr ""
+
+#. js-lingui-id: dMS+la
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording must be at least 20 seconds (this one was {elapsed}s)."
+msgstr ""
+
 #. js-lingui-id: h9TBi+
 #: src/modules/page-layout/widgets/call-recording/utils/getCallRecordingStatusDisplayConfiguration.ts
 msgid "Recording Scheduled"
 msgstr "已安排录制"
+
+#. js-lingui-id: Y3jApD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording, up to 30 seconds. Speak your ad, then press Stop."
+msgstr ""
 
 #. js-lingui-id: PWlTvh
 #: src/modules/navigation-menu-item/edit/side-panel/components/SidePanelNewSidebarItemSearchResults.tsx
@@ -17053,10 +17804,20 @@ msgstr "为所有语言重命名"
 msgid "Renewal date"
 msgstr "续约日期"
 
+#. js-lingui-id: qYAz/O
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Renews {dateStr}"
+msgstr ""
+
 #. js-lingui-id: bha0Vl
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Renews on"
 msgstr "续订日期"
+
+#. js-lingui-id: neuNgB
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Renews on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: Ee8JBW
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowEditActionFormBuilder.tsx
@@ -17068,10 +17829,25 @@ msgstr "重新排序字段"
 msgid "Reorder options"
 msgstr "调整选项顺序"
 
+#. js-lingui-id: YOzD/a
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace image"
+msgstr ""
+
+#. js-lingui-id: ECPoNf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace logo"
+msgstr ""
+
 #. js-lingui-id: q8Id6J
 #: src/modules/side-panel/pages/page-layout/components/WidgetSettingsManageSection.tsx
 msgid "Replace widget"
 msgstr "替换小部件"
+
+#. js-lingui-id: Vhkt8a
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace with MP3"
+msgstr ""
 
 #. js-lingui-id: N8UzTV
 #: src/modules/settings/admin-panel/chats/components/SettingsAdminChatsTable.tsx
@@ -17099,6 +17875,17 @@ msgstr "回复"
 msgid "Reply..."
 msgstr "回复..."
 
+#. js-lingui-id: cd5EXh
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Report a bug"
+msgstr ""
+
+#. js-lingui-id: hV3yAb
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Report a problem"
+msgstr ""
+
 #. js-lingui-id: Q3LOVJ
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 msgid "Report an issue"
@@ -17113,6 +17900,12 @@ msgstr "报告"
 #: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/WorkflowRunStepLogsHttpRequestDetail.tsx
 msgid "Request"
 msgstr "请求"
+
+#. js-lingui-id: eBQF7D
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Request an integration"
+msgstr ""
 
 #. js-lingui-id: /laZGZ
 #: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/HttpRequestExecutionResult.tsx
@@ -17299,6 +18092,16 @@ msgstr "结果"
 msgid "Resume"
 msgstr "恢复"
 
+#. js-lingui-id: 1K1kvB
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Resume plan"
+msgstr ""
+
+#. js-lingui-id: wBRT4D
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Resuming…"
+msgstr ""
+
 #. js-lingui-id: 6gRgw8
 #: src/modules/ai/components/AiChatErrorMessage.tsx
 #: src/modules/page-layout/widgets/call-recording-transcript/components/CallRecordingAudioPlayer.tsx
@@ -17335,6 +18138,11 @@ msgstr "返回值"
 #: src/modules/side-panel/pages/page-layout/utils/getSortLabelSuffixForFieldType.ts
 msgid "reverse alphabetical"
 msgstr "逆字母顺序"
+
+#. js-lingui-id: 5vWqqr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Review & submit"
+msgstr ""
 
 #. js-lingui-id: GXsAby
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantRowDropdownMenu.tsx
@@ -17518,6 +18326,11 @@ msgstr "红宝石色"
 msgid "Run"
 msgstr ""
 
+#. js-lingui-id: d3FYmd
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Run a 20 to 30 second audio ad for your brand across their shows. A few quick steps and we'll handle delivery."
+msgstr ""
+
 #. js-lingui-id: UX0N2y
 #: src/modules/object-record/record-table/empty-state/utils/getEmptyStateSubTitle.ts
 msgid "Run a workflow and return here to view its executions"
@@ -17592,6 +18405,8 @@ msgstr "星期六"
 
 #. js-lingui-id: tfDRzk
 #: src/modules/settings/components/SaveAndCancelButtons/SaveButton.tsx
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/pages/settings/data-model/new-field/SettingsObjectNewFieldConfigure.tsx
 msgid "Save"
 msgstr "保存"
@@ -17688,6 +18503,16 @@ msgstr "范围"
 #: src/pages/settings/ai/components/SettingsAgentLogsTab.tsx
 #: src/pages/settings/ai/SettingsAgentTurnDetail.tsx
 msgid "Score"
+msgstr ""
+
+#. js-lingui-id: +zt6D4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Script / transcript"
+msgstr ""
+
+#. js-lingui-id: 5yF7Zr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Script assistant"
 msgstr ""
 
 #. js-lingui-id: oOi11l
@@ -18029,6 +18854,21 @@ msgstr "每座/月"
 msgid "seat / month - billed yearly"
 msgstr "每座/月 - 年费结算"
 
+#. js-lingui-id: NsDUXD
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "seat cancels soon"
+msgstr ""
+
+#. js-lingui-id: lUgAe4
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Seat purchased and invite sent to {beneficiary}."
+msgstr ""
+
+#. js-lingui-id: fURW48
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Seat purchased for {beneficiary}."
+msgstr ""
+
 #. js-lingui-id: MpFIca
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "seats"
@@ -18118,6 +18958,11 @@ msgstr "查看与此记录关联的所有 {relationLabelPlural}"
 #: src/modules/page-layout/widgets/call-recording/components/WidgetActionCallRecordingSeeAll.tsx
 msgid "See all call recordings linked to this calendar event"
 msgstr "查看与此日历事件关联的所有通话录音"
+
+#. js-lingui-id: l3YUC+
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "See all integrations"
+msgstr ""
 
 #. js-lingui-id: 3o+CgI
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationShareLinkButtons.tsx
@@ -18246,6 +19091,11 @@ msgstr "选择一个已知提供商或创建自定义提供商"
 #: src/modules/navigation-menu-item/edit/side-panel/components/SidePanelNavigationMenuItemEditPage.tsx
 msgid "Select a navigation item to edit"
 msgstr "选择要编辑的导航项"
+
+#. js-lingui-id: TD8E92
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Select a plan"
+msgstr ""
 
 #. js-lingui-id: p4N5TB
 #: src/modules/object-record/record-picker/multiple-record-picker/components/MultipleRecordPickerCreateTargetSelect.tsx
@@ -18432,9 +19282,17 @@ msgstr "选择你的语言并调整界面大小"
 msgid "Selected folders"
 msgstr "已选择的文件夹"
 
+#. js-lingui-id: cBv4wp
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "self-managed"
+msgstr ""
+
 #. js-lingui-id: JlFcis
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/page-layout/widgets/email-thread/components/EmailThreadComposer.tsx
 #: src/modules/side-panel/pages/compose-email/components/SidePanelComposeEmailPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Send"
 msgstr "发送"
 
@@ -18474,6 +19332,11 @@ msgstr "发送邮件"
 msgid "Send emails via connected accounts"
 msgstr "通过连接的账户发送电子邮件"
 
+#. js-lingui-id: RoafuO
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Send feedback"
+msgstr ""
+
 #. js-lingui-id: 6nwEi6
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -18489,6 +19352,11 @@ msgstr "稍后发送"
 #: src/modules/side-panel/pages/send-campaign/components/SendCampaignForm.tsx
 msgid "Send now"
 msgstr "立即发送"
+
+#. js-lingui-id: 4k2VbT
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Send request"
+msgstr ""
 
 #. js-lingui-id: doZzL7
 #: src/modules/side-panel/pages/send-campaign-test/components/SidePanelSendCampaignTestPage.tsx
@@ -18741,6 +19609,11 @@ msgstr "设置您的 2FA"
 msgid "Seventh"
 msgstr "第七"
 
+#. js-lingui-id: BDHA/i
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Severity"
+msgstr ""
+
 #. js-lingui-id: Z8lGw6
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 msgid "Share"
@@ -18883,6 +19756,11 @@ msgstr "侧边栏项"
 msgid "Sign in"
 msgstr "登录"
 
+#. js-lingui-id: pa0Bbi
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "Sign in again"
+msgstr ""
+
 #. js-lingui-id: Vt3mQ2
 #: src/utils/title-utils.ts
 msgid "Sign in or Create an account"
@@ -18922,6 +19800,11 @@ msgstr "签名密钥已撤销"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminHealthStatus.tsx
 msgid "Signing Keys"
 msgstr "签名密钥"
+
+#. js-lingui-id: UOV0wi
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "Signing you in…"
+msgstr ""
 
 #. js-lingui-id: BZdVGR
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectForm.tsx
@@ -19039,11 +19922,6 @@ msgstr ""
 msgid "Smaller"
 msgstr "更小"
 
-#. js-lingui-id: ZKXQ0a
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Smart"
-msgstr "智能"
-
 #. js-lingui-id: w+rJId
 #: src/modules/settings/accounts/components/SettingsAccountsConnectionForm.tsx
 msgid "SMTP Configuration"
@@ -19132,6 +20010,19 @@ msgstr "加载日志时出现问题。请重试。"
 #: src/modules/side-panel/routing/components/SidePanelRoutedPage.tsx
 msgid "Something went wrong while loading this page."
 msgstr "加载此页面时出错。"
+
+#. js-lingui-id: kf83Ld
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Something went wrong."
+msgstr ""
+
+#. js-lingui-id: mTxXar
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Something's missing. Go back and complete the earlier steps."
+msgstr ""
 
 #. js-lingui-id: yHwG3y
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent.tsx
@@ -19345,6 +20236,11 @@ msgstr "开始验证过程"
 msgid "Starting {scheduledChangeStartDate}"
 msgstr "自 {scheduledChangeStartDate} 起生效"
 
+#. js-lingui-id: JD3In6
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Starting…"
+msgstr ""
+
 #. js-lingui-id: W1KkjZ
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -19416,6 +20312,12 @@ msgstr "步骤筛选组选项"
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterOptionsDropdown.tsx
 msgid "Step filter options"
 msgstr "步骤筛选选项"
+
+#. js-lingui-id: 84Scru
+#. placeholder {0}: formatSeconds(recordSeconds)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Stop ({0})"
+msgstr ""
 
 #. js-lingui-id: 9QwrMz
 #: src/modules/ai/dictation/components/AiChatDictationButton.tsx
@@ -19496,10 +20398,10 @@ msgstr "子字段"
 msgid "Subdomain"
 msgstr "子域名"
 
-#. js-lingui-id: Sv4BSp
+#. js-lingui-id: O6Cs12
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
-msgid "Subdomain (yourco.twenty.com)"
-msgstr "子域名 (yourco.twenty.com)"
+msgid "Subdomain (yourco.desync.com)"
+msgstr ""
 
 #. js-lingui-id: mGO3xy
 #: src/modules/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm.tsx
@@ -19569,7 +20471,18 @@ msgstr "主题、正文和附件将与您的团队分享。"
 msgid "Submit"
 msgstr "提交"
 
+#. js-lingui-id: ceXhtA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Submit Fio ad"
+msgstr ""
+
+#. js-lingui-id: LMMGPr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Submitting..."
+msgstr ""
+
 #. js-lingui-id: EDl9kS
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
 #: src/modules/information-banner/components/billing/InformationBannerNoBillingSubscription.tsx
 msgid "Subscribe"
 msgstr "订阅"
@@ -19579,6 +20492,11 @@ msgstr "订阅"
 #: src/modules/settings/billing/components/internal/SettingsBillingSubscriptionInfoCardHeaderActions.tsx
 msgid "Subscribe Now"
 msgstr "立即订阅"
+
+#. js-lingui-id: /z87rP
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Subscribe to unlock the full CRM. Annual plans save 10%."
+msgstr ""
 
 #. js-lingui-id: WVzGc2
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
@@ -19592,13 +20510,13 @@ msgstr "订阅"
 msgid "Subscription activated."
 msgstr "订阅已激活。"
 
-#. js-lingui-id: 0okvpx
+#. js-lingui-id: 5JLHOO
 #: src/modules/settings/billing/components/AddPaymentMethodForm.tsx
 #: src/modules/settings/billing/components/AddPaymentMethodForm.tsx
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
-msgid "Subscription error. Please retry or contact Twenty team"
-msgstr "订阅错误。请重试或联系 Twenty 团队"
+msgid "Subscription error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: FooJUj
 #. placeholder {0}: getTargetPlanLabel(targetPlanKey)
@@ -19636,8 +20554,15 @@ msgstr ""
 
 #. js-lingui-id: a0w0iQ
 #: src/modules/advanced-text-editor/components/AdvancedTextEditorInsertRail.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Subtitle"
 msgstr "副标题"
+
+#. js-lingui-id: 2MXxPR
+#. placeholder {0}: subtitle.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Subtitle ({0}/{SUBTITLE_MAX})"
+msgstr ""
 
 #. js-lingui-id: zzDlyQ
 #: src/modules/ui/feedback/toast/components/__tests__/AppToaster.test.tsx
@@ -19755,6 +20680,7 @@ msgstr "已切换为生产实例。"
 
 #. js-lingui-id: Nu4DdT
 #: src/modules/settings/workspace/components/SettingsWorkspaceEmailSyncSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Sync"
 msgstr "同步"
 
@@ -19916,6 +20842,11 @@ msgstr "认领你发布到 npm 的应用。请输入其准确的软件包名称�
 msgid "Talk to our team"
 msgstr "与我们的团队沟通"
 
+#. js-lingui-id: ezTM0H
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Talk to the Desync team"
+msgstr ""
+
 #. js-lingui-id: sceIIK
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "Target relation on Junction Object"
@@ -19946,6 +20877,26 @@ msgstr "团队"
 #: src/modules/activities/emails/recipients/hooks/useEmailRecipientSuggestions.ts
 msgid "Team member"
 msgstr "团队成员"
+
+#. js-lingui-id: T0u3ig
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Team members"
+msgstr ""
+
+#. js-lingui-id: PEiTw7
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Teammate email"
+msgstr ""
+
+#. js-lingui-id: K1hNyg
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "teammate@email.com"
+msgstr ""
+
+#. js-lingui-id: Hmgm6w
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Tell us what's on your mind."
+msgstr ""
 
 #. js-lingui-id: lKXcJz
 #: src/pages/settings/emailing-domains/utils/getEmailingDomainStatusText.ts
@@ -20022,6 +20973,17 @@ msgstr "文本已复制到剪贴板"
 msgid "Text Editor"
 msgstr "文本编辑器"
 
+#. js-lingui-id: BmfK6Z
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Thanks, sent to the Desync team."
+msgstr ""
+
+#. js-lingui-id: 1OAoa8
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "The ad image must be a non-transparent PNG (or a JPG)."
+msgstr ""
+
 #. js-lingui-id: Z4WP0F
 #: src/modules/settings/accounts/components/SettingsAccountsNewEmailGroupChannel.tsx
 msgid "The address your workspace will send and receive email from (e.g. support@mycompany.com). Outbound sending requires the domain to be verified in Outbound Domains."
@@ -20037,14 +20999,14 @@ msgstr "您的 OpenAI 兼容提供商的 API 端点"
 msgid "The AWS region for Bedrock"
 msgstr "用于 Bedrock 的 AWS 区域"
 
-#. js-lingui-id: HP7per
+#. js-lingui-id: 9pMTah
 #: src/pages/settings/applications/utils/getStandardApplicationDescription.ts
 msgid ""
-"The base data model every Twenty workspace runs on.\n"
+"The base data model every Desync workspace runs on.\n"
 "\n"
 "#### What \"foundation\" means\n"
 "\n"
-"Every Twenty workspace starts with this set of objects. They define the shape of your CRM, including relationships, activity, and reporting. Everything else, including marketplace apps, AI agents, and custom objects, plugs into them.\n"
+"Every Desync workspace starts with this set of objects. They define the shape of your CRM, including relationships, activity, and reporting. Everything else, including marketplace apps, AI agents, and custom objects, plugs into them.\n"
 "\n"
 "#### Included objects\n"
 "- **People & Companies**: contact and account records\n"
@@ -20052,11 +21014,11 @@ msgid ""
 "- **Notes & Tasks**: activity and follow-ups\n"
 "- **Workflows & Dashboards**: automation and reporting\n"
 "\n"
-"Remove this app and the rest of Twenty has nothing to hang off.\n"
+"Remove this app and the rest of Desync has nothing to hang off.\n"
 "\n"
 "#### Build your own app\n"
 "\n"
-"Extend Twenty with your own objects, fields, logic functions, or AI skills. Scaffold a new app in one command:\n"
+"Extend Desync with your own objects, fields, logic functions, or AI skills. Scaffold a new app in one command:\n"
 "\n"
 "```bash\n"
 "npx create-twenty-app@latest my-twenty-app\n"
@@ -20184,6 +21146,11 @@ msgstr "收件人在您的地址旁边看到的名称。此名称在创建渠道
 msgid "The page you're seeking is either gone or never was. Let's get you back on track"
 msgstr "您要找的页面已不存在或从未存在。让我们帮您回到正轨"
 
+#. js-lingui-id: xloE1p
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "The payment didn't complete. Try a different card."
+msgstr ""
+
 #. js-lingui-id: Ya1wb4
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
 msgid "The PDF is pre-signed by Twenty and executed with your legal entity and authorized signatory."
@@ -20203,6 +21170,11 @@ msgstr "无法加载该录音。"
 #: src/modules/object-record/record-field/ui/hooks/useCreateJunctionRecordWithNestedTarget.ts
 msgid "The relation configuration could not be resolved."
 msgstr "无法解析关系配置。"
+
+#. js-lingui-id: /wbqWf
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "The seat has been upgraded."
+msgstr ""
 
 #. js-lingui-id: wxyrqd
 #: src/modules/workflow/workflow-steps/workflow-actions/pick-record-action/components/WorkflowEditActionPickRecord.tsx
@@ -20248,6 +21220,12 @@ msgstr "此字段的值"
 #: src/pages/settings/data-model/SettingsObjectFieldEdit.tsx
 msgid "The values of this field must be unique"
 msgstr "此字段的值必须唯一"
+
+#. js-lingui-id: wHb04I
+#. placeholder {0}: Math.round(duration)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "The voiceover is {0}s; aim for a script that reads in 20 to 30 seconds, then regenerate."
+msgstr ""
 
 #. js-lingui-id: MHLapp
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarVisibilitySettingsCard.tsx
@@ -20324,6 +21302,11 @@ msgstr "粗细"
 #: src/modules/ai/components/AiChatThinkingRow.tsx
 msgid "Thinking"
 msgstr "思考中"
+
+#. js-lingui-id: Ed99mE
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Thinking..."
+msgstr ""
 
 #. js-lingui-id: 9ItHLu
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -20449,6 +21432,11 @@ msgstr "此计费周期"
 msgid "This call is being recorded…"
 msgstr "此通话正在录制…"
 
+#. js-lingui-id: M2ohgY
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "This cancels the paid seat at the end of its current billing period — they keep access until then."
+msgstr ""
+
 #. js-lingui-id: WCa/7U
 #: src/pages/settings/applications/tabs/SettingsApplicationFrontComponentPreviewTab.tsx
 msgid "This component runs without a UI and renders nothing here."
@@ -20513,6 +21501,11 @@ msgstr "这是一个非生产实例。"
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "This is a relation to a Junction Object"
 msgstr "这是指向连接对象的关系"
+
+#. js-lingui-id: Km4wPr
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "This is an internal Desync account with unlimited access. No billing actions apply."
+msgstr ""
 
 #. js-lingui-id: E4JJ5C
 #: src/modules/object-record/record-index/components/RecordIndexRemoveSortingModal.tsx
@@ -20589,6 +21582,11 @@ msgstr "此角色已分配给这些 {roleTargetDisplayName}。"
 msgid "This role is shared with other users or agents and cannot be edited here."
 msgstr ""
 
+#. js-lingui-id: KkZ+Og
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "This runs inside {name}, not in Desync, so there is no connection status to show here. Add the connection details in {name} and you are all set."
+msgstr ""
+
 #. js-lingui-id: IBWuXb
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "This server has an Organization key configured. Make sure you keep a copy of it somewhere safe: you need the same key to activate a development instance or to move your license to a replacement server. If you no longer have access to your key, contact support."
@@ -20619,6 +21617,11 @@ msgstr "该子域名已被保留"
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 msgid "This takes {0} credits back off this workspace straight away. Revoking cannot be undone."
 msgstr "这会立即从此工作区收回 {0} 积分。撤销操作无法恢复。"
+
+#. js-lingui-id: zFwAll
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "This teammate is already on the top plan."
+msgstr ""
 
 #. js-lingui-id: MMGDfe
 #: src/modules/settings/admin-panel/config-variables/components/ConfigVariableHelpText.tsx
@@ -20711,6 +21714,11 @@ msgstr "这将永久删除您的双重身份验证方法。<0/>由于您的工�
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdminAccess.tsx
 msgid "This will revoke {0} for {userLabel}."
 msgstr "这将收回 {userLabel} 的 {0}。"
+
+#. js-lingui-id: WneKvA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "This workspace has already submitted its Fio ad. We'll be in touch; reach out if you need to change it."
+msgstr ""
 
 #. js-lingui-id: f8HOUp
 #: src/modules/ai/components/ThinkingStepsDisplay.tsx
@@ -20992,8 +22000,14 @@ msgstr "总耗时"
 msgid "Track AI consumption across your workspace."
 msgstr "在您的工作区中跟踪 AI 消耗。"
 
+#. js-lingui-id: ipzSMZ
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Transcribing your audio..."
+msgstr ""
+
 #. js-lingui-id: DDziIo
 #: src/modules/page-layout/widgets/call-recording-transcript/components/CallRecordingTranscriptEntryList.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Transcript"
 msgstr "转录文本"
 
@@ -21207,16 +22221,6 @@ msgstr ""
 msgid "Turquoise"
 msgstr "绿松石色"
 
-#. js-lingui-id: JnaRPe
-#: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
-msgid "Twenty fields"
-msgstr "Twenty 字段"
-
-#. js-lingui-id: pNo8xt
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Twenty fills each level with the best model that meets your requirements"
-msgstr "Twenty 会为每个级别配置满足您要求的最佳模型"
-
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
 msgid "Twitter/X Search"
@@ -21261,6 +22265,7 @@ msgid "Two-factor authentication setup completed successfully!"
 msgstr "双因素身份验证设置成功完成！"
 
 #. js-lingui-id: +zy2Nq
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 #: src/modules/settings/components/SettingsDnsRecordsTable.tsx
@@ -21289,11 +22294,21 @@ msgstr "输入“/”以使用命令"
 msgid "Type '/' for commands, '@' for mentions"
 msgstr "输入 '/' 以使用命令，输入 '@' 以提及"
 
+#. js-lingui-id: wEWQRM
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Type \"cancel\" to confirm."
+msgstr ""
+
 #. js-lingui-id: qzD6hf
 #: src/modules/side-panel/components/SidePanelTopBar.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowAiAgentPermissionsTab.tsx
 msgid "Type anything..."
 msgstr "输入任何内容..."
+
+#. js-lingui-id: uz+96A
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Type cancel"
+msgstr ""
 
 #. js-lingui-id: LaEX5I
 #: src/modules/activities/emails/components/CampaignBodyField.tsx
@@ -21639,6 +22654,11 @@ msgstr "退订用户"
 msgid "Unsupported image format"
 msgstr "不支持的图片格式"
 
+#. js-lingui-id: HLxHPm
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Until {dateStr}"
+msgstr ""
+
 #. js-lingui-id: wja8aL
 #: src/modules/ai/components/AiChatThreadListItem.tsx
 #: src/modules/ai/components/ChatReferenceChip.tsx
@@ -21831,9 +22851,15 @@ msgstr "正在更新 {objectLabel}"
 msgid "Updating..."
 msgstr "正在更新..."
 
+#. js-lingui-id: Jqe+Dc
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Updating…"
+msgstr ""
+
 #. js-lingui-id: kwkhPe
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
 #: src/modules/information-banner/components/billing/InformationBannerNoMoreCredits.tsx
 #: src/modules/settings/billing/components/internal/ResourceCreditPriceSelector.tsx
 #: src/modules/settings/billing/hooks/useBillingPlanActions.ts
@@ -21841,6 +22867,17 @@ msgstr "正在更新..."
 #: src/modules/settings/roles/role-permissions/object-level-permissions/record-level-permissions/components/SettingsRolePermissionsObjectLevelRecordLevelSection.tsx
 msgid "Upgrade"
 msgstr "升级"
+
+#. js-lingui-id: EHnRfs
+#. placeholder {0}: target.email
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Upgrade {0}'s seat"
+msgstr ""
+
+#. js-lingui-id: B/WhgE
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Upgrade for more records and features. Your leftover records carry over, and you’re charged the new plan’s price right away."
+msgstr ""
 
 #. js-lingui-id: IEtN5Y
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminWorkspacesStatusSummaryCard.tsx
@@ -21872,7 +22909,11 @@ msgstr "升级状态已刷新"
 
 #. js-lingui-id: doMiaH
 #. placeholder {0}: latestAvailableVersion ?? ''
+#. placeholder {0}: selectedPlan.name
+#. placeholder {0}: selectedPlan?.name ?? ''
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/applications/components/SettingsApplicationActionButton.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Upgrade to {0}"
 msgstr "升级到 {0}"
 
@@ -21904,6 +22945,11 @@ msgstr "升级到组织版以访问审计日志。"
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
 msgid "Upgrade your free trial"
 msgstr "升级您的免费试用"
+
+#. js-lingui-id: 21QsyA
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Upgrade your plan"
+msgstr ""
 
 #. js-lingui-id: T1mDWj
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
@@ -21957,6 +23003,11 @@ msgstr "上传文件"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm.tsx
 msgid "Upload logo"
 msgstr "上传徽标"
+
+#. js-lingui-id: Yi/8c6
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Upload MP3"
+msgstr ""
 
 #. js-lingui-id: sl/qWH
 #: src/modules/onboarding/components/OnboardingProfilePictureUploader.tsx
@@ -22090,10 +23141,25 @@ msgstr "使用周期"
 msgid "Use a dedicated form when creating records."
 msgstr "创建记录时使用专用表单。"
 
+#. js-lingui-id: I3AwBO
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Use a different card"
+msgstr ""
+
+#. js-lingui-id: mvljGL
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Use as script"
+msgstr ""
+
 #. js-lingui-id: 6kLyt5
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationProvision.tsx
 msgid "Use authenticator apps and browser extensions like 1Password, Authy, Microsoft Authenticator to generate one-time passwords"
 msgstr "使用类似于 1Password、Authy、Microsoft Authenticator 的身份验证应用和浏览器扩展生成一次性密码"
+
+#. js-lingui-id: 22KOw3
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Use card on file"
+msgstr ""
 
 #. js-lingui-id: 5ZehS/
 #: src/pages/settings/ai/components/SettingsAgentSkillsTab.tsx
@@ -22473,7 +23539,6 @@ msgstr "查看文档"
 
 #. js-lingui-id: Mv1YVf
 #: src/modules/error-handler/utils/getToastOptionsFromError.tsx
-#: src/modules/error-handler/utils/getToastOptionsFromError.tsx
 msgid "View existing record"
 msgstr "查看现有记录"
 
@@ -22749,6 +23814,11 @@ msgstr "我们无法访问软件包注册表以验证软件包来源。请几分
 msgid "We couldn't confirm your payment method. Please retry."
 msgstr "我们无法确认您的付款方式。请重试。"
 
+#. js-lingui-id: 1sa/dE
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "We couldn't finish signing you in. Please try again."
+msgstr ""
+
 #. js-lingui-id: TvNBSn
 #: src/modules/onboarding/components/upgrade-free-trial/ChooseYourPlanErrorState.tsx
 #: src/modules/settings/billing/components/SettingsBillingPlansErrorState.tsx
@@ -22765,6 +23835,11 @@ msgstr "我们在验证时遇到了问题"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionUpsertRecord.tsx
 msgid "We match on these fields. If a {0} already exists, we update it. Otherwise, we create a new one."
 msgstr "我们匹配这些字段。如果一个{0}已经存在，则更新它。否则，我们创建一个新的。"
+
+#. js-lingui-id: V/kD6G
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "We prefilled what we already know. Edit anything."
+msgstr ""
 
 #. js-lingui-id: id6ein
 #: src/modules/ui/input/components/ImageInput.tsx
@@ -22877,8 +23952,14 @@ msgstr "Webhooks"
 
 #. js-lingui-id: On0aF2
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Website"
 msgstr "网站"
+
+#. js-lingui-id: fVUMW4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Website (https://...)"
+msgstr ""
 
 #. js-lingui-id: zx4BuL
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent.tsx
@@ -22903,26 +23984,25 @@ msgstr "每周"
 msgid "weeks"
 msgstr ""
 
-#. js-lingui-id: nTuObL
+#. js-lingui-id: 6jfS51
 #: src/pages/auth/SignInUp.tsx
-msgid "Welcome to Twenty"
-msgstr "欢迎来到 Twenty"
+msgid "Welcome"
+msgstr ""
+
+#. js-lingui-id: 9FXDWs
+#: src/pages/auth/SignInUp.tsx
+msgid "Welcome to Desync"
+msgstr ""
+
+#. js-lingui-id: b3bMNK
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Welcome to Desync. Let's set up your CRM."
+msgstr ""
 
 #. js-lingui-id: t8ZvkC
 #: src/modules/onboarding/constants/WelcomeTitleMessage.ts
-#: src/pages/auth/SignInUp.tsx
 msgid "Welcome to your workspace"
 msgstr "欢迎来到您的工作区"
-
-#. js-lingui-id: Vin3Dv
-#: src/pages/auth/SignInUp.tsx
-msgid "Welcome, {workspaceName}."
-msgstr "欢迎，{workspaceName}。"
-
-#. js-lingui-id: Itn+J7
-#: src/modules/ai/components/suggested-prompts/AiChatSuggestedPrompts.tsx
-msgid "What can I help you with?"
-msgstr "我能帮您做什么？"
 
 #. js-lingui-id: ivJ1Xk
 #: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
@@ -22939,11 +24019,22 @@ msgstr "各语言对此字段标签的显示内容"
 msgid "What each language displays for this object's labels"
 msgstr "各语言对此对象标签的显示内容"
 
+#. js-lingui-id: y/K0Dz
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "What happened?"
+msgstr ""
+
 #. js-lingui-id: cE4SvC
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeyDetail.tsx
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeysNew.tsx
 msgid "What this API can do: Select a user role to define its permissions."
 msgstr "此 API 的功能：选择用户角色以定义其权限。"
+
+#. js-lingui-id: sY9iJW
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "What you expected, what happened, and where."
+msgstr ""
 
 #. js-lingui-id: drC+Tq
 #: src/pages/settings/ai/components/SettingsAiOverviewTab.tsx
@@ -22954,21 +24045,6 @@ msgstr "你的工作区中已安装并正在使用的内容"
 #: src/pages/settings/communications/SettingsWorkspaceCommunications.tsx
 msgid "Whatsapp"
 msgstr "WhatsApp"
-
-#. js-lingui-id: m7GziZ
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When a deal's stage changes to Closed Won, create a task assigned to the deal owner, due 7 days after the close date, with title \"Post-sale check-in\" and the company name in the description."
-msgstr "当某个交易的阶段变为已赢单时，创建一个分配给该交易负责人的任务，截止日期为关闭日期后的 7 天，标题为 \"售后回访\"，并在描述中包含公司名称。"
-
-#. js-lingui-id: IHLoUB
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When a new lead is created with source \"Website\", assign it to the sales rep whose territory (by region/country) matches the lead's address; if no match, assign to the team lead."
-msgstr "当创建来源为 \"网站\" 的新线索时，将其分配给辖区（按地区/国家）与该线索地址匹配的销售代表；如果不匹配，则分配给团队负责人。"
-
-#. js-lingui-id: haFWB2
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When any deal with amount over $100,000 has its stage or amount updated, send a notification to the sales channel with the deal name, company, new stage, amount and owner."
-msgstr "当任何金额超过 $100,000 的交易的阶段或金额被更新时，向销售频道发送通知，包含交易名称、公司、新阶段、金额和负责人。"
 
 #. js-lingui-id: aEaoKJ
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -23002,6 +24078,11 @@ msgstr "此对象记录的打开位置"
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Whether this model supports chain-of-thought reasoning"
 msgstr "此模型是否支持思维链推理"
+
+#. js-lingui-id: JNCYjr
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Which platform would you like?"
+msgstr ""
 
 #. js-lingui-id: 9y+sLE
 #: src/modules/workflow/workflow-variables/utils/getWorkflowVariableSpecialItems.ts
@@ -23163,6 +24244,7 @@ msgstr "工作流"
 #: src/pages/settings/developers/playground/SettingsRestPlayground.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 #: src/pages/settings/general/SettingsGeneral.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 #: src/pages/settings/layout/components/SettingsLayoutDetailScaffold.tsx
 #: src/pages/settings/layout/SettingsLayout.tsx
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
@@ -23232,6 +24314,11 @@ msgstr "工作区成员"
 msgid "Workspace members"
 msgstr "工作区成员"
 
+#. js-lingui-id: 7etw3b
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Workspace role"
+msgstr ""
+
 #. js-lingui-id: PHF7zj
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/tabs/SettingsApplicationConnectionsSection.tsx
@@ -23284,6 +24371,11 @@ msgstr "撰写描述"
 #: src/pages/settings/ai/components/SettingsAgentSettingsTab.tsx
 msgid "Write a description for this agent"
 msgstr "为此代理撰写描述"
+
+#. js-lingui-id: 3NOsWS
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Write or generate a script first, then I can voice it."
+msgstr ""
 
 #. js-lingui-id: zeCIJi
 #: src/modules/settings/logic-functions/components/tabs/SettingsLogicFunctionCodeEditorTab.tsx
@@ -23377,6 +24469,11 @@ msgstr "是"
 msgid "Yesterday"
 msgstr "昨天"
 
+#. js-lingui-id: kWJmRL
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "You"
+msgstr ""
+
 #. js-lingui-id: lWUeEt
 #: src/modules/auth/sign-in-up/hooks/useWorkspaceFromInviteHash.ts
 msgid "You already belong to the workspace {workspaceDisplayName}"
@@ -23448,6 +24545,11 @@ msgstr "您无权访问此对象。"
 msgid "You don't have access to this settings page."
 msgstr "您无权访问此设置页面。"
 
+#. js-lingui-id: J5Sr/d
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "You don't have an active Desync subscription yet. Subscribe to start using the CRM, then come back and continue."
+msgstr ""
+
 #. js-lingui-id: tzk0bz
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "You have reached the maximum number of server transfers allowed in the last 30 days for this Organization key. Please try again later or contact support."
@@ -23493,15 +24595,30 @@ msgstr "您将失去所有的映射。"
 msgid "You will stop receiving these emails."
 msgstr "您将不再接收这些电子邮件。"
 
+#. js-lingui-id: 6CBP/6
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "You’ll keep access, and your workspace, until the end of the period you’ve already paid for. Type <0>cancel</0> to confirm."
+msgstr ""
+
 #. js-lingui-id: Cl+hUj
 #: src/modules/settings/domains/components/SettingsSubdomain.tsx
 msgid "You're about to change your workspace subdomain. This action will log out all users."
 msgstr "您即将更改工作区子域名。这一操作将会注销所有用户。"
 
+#. js-lingui-id: PRZEsv
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "You’re on our top plan. Thank you!"
+msgstr ""
+
 #. js-lingui-id: 6x8lJe
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
 msgid "You’ve reached your AI usage limit."
 msgstr "您已达到 AI 使用限额。"
+
+#. js-lingui-id: w328ML
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your account has full access to the CRM."
+msgstr ""
 
 #. js-lingui-id: tOPGvO
 #: src/modules/apollo/services/apollo.factory.ts
@@ -23518,6 +24635,11 @@ msgstr "您的计费周期将立即切换为按月计费，试用将继续。试
 msgid "Your billing interval will switch to yearly immediately and your trial will continue. When it ends, you will be charged ${yearlyPrice} per user per year billed annually."
 msgstr "您的计费周期将立即切换为按年计费，试用将继续。试用结束后，将按每位用户每年 ${yearlyPrice}（按年计费）向您收费。"
 
+#. js-lingui-id: GMUujR
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Your built-in AI agent can fill your CRM for you, pull in your contacts, find new leads, and tell you who to follow up with. Three quick steps and it does the work."
+msgstr ""
+
 #. js-lingui-id: u1O1GV
 #: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 msgid "Your card was saved, but the payment still needs attention."
@@ -23527,6 +24649,16 @@ msgstr "您的卡片已保存，但付款仍需处理。"
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
 msgid "Your details"
 msgstr "您的详细信息"
+
+#. js-lingui-id: cSUBI1
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Your feedback"
+msgstr ""
+
+#. js-lingui-id: OSmWqR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Your Fio ad was submitted. We'll be in touch."
+msgstr ""
 
 #. js-lingui-id: gUv6/H
 #: src/pages/settings/applications/utils/getClaimErrorContent.ts
@@ -23568,6 +24700,17 @@ msgstr "您的组织订阅已取消。"
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
 msgid "Your payment details are incomplete. Please review and retry."
 msgstr "您的付款信息不完整。请检查后重试。"
+
+#. js-lingui-id: f4DO/O
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your plan"
+msgstr ""
+
+#. js-lingui-id: lDBxkO
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your plan is updating. It may take a few seconds to reflect here."
+msgstr ""
 
 #. js-lingui-id: IxG5gy
 #: src/modules/settings/billing/hooks/useBillingWording.ts

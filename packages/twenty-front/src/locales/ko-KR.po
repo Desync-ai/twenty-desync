@@ -237,6 +237,12 @@ msgstr "{0, plural, other {석}}"
 msgid "{0, plural, one {You do not have permission to access the {fieldsList} field} other {You do not have permission to access the {fieldsList} fields}}"
 msgstr "{0, plural, other {귀하는 {fieldsList} 필드를 액세스할 권한이 없습니다}}"
 
+#. js-lingui-id: srV4+B
+#. placeholder {0}: seat.planName
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "{0} · you pay"
+msgstr ""
+
 #. js-lingui-id: 6lE3tD
 #. placeholder {0}: formatNumber(counts.hardSuppressed)
 #: src/modules/activities/emails/utils/buildExcludedRecipientReasons.ts
@@ -376,13 +382,6 @@ msgstr "{0}명에게 이메일 주소가 없음"
 #: src/modules/object-record/record-field/ui/form-types/components/FormWorkspaceMemberFilterValueInput.tsx
 msgid "{0} workspace members"
 msgstr "워크스페이스 구성원 {0}명"
-
-#. js-lingui-id: kofqAN
-#. placeholder {0}: selectedResolvedTier.label
-#. placeholder {1}: selectedResolvedTier.model.label
-#: src/modules/ai/components/AiModelTierDropdown.tsx
-msgid "{0}: {1}"
-msgstr "{0}: {1}"
 
 #. js-lingui-id: qdQhzv
 #: src/modules/views/advanced-filter-chip/components/AdvancedFilterChip.tsx
@@ -600,6 +599,32 @@ msgstr "{minutes, plural, other {#분}}"
 msgid "{morphRelationCount} Objects"
 msgstr "객체 {morphRelationCount}개"
 
+#. js-lingui-id: 6CXv6p
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} connected."
+msgstr ""
+
+#. js-lingui-id: apDNfL
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#. placeholder {0}: final?.error ?? 'unknown error'
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} sync failed: {0}"
+msgstr ""
+
+#. js-lingui-id: gylK9G
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} sync is still running in the background. Check back shortly."
+msgstr ""
+
+#. js-lingui-id: 1nOTVV
+#. placeholder {0}: c.created ?? 0
+#. placeholder {1}: c.skipped ?? 0
+#. placeholder {2}: (c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} synced: {0} imported, {1} already up to date{2}."
+msgstr ""
+
 #. js-lingui-id: g9mDO3
 #: src/utils/format/getOrdinalNumber.ts
 msgid "{num, selectordinal, one {{num}st} two {{num}nd} few {{num}rd} other {{num}th}}"
@@ -758,6 +783,11 @@ msgstr "{unitCount, plural, one {주} other {주}}"
 msgid "{unitCount, plural, one {Year} other {Years}}"
 msgstr "{unitCount, plural, one {년} other {년}}"
 
+#. js-lingui-id: DSD1of
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "{usedStr} of {quotaStr} leads used this period"
+msgstr ""
+
 #. js-lingui-id: YdwR4T
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCustomView.tsx
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownDefaultView.tsx
@@ -851,6 +881,11 @@ msgstr "0"
 #: src/modules/workflow/workflow-trigger/components/WorkflowEditTriggerCronForm.tsx
 msgid "0 */1 * * *"
 msgstr "0 */1 * * *"
+
+#. js-lingui-id: 3jxkNE
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "1 is most serious, 3 is least."
+msgstr ""
 
 #. js-lingui-id: 4pzLrc
 #: src/modules/settings/data-model/object-details/components/SettingsObjectRelationItemTableRow.tsx
@@ -1095,10 +1130,20 @@ msgstr "이 작업공간에 대해"
 msgid "About your app"
 msgstr "앱 정보"
 
+#. js-lingui-id: iFAZVR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "About your brand"
+msgstr ""
+
 #. js-lingui-id: nJJAYH
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
 msgid "Accepted and signed DPAs for this workspace, with their template version and date."
 msgstr "이 워크스페이스에 대해 수락 및 서명된 DPA와 해당 템플릿 버전 및 날짜입니다."
+
+#. js-lingui-id: Xcdlbt
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Access ends on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: pNW+Rt
 #: src/pages/settings/admin-panel/SettingsAdminNewAiProvider.tsx
@@ -1238,6 +1283,7 @@ msgstr "활성화 중..."
 
 #. js-lingui-id: F6pfE9
 #: src/modules/ai/constants/AgentChatThreadFilterStatusLabels.ts
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
 #: src/modules/object-core/workflows/constants/CoreWorkflowStatusFilterOptions.ts
 #: src/modules/object-core/workflows/versions/constants/CoreWorkflowVersionStatusTagProps.ts
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
@@ -1248,6 +1294,7 @@ msgstr "활성화 중..."
 #: src/pages/settings/applications/tabs/SettingsApplicationTimelineActivityTypeSettingsTab.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 #: src/pages/settings/profile/SettingsProfile.tsx
 msgid "Active"
 msgstr "활성"
@@ -1311,11 +1358,6 @@ msgstr "위치 추가"
 msgid "Add a meeting link"
 msgstr "회의 링크 추가"
 
-#. js-lingui-id: CZDwqQ
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Add a new company we're in touch with (e.g. name, website, industry). Details: "
-msgstr "연락 중인 새 회사를 추가하세요 (예: 이름, 웹사이트, 업종). 세부정보: "
-
 #. js-lingui-id: 5xxrhm
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Add a note"
@@ -1351,6 +1393,12 @@ msgstr "단계 추가"
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Add a step to this workflow that "
 msgstr "이 워크플로에 다음을 수행하는 단계 추가: "
+
+#. js-lingui-id: YQ9Rdn
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Add a teammate"
+msgstr ""
 
 #. js-lingui-id: KKfos4
 #: src/modules/workflow/workflow-diagram/workflow-nodes/components/WorkflowDiagramEmptyTriggerEditable.tsx
@@ -1463,6 +1511,11 @@ msgstr "사용자 지정 엔드포인트, 프라이빗 게이트웨이 또는 �
 #: src/modules/settings/admin-panel/ai/components/SettingsAdminAiProviderListCard.tsx
 msgid "Add Custom Provider"
 msgstr "사용자 지정 공급자 추가"
+
+#. js-lingui-id: cJbo96
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Add Desync as a Streamable HTTP extension in Goose."
+msgstr ""
 
 #. js-lingui-id: 094J9M
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -1679,40 +1732,45 @@ msgstr "SSO ID 공급자 추가"
 msgid "Add test input for evaluation (e.g., \"Find all customers in NY\")"
 msgstr ""
 
-#. js-lingui-id: FKGcEL
+#. js-lingui-id: YgJ55i
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server as a remote context server in Zed."
-msgstr "Zed에서 Twenty MCP 서버를 원격 컨텍스트 서버로 추가하세요."
+msgid "Add the Desync MCP server as a remote context server in Zed."
+msgstr ""
 
-#. js-lingui-id: iA2nHX
+#. js-lingui-id: M7GPN5
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server from Augment Code settings."
-msgstr "Augment Code 설정에서 Twenty MCP 서버를 추가하세요."
+msgid "Add the Desync MCP server from Augment Code settings."
+msgstr ""
 
-#. js-lingui-id: l+NzAk
+#. js-lingui-id: SBNhsw
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server from Raycast's MCP commands or settings."
-msgstr "Raycast의 MCP 명령 또는 설정에서 Twenty MCP 서버를 추가하세요."
+msgid "Add the Desync MCP server from Raycast's MCP commands or settings."
+msgstr ""
 
-#. js-lingui-id: j6G/yI
+#. js-lingui-id: UmFYbe
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server in Gemini CLI settings."
-msgstr "Gemini CLI 설정에서 Twenty MCP 서버를 추가하세요."
+msgid "Add the Desync MCP server in Gemini CLI settings."
+msgstr ""
 
-#. js-lingui-id: /OyhlM
+#. js-lingui-id: Z8sy5Z
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server to your LibreChat configuration file."
-msgstr "LibreChat 구성 파일에 Twenty MCP 서버를 추가하세요."
+msgid "Add the Desync MCP server to your LibreChat configuration file."
+msgstr ""
 
-#. js-lingui-id: K0DXoj
+#. js-lingui-id: ghQ5RI
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty remote server with LM Studio's install link."
-msgstr "LM Studio의 설치 링크로 Twenty 원격 서버를 추가하세요."
+msgid "Add the Desync remote server with LM Studio's install link."
+msgstr ""
 
-#. js-lingui-id: BTFMKE
+#. js-lingui-id: ppkvcg
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Add the people you email with — your saved Google contacts plus the \"other contacts\" Google collects automatically — to your People list."
+msgstr ""
+
+#. js-lingui-id: kNrza3
 #: src/pages/settings/communications/SettingsWorkspaceCommunicationGroupChannelDetail.tsx
-msgid "Add these records at your DNS provider. Twenty checks them automatically."
-msgstr "DNS 제공업체에 이 레코드를 추가하세요. Twenty가 자동으로 확인합니다."
+msgid "Add these records at your DNS provider. Desync checks them automatically."
+msgstr ""
 
 #. js-lingui-id: 5+ttxv
 #: src/modules/settings/accounts/components/SettingsAccountsBlocklistInput.tsx
@@ -1728,11 +1786,6 @@ msgstr "즐겨찾기에 추가"
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 msgid "Add topic"
 msgstr "주제 추가"
-
-#. js-lingui-id: 4D/zWv
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add Twenty as a Streamable HTTP extension in Goose."
-msgstr "Goose에서 Twenty를 Streamable HTTP 확장으로 추가하세요."
 
 #. js-lingui-id: XnwceV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationRedirectURIsInput.tsx
@@ -1889,7 +1942,6 @@ msgid "Administrators"
 msgstr "관리자"
 
 #. js-lingui-id: sxkWRg
-#: src/modules/ai/components/AiModelPicker.tsx
 #: src/modules/navigation/components/SettingsNavigationDrawerContent.tsx
 #: src/modules/settings/components/SettingsMorphRelationMultiSelect.tsx
 #: src/modules/ui/input/components/AdvancedSettingsSwitch.tsx
@@ -1910,6 +1962,11 @@ msgstr "고급 필터"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionEmailBase.tsx
 msgid "Advanced options"
 msgstr "고급 옵션"
+
+#. js-lingui-id: jCxxQi
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Advertisement image"
+msgstr ""
 
 #. js-lingui-id: 1Cox/a
 #: src/localization/hooks/useLocaleOptions.ts
@@ -2000,7 +2057,6 @@ msgid "Aggregate Chart"
 msgstr ""
 
 #. js-lingui-id: jsQZMk
-#: src/modules/navigation/hooks/useNavigationDrawerModes.ts
 #: src/modules/settings/admin-panel/hooks/useSettingsAdminTabs.ts
 #: src/modules/settings/billing/constants/UsageLimitResourceTypeLabels.ts
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -2027,6 +2083,11 @@ msgstr "AI"
 msgid "AI & Automations"
 msgstr "AI 및 자동화"
 
+#. js-lingui-id: MnmJG1
+#: src/modules/navigation/hooks/useNavigationDrawerModes.ts
+msgid "AI Agent"
+msgstr ""
+
 #. js-lingui-id: oI7HO0
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowRunStepLogsAiAgentDetail.tsx
 msgid "AI agent run"
@@ -2036,6 +2097,11 @@ msgstr "AI 에이전트 실행"
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
 msgid "AI agents"
 msgstr "AI 에이전트"
+
+#. js-lingui-id: eaVev5
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "AI budget used"
+msgstr ""
 
 #. js-lingui-id: n2fhCy
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
@@ -2073,6 +2139,11 @@ msgstr "AI 요청 준비"
 #: src/modules/settings/logic-functions/components/triggers/SettingsLogicFunctionToolTriggerSection.tsx
 msgid "AI tool"
 msgstr "AI 도구"
+
+#. js-lingui-id: i1RFI2
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "AI usage"
+msgstr ""
 
 #. js-lingui-id: tzhisR
 #: src/pages/settings/ai/components/SettingsAiUsageTab.tsx
@@ -2135,10 +2206,20 @@ msgstr "AI 사용 한도에 도달했습니다. 관리자가 플랜을 업그레
 msgid "AI usage limit reached. Contact support to upgrade."
 msgstr "AI 사용 한도에 도달했습니다. 업그레이드하려면 지원팀에 문의하세요."
 
+#. js-lingui-id: P3UoHx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "AI usage: {aiPct}% — ${aiUsedDollars} of ${aiQuotaDollars} this period"
+msgstr ""
+
 #. js-lingui-id: KLyZ6L
 #: src/pages/settings/ai/SettingsAiUsageUserDetail.tsx
 msgid "AI User Usage"
 msgstr "사용자의 AI 사용량"
+
+#. js-lingui-id: AOCP2j
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "AI voice"
+msgstr ""
 
 #. js-lingui-id: TLbVxH
 #: src/modules/settings/usage/constants/UsageOperationTypeLabels.ts
@@ -2590,6 +2671,12 @@ msgstr "및"
 msgid "Annual"
 msgstr "연간"
 
+#. js-lingui-id: QyHYOr
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Annual (save 10%)"
+msgstr ""
+
 #. js-lingui-id: GqCA/t
 #: src/modules/settings/admin-panel/components/SettingsAdminChatAskQuestionsPart.tsx
 msgid "Answered"
@@ -2642,6 +2729,7 @@ msgstr "API 호출"
 #. js-lingui-id: iq3W+B
 #: src/modules/settings/billing/constants/UsageLimitSpenderGroups.ts
 #: src/modules/settings/billing/constants/UsageLimitSpenderTypeLabels.ts
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "API key"
 msgstr "API 키"
 
@@ -2981,6 +3069,11 @@ msgstr "확실합니까? 현재 정보는 저장되지 않습니다."
 msgid "Armenian"
 msgstr "아르메니아어"
 
+#. js-lingui-id: 1kbfBv
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "As a workspace admin you can pay for a teammate’s plan (charged to your card) and invite them. Each seat is its own subscription you can cancel anytime."
+msgstr ""
+
 #. js-lingui-id: cybVUo
 #: src/modules/settings/members/components/MemberInfosTab.tsx
 msgid "As it will be displayed in the workspace"
@@ -3087,8 +3180,15 @@ msgid "Assignment"
 msgstr "할당"
 
 #. js-lingui-id: d/bvvp
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/ai/SettingsAgentTurnDetail.tsx
 msgid "Assistant"
+msgstr ""
+
+#. js-lingui-id: +BYU/g
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Assistant error: {0}"
 msgstr ""
 
 #. js-lingui-id: 4H6WHS
@@ -3131,6 +3231,16 @@ msgstr "한눈에 보기"
 #: src/modules/workflow/workflow-steps/workflow-actions/delay-actions/components/WorkflowEditActionDelay.tsx
 msgid "At a specific date or time"
 msgstr "특정 날짜나 시간에"
+
+#. js-lingui-id: ByxKBF
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "At least 500x500, up to 1MB. JPG or non-transparent PNG."
+msgstr ""
+
+#. js-lingui-id: YFUztS
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "At least 500x500, up to 1MB. JPG or transparent PNG."
+msgstr ""
 
 #. js-lingui-id: H8QGSx
 #: src/modules/auth/sign-in-up/components/internal/SignInUpPasswordField.tsx
@@ -3183,9 +3293,15 @@ msgid "Attendees"
 msgstr "참석자"
 
 #. js-lingui-id: /rTz0M
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Audio"
 msgstr "오디오"
+
+#. js-lingui-id: sSZSHW
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Audio (20 to 30 seconds)"
+msgstr ""
 
 #. js-lingui-id: y2W2Hg
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
@@ -3289,12 +3405,6 @@ msgstr ""
 msgid "Auto-upgrade"
 msgstr "자동 업그레이드"
 
-#. js-lingui-id: Dnn2XG
-#: src/modules/ai/components/AiModelPicker.tsx
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Automatic"
-msgstr "자동"
-
 #. js-lingui-id: YRT7ZW
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarChannelDetails.tsx
 msgid "Automatically create contacts for people you've participated in an event with."
@@ -3314,11 +3424,6 @@ msgstr "이메일을 받거나 보낼 때 사람 레코드를 자동으로 생�
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationGeneralSwitches.tsx
 msgid "Automatically install this app on every newly created workspace"
 msgstr "새로 생성된 모든 워크스페이스에 이 앱을 자동으로 설치"
-
-#. js-lingui-id: MHsVk5
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "Automatically selected by Twenty for this mode."
-msgstr "이 모드에서는 Twenty가 자동으로 선택합니다."
 
 #. js-lingui-id: XFGV21
 #: src/pages/settings/applications/tabs/SettingsApplicationGeneralSection.tsx
@@ -3356,6 +3461,7 @@ msgstr "축 이름"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification.tsx
 #: src/modules/side-panel/components/SidePanelBackButton.tsx
 #: src/modules/spreadsheet-import/components/StepNavigationButton.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/onboarding/BookCall.tsx
 msgid "Back"
 msgstr "뒤로"
@@ -3473,8 +3579,14 @@ msgstr "{start}분에서 {end}분 사이에"
 msgid "between the {startOrdinal} and {endOrdinal} of the month"
 msgstr "매달의 {startOrdinal}일에서 {endOrdinal}일까지"
 
+#. js-lingui-id: K9cTJe
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Billed annually"
+msgstr ""
+
 #. js-lingui-id: aIkeAd
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Billed monthly"
 msgstr "월별 청구"
 
@@ -3512,6 +3624,12 @@ msgstr "청구 내역"
 msgid "Billing interval"
 msgstr "청구 주기"
 
+#. js-lingui-id: 4CApuf
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Billing isn’t configured on this environment."
+msgstr ""
+
 #. js-lingui-id: 8tzR0k
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
 #: src/modules/settings/billing/constants/UsageLimitPeriodNameLabels.ts
@@ -3519,10 +3637,10 @@ msgstr "청구 주기"
 msgid "Billing period"
 msgstr "청구 기간"
 
-#. js-lingui-id: xF/NXI
+#. js-lingui-id: JKKVdf
 #: src/modules/settings/billing/hooks/useBillingPortalSession.ts
-msgid "Billing portal session error. Please retry or contact Twenty team"
-msgstr "결제 포털 세션 오류입니다. 다시 시도하거나 Twenty 팀에 문의하세요"
+msgid "Billing portal session error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: 8kIU+G
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
@@ -3567,6 +3685,16 @@ msgstr "본문 입력"
 msgid "Book a 30-minute call and we'll help you get your workspace production-ready."
 msgstr "30분 상담 전화를 예약하시면 워크스페이스를 프로덕션 준비 상태로 만드는 데 도움을 드리겠습니다."
 
+#. js-lingui-id: fxbNMG
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Book a 30-minute call with Mark or Jackson."
+msgstr ""
+
+#. js-lingui-id: MkvsWx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Book a call"
+msgstr ""
+
 #. js-lingui-id: 2yl5lQ
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
 msgid "Book a Call"
@@ -3598,6 +3726,16 @@ msgstr "두 가지 모두"
 #: src/modules/settings/unsubscribers/utils/getMessageSuppressionReasonBadge.ts
 msgid "Bounce"
 msgstr "반송됨"
+
+#. js-lingui-id: peaanf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Brand"
+msgstr ""
+
+#. js-lingui-id: 7C7tMy
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Brand name"
+msgstr ""
 
 #. js-lingui-id: 1hGdwj
 #: src/pages/settings/ai/components/SettingsAiUsageTab.tsx
@@ -3645,6 +3783,11 @@ msgstr "파트너 둘러보기"
 msgid "BTREE (default, good for sorting and equality)"
 msgstr "BTREE (기본값, 정렬과 동등 비교에 적합)"
 
+#. js-lingui-id: vXemf6
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Bug"
+msgstr ""
+
 #. js-lingui-id: pN5hZf
 #: src/pages/settings/applications/tabs/SettingsApplicationFrontComponentSettingsTab.tsx
 msgid "Build and runtime metadata for this component"
@@ -3659,6 +3802,11 @@ msgstr "빌드 체크섬"
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "Build many-to-many relations"
 msgstr "다대다 관계 만들기"
+
+#. js-lingui-id: 1JcBEO
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Build my CRM"
+msgstr ""
 
 #. js-lingui-id: uvoIrk
 #: src/pages/settings/admin-panel/SettingsAdminAiProviderDetail.tsx
@@ -3706,16 +3854,33 @@ msgstr "버튼"
 msgid "Button"
 msgstr "버튼"
 
+#. js-lingui-id: bvat20
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy & invite"
+msgstr ""
+
+#. js-lingui-id: 1kxw0W
+#. placeholder {0}: target.email
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy a seat for {0}"
+msgstr ""
+
+#. js-lingui-id: NXZz0n
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy seat"
+msgstr ""
+
 #. js-lingui-id: 8ds4Hj
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 #: src/pages/settings/applications/components/SettingsAvailableApplicationCard.tsx
 msgid "by {author}"
 msgstr "제작: {author}"
 
-#. js-lingui-id: 8Pfllj
+#. js-lingui-id: 3Rof1A
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
-msgid "By using Twenty, you agree to the"
-msgstr "Twenty를 사용함으로써 귀하는 다음에 동의합니다"
+msgid "By using Desync, you agree to the"
+msgstr ""
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3892,6 +4057,11 @@ msgstr "이 레코드에서는 통화 녹음을 사용할 수 없습니다."
 msgid "Call-to-action button"
 msgstr "행동 유도 버튼"
 
+#. js-lingui-id: wt+Dd/
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Call-to-action button URL (https://...)"
+msgstr ""
+
 #. js-lingui-id: qIlodj
 #: src/modules/object-record/record-field/ui/form-types/components/FormPhoneFieldInput.tsx
 msgid "Calling Code"
@@ -3927,8 +4097,15 @@ msgstr "표준 객체에 대한 API 이름을 변경할 수 없습니다."
 msgid "Can't scan? Copy the"
 msgstr "스캔이 불가능합니까?"
 
+#. js-lingui-id: d8/6/v
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "cancel"
+msgstr ""
+
 #. js-lingui-id: dEgA5A
 #: src/modules/applications/components/AuthorizeActionButtons.tsx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/object-record/record-update-multiple/components/UpdateMultipleRecordsFooter.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
 #: src/modules/settings/billing/components/AddCreditCardModal.tsx
@@ -3936,6 +4113,8 @@ msgstr "스캔이 불가능합니까?"
 #: src/modules/settings/billing/components/UpdatePaymentMethodModal.tsx
 #: src/modules/settings/components/SaveAndCancelButtons/CancelButton.tsx
 #: src/modules/settings/components/SaveAndCancelButtons/CancelButton.tsx
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/modules/spreadsheet-import/provider/components/SpreadsheetImport.tsx
 #: src/modules/spreadsheet-import/steps/components/ImportDataStep.tsx
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/MatchColumnsStep.tsx
@@ -3945,6 +4124,8 @@ msgstr "스캔이 불가능합니까?"
 #: src/modules/ui/feedback/toast/utils/getLocalizedToastProps.ts
 #: src/modules/ui/layout/modal/components/ConfirmationModal.tsx
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Cancel"
 msgstr "취소"
 
@@ -3974,6 +4155,11 @@ msgstr "간격 전환 취소"
 msgid "Cancel interval switching?"
 msgstr "간격 전환을 취소하시겠습니까?"
 
+#. js-lingui-id: Bu+BBn
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancel plan"
+msgstr ""
+
 #. js-lingui-id: rRK/Lf
 #: src/modules/settings/billing/components/SettingsBillingContent.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -3994,6 +4180,24 @@ msgstr "플랜 전환을 취소하시겠습니까?"
 #: src/modules/page-layout/widgets/email-thread/components/EmailThreadComposer.tsx
 msgid "Cancel reply"
 msgstr "회신 취소"
+
+#. js-lingui-id: XCBaVZ
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Cancel seat"
+msgstr ""
+
+#. js-lingui-id: fHXMPy
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancel subscription"
+msgstr ""
+
+#. js-lingui-id: BqbtvX
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Cancel this seat?"
+msgstr ""
 
 #. js-lingui-id: N6gPiD
 #: src/modules/settings/billing/components/SettingsBillingContent.tsx
@@ -4017,6 +4221,11 @@ msgstr ""
 msgid "Cancelling"
 msgstr "취소 중"
 
+#. js-lingui-id: LP3MyV
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Cancels {dateStr}"
+msgstr ""
+
 #. js-lingui-id: zbbpgB
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 msgid "Cancels at"
@@ -4031,6 +4240,17 @@ msgstr ""
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Cancels on"
 msgstr "취소 예정일"
+
+#. js-lingui-id: Gnfo4D
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "cancels soon"
+msgstr ""
+
+#. js-lingui-id: TaH0sM
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancels soon"
+msgstr ""
 
 #. js-lingui-id: XDbjjW
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCustomView.tsx
@@ -4064,6 +4284,7 @@ msgid "Captcha (anti-bot check) is still loading, try again"
 msgstr "Captcha (봇 방지 검사)가 여전히 로딩 중입니다. 다시 시도하세요"
 
 #. js-lingui-id: kryGs+
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/side-panel/pages/page-layout/components/dropdown-content/FieldWidgetLayoutDropdownContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/record-page/SidePanelRecordPageFieldSettings.tsx
 msgid "Card"
@@ -4084,6 +4305,17 @@ msgstr "카탈로니아어"
 #: src/pages/settings/applications/components/SettingsClaimApplicationSection.tsx
 msgid "Catalog sync started. Try your lookup again in a moment."
 msgstr "카탈로그 동기화를 시작했습니다. 잠시 후 다시 조회해 보세요."
+
+#. js-lingui-id: NUrY9o
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Categories"
+msgstr ""
+
+#. js-lingui-id: zrDM9A
+#. placeholder {0}: categories.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Categories ({0}/{MAX_CATEGORIES})"
+msgstr ""
 
 #. js-lingui-id: RpYfjZ
 #: src/modules/activities/emails/components/EmailComposerFields.tsx
@@ -4133,6 +4365,11 @@ msgstr "비밀번호 변경"
 #: src/pages/auth/PasswordReset.tsx
 msgid "Change Password"
 msgstr "비밀번호 변경"
+
+#. js-lingui-id: Ts/A07
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Change payment method"
+msgstr ""
 
 #. js-lingui-id: EYSFEW
 #: src/modules/settings/domains/components/SettingsSubdomain.tsx
@@ -4255,11 +4492,17 @@ msgstr "이메일을 확인하세요"
 msgid "Check your inbox to verify your new email address."
 msgstr "새 이메일 주소를 확인하려면 받은 편지함을 확인하세요."
 
-#. js-lingui-id: SxwQE8
+#. js-lingui-id: RLe7Vk
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Checking…"
+msgstr ""
+
+#. js-lingui-id: yKu7Nn
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
-msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "결제 세션 오류입니다. 다시 시도하거나 Twenty 팀에 문의하십시오"
+msgid "Checkout session error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: SviKkE
 #: src/localization/hooks/useLocaleOptions.ts
@@ -4281,6 +4524,11 @@ msgstr "{intervalAdjective} 크레딧 선택"
 msgid "Choose a model mode"
 msgstr "모델 모드 선택"
 
+#. js-lingui-id: zMquA7
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Choose a plan"
+msgstr ""
+
 #. js-lingui-id: sHa2Dg
 #: src/modules/settings/billing/components/SettingsBillingLimitSpenderSelect.tsx
 msgid "Choose a spender"
@@ -4301,11 +4549,6 @@ msgstr "먼저 사용량을 선택하세요"
 msgid "Choose a Workspace"
 msgstr "작업공간을 선택하세요"
 
-#. js-lingui-id: KsP4Tg
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Choose automatically"
-msgstr "자동으로 선택"
-
 #. js-lingui-id: Qz73jD
 #: src/modules/settings/security/components/sso/SettingsSsoIdentitiesProvidersForm.tsx
 msgid "Choose between OIDC and SAML protocols"
@@ -4321,6 +4564,16 @@ msgstr "짧음과 긴 중에서 선택"
 msgid "Choose folders to sync"
 msgstr "동기화할 폴더를 선택하세요"
 
+#. js-lingui-id: RrLmIw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Choose image"
+msgstr ""
+
+#. js-lingui-id: o1dp6g
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Choose logo"
+msgstr ""
+
 #. js-lingui-id: 5EMoSo
 #: src/modules/settings/billing/components/internal/SettingsBillingPlansWithoutSubscription.tsx
 msgid "Choose plan"
@@ -4331,10 +4584,10 @@ msgstr "플랜 선택"
 msgid "Choose the default currency that will apply"
 msgstr "적용될 기본 통화 선택"
 
-#. js-lingui-id: KoXi44
+#. js-lingui-id: XnAuzq
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Choose the default modes for people and agents"
-msgstr "사람 및 에이전트의 기본 모드를 선택하세요"
+msgid "Choose the default mode for people and agents"
+msgstr ""
 
 #. js-lingui-id: LHce7q
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectSettings.tsx
@@ -4554,6 +4807,7 @@ msgstr "클립보드는 보안 연결(HTTPS)이 필요합니다. 복사 기능�
 #: src/modules/settings/applications/components/SettingsApplicationScreenshotLightbox.tsx
 #: src/modules/ui/feedback/toast/components/__tests__/AppToaster.test.tsx
 #: src/modules/ui/feedback/toast/utils/getLocalizedToastProps.ts
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Close"
 msgstr "닫기"
 
@@ -4567,6 +4821,11 @@ msgstr "배너 닫기"
 #: src/modules/blocknote-editor/components/BlockEditor.tsx
 msgid "Close menu"
 msgstr "메뉴 닫기"
+
+#. js-lingui-id: sUQBA7
+#: src/modules/settings/data-model/graph-overview/components/SettingsDataModelOverview.tsx
+msgid "Close overview"
+msgstr ""
 
 #. js-lingui-id: saip/v
 #: src/modules/side-panel/components/SidePanelCloseButton.tsx
@@ -4759,7 +5018,6 @@ msgstr "커뮤니케이션"
 
 #. js-lingui-id: chL5IG
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
 #: src/pages/settings/community/SettingsCommunity.tsx
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Community"
@@ -4940,6 +5198,16 @@ msgstr "IMAP 설정을 구성하여 이메일을 수신하고 동기화하세요
 msgid "Configure SMTP settings to send emails from your account."
 msgstr "이메일을 보내기 위해 SMTP 설정을 구성하십시오."
 
+#. js-lingui-id: NOBg69
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Configure the Desync MCP server manually in Cascade."
+msgstr ""
+
+#. js-lingui-id: QTjg6Y
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Configure the Desync MCP server manually in Cline."
+msgstr ""
+
 #. js-lingui-id: CcCy4C
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Configure the remote MCP server through Warp's agent settings."
@@ -4949,16 +5217,6 @@ msgstr "Warp의 에이전트 설정에서 원격 MCP 서버를 구성하세요."
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Configure the remote server in Amazon Q Developer's MCP settings."
 msgstr "Amazon Q Developer의 MCP 설정에서 원격 서버를 구성하세요."
-
-#. js-lingui-id: g1/8jH
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Configure the Twenty MCP server manually in Cascade."
-msgstr "Cascade에서 Twenty MCP 서버를 수동으로 구성하세요."
-
-#. js-lingui-id: XiyvRh
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Configure the Twenty MCP server manually in Cline."
-msgstr "Cline에서 Twenty MCP 서버를 수동으로 구성하세요."
 
 #. js-lingui-id: qA9AGQ
 #: src/modules/settings/domains/components/SettingsDomainRecords.tsx
@@ -5052,10 +5310,22 @@ msgstr "수신 설정을 확인하세요:"
 msgid "Confirming your payment"
 msgstr "결제를 확인하는 중"
 
+#. js-lingui-id: iSLIjg
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect"
+msgstr ""
+
 #. js-lingui-id: LOM1MR
 #: src/pages/auth/Authorize.tsx
 msgid "Connect {appName} to your account"
 msgstr "{appName}을(를) 계정에 연결"
+
+#. js-lingui-id: UA993i
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect {name}"
+msgstr ""
 
 #. js-lingui-id: bFJIPh
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -5067,6 +5337,11 @@ msgstr "캘린더 계정 연결"
 msgid "Connect a new account to your workspace"
 msgstr "새 계정을 워크스페이스에 연결"
 
+#. js-lingui-id: SKFp0I
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply."
+msgstr ""
+
 #. js-lingui-id: CMrq4R
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Connect additional MCP clients using install links or client docs."
@@ -5077,6 +5352,11 @@ msgstr "설치 링크 또는 클라이언트 문서를 사용해 MCP 클라이�
 msgid "Connect AI assistants like Claude or Cursor to your workspace via the Model Context Protocol"
 msgstr "Model Context Protocol을 통해 Claude나 Cursor와 같은 AI 어시스턴트를 워크스페이스에 연결하세요"
 
+#. js-lingui-id: 7OVsRI
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Connect Google"
+msgstr ""
+
 #. js-lingui-id: TA7R1S
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 msgid "Connect Google, Microsoft or CalDAV and enable calendar sync before creating an event."
@@ -5086,6 +5366,11 @@ msgstr "이벤트를 만들기 전에 Google, Microsoft 또는 CalDAV를 연결�
 #: src/modules/settings/accounts/components/SettingsAccountsListEmptyStateCard.tsx
 msgid "Connect via IMAP/SMTP"
 msgstr "IMAP/SMTP로 연결"
+
+#. js-lingui-id: H+M0h7
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Connect where your leads live"
+msgstr ""
 
 #. js-lingui-id: Zgi9Fd
 #: src/modules/settings/accounts/components/SettingsAccountsListEmptyStateCard.tsx
@@ -5102,9 +5387,20 @@ msgstr "Microsoft와 연결"
 msgid "Connect your email and calendar to see your entire network instantly. Takes only 30 seconds."
 msgstr "이메일과 캘린더를 연결하여 전체 네트워크를 즉시 확인하세요. 30초면 충분합니다."
 
+#. js-lingui-id: NJKXTa
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Connect your Google account to add the people you email with to your People list."
+msgstr ""
+
+#. js-lingui-id: HPbRf3
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect your tools and AI agents to your CRM."
+msgstr ""
+
 #. js-lingui-id: QHcLEN
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/tabs/SettingsApplicationConnectionsSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Connected"
 msgstr "연결됨"
 
@@ -5160,6 +5456,11 @@ msgstr ""
 msgid "Consider adding a filter to display more data."
 msgstr ""
 
+#. js-lingui-id: jfC/xh
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact"
+msgstr ""
+
 #. js-lingui-id: AOwjMZ
 #: src/modules/settings/billing/hooks/useBillingPlanActions.ts
 msgid "Contact admin"
@@ -5170,6 +5471,16 @@ msgstr "관리자에게 문의"
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
 msgid "Contact auto-creation"
 msgstr "연락처 자동 생성"
+
+#. js-lingui-id: i3p844
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact email"
+msgstr ""
+
+#. js-lingui-id: /B41w4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact full name"
+msgstr ""
 
 #. js-lingui-id: cByGGA
 #: src/modules/information-banner/components/billing/InformationBannerEndTrialPeriod.tsx
@@ -5328,6 +5639,11 @@ msgstr "클립보드에 복사되었습니다"
 msgid "Copy"
 msgstr "복사"
 
+#. js-lingui-id: C03pZD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Copy & links"
+msgstr ""
+
 #. js-lingui-id: 6gAr5+
 #: src/modules/page-layout/widgets/call-recording-transcript/components/WidgetActionCallRecordingTranscript.tsx
 msgid "Copy audio download link"
@@ -5478,6 +5794,11 @@ msgstr "100만 토큰당 비용(USD)"
 msgid "Cost per million tokens for cached input (USD)"
 msgstr "캐시된 입력에 대한 100만 토큰당 비용(USD)"
 
+#. js-lingui-id: Phb3rR
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Could not buy the seat."
+msgstr ""
+
 #. js-lingui-id: T8ACay
 #: src/pages/settings/applications/components/SettingsClaimApplicationSection.tsx
 msgid "Could not claim this application"
@@ -5503,6 +5824,11 @@ msgstr "문서를 다운로드할 수 없습니다."
 msgid "Could not generate the signed DPA. Please try again."
 msgstr "서명된 DPA를 생성할 수 없습니다. 다시 시도하세요."
 
+#. js-lingui-id: eOmcN6
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Could not import your Google contacts. Please try again."
+msgstr ""
+
 #. js-lingui-id: FR0Fbp
 #: src/modules/object-core/workflows/versions/components/SidePanelCoreWorkflowVersionsPage.tsx
 msgid "Could not load versions."
@@ -5522,6 +5848,21 @@ msgstr "Stripe를 열 수 없습니다. 지원팀에 문의하세요."
 #: src/modules/settings/mcp-and-apis/hooks/useOpenPlayground.ts
 msgid "Could not open the API playground"
 msgstr "API 플레이그라운드를 열 수 없습니다"
+
+#. js-lingui-id: pjCYgw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not process the recording."
+msgstr ""
+
+#. js-lingui-id: 6wgdTI
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not read that audio file."
+msgstr ""
+
+#. js-lingui-id: YbOI+l
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not read that image."
+msgstr ""
 
 #. js-lingui-id: w1HkE9
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -5569,6 +5910,16 @@ msgstr "조직 키를 전송할 수 없습니다. 지원팀에 문의하세요."
 msgid "Could not update the instance type"
 msgstr "인스턴스 유형을 업데이트할 수 없습니다"
 
+#. js-lingui-id: sJJv5P
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Could not upgrade the seat."
+msgstr ""
+
+#. js-lingui-id: 1o1eYE
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't access the microphone. Check this site's microphone permission."
+msgstr ""
+
 #. js-lingui-id: PiYvMl
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
@@ -5580,20 +5931,63 @@ msgstr "즐겨찾기에 추가하지 못했습니다"
 msgid "Couldn't check availability. Please try again."
 msgstr "가용성을 확인할 수 없습니다. 다시 시도하세요."
 
+#. js-lingui-id: mQ0ZQF
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't connect {name}: {0}"
+msgstr ""
+
 #. js-lingui-id: s8lFtq
 #: src/hooks/useCopyToClipboard.tsx
 msgid "Couldn't copy to clipboard"
 msgstr "클립보드에 복사할 수 없습니다"
+
+#. js-lingui-id: rlnqM+
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't disconnect {name}: {0}"
+msgstr ""
+
+#. js-lingui-id: 9OXGgm
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't generate voiceover: {0}"
+msgstr ""
 
 #. js-lingui-id: TU+LOV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationInstalledWorkspaces.tsx
 msgid "Couldn't load installed workspaces"
 msgstr "설치된 워크스페이스를 불러올 수 없습니다"
 
+#. js-lingui-id: Otslhr
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't play a sample: {0}"
+msgstr ""
+
 #. js-lingui-id: kjbTwZ
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
 msgid "Couldn't remove favorite"
 msgstr "즐겨찾기를 제거하지 못했습니다"
+
+#. js-lingui-id: CjWmm9
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't send: {0}"
+msgstr ""
+
+#. js-lingui-id: v5TABg
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't start {name} connection: {0}"
+msgstr ""
+
+#. js-lingui-id: e4RAJ8
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't submit: {0}"
+msgstr ""
 
 #. js-lingui-id: WSmI/y
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
@@ -5684,11 +6078,6 @@ msgstr ""
 msgid "Create a {0} to automate your work."
 msgstr "작업을 자동화할 {0}을(를) 만드세요."
 
-#. js-lingui-id: fQFALn
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Create a new contact and link them to a company. Details: "
-msgstr "새 연락처를 만들고 회사에 연결하세요. 세부정보: "
-
 #. js-lingui-id: j85EUk
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Create a new record in this view. Details: "
@@ -5696,7 +6085,6 @@ msgstr "이 보기에서 새 레코드 생성: "
 
 #. js-lingui-id: n1Nbbe
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
 msgid "Create a record"
 msgstr "레코드 생성"
 
@@ -5720,11 +6108,6 @@ msgstr "이 회사의 작업 생성: "
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Create a task for this record: "
 msgstr "이 레코드의 작업 생성: "
-
-#. js-lingui-id: Xn2Nlq
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Create a workflow"
-msgstr "워크플로 만들기"
 
 #. js-lingui-id: zNoOC2
 #: src/modules/object-record/record-table/empty-state/utils/getEmptyStateSubTitle.ts
@@ -5860,7 +6243,6 @@ msgid "Create workspace"
 msgstr "워크스페이스 만들기"
 
 #. js-lingui-id: kdLGki
-#: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/MultiWorkspaceDropdownDefaultComponents.tsx
 #: src/utils/title-utils.ts
 msgid "Create Workspace"
 msgstr "워크스페이스 만들기"
@@ -6079,6 +6461,11 @@ msgstr "CSV 가져오기 및 내보내기"
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
 msgid "cta"
 msgstr "cta"
+
+#. js-lingui-id: g2OLW6
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "CTA URL"
+msgstr ""
 
 #. js-lingui-id: J1QT+3
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
@@ -6755,8 +7142,11 @@ msgstr "삭제"
 #: src/modules/settings/data-model/objects/components/SettingsObjectInactiveMenuDropDown.tsx
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
+#: src/modules/settings/domains/components/SettingPublicDomain.tsx
 #: src/modules/settings/domains/components/SettingPublicDomainRowDropdownMenu.tsx
+#: src/modules/settings/domains/components/SettingsCustomDomain.tsx
 #: src/modules/settings/security/components/sso/SettingsSecuritySsoRowDropdownMenu.tsx
+#: src/modules/side-panel/pages/page-layout/components/record-table-settings/RecordTableSettingsSortsContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/RegularTabSettingsContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/SingleWidgetTabSettingsContent.tsx
 #: src/modules/views/view-picker/components/ViewPickerCreateButton.tsx
@@ -6764,6 +7154,9 @@ msgstr "삭제"
 #: src/modules/views/view-picker/components/ViewPickerOptionDropdown.tsx
 #: src/modules/workflow/workflow-steps/components/WorkflowStepFooter.tsx
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterOptionsDropdown.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/find-records-action/components/WorkflowFindRecordsSorts.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/KeyValuePairInput.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/KeyValuePairInput.tsx
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
 #: src/pages/settings/ai/components/SettingsAgentEvalsTab.tsx
 #: src/pages/settings/ai/components/SettingsAgentEvalsTab.tsx
@@ -7060,10 +7453,20 @@ msgstr "내림차순"
 msgid "Descending"
 msgstr "내림차순"
 
+#. js-lingui-id: EXihgB
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Describe the problem…"
+msgstr ""
+
 #. js-lingui-id: g+5exC
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowAiAgentPromptTab.tsx
 msgid "Describe what you want the AI to do..."
 msgstr "AI에 원하는 작업을 설명하세요..."
+
+#. js-lingui-id: KepWTT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Describe what you want to promote and the assistant will draft a 20 to 30 second script from your brand and website. Edit anything it gives you."
+msgstr ""
 
 #. js-lingui-id: Nu4oKW
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -7117,6 +7520,11 @@ msgstr "{objectLabelPlural} 파기"
 #: src/modules/settings/roles/role-permissions/objects-permissions/components/SettingsRolePermissionsObjectsSection.tsx
 msgid "Destroy Records on All Objects"
 msgstr "모든 객체의 기록 파기"
+
+#. js-lingui-id: 5vinRl
+#: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
+msgid "Desync fields"
+msgstr ""
 
 #. js-lingui-id: FOcBn3
 #: src/modules/object-record/record-field-list/record-detail-section/relation/components/RecordDetailRelationRecordsListItem.tsx
@@ -7219,6 +7627,7 @@ msgstr "버리기"
 #. js-lingui-id: +K0AvT
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Disconnect"
 msgstr "연결 해제"
 
@@ -7332,7 +7741,6 @@ msgid "Document"
 msgstr "문서"
 
 #. js-lingui-id: TvY/XA
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
 #: src/pages/settings/api-webhooks/SettingsApiWebhooks.tsx
 msgid "Documentation"
 msgstr "문서"
@@ -7558,6 +7966,11 @@ msgstr "예: 2.50"
 msgid "e.g. 3.75"
 msgstr "예: 3.75"
 
+#. js-lingui-id: ed0cQX
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "e.g. acme.com and 2 other companies, or paste a list of names"
+msgstr ""
+
 #. js-lingui-id: QVVmxi
 #: src/modules/settings/developers/components/ApiKeyNameInput.tsx
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeyDetail.tsx
@@ -7595,6 +8008,16 @@ msgstr "예: my-workspace"
 msgid "e.g. OpenAI EU"
 msgstr "예: OpenAI EU"
 
+#. js-lingui-id: kHJglt
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "e.g. Pipedrive, Zoho, Notion…"
+msgstr ""
+
+#. js-lingui-id: tNWYAT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "e.g. Promote our parish youth retreat in July"
+msgstr ""
+
 #. js-lingui-id: p5P8NB
 #: src/pages/settings/ai/components/SettingsAiOverviewTab.tsx
 msgid "E.g., \"We are a B2B SaaS company. Always use formal language...\""
@@ -7609,6 +8032,11 @@ msgstr "예: 요약, 상태, 수"
 #: src/pages/settings/data-model/new-index/SettingsObjectNewIndex.tsx
 msgid "Each index speeds up reads on the fields it covers, but slows down every insert and update, and uses disk space. Only add an index when you know which queries it serves."
 msgstr "각 인덱스는 포함된 필드의 읽기 속도를 높이지만, 모든 INSERT 및 UPDATE 작업을 느리게 하고 디스크 공간을 사용합니다. 어떤 쿼리에 사용될지 확실할 때만 인덱스를 추가하세요."
+
+#. js-lingui-id: 3caNlB
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Each seat is its own subscription on your card, cancel anytime. If they’re not on Desync yet, we’ll invite them and the seat activates when they join."
+msgstr ""
 
 #. js-lingui-id: 79hamt
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
@@ -7641,8 +8069,10 @@ msgstr "eddy@gmail.com, @apple.com"
 #: src/modules/object-record/record-field/ui/form-types/components/FormMultiSelectFieldInput.tsx
 #: src/modules/object-record/record-field/ui/meta-types/input/components/MultiItemFieldMenuItem.tsx
 #: src/modules/object-record/record-group/hooks/useRecordGroupActions.ts
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
 #: src/modules/settings/data-model/object-details/components/SettingsObjectFieldDisabledActionDropdown.tsx
 #: src/modules/settings/data-model/objects/components/SettingsObjectInactiveMenuDropDown.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRowOptionsDropdown.tsx
 #: src/modules/settings/roles/role-permissions/object-level-permissions/field-permissions/components/SettingsRolePermissionsObjectLevelObjectFieldPermissionTable.tsx
 #: src/modules/side-panel/hooks/useSidePanelMenu.ts
@@ -7677,6 +8107,11 @@ msgstr "데이터 구조 및 필드 편집"
 #: src/modules/side-panel/pages/email-block-settings/components/EmailBoxSidesInput.tsx
 msgid "Edit each side"
 msgstr "각 면 편집"
+
+#. js-lingui-id: 48e2R8
+#: src/modules/settings/profile/components/EmailField.tsx
+msgid "Edit email"
+msgstr ""
 
 #. js-lingui-id: 9QCQIc
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownHiddenRecordGroupsContent.tsx
@@ -7767,6 +8202,11 @@ msgstr "관계 편집"
 #: src/modules/settings/translations/components/SettingsTranslationsButton.tsx
 msgid "Edit translations"
 msgstr "번역 편집"
+
+#. js-lingui-id: 8TA4hU
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+msgid "Edit variable"
+msgstr ""
 
 #. js-lingui-id: eMFB6/
 #: src/modules/views/view-picker/components/ViewPickerContentEditMode.tsx
@@ -8567,10 +9007,10 @@ msgstr "간격 전환 취소 중 오류 발생."
 msgid "Error while cancelling plan switching."
 msgstr "플랜 전환 취소 중 오류 발생."
 
-#. js-lingui-id: QmR+2U
+#. js-lingui-id: Pd6rw+
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
-msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "시험 기간 종료 중 오류가 발생했습니다. Twenty 팀에 문의하세요."
+msgid "Error while ending trial period. Please contact Desync team."
+msgstr ""
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -8848,11 +9288,18 @@ msgid "Expiration Date"
 msgstr "만료일"
 
 #. js-lingui-id: M1RnFv
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 #: src/modules/settings/developers/utils/formatExpiration.ts
 #: src/pages/settings/members/tabs/SettingsWorkspaceMembersInviteTab.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Expired"
 msgstr "만료됨"
+
+#. js-lingui-id: Zx6GyO
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Expired on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: KnN1Tu
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
@@ -8921,16 +9368,6 @@ msgstr "표현식"
 #: src/modules/onboarding/components/upgrade-free-trial/OnboardingTrialExtensionTag.tsx
 msgid "Extended"
 msgstr "연장됨"
-
-#. js-lingui-id: 4NR4Ja
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Extra Fast"
-msgstr "매우 빠름"
-
-#. js-lingui-id: Y64TrM
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Extra Smart"
-msgstr "매우 스마트"
 
 #. js-lingui-id: 7Bj3x9
 #: src/modules/activities/calendar/components/CalendarEventCallRecorderAvatar.tsx
@@ -9405,6 +9842,11 @@ msgstr "기능"
 msgid "Features active until"
 msgstr "기능 활성 유지 기한"
 
+#. js-lingui-id: YirHq7
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Feedback"
+msgstr ""
+
 #. js-lingui-id: 2lOBKV
 #: src/modules/metadata-error-handler/hooks/useMetadataErrorHandler.ts
 msgid "field"
@@ -9664,6 +10106,31 @@ msgstr "필터링"
 msgid "Filters"
 msgstr "필터"
 
+#. js-lingui-id: BxSWR8
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find contacts at a company"
+msgstr ""
+
+#. js-lingui-id: eyqTxJ
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find leads"
+msgstr ""
+
+#. js-lingui-id: 41jxEH
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find marketing directors at mid-size ecommerce companies and add them to my CRM as contacts."
+msgstr ""
+
+#. js-lingui-id: kV/Gjb
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find me a list of SaaS companies in New York with 50-200 employees and add them to my CRM."
+msgstr ""
+
+#. js-lingui-id: eUmJ6S
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find the key people (name, title, email) at this company and add them to my CRM as contacts. Company: "
+msgstr ""
+
 #. js-lingui-id: YTaTdm
 #: src/modules/ai/constants/crud-tool-operation-verbs.constant.ts
 msgid "Finding {objectLabel}"
@@ -9684,16 +10151,6 @@ msgstr "완료"
 msgid "Finish editing the layout to expand chat"
 msgstr "채팅을 확장하려면 레이아웃 편집을 완료하세요"
 
-#. js-lingui-id: yJoako
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Finish editing the layout to open AI"
-msgstr "AI를 열려면 레이아웃 편집을 완료하세요"
-
-#. js-lingui-id: 6cOXRd
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Finish editing the layout to open Settings"
-msgstr "설정을 열려면 레이아웃 편집을 완료하세요"
-
 #. js-lingui-id: SNdnlf
 #: src/modules/spreadsheet-import/steps/components/ValidationStep/ValidationStep.tsx
 msgid "Finish flow with errors"
@@ -9708,6 +10165,26 @@ msgstr "설정 완료"
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "Finnish"
 msgstr "핀란드어"
+
+#. js-lingui-id: cm6GQ8
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads are available on paid plans (Starter and above). Referral accounts aren't eligible."
+msgstr ""
+
+#. js-lingui-id: fZyUK0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads are available on Starter and above. Upgrade your plan to launch one."
+msgstr ""
+
+#. js-lingui-id: t2yzYY
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads aren't available on your account yet."
+msgstr ""
+
+#. js-lingui-id: VUoz0i
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio is a Catholic podcast network"
+msgstr ""
 
 #. js-lingui-id: hy+Mfg
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -9880,6 +10357,11 @@ msgstr "넷째"
 msgid "Fourth"
 msgstr "넷째"
 
+#. js-lingui-id: 2POOFK
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Free"
+msgstr ""
+
 #. js-lingui-id: lm4S7P
 #: src/modules/onboarding/components/import-contacts/OnboardingCreditsRewardTag.tsx
 #: src/modules/onboarding/components/OnboardingHeader.tsx
@@ -10032,6 +10514,16 @@ msgstr "일반 - 설정"
 msgid "Generate"
 msgstr "생성"
 
+#. js-lingui-id: SQq4cO
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generate AI voiceover"
+msgstr ""
+
+#. js-lingui-id: YQbBvj
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generate an AI voiceover of your script, record one in your browser, or upload an MP3."
+msgstr ""
+
 #. js-lingui-id: H3rta9
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
@@ -10053,10 +10545,20 @@ msgstr "생성된 파일"
 msgid "Generates a Google Meet or Microsoft Teams link depending on the account."
 msgstr "계정에 따라 Google Meet 또는 Microsoft Teams 링크를 생성합니다."
 
+#. js-lingui-id: NOdFZR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generating..."
+msgstr ""
+
 #. js-lingui-id: DDcvSo
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "German"
 msgstr "독일어"
+
+#. js-lingui-id: hd59yv
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Get connection details"
+msgstr ""
 
 #. js-lingui-id: gRFvyL
 #: src/modules/onboarding/constants/OnboardingInstallableApps.ts
@@ -10084,6 +10586,11 @@ msgstr "조직 이용하기"
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Get Organization Key"
 msgstr "조직 키 받기"
+
+#. js-lingui-id: ZDIydz
+#: src/modules/navigation/components/DesyncGetStartedSection.tsx
+msgid "Get started"
+msgstr ""
 
 #. js-lingui-id: wwPywk
 #: src/pages/onboarding/InstallAppsContent.tsx
@@ -10116,7 +10623,6 @@ msgid "Go back"
 msgstr "뒤로 가기"
 
 #. js-lingui-id: y0SPQU
-#: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 #: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 msgid "Go to billing"
 msgstr "청구로 이동"
@@ -10408,6 +10914,17 @@ msgstr "헤드리스"
 msgid "Headless component"
 msgstr "헤드리스 구성 요소"
 
+#. js-lingui-id: +670Zw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Headline"
+msgstr ""
+
+#. js-lingui-id: f7ipCg
+#. placeholder {0}: headline.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Headline ({0}/{HEADLINE_MAX})"
+msgstr ""
+
 #. js-lingui-id: UPqS9C
 #: src/modules/settings/admin-panel/hooks/useSettingsAdminTabs.ts
 msgid "Health"
@@ -10423,6 +10940,11 @@ msgstr "마지막 인스턴스 명령어의 상태"
 msgid "Health Status"
 msgstr "건강 상태"
 
+#. js-lingui-id: cbo/E4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Hear a short sample before generating."
+msgstr ""
+
 #. js-lingui-id: 3oTCgM
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "Hebrew"
@@ -10432,6 +10954,11 @@ msgstr "히브리어"
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
 msgid "Help center"
 msgstr "도움말 센터"
+
+#. js-lingui-id: mOS4do
+#: src/modules/ai/components/suggested-prompts/AiChatSuggestedPrompts.tsx
+msgid "Hi 👋 I'm your Desync AI agent — what can I help you find?"
+msgstr ""
 
 #. js-lingui-id: D+zLDD
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownHiddenRecordGroupsContent.tsx
@@ -10506,10 +11033,10 @@ msgstr "시스템 인덱스 숨기기"
 msgid "High"
 msgstr "높음"
 
-#. js-lingui-id: 1ETc0T
+#. js-lingui-id: MWp8n+
 #: src/pages/settings/community/SettingsCommunity.tsx
-msgid "Hire a partner to help you implement and customize Twenty."
-msgstr "Twenty의 구현 및 맞춤 설정을 도와줄 파트너를 고용하세요."
+msgid "Hire a partner to help you implement and customize Desync."
+msgstr ""
 
 #. js-lingui-id: i0qMbr
 #: src/modules/navigation/hooks/useMobileNavigationBarItems.ts
@@ -10699,6 +11226,11 @@ msgstr "사람 입력"
 msgid "Hungarian"
 msgstr "헝가리어"
 
+#. js-lingui-id: QiiPm6
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "I've already subscribed — continue"
+msgstr ""
+
 #. js-lingui-id: VNC0Db
 #: src/modules/settings/admin-panel/ai/components/SettingsAdminAiProviderListCard.tsx
 msgid "IAM credentials"
@@ -10810,10 +11342,20 @@ msgstr "이미지"
 msgid "Image \"{fileName}\" exceeds {maxUploadSize}"
 msgstr "이미지 \"{fileName}\"이(가) {maxUploadSize}를 초과합니다"
 
+#. js-lingui-id: sYsiVD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "image set"
+msgstr ""
+
 #. js-lingui-id: VyUuZb
 #: src/modules/advanced-text-editor/components/AdvancedTextEditorInsertRail.tsx
 msgid "Image URL"
 msgstr "이미지 URL"
+
+#. js-lingui-id: an5hVd
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Images"
+msgstr ""
 
 #. js-lingui-id: ijW9MW
 #: src/modules/settings/accounts/components/SettingsAccountsConnectionForm.tsx
@@ -10900,10 +11442,20 @@ msgstr "가져오기"
 msgid "Import all emails"
 msgstr "모든 이메일 가져오기"
 
+#. js-lingui-id: RQkDtT
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Import contacts"
+msgstr ""
+
 #. js-lingui-id: 2CeOI3
 #: src/modules/settings/roles/role-permissions/permission-flags/hooks/useActionRolePermissionFlagConfig.ts
 msgid "Import CSV"
 msgstr "CSV 가져오기"
+
+#. js-lingui-id: gAxUg2
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Import from Google"
+msgstr ""
 
 #. js-lingui-id: D5QSQM
 #: src/modules/settings/accounts/components/SettingsAccountsMessageFolderCard.tsx
@@ -10919,6 +11471,17 @@ msgstr "JetBrains 설정에서 MCP 구성을 가져오거나 추가하세요."
 #: src/pages/onboarding/ImportContacts.tsx
 msgid "Import your contacts"
 msgstr "연락처 가져오기"
+
+#. js-lingui-id: qlsHAs
+#. placeholder {0}: c.created ?? 0
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Imported {0} so far…"
+msgstr ""
+
+#. js-lingui-id: bPOBi2
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Imported {imported} new people from Google ({found} contacts found)."
+msgstr ""
 
 #. js-lingui-id: wsKZ+v
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
@@ -11214,6 +11777,13 @@ msgstr "지침"
 msgid "Instructions Editor"
 msgstr "지침 편집기"
 
+#. js-lingui-id: nbfdhU
+#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Integrations"
+msgstr ""
+
 #. js-lingui-id: RGm66q
 #: src/utils/title-utils.ts
 msgid "Integrations - Settings"
@@ -11229,6 +11799,12 @@ msgstr "지능"
 #: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
 msgid "Interface"
 msgstr "인터페이스"
+
+#. js-lingui-id: wv1e0F
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Internal"
+msgstr ""
 
 #. js-lingui-id: a+PGuG
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
@@ -11403,6 +11979,11 @@ msgstr "사용자 초대"
 #: src/pages/onboarding/InviteTeam.tsx
 msgid "Invite your team"
 msgstr "팀 초대"
+
+#. js-lingui-id: js9NdT
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Invited (seat active when they join)"
+msgstr ""
 
 #. js-lingui-id: 2InwTp
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
@@ -11957,6 +12538,12 @@ msgstr "위도"
 msgid "Launch"
 msgstr "시작"
 
+#. js-lingui-id: KLsJEy
+#: src/modules/navigation/components/DesyncFioAdsSection.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Launch a Fio ad"
+msgstr ""
+
 #. js-lingui-id: 9BjbLR
 #: src/modules/side-panel/components/SidePanelWorkflowStepInfo.tsx
 msgid "Launch manually"
@@ -12005,11 +12592,31 @@ msgstr "레이아웃 모드: {0}"
 msgid "Layouts"
 msgstr "레이아웃"
 
+#. js-lingui-id: LhgWCf
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Leads"
+msgstr ""
+
+#. js-lingui-id: o7Mb1h
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Leads generated this cycle"
+msgstr ""
+
 #. js-lingui-id: zwWKhA
 #: src/modules/information-banner/components/maintenance/InformationBannerMaintenance.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowEditActionFormBuilder.tsx
 msgid "Learn more"
 msgstr "자세히 알아보기"
+
+#. js-lingui-id: NgeSlx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Learn More"
+msgstr ""
+
+#. js-lingui-id: zfagGa
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Learn More URL (https://...)"
+msgstr ""
 
 #. js-lingui-id: wYPbcI
 #: src/modules/ai/utils/tool-display/get-tool-display-message.ts
@@ -12098,6 +12705,11 @@ msgstr "이하"
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectOpenRecordInPicker.tsx
 msgid "Let each member decide for themselves"
 msgstr "각 구성원이 스스로 결정하도록 허용합니다"
+
+#. js-lingui-id: r5kwln
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Let the agent build your CRM"
+msgstr ""
 
 #. js-lingui-id: vhRvfF
 #: src/modules/advanced-text-editor/constants/getAdvancedTextEditorTypographySettings.ts
@@ -12419,6 +13031,7 @@ msgstr "스레드 로드 중"
 #: src/modules/settings/admin-panel/components/SettingsAdminVersionDisplay.tsx
 #: src/modules/settings/roles/role-assignment/components/SettingsRoleAssignmentEntityPickerDropdown.tsx
 #: src/modules/views/hooks/useComputeRecordRelationFilterDisplayValue.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Loading..."
 msgstr "로딩 중..."
 
@@ -12446,13 +13059,10 @@ msgstr "로케일"
 msgid "Location"
 msgstr "위치"
 
-#. js-lingui-id: B6ANJW
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Log a new deal (company, amount, stage, expected close). Details: "
-msgstr "새 거래를 기록하세요 (회사, 금액, 단계, 예상 종결일). 세부정보: "
-
 #. js-lingui-id: FgAxTj
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
 #: src/modules/auth/sign-in-up/components/WorkspaceSelectionFooter.tsx
+#: src/modules/navigation/components/NavigationDrawerLogoutButton.tsx
 #: src/modules/onboarding/components/upgrade-free-trial/ChooseYourPlanErrorState.tsx
 #: src/modules/settings/profile/devices/components/SettingsDeviceSessionRowDropdownMenu.tsx
 #: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/MultiWorkspaceDropdownDefaultComponents.tsx
@@ -12508,10 +13118,20 @@ msgstr "로직 함수"
 msgid "Login token missing. Two Factor Authentication setup can not be initiated."
 msgstr "로그인 토큰이 없습니다. 이중 인증 설정을 시작할 수 없습니다."
 
-#. js-lingui-id: nOhz3x
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
-msgid "Logout"
-msgstr "로그아웃"
+#. js-lingui-id: iG7KNr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Logo"
+msgstr ""
+
+#. js-lingui-id: ao3wWA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Logo / image"
+msgstr ""
+
+#. js-lingui-id: 42GEJY
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "logo set"
+msgstr ""
 
 #. js-lingui-id: w/bY7R
 #: src/modules/logic-functions/components/LogicFunctionLogs.tsx
@@ -12666,6 +13286,11 @@ msgstr "뷰 관리"
 msgid "Manage workflows"
 msgstr "워크플로우 관리"
 
+#. js-lingui-id: act4Md
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Manage your Desync subscription, billing cadence, and usage."
+msgstr ""
+
 #. js-lingui-id: FyFNsd
 #: src/pages/settings/accounts/SettingsAccounts.tsx
 msgid "Manage your internet accounts."
@@ -12689,11 +13314,6 @@ msgstr "수동"
 #: src/modules/settings/mcp-and-apis/components/SettingsMcpSetup.tsx
 msgid "Manual configuration"
 msgstr "수동 구성"
-
-#. js-lingui-id: ospBFm
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "Manually selected for this mode."
-msgstr "이 모드에 대해 수동으로 선택되었습니다."
 
 #. js-lingui-id: lkcAoj
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
@@ -12754,6 +13374,11 @@ msgstr "최대 출력은 양의 정수여야 합니다"
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
 msgid "Max range"
 msgstr "최대 범위"
+
+#. js-lingui-id: uT7ydO
+#: src/modules/ai/utils/getAiModelTierLabel.ts
+msgid "Max Thinking"
+msgstr ""
 
 #. js-lingui-id: DBiUDH
 #: src/modules/settings/data-model/fields/forms/components/SettingsDataModelFieldMaxValuesForm.tsx
@@ -12844,6 +13469,11 @@ msgstr "중간"
 #. js-lingui-id: IAcjOi
 #: src/modules/advanced-text-editor/extensions/slash-command/DefaultSlashCommands.ts
 msgid "Medium section heading"
+msgstr ""
+
+#. js-lingui-id: OvoEq7
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Member"
 msgstr ""
 
 #. js-lingui-id: Sma10A
@@ -13014,6 +13644,13 @@ msgstr "분"
 msgid "Minutes between triggers"
 msgstr "트리거 간의 분"
 
+#. js-lingui-id: 8DvOLm
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "missing"
+msgstr ""
+
 #. js-lingui-id: cOFpUq
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
 msgid "Missing calendar permission."
@@ -13040,8 +13677,17 @@ msgstr "모바일"
 msgid "Mode"
 msgstr "모드"
 
+#. js-lingui-id: HPec50
+#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
+msgid "Mode agents use when they run on their own"
+msgstr ""
+
+#. js-lingui-id: /1sxVR
+#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
+msgid "Mode used when you chat with Desync"
+msgstr ""
+
 #. js-lingui-id: scu3wk
-#: src/modules/ai/components/AiModelTierInformationButton.tsx
 #: src/modules/ai/components/AiModelTierSlider.tsx
 msgid "Model"
 msgstr "모델"
@@ -13058,11 +13704,6 @@ msgstr "모델 \"{0}\"이(가) 추가되었습니다"
 msgid "Model \"{0}\" removed"
 msgstr "모델 \"{0}\"이(가) 제거되었습니다"
 
-#. js-lingui-id: 8jgO3g
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Model agents use when they run on their own"
-msgstr "에이전트가 자체적으로 실행될 때 사용하는 모델"
-
 #. js-lingui-id: IzB3v0
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Model ID"
@@ -13077,11 +13718,6 @@ msgstr "모델 ID가 필요합니다"
 #: src/modules/ai/components/AiModelTierInformationButton.tsx
 msgid "Model information"
 msgstr "모델 정보"
-
-#. js-lingui-id: iaurWj
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Model used when you chat with Twenty"
-msgstr "Twenty와 채팅할 때 사용하는 모델"
 
 #. js-lingui-id: //nm2/
 #: src/pages/settings/admin-panel/SettingsAdminAiProviderDetail.tsx
@@ -13142,10 +13778,12 @@ msgid "monthly"
 msgstr "월간"
 
 #. js-lingui-id: +8Nek/
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
 #: src/modules/settings/billing/constants/UsageLimitPeriodNameLabels.ts
 #: src/modules/settings/enterprise/components/EnterprisePlanModal.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Monthly"
 msgstr "월간"
 
@@ -13271,6 +13909,22 @@ msgstr "메시지"
 msgid "Multiple answers"
 msgstr "다중 답변"
 
+#. js-lingui-id: /BEbOG
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be 1MB or smaller."
+msgstr ""
+
+#. js-lingui-id: SFjemy
+#. placeholder {0}: Math.round(duration)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be 20 to 30 seconds (this one is {0}s)."
+msgstr ""
+
+#. js-lingui-id: EcE0u/
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be a JPG or PNG."
+msgstr ""
+
 #. js-lingui-id: asWVA5
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
 msgid "must be a number"
@@ -13290,6 +13944,16 @@ msgstr "유효한 URL과 라벨이 포함된 객체 배열이어야 합니다 (�
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
 msgid "must be an array of valid emails"
 msgstr "유효한 이메일의 배열이어야 합니다"
+
+#. js-lingui-id: pGNPM0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be an MP3."
+msgstr ""
+
+#. js-lingui-id: Yy/yCI
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be at least 500x500 pixels."
+msgstr ""
 
 #. js-lingui-id: OJCJh9
 #: src/pages/settings/applications/tabs/SettingsApplicationsDeveloperTab.tsx
@@ -13419,11 +14083,6 @@ msgstr "내비게이션 메뉴 항목"
 #: src/pages/settings/applications/tabs/SettingsApplicationDetailContentTab.tsx
 msgid "Navigation menu items"
 msgstr "내비게이션 메뉴 항목"
-
-#. js-lingui-id: aTTshK
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Navigation modes"
-msgstr "내비게이션 모드"
 
 #. js-lingui-id: IbVc4A
 #: src/modules/page-layout/widgets/record-table/utils/getRecordTableWidgetLayoutPickerOptions.ts
@@ -13710,6 +14369,7 @@ msgstr "뉴스레터"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminQueueJobsTable.tsx
 #: src/modules/settings/billing/components/internal/SubscriptionInfoRowContainer.tsx
 #: src/modules/settings/components/SettingsPaginationControls.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/accounts/SettingsAccountsConfigurationStepEmail.tsx
 msgid "Next"
 msgstr "다음"
@@ -14234,10 +14894,10 @@ msgstr "사용 가능한 마이크가 없습니다. 마이크를 연결한 후 �
 msgid "No model available"
 msgstr "사용 가능한 모델 없음"
 
-#. js-lingui-id: xo340M
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "No model is available for this mode."
-msgstr "이 모드에 사용할 수 있는 모델이 없습니다."
+#. js-lingui-id: K6CQlq
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "No new people to import — your {found} Google contacts are already in the CRM."
+msgstr ""
 
 #. js-lingui-id: 9VrTfZ
 #: src/modules/activities/notes/components/NotesCardContent.tsx
@@ -14253,6 +14913,11 @@ msgstr "보기가 있는 개체를 찾을 수 없습니다"
 #: src/modules/ui/field/input/components/MultiSelectInput.tsx
 msgid "No option found"
 msgstr "옵션을 찾을 수 없음"
+
+#. js-lingui-id: IWf5/9
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "No other members in this workspace yet."
+msgstr ""
 
 #. js-lingui-id: XRc1G9
 #: src/modules/ai/components/TerminalOutput.tsx
@@ -14291,6 +14956,13 @@ msgstr "이 애플리케이션에 대해 구성된 권한이 없습니다."
 #: src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelSection.tsx
 msgid "No permissions have been set for individual objects."
 msgstr "개별 객체에 대한 권한이 설정되지 않았습니다."
+
+#. js-lingui-id: 9+qP8v
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "No plan"
+msgstr ""
 
 #. js-lingui-id: pRxlf6
 #: src/pages/settings/applications/utils/getClaimErrorContent.ts
@@ -14706,6 +15378,11 @@ msgstr "녹음되지 않음"
 msgid "Not Recorded"
 msgstr "녹음되지 않음"
 
+#. js-lingui-id: 85VBFF
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "not set"
+msgstr ""
+
 #. js-lingui-id: MTqQMG
 #: src/modules/settings/emailing-domains/utils/getVerificationRecordGroupStatusDisplay.ts
 #: src/pages/settings/applications/tabs/SettingsApplicationCommandMenuItemSettingsTab.tsx
@@ -14761,6 +15438,11 @@ msgstr "아직 전송된 내용이 없습니다. 캠페인이 초안으로 돌�
 #: src/pages/settings/applications/SettingsApplicationDetails.tsx
 msgid "Nothing to configure for this application"
 msgstr "이 애플리케이션에 대해 구성할 항목이 없습니다"
+
+#. js-lingui-id: hqYwbH
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Nothing to import for your account yet"
+msgstr ""
 
 #. js-lingui-id: DYCPYF
 #: src/modules/page-layout/widgets/components/StandaloneWidgetPlaceholder.tsx
@@ -15083,10 +15765,10 @@ msgstr "온보딩 보상"
 msgid "One or more filters reference deactivated or deleted fields and will be automatically removed on save."
 msgstr "하나 이상의 필터가 비활성화되었거나 삭제된 필드를 참조하고 있어, 저장 시 자동으로 제거됩니다."
 
-#. js-lingui-id: 1WZTTl
+#. js-lingui-id: w2yO3R
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
-msgid "One subscription provides one Organization key that powers one production instance and one potential staging or test instance. To run a staging or test environment, install Twenty on a second server, activate it with this same Organization key, then register that server as a development instance. Development instances unlock premium features without extra billing and do not count toward your production seats."
-msgstr "하나의 구독은 하나의 프로덕션 인스턴스와 하나의 스테이징 또는 테스트 인스턴스를 구동하는 조직 키 한 개를 제공합니다. 스테이징 또는 테스트 환경을 실행하려면 두 번째 서버에 Twenty를 설치하고, 동일한 조직 키로 활성화한 다음 해당 서버를 개발 인스턴스로 등록하세요. 개발 인스턴스는 추가 청구 없이 프리미엄 기능을 활성화하며 프로덕션 좌석 수에 포함되지 않습니다."
+msgid "One subscription provides one Organization key that powers one production instance and one potential staging or test instance. To run a staging or test environment, install Desync on a second server, activate it with this same Organization key, then register that server as a development instance. Development instances unlock premium features without extra billing and do not count toward your production seats."
+msgstr ""
 
 #. js-lingui-id: JEtonz
 #: src/modules/settings/event-logs/components/SettingsLogs.tsx
@@ -15152,6 +15834,11 @@ msgstr "{remainingDays}일과 {0}일에만"
 msgid "Only the subject is shared"
 msgstr "제목만 공유됩니다"
 
+#. js-lingui-id: VRnwi0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Only workspace admins can launch a Fio ad. Ask an admin on your workspace to set it up."
+msgstr ""
+
 #. js-lingui-id: P5aFS1
 #: src/modules/onboarding/components/import-contacts/OnboardingImportPrivacyNote.tsx
 msgid "Only you will be able to see your emails and events"
@@ -15169,6 +15856,11 @@ msgstr "열기"
 msgid "Open a maintained integration or prefill clients that accept MCP install links."
 msgstr "유지 관리되는 통합을 열거나 MCP 설치 링크를 허용하는 클라이언트를 미리 채우세요."
 
+#. js-lingui-id: JHmJS+
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Open a workspace first."
+msgstr ""
+
 #. js-lingui-id: 650kGT
 #: src/modules/side-panel/pages/email-block-settings/components/SidePanelEmailBlockSettingsPage.tsx
 msgid "Open an email editor to edit block settings."
@@ -15179,15 +15871,20 @@ msgstr "이메일 편집기를 열어 블록 설정을 편집하세요."
 msgid "Open as link"
 msgstr "링크로 열기"
 
-#. js-lingui-id: n0vVgf
+#. js-lingui-id: n7jeqv
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Claude with the Twenty connector name and MCP URL prefilled."
-msgstr "Twenty 커넥터 이름과 MCP URL이 미리 채워진 상태로 Claude를 여세요."
+msgid "Open Claude with the Desync connector name and MCP URL prefilled."
+msgstr ""
 
-#. js-lingui-id: +n2jpB
+#. js-lingui-id: khtqoR
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Cursor's MCP installer with the Twenty remote server config."
-msgstr "Twenty 원격 서버 구성이 미리 채워진 상태로 Cursor의 MCP 설치 프로그램을 여세요."
+msgid "Open Cursor's MCP installer with the Desync remote server config."
+msgstr ""
+
+#. js-lingui-id: 5y9E/B
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Open Desync's official ChatGPT integration for your workspace."
+msgstr ""
 
 #. js-lingui-id: pZZH4Q
 #: src/modules/auth/sign-in-up/components/EmailVerificationSent.tsx
@@ -15247,20 +15944,25 @@ msgstr "레코드를 다음에서 열기"
 msgid "Open records on a dedicated page"
 msgstr "전용 페이지에서 레코드를 열기"
 
-#. js-lingui-id: q170S2
+#. js-lingui-id: RLQ6Yx
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Replit with the Twenty remote server config."
-msgstr "Twenty 원격 서버 구성이 미리 채워진 상태로 Replit을 여세요."
+msgid "Open Replit with the Desync remote server config."
+msgstr ""
 
-#. js-lingui-id: sBd/cl
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Twenty's official ChatGPT integration for your workspace."
-msgstr "워크스페이스용 Twenty 공식 ChatGPT 통합을 여세요."
+#. js-lingui-id: bY2Xkv
+#: src/modules/sign-in-background-mock/components/BackgroundMockPage.tsx
+msgid "Open side panel"
+msgstr ""
 
 #. js-lingui-id: OV5wZZ
 #: src/modules/navigation-menu-item/display/sections/components/NavigationDrawerOpenedSection.tsx
 msgid "Opened"
 msgstr "열림"
+
+#. js-lingui-id: 9NJUeH
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you."
+msgstr ""
 
 #. js-lingui-id: Fzfj4N
 #: src/pages/settings/layout/SettingsLayoutViewDetail.tsx
@@ -15304,6 +16006,11 @@ msgstr "환경설정 페이지에서 수신자에게 표시되는 선택적 설�
 msgid "Optional secret used to compute the HMAC signature for webhook payloads"
 msgstr "Webhook 페이로드에 대한 HMAC 서명을 계산하는 데 사용되는 선택적 비밀"
 
+#. js-lingui-id: 7ousH3
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)"
+msgstr ""
+
 #. js-lingui-id: 0zpgxV
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdown.tsx
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
@@ -15321,6 +16028,11 @@ msgstr "옵션"
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterLogicalOperatorCell.tsx
 msgid "Or"
 msgstr "또는"
+
+#. js-lingui-id: Hs1qcH
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Or have the agent fill your CRM another way:"
+msgstr ""
 
 #. js-lingui-id: 4OE5Sf
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectFormOptionRow.tsx
@@ -15496,11 +16208,6 @@ msgstr "출력 토큰"
 msgid "Override Draft"
 msgstr "초안 덮어쓰기"
 
-#. js-lingui-id: RQCK56
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Overrides the mode above until you switch back to automatic"
-msgstr "자동으로 다시 전환할 때까지 위 모드를 재정의합니다"
-
 #. js-lingui-id: 6/dCYd
 #: src/pages/settings/ai/SettingsAI.tsx
 #: src/pages/settings/data-model/SettingsObjectOverview.tsx
@@ -15604,10 +16311,10 @@ msgstr "페이지 레이아웃"
 msgid "Page name"
 msgstr "페이지 이름"
 
-#. js-lingui-id: NRvxzv
+#. js-lingui-id: W5RzSu
 #: src/pages/not-found/NotFound.tsx
-msgid "Page Not Found | Twenty"
-msgstr "페이지를 찾을 수 없음 | Twenty"
+msgid "Page Not Found | Desync"
+msgstr ""
 
 #. js-lingui-id: oIhFvf
 #: src/modules/side-panel/pages/email-block-settings/components/EmailPageStyleSection.tsx
@@ -15682,6 +16389,16 @@ msgstr "호스팅된 이미지의 링크를 붙여넣으세요"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification.tsx
 msgid "Paste the code below"
 msgstr "아래 코드를 붙여넣기"
+
+#. js-lingui-id: 0dOXmH
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Paste the script, or add audio and we'll fill it in for you."
+msgstr ""
+
+#. js-lingui-id: tsiTqO
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Paste your API key"
+msgstr ""
 
 #. js-lingui-id: M01WeF
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -15902,6 +16619,11 @@ msgstr "하나 이상의 필드를 선택하세요. 선택한 순서가 인덱�
 msgid "Pick the index type. BTREE covers most queries; GIN is for full-text and JSONB."
 msgstr "인덱스 유형을 선택하세요. BTREE는 대부분의 쿼리를 처리하고, GIN은 전문 검색 및 JSONB에 사용됩니다."
 
+#. js-lingui-id: S07uak
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Pick up to 5 listening categories to target."
+msgstr ""
+
 #. js-lingui-id: N0+GsR
 #: src/modules/settings/members/components/MemberInfosTab.tsx
 #: src/pages/settings/general/SettingsGeneral.tsx
@@ -15914,11 +16636,6 @@ msgstr "사진"
 #: src/modules/side-panel/pages/page-layout/constants/GraphTypeInformation.ts
 msgid "Pie Chart"
 msgstr "파이 차트"
-
-#. js-lingui-id: 6U8nJN
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Pin a specific model"
-msgstr "특정 모델 고정"
 
 #. js-lingui-id: 3pU8e+
 #: src/modules/side-panel/pages/page-layout/utils/getTabSettingsPlacementItems.ts
@@ -15942,11 +16659,6 @@ msgstr "고정됨"
 msgid "Pinned tab, always shown on the left"
 msgstr "왼쪽에 항상 표시되는 고정된 탭"
 
-#. js-lingui-id: Iaw5/y
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Pinned to a specific model"
-msgstr "특정 모델로 고정됨"
-
 #. js-lingui-id: hx1ePY
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowFormFieldSettingsNumber.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowFormFieldSettingsText.tsx
@@ -15965,10 +16677,23 @@ msgid "Plain text paragraph"
 msgstr ""
 
 #. js-lingui-id: GdgCoi
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "Plan"
 msgstr "플랜"
+
+#. js-lingui-id: 6bnoVc
+#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Plan & Billing"
+msgstr ""
+
+#. js-lingui-id: jJWQWc
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Plan and usage"
+msgstr ""
 
 #. js-lingui-id: XduPHC
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
@@ -16172,6 +16897,11 @@ msgstr "미리 보기를 사용할 수 없음"
 msgid "Preview of the page recipients see when they unsubscribe"
 msgstr "수신자가 수신을 거부할 때 보게 되는 페이지 미리보기"
 
+#. js-lingui-id: ZuBYCT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Preview voice"
+msgstr ""
+
 #. js-lingui-id: DHhJ7s
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminQueueJobsTable.tsx
 #: src/modules/settings/components/SettingsPaginationControls.tsx
@@ -16278,6 +17008,11 @@ msgstr "녹음 처리 중"
 #: src/modules/workflow/components/WorkflowStepExecutionResult.tsx
 msgid "Processing..."
 msgstr "처리 중..."
+
+#. js-lingui-id: CRDrF5
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Processing…"
+msgstr ""
 
 #. js-lingui-id: vERlcd
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -16656,6 +17391,7 @@ msgstr "기록"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionDeleteRecord.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionUpdateRecord.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/utils/getActionHeaderTypeOrThrow.ts
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Record"
 msgstr "기록"
 
@@ -16744,10 +17480,25 @@ msgstr "녹음 중"
 msgid "Recording Failed"
 msgstr "녹음 실패"
 
+#. js-lingui-id: 12j3xf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording isn't supported in this browser. Upload an MP3 instead."
+msgstr ""
+
+#. js-lingui-id: dMS+la
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording must be at least 20 seconds (this one was {elapsed}s)."
+msgstr ""
+
 #. js-lingui-id: h9TBi+
 #: src/modules/page-layout/widgets/call-recording/utils/getCallRecordingStatusDisplayConfiguration.ts
 msgid "Recording Scheduled"
 msgstr "녹음 예약됨"
+
+#. js-lingui-id: Y3jApD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording, up to 30 seconds. Speak your ad, then press Stop."
+msgstr ""
 
 #. js-lingui-id: PWlTvh
 #: src/modules/navigation-menu-item/edit/side-panel/components/SidePanelNewSidebarItemSearchResults.tsx
@@ -17076,10 +17827,20 @@ msgstr "모든 언어에서 이름 바꾸기"
 msgid "Renewal date"
 msgstr "갱신 날짜"
 
+#. js-lingui-id: qYAz/O
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Renews {dateStr}"
+msgstr ""
+
 #. js-lingui-id: bha0Vl
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Renews on"
 msgstr "갱신일"
+
+#. js-lingui-id: neuNgB
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Renews on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: Ee8JBW
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowEditActionFormBuilder.tsx
@@ -17091,10 +17852,25 @@ msgstr "필드 재정렬"
 msgid "Reorder options"
 msgstr "옵션 재정렬"
 
+#. js-lingui-id: YOzD/a
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace image"
+msgstr ""
+
+#. js-lingui-id: ECPoNf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace logo"
+msgstr ""
+
 #. js-lingui-id: q8Id6J
 #: src/modules/side-panel/pages/page-layout/components/WidgetSettingsManageSection.tsx
 msgid "Replace widget"
 msgstr "위젯 교체"
+
+#. js-lingui-id: Vhkt8a
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace with MP3"
+msgstr ""
 
 #. js-lingui-id: N8UzTV
 #: src/modules/settings/admin-panel/chats/components/SettingsAdminChatsTable.tsx
@@ -17122,6 +17898,17 @@ msgstr "답장"
 msgid "Reply..."
 msgstr "답장..."
 
+#. js-lingui-id: cd5EXh
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Report a bug"
+msgstr ""
+
+#. js-lingui-id: hV3yAb
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Report a problem"
+msgstr ""
+
 #. js-lingui-id: Q3LOVJ
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 msgid "Report an issue"
@@ -17136,6 +17923,12 @@ msgstr "리포트"
 #: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/WorkflowRunStepLogsHttpRequestDetail.tsx
 msgid "Request"
 msgstr "요청"
+
+#. js-lingui-id: eBQF7D
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Request an integration"
+msgstr ""
 
 #. js-lingui-id: /laZGZ
 #: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/HttpRequestExecutionResult.tsx
@@ -17322,6 +18115,16 @@ msgstr "결과"
 msgid "Resume"
 msgstr "다시 시작"
 
+#. js-lingui-id: 1K1kvB
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Resume plan"
+msgstr ""
+
+#. js-lingui-id: wBRT4D
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Resuming…"
+msgstr ""
+
 #. js-lingui-id: 6gRgw8
 #: src/modules/ai/components/AiChatErrorMessage.tsx
 #: src/modules/page-layout/widgets/call-recording-transcript/components/CallRecordingAudioPlayer.tsx
@@ -17358,6 +18161,11 @@ msgstr "반환 값"
 #: src/modules/side-panel/pages/page-layout/utils/getSortLabelSuffixForFieldType.ts
 msgid "reverse alphabetical"
 msgstr "알파벳 역순"
+
+#. js-lingui-id: 5vWqqr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Review & submit"
+msgstr ""
 
 #. js-lingui-id: GXsAby
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantRowDropdownMenu.tsx
@@ -17541,6 +18349,11 @@ msgstr "루비"
 msgid "Run"
 msgstr ""
 
+#. js-lingui-id: d3FYmd
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Run a 20 to 30 second audio ad for your brand across their shows. A few quick steps and we'll handle delivery."
+msgstr ""
+
 #. js-lingui-id: UX0N2y
 #: src/modules/object-record/record-table/empty-state/utils/getEmptyStateSubTitle.ts
 msgid "Run a workflow and return here to view its executions"
@@ -17615,6 +18428,8 @@ msgstr "토요일"
 
 #. js-lingui-id: tfDRzk
 #: src/modules/settings/components/SaveAndCancelButtons/SaveButton.tsx
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/pages/settings/data-model/new-field/SettingsObjectNewFieldConfigure.tsx
 msgid "Save"
 msgstr "저장"
@@ -17711,6 +18526,16 @@ msgstr "범위"
 #: src/pages/settings/ai/components/SettingsAgentLogsTab.tsx
 #: src/pages/settings/ai/SettingsAgentTurnDetail.tsx
 msgid "Score"
+msgstr ""
+
+#. js-lingui-id: +zt6D4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Script / transcript"
+msgstr ""
+
+#. js-lingui-id: 5yF7Zr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Script assistant"
 msgstr ""
 
 #. js-lingui-id: oOi11l
@@ -18052,6 +18877,21 @@ msgstr "좌석 / 월"
 msgid "seat / month - billed yearly"
 msgstr "좌석 / 월 - 연간 청구"
 
+#. js-lingui-id: NsDUXD
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "seat cancels soon"
+msgstr ""
+
+#. js-lingui-id: lUgAe4
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Seat purchased and invite sent to {beneficiary}."
+msgstr ""
+
+#. js-lingui-id: fURW48
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Seat purchased for {beneficiary}."
+msgstr ""
+
 #. js-lingui-id: MpFIca
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "seats"
@@ -18141,6 +18981,11 @@ msgstr "이 레코드에 연결된 {relationLabelPlural} 모두 보기"
 #: src/modules/page-layout/widgets/call-recording/components/WidgetActionCallRecordingSeeAll.tsx
 msgid "See all call recordings linked to this calendar event"
 msgstr "이 캘린더 일정에 연결된 모든 통화 녹음 보기"
+
+#. js-lingui-id: l3YUC+
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "See all integrations"
+msgstr ""
 
 #. js-lingui-id: 3o+CgI
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationShareLinkButtons.tsx
@@ -18269,6 +19114,11 @@ msgstr "알려진 공급자를 선택하거나 사용자 지정 공급자를 생
 #: src/modules/navigation-menu-item/edit/side-panel/components/SidePanelNavigationMenuItemEditPage.tsx
 msgid "Select a navigation item to edit"
 msgstr "편집할 내비게이션 항목을 선택하세요"
+
+#. js-lingui-id: TD8E92
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Select a plan"
+msgstr ""
 
 #. js-lingui-id: p4N5TB
 #: src/modules/object-record/record-picker/multiple-record-picker/components/MultipleRecordPickerCreateTargetSelect.tsx
@@ -18455,9 +19305,17 @@ msgstr "언어를 선택하고 인터페이스 크기를 조정하세요"
 msgid "Selected folders"
 msgstr "선택한 폴더"
 
+#. js-lingui-id: cBv4wp
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "self-managed"
+msgstr ""
+
 #. js-lingui-id: JlFcis
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/page-layout/widgets/email-thread/components/EmailThreadComposer.tsx
 #: src/modules/side-panel/pages/compose-email/components/SidePanelComposeEmailPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Send"
 msgstr "보내기"
 
@@ -18497,6 +19355,11 @@ msgstr "이메일 보내기"
 msgid "Send emails via connected accounts"
 msgstr "연결된 계정을 사용하여 이메일 전송 허용"
 
+#. js-lingui-id: RoafuO
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Send feedback"
+msgstr ""
+
 #. js-lingui-id: 6nwEi6
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -18512,6 +19375,11 @@ msgstr "나중에 전송"
 #: src/modules/side-panel/pages/send-campaign/components/SendCampaignForm.tsx
 msgid "Send now"
 msgstr "지금 전송"
+
+#. js-lingui-id: 4k2VbT
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Send request"
+msgstr ""
 
 #. js-lingui-id: doZzL7
 #: src/modules/side-panel/pages/send-campaign-test/components/SidePanelSendCampaignTestPage.tsx
@@ -18764,6 +19632,11 @@ msgstr "2단계 인증 설정하기"
 msgid "Seventh"
 msgstr "일곱 번째"
 
+#. js-lingui-id: BDHA/i
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Severity"
+msgstr ""
+
 #. js-lingui-id: Z8lGw6
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 msgid "Share"
@@ -18906,6 +19779,11 @@ msgstr "사이드바 항목"
 msgid "Sign in"
 msgstr "로그인"
 
+#. js-lingui-id: pa0Bbi
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "Sign in again"
+msgstr ""
+
 #. js-lingui-id: Vt3mQ2
 #: src/utils/title-utils.ts
 msgid "Sign in or Create an account"
@@ -18945,6 +19823,11 @@ msgstr "서명 키가 취소됨"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminHealthStatus.tsx
 msgid "Signing Keys"
 msgstr "서명 키"
+
+#. js-lingui-id: UOV0wi
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "Signing you in…"
+msgstr ""
 
 #. js-lingui-id: BZdVGR
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectForm.tsx
@@ -19062,11 +19945,6 @@ msgstr ""
 msgid "Smaller"
 msgstr "더 작게"
 
-#. js-lingui-id: ZKXQ0a
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Smart"
-msgstr "스마트"
-
 #. js-lingui-id: w+rJId
 #: src/modules/settings/accounts/components/SettingsAccountsConnectionForm.tsx
 msgid "SMTP Configuration"
@@ -19155,6 +20033,19 @@ msgstr "로그를 불러오는 동안 문제가 발생했습니다. 다시 시�
 #: src/modules/side-panel/routing/components/SidePanelRoutedPage.tsx
 msgid "Something went wrong while loading this page."
 msgstr "이 페이지를 불러오는 동안 문제가 발생했습니다."
+
+#. js-lingui-id: kf83Ld
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Something went wrong."
+msgstr ""
+
+#. js-lingui-id: mTxXar
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Something's missing. Go back and complete the earlier steps."
+msgstr ""
 
 #. js-lingui-id: yHwG3y
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent.tsx
@@ -19368,6 +20259,11 @@ msgstr "확인 과정 시작됨"
 msgid "Starting {scheduledChangeStartDate}"
 msgstr "{scheduledChangeStartDate}부터 시작"
 
+#. js-lingui-id: JD3In6
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Starting…"
+msgstr ""
+
 #. js-lingui-id: W1KkjZ
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -19439,6 +20335,12 @@ msgstr "단계 필터 그룹 옵션"
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterOptionsDropdown.tsx
 msgid "Step filter options"
 msgstr "단계 필터 옵션"
+
+#. js-lingui-id: 84Scru
+#. placeholder {0}: formatSeconds(recordSeconds)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Stop ({0})"
+msgstr ""
 
 #. js-lingui-id: 9QwrMz
 #: src/modules/ai/dictation/components/AiChatDictationButton.tsx
@@ -19519,10 +20421,10 @@ msgstr "하위 필드"
 msgid "Subdomain"
 msgstr "하위 도메인"
 
-#. js-lingui-id: Sv4BSp
+#. js-lingui-id: O6Cs12
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
-msgid "Subdomain (yourco.twenty.com)"
-msgstr "서브도메인 (yourco.twenty.com)"
+msgid "Subdomain (yourco.desync.com)"
+msgstr ""
 
 #. js-lingui-id: mGO3xy
 #: src/modules/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm.tsx
@@ -19592,7 +20494,18 @@ msgstr "주제, 본문, 첨부 파일이 팀과 공유됩니다."
 msgid "Submit"
 msgstr "제출"
 
+#. js-lingui-id: ceXhtA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Submit Fio ad"
+msgstr ""
+
+#. js-lingui-id: LMMGPr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Submitting..."
+msgstr ""
+
 #. js-lingui-id: EDl9kS
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
 #: src/modules/information-banner/components/billing/InformationBannerNoBillingSubscription.tsx
 msgid "Subscribe"
 msgstr "구독"
@@ -19602,6 +20515,11 @@ msgstr "구독"
 #: src/modules/settings/billing/components/internal/SettingsBillingSubscriptionInfoCardHeaderActions.tsx
 msgid "Subscribe Now"
 msgstr "지금 구독"
+
+#. js-lingui-id: /z87rP
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Subscribe to unlock the full CRM. Annual plans save 10%."
+msgstr ""
 
 #. js-lingui-id: WVzGc2
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
@@ -19615,13 +20533,13 @@ msgstr "구독"
 msgid "Subscription activated."
 msgstr "구독이 활성화되었습니다."
 
-#. js-lingui-id: 0okvpx
+#. js-lingui-id: 5JLHOO
 #: src/modules/settings/billing/components/AddPaymentMethodForm.tsx
 #: src/modules/settings/billing/components/AddPaymentMethodForm.tsx
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
-msgid "Subscription error. Please retry or contact Twenty team"
-msgstr "구독 오류입니다. 다시 시도하거나 Twenty 팀에 문의하세요"
+msgid "Subscription error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: FooJUj
 #. placeholder {0}: getTargetPlanLabel(targetPlanKey)
@@ -19659,8 +20577,15 @@ msgstr ""
 
 #. js-lingui-id: a0w0iQ
 #: src/modules/advanced-text-editor/components/AdvancedTextEditorInsertRail.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Subtitle"
 msgstr "부제목"
+
+#. js-lingui-id: 2MXxPR
+#. placeholder {0}: subtitle.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Subtitle ({0}/{SUBTITLE_MAX})"
+msgstr ""
 
 #. js-lingui-id: zzDlyQ
 #: src/modules/ui/feedback/toast/components/__tests__/AppToaster.test.tsx
@@ -19778,6 +20703,7 @@ msgstr "프로덕션 인스턴스로 전환되었습니다."
 
 #. js-lingui-id: Nu4DdT
 #: src/modules/settings/workspace/components/SettingsWorkspaceEmailSyncSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Sync"
 msgstr "동기화"
 
@@ -19939,6 +20865,11 @@ msgstr "npm에 게시한 애플리케이션의 소유권을 등록하세요. 찾
 msgid "Talk to our team"
 msgstr "저희 팀과 상담해 보세요"
 
+#. js-lingui-id: ezTM0H
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Talk to the Desync team"
+msgstr ""
+
 #. js-lingui-id: sceIIK
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "Target relation on Junction Object"
@@ -19969,6 +20900,26 @@ msgstr "팀"
 #: src/modules/activities/emails/recipients/hooks/useEmailRecipientSuggestions.ts
 msgid "Team member"
 msgstr "팀원"
+
+#. js-lingui-id: T0u3ig
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Team members"
+msgstr ""
+
+#. js-lingui-id: PEiTw7
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Teammate email"
+msgstr ""
+
+#. js-lingui-id: K1hNyg
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "teammate@email.com"
+msgstr ""
+
+#. js-lingui-id: Hmgm6w
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Tell us what's on your mind."
+msgstr ""
 
 #. js-lingui-id: lKXcJz
 #: src/pages/settings/emailing-domains/utils/getEmailingDomainStatusText.ts
@@ -20045,6 +20996,17 @@ msgstr "텍스트가 클립보드에 복사되었습니다"
 msgid "Text Editor"
 msgstr "텍스트 편집기"
 
+#. js-lingui-id: BmfK6Z
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Thanks, sent to the Desync team."
+msgstr ""
+
+#. js-lingui-id: 1OAoa8
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "The ad image must be a non-transparent PNG (or a JPG)."
+msgstr ""
+
 #. js-lingui-id: Z4WP0F
 #: src/modules/settings/accounts/components/SettingsAccountsNewEmailGroupChannel.tsx
 msgid "The address your workspace will send and receive email from (e.g. support@mycompany.com). Outbound sending requires the domain to be verified in Outbound Domains."
@@ -20060,14 +21022,14 @@ msgstr "OpenAI 호환 공급자용 API 엔드포인트"
 msgid "The AWS region for Bedrock"
 msgstr "Bedrock용 AWS 리전"
 
-#. js-lingui-id: HP7per
+#. js-lingui-id: 9pMTah
 #: src/pages/settings/applications/utils/getStandardApplicationDescription.ts
 msgid ""
-"The base data model every Twenty workspace runs on.\n"
+"The base data model every Desync workspace runs on.\n"
 "\n"
 "#### What \"foundation\" means\n"
 "\n"
-"Every Twenty workspace starts with this set of objects. They define the shape of your CRM, including relationships, activity, and reporting. Everything else, including marketplace apps, AI agents, and custom objects, plugs into them.\n"
+"Every Desync workspace starts with this set of objects. They define the shape of your CRM, including relationships, activity, and reporting. Everything else, including marketplace apps, AI agents, and custom objects, plugs into them.\n"
 "\n"
 "#### Included objects\n"
 "- **People & Companies**: contact and account records\n"
@@ -20075,11 +21037,11 @@ msgid ""
 "- **Notes & Tasks**: activity and follow-ups\n"
 "- **Workflows & Dashboards**: automation and reporting\n"
 "\n"
-"Remove this app and the rest of Twenty has nothing to hang off.\n"
+"Remove this app and the rest of Desync has nothing to hang off.\n"
 "\n"
 "#### Build your own app\n"
 "\n"
-"Extend Twenty with your own objects, fields, logic functions, or AI skills. Scaffold a new app in one command:\n"
+"Extend Desync with your own objects, fields, logic functions, or AI skills. Scaffold a new app in one command:\n"
 "\n"
 "```bash\n"
 "npx create-twenty-app@latest my-twenty-app\n"
@@ -20094,36 +21056,6 @@ msgid ""
 "\n"
 "See the [Getting Started guide](https://twenty.com/developers/extend/apps/getting-started) for the full walkthrough, and [Building Apps](https://twenty.com/developers/extend/apps/building) for the `defineApplication` / `defineEntity` APIs."
 msgstr ""
-"모든 Twenty 워크스페이스가 기반으로 하는 기본 데이터 모델입니다.\n"
-"\n"
-"#### \"foundation\"의 의미\n"
-"\n"
-"모든 Twenty 워크스페이스는 이 객체 집합으로 시작합니다. 여기에는 관계, 활동, 보고를 포함해 CRM의 형태가 정의됩니다. 마켓플레이스 앱, AI 에이전트, 사용자 지정 객체를 비롯한 다른 모든 것은 여기에 연결됩니다.\n"
-"\n"
-"#### 포함된 객체\n"
-"- **People & Companies**: 연락처 및 계정 레코드\n"
-"- **Opportunities**: 영업 파이프라인\n"
-"- **Notes & Tasks**: 활동 및 후속 조치\n"
-"- **Workflows & Dashboards**: 자동화 및 보고\n"
-"\n"
-"이 앱을 제거하면 나머지 Twenty는 의존할 토대가 없어집니다.\n"
-"\n"
-"#### 나만의 앱 만들기\n"
-"\n"
-"사용자 지정 객체, 필드, 로직 함수, AI 기술로 Twenty를 확장하세요. 명령 한 번으로 새 앱을 스캐폴드합니다:\n"
-"\n"
-"```bash\n"
-"npx create-twenty-app@latest my-twenty-app\n"
-"```\n"
-"\n"
-"그다음 폴더 안에서:\n"
-"\n"
-"```bash\n"
-"cd my-twenty-app\n"
-"yarn twenty dev\n"
-"```\n"
-"\n"
-"전체 안내는 [시작하기 가이드](https://twenty.com/developers/extend/apps/getting-started)를 확인하고, `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참고하세요."
 
 #. js-lingui-id: VsxjzF
 #: src/modules/page-layout/widgets/call-recording/utils/getCallRecordingStatusDisplayConfiguration.ts
@@ -20237,6 +21169,11 @@ msgstr "수신자가 귀하의 주소 옆에 표시되는 이름입니다. 채�
 msgid "The page you're seeking is either gone or never was. Let's get you back on track"
 msgstr "찾고 계신 페이지는 이미 사라졌거나 존재하지 않습니다. 다시 정상화해 드리겠습니다"
 
+#. js-lingui-id: xloE1p
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "The payment didn't complete. Try a different card."
+msgstr ""
+
 #. js-lingui-id: Ya1wb4
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
 msgid "The PDF is pre-signed by Twenty and executed with your legal entity and authorized signatory."
@@ -20256,6 +21193,11 @@ msgstr "녹음을 불러올 수 없습니다."
 #: src/modules/object-record/record-field/ui/hooks/useCreateJunctionRecordWithNestedTarget.ts
 msgid "The relation configuration could not be resolved."
 msgstr "관계 구성을 확인할 수 없습니다."
+
+#. js-lingui-id: /wbqWf
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "The seat has been upgraded."
+msgstr ""
 
 #. js-lingui-id: wxyrqd
 #: src/modules/workflow/workflow-steps/workflow-actions/pick-record-action/components/WorkflowEditActionPickRecord.tsx
@@ -20301,6 +21243,12 @@ msgstr "이 필드의 값"
 #: src/pages/settings/data-model/SettingsObjectFieldEdit.tsx
 msgid "The values of this field must be unique"
 msgstr "이 필드의 값은 고유해야 합니다"
+
+#. js-lingui-id: wHb04I
+#. placeholder {0}: Math.round(duration)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "The voiceover is {0}s; aim for a script that reads in 20 to 30 seconds, then regenerate."
+msgstr ""
 
 #. js-lingui-id: MHLapp
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarVisibilitySettingsCard.tsx
@@ -20377,6 +21325,11 @@ msgstr "두께"
 #: src/modules/ai/components/AiChatThinkingRow.tsx
 msgid "Thinking"
 msgstr "생각 중"
+
+#. js-lingui-id: Ed99mE
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Thinking..."
+msgstr ""
 
 #. js-lingui-id: 9ItHLu
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -20502,6 +21455,11 @@ msgstr "이번 청구 기간"
 msgid "This call is being recorded…"
 msgstr "이 통화는 녹음 중입니다…"
 
+#. js-lingui-id: M2ohgY
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "This cancels the paid seat at the end of its current billing period — they keep access until then."
+msgstr ""
+
 #. js-lingui-id: WCa/7U
 #: src/pages/settings/applications/tabs/SettingsApplicationFrontComponentPreviewTab.tsx
 msgid "This component runs without a UI and renders nothing here."
@@ -20566,6 +21524,11 @@ msgstr "이 인스턴스는 비프로덕션 인스턴스입니다."
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "This is a relation to a Junction Object"
 msgstr "이는 정션 오브젝트에 대한 관계입니다"
+
+#. js-lingui-id: Km4wPr
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "This is an internal Desync account with unlimited access. No billing actions apply."
+msgstr ""
 
 #. js-lingui-id: E4JJ5C
 #: src/modules/object-record/record-index/components/RecordIndexRemoveSortingModal.tsx
@@ -20642,6 +21605,11 @@ msgstr "이 역할은 이 {roleTargetDisplayName}들에게 할당되었습니다
 msgid "This role is shared with other users or agents and cannot be edited here."
 msgstr ""
 
+#. js-lingui-id: KkZ+Og
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "This runs inside {name}, not in Desync, so there is no connection status to show here. Add the connection details in {name} and you are all set."
+msgstr ""
+
 #. js-lingui-id: IBWuXb
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "This server has an Organization key configured. Make sure you keep a copy of it somewhere safe: you need the same key to activate a development instance or to move your license to a replacement server. If you no longer have access to your key, contact support."
@@ -20672,6 +21640,11 @@ msgstr "이 하위 도메인은 예약되어 있습니다"
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 msgid "This takes {0} credits back off this workspace straight away. Revoking cannot be undone."
 msgstr "이 작업을 수행하면 이 워크스페이스에서 즉시 {0} 크레딧이 회수됩니다. 취소는 되돌릴 수 없습니다."
+
+#. js-lingui-id: zFwAll
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "This teammate is already on the top plan."
+msgstr ""
 
 #. js-lingui-id: MMGDfe
 #: src/modules/settings/admin-panel/config-variables/components/ConfigVariableHelpText.tsx
@@ -20764,6 +21737,11 @@ msgstr "이 작업은 이중 인증 방법을 영구적으로 삭제합니다.<0
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdminAccess.tsx
 msgid "This will revoke {0} for {userLabel}."
 msgstr "{userLabel}의 {0} 권한을 해지합니다."
+
+#. js-lingui-id: WneKvA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "This workspace has already submitted its Fio ad. We'll be in touch; reach out if you need to change it."
+msgstr ""
 
 #. js-lingui-id: f8HOUp
 #: src/modules/ai/components/ThinkingStepsDisplay.tsx
@@ -21045,8 +22023,14 @@ msgstr "총 시간"
 msgid "Track AI consumption across your workspace."
 msgstr "워크스페이스 전반의 AI 사용량을 추적하세요."
 
+#. js-lingui-id: ipzSMZ
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Transcribing your audio..."
+msgstr ""
+
 #. js-lingui-id: DDziIo
 #: src/modules/page-layout/widgets/call-recording-transcript/components/CallRecordingTranscriptEntryList.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Transcript"
 msgstr "전사본"
 
@@ -21260,16 +22244,6 @@ msgstr ""
 msgid "Turquoise"
 msgstr "터콰이즈"
 
-#. js-lingui-id: JnaRPe
-#: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
-msgid "Twenty fields"
-msgstr "Twenty 필드"
-
-#. js-lingui-id: pNo8xt
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Twenty fills each level with the best model that meets your requirements"
-msgstr "Twenty는 요구 사항을 충족하는 최적의 모델로 각 수준을 채웁니다"
-
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
 msgid "Twitter/X Search"
@@ -21314,6 +22288,7 @@ msgid "Two-factor authentication setup completed successfully!"
 msgstr "이중 인증 설정이 성공적으로 완료되었습니다!"
 
 #. js-lingui-id: +zy2Nq
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 #: src/modules/settings/components/SettingsDnsRecordsTable.tsx
@@ -21342,11 +22317,21 @@ msgstr "명령어를 입력하려면 '/'를 입력하세요"
 msgid "Type '/' for commands, '@' for mentions"
 msgstr "명령어는 '/'를, 멘션은 '@'를 입력하세요"
 
+#. js-lingui-id: wEWQRM
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Type \"cancel\" to confirm."
+msgstr ""
+
 #. js-lingui-id: qzD6hf
 #: src/modules/side-panel/components/SidePanelTopBar.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowAiAgentPermissionsTab.tsx
 msgid "Type anything..."
 msgstr "아무거나 입력하세요..."
+
+#. js-lingui-id: uz+96A
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Type cancel"
+msgstr ""
 
 #. js-lingui-id: LaEX5I
 #: src/modules/activities/emails/components/CampaignBodyField.tsx
@@ -21692,6 +22677,11 @@ msgstr "수신 거부자"
 msgid "Unsupported image format"
 msgstr "지원되지 않는 이미지 형식"
 
+#. js-lingui-id: HLxHPm
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Until {dateStr}"
+msgstr ""
+
 #. js-lingui-id: wja8aL
 #: src/modules/ai/components/AiChatThreadListItem.tsx
 #: src/modules/ai/components/ChatReferenceChip.tsx
@@ -21884,9 +22874,15 @@ msgstr "{objectLabel} 업데이트 중"
 msgid "Updating..."
 msgstr "업데이트 중..."
 
+#. js-lingui-id: Jqe+Dc
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Updating…"
+msgstr ""
+
 #. js-lingui-id: kwkhPe
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
 #: src/modules/information-banner/components/billing/InformationBannerNoMoreCredits.tsx
 #: src/modules/settings/billing/components/internal/ResourceCreditPriceSelector.tsx
 #: src/modules/settings/billing/hooks/useBillingPlanActions.ts
@@ -21894,6 +22890,17 @@ msgstr "업데이트 중..."
 #: src/modules/settings/roles/role-permissions/object-level-permissions/record-level-permissions/components/SettingsRolePermissionsObjectLevelRecordLevelSection.tsx
 msgid "Upgrade"
 msgstr "업그레이드"
+
+#. js-lingui-id: EHnRfs
+#. placeholder {0}: target.email
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Upgrade {0}'s seat"
+msgstr ""
+
+#. js-lingui-id: B/WhgE
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Upgrade for more records and features. Your leftover records carry over, and you’re charged the new plan’s price right away."
+msgstr ""
 
 #. js-lingui-id: IEtN5Y
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminWorkspacesStatusSummaryCard.tsx
@@ -21925,7 +22932,11 @@ msgstr "업그레이드 상태를 새로고침했습니다"
 
 #. js-lingui-id: doMiaH
 #. placeholder {0}: latestAvailableVersion ?? ''
+#. placeholder {0}: selectedPlan.name
+#. placeholder {0}: selectedPlan?.name ?? ''
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/applications/components/SettingsApplicationActionButton.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Upgrade to {0}"
 msgstr "{0}(으)로 업그레이드"
 
@@ -21957,6 +22968,11 @@ msgstr "감사 로그에 액세스하려면 Organization으로 업그레이드�
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
 msgid "Upgrade your free trial"
 msgstr "무료 체험판 업그레이드"
+
+#. js-lingui-id: 21QsyA
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Upgrade your plan"
+msgstr ""
 
 #. js-lingui-id: T1mDWj
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
@@ -22010,6 +23026,11 @@ msgstr "파일 업로드"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm.tsx
 msgid "Upload logo"
 msgstr "로고 업로드"
+
+#. js-lingui-id: Yi/8c6
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Upload MP3"
+msgstr ""
 
 #. js-lingui-id: sl/qWH
 #: src/modules/onboarding/components/OnboardingProfilePictureUploader.tsx
@@ -22143,10 +23164,25 @@ msgstr "사용 기간"
 msgid "Use a dedicated form when creating records."
 msgstr "레코드를 생성할 때 전용 양식을 사용합니다."
 
+#. js-lingui-id: I3AwBO
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Use a different card"
+msgstr ""
+
+#. js-lingui-id: mvljGL
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Use as script"
+msgstr ""
+
 #. js-lingui-id: 6kLyt5
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationProvision.tsx
 msgid "Use authenticator apps and browser extensions like 1Password, Authy, Microsoft Authenticator to generate one-time passwords"
 msgstr "1Password, Authy, Microsoft Authenticator와 같은 인증 앱 및 브라우저 확장을 사용하여 일회용 비밀번호를 생성합니다."
+
+#. js-lingui-id: 22KOw3
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Use card on file"
+msgstr ""
 
 #. js-lingui-id: 5ZehS/
 #: src/pages/settings/ai/components/SettingsAgentSkillsTab.tsx
@@ -22526,7 +23562,6 @@ msgstr "문서 보기"
 
 #. js-lingui-id: Mv1YVf
 #: src/modules/error-handler/utils/getToastOptionsFromError.tsx
-#: src/modules/error-handler/utils/getToastOptionsFromError.tsx
 msgid "View existing record"
 msgstr "기존 레코드 보기"
 
@@ -22802,6 +23837,11 @@ msgstr "패키지 출처를 검증하기 위해 패키지 레지스트리에 연
 msgid "We couldn't confirm your payment method. Please retry."
 msgstr "결제 수단을 확인하지 못했습니다. 다시 시도해 주세요."
 
+#. js-lingui-id: 1sa/dE
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "We couldn't finish signing you in. Please try again."
+msgstr ""
+
 #. js-lingui-id: TvNBSn
 #: src/modules/onboarding/components/upgrade-free-trial/ChooseYourPlanErrorState.tsx
 #: src/modules/settings/billing/components/SettingsBillingPlansErrorState.tsx
@@ -22818,6 +23858,11 @@ msgstr "인증하는 데 문제가 발생했습니다."
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionUpsertRecord.tsx
 msgid "We match on these fields. If a {0} already exists, we update it. Otherwise, we create a new one."
 msgstr "이 필드들을 기준으로 매칭합니다. {0}이(가) 이미 있으면 업데이트하고, 없으면 새로 생성합니다."
+
+#. js-lingui-id: V/kD6G
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "We prefilled what we already know. Edit anything."
+msgstr ""
 
 #. js-lingui-id: id6ein
 #: src/modules/ui/input/components/ImageInput.tsx
@@ -22930,8 +23975,14 @@ msgstr "Webhooks"
 
 #. js-lingui-id: On0aF2
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Website"
 msgstr "웹사이트"
+
+#. js-lingui-id: fVUMW4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Website (https://...)"
+msgstr ""
 
 #. js-lingui-id: zx4BuL
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent.tsx
@@ -22956,26 +24007,25 @@ msgstr "매주"
 msgid "weeks"
 msgstr ""
 
-#. js-lingui-id: nTuObL
+#. js-lingui-id: 6jfS51
 #: src/pages/auth/SignInUp.tsx
-msgid "Welcome to Twenty"
-msgstr "Twenty에 오신 것을 환영합니다"
+msgid "Welcome"
+msgstr ""
+
+#. js-lingui-id: 9FXDWs
+#: src/pages/auth/SignInUp.tsx
+msgid "Welcome to Desync"
+msgstr ""
+
+#. js-lingui-id: b3bMNK
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Welcome to Desync. Let's set up your CRM."
+msgstr ""
 
 #. js-lingui-id: t8ZvkC
 #: src/modules/onboarding/constants/WelcomeTitleMessage.ts
-#: src/pages/auth/SignInUp.tsx
 msgid "Welcome to your workspace"
 msgstr "워크스페이스에 오신 것을 환영합니다"
-
-#. js-lingui-id: Vin3Dv
-#: src/pages/auth/SignInUp.tsx
-msgid "Welcome, {workspaceName}."
-msgstr "{workspaceName}에 오신 것을 환영합니다"
-
-#. js-lingui-id: Itn+J7
-#: src/modules/ai/components/suggested-prompts/AiChatSuggestedPrompts.tsx
-msgid "What can I help you with?"
-msgstr "무엇을 도와드릴까요?"
 
 #. js-lingui-id: ivJ1Xk
 #: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
@@ -22992,11 +24042,22 @@ msgstr "이 필드의 레이블에 대해 각 언어에 표시되는 내용"
 msgid "What each language displays for this object's labels"
 msgstr "이 객체의 레이블에 대해 각 언어에 표시되는 내용"
 
+#. js-lingui-id: y/K0Dz
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "What happened?"
+msgstr ""
+
 #. js-lingui-id: cE4SvC
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeyDetail.tsx
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeysNew.tsx
 msgid "What this API can do: Select a user role to define its permissions."
 msgstr "이 API가 할 수 있는 것: 사용자의 권한을 정의하기 위해 역할을 선택하세요."
+
+#. js-lingui-id: sY9iJW
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "What you expected, what happened, and where."
+msgstr ""
 
 #. js-lingui-id: drC+Tq
 #: src/pages/settings/ai/components/SettingsAiOverviewTab.tsx
@@ -23007,21 +24068,6 @@ msgstr "워크스페이스에 설치되어 사용 중인 항목"
 #: src/pages/settings/communications/SettingsWorkspaceCommunications.tsx
 msgid "Whatsapp"
 msgstr "Whatsapp"
-
-#. js-lingui-id: m7GziZ
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When a deal's stage changes to Closed Won, create a task assigned to the deal owner, due 7 days after the close date, with title \"Post-sale check-in\" and the company name in the description."
-msgstr "거래의 단계가 Closed Won으로 변경되면, 거래 소유자에게 할당된 작업을 생성하고 마감일을 종결일로부터 7일 후로 설정하세요. 제목은 \"Post-sale check-in\"으로 하고, 설명에 회사명을 포함하세요."
-
-#. js-lingui-id: IHLoUB
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When a new lead is created with source \"Website\", assign it to the sales rep whose territory (by region/country) matches the lead's address; if no match, assign to the team lead."
-msgstr "소스가 \"Website\"인 새 리드가 생성되면, 리드의 주소와 일치하는 영업 담당자의 구역(지역/국가 기준)에 배정하세요. 일치하는 담당자가 없으면 팀 리드에게 배정하세요."
-
-#. js-lingui-id: haFWB2
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When any deal with amount over $100,000 has its stage or amount updated, send a notification to the sales channel with the deal name, company, new stage, amount and owner."
-msgstr "금액이 $100,000를 초과하는 거래의 단계 또는 금액이 업데이트되면, 거래명, 회사, 새 단계, 금액 및 소유자를 포함해 영업 채널로 알림을 보내세요."
 
 #. js-lingui-id: aEaoKJ
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -23055,6 +24101,11 @@ msgstr "이 오브젝트의 레코드를 여는 위치"
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Whether this model supports chain-of-thought reasoning"
 msgstr "이 모델이 Chain-of-Thought 추론을 지원하는지 여부"
+
+#. js-lingui-id: JNCYjr
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Which platform would you like?"
+msgstr ""
 
 #. js-lingui-id: 9y+sLE
 #: src/modules/workflow/workflow-variables/utils/getWorkflowVariableSpecialItems.ts
@@ -23216,6 +24267,7 @@ msgstr "Workflows"
 #: src/pages/settings/developers/playground/SettingsRestPlayground.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 #: src/pages/settings/general/SettingsGeneral.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 #: src/pages/settings/layout/components/SettingsLayoutDetailScaffold.tsx
 #: src/pages/settings/layout/SettingsLayout.tsx
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
@@ -23285,6 +24337,11 @@ msgstr "워크스페이스 멤버"
 msgid "Workspace members"
 msgstr "워크스페이스 구성원"
 
+#. js-lingui-id: 7etw3b
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Workspace role"
+msgstr ""
+
 #. js-lingui-id: PHF7zj
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/tabs/SettingsApplicationConnectionsSection.tsx
@@ -23337,6 +24394,11 @@ msgstr "설명을 작성하세요"
 #: src/pages/settings/ai/components/SettingsAgentSettingsTab.tsx
 msgid "Write a description for this agent"
 msgstr "이 에이전트에 대한 설명을 작성하세요"
+
+#. js-lingui-id: 3NOsWS
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Write or generate a script first, then I can voice it."
+msgstr ""
 
 #. js-lingui-id: zeCIJi
 #: src/modules/settings/logic-functions/components/tabs/SettingsLogicFunctionCodeEditorTab.tsx
@@ -23430,6 +24492,11 @@ msgstr "예"
 msgid "Yesterday"
 msgstr "어제"
 
+#. js-lingui-id: kWJmRL
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "You"
+msgstr ""
+
 #. js-lingui-id: lWUeEt
 #: src/modules/auth/sign-in-up/hooks/useWorkspaceFromInviteHash.ts
 msgid "You already belong to the workspace {workspaceDisplayName}"
@@ -23501,6 +24568,11 @@ msgstr "이 객체에 접근할 수 없습니다."
 msgid "You don't have access to this settings page."
 msgstr "이 설정 페이지에 접근할 수 없습니다."
 
+#. js-lingui-id: J5Sr/d
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "You don't have an active Desync subscription yet. Subscribe to start using the CRM, then come back and continue."
+msgstr ""
+
 #. js-lingui-id: tzk0bz
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "You have reached the maximum number of server transfers allowed in the last 30 days for this Organization key. Please try again later or contact support."
@@ -23546,15 +24618,30 @@ msgstr "모든 매핑이 삭제됩니다."
 msgid "You will stop receiving these emails."
 msgstr "이메일 수신이 중단됩니다."
 
+#. js-lingui-id: 6CBP/6
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "You’ll keep access, and your workspace, until the end of the period you’ve already paid for. Type <0>cancel</0> to confirm."
+msgstr ""
+
 #. js-lingui-id: Cl+hUj
 #: src/modules/settings/domains/components/SettingsSubdomain.tsx
 msgid "You're about to change your workspace subdomain. This action will log out all users."
 msgstr "워크스페이스 서브도메인을 변경하려고 합니다. 이 작업은 모든 사용자의 로그아웃을 유도할 것입니다."
 
+#. js-lingui-id: PRZEsv
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "You’re on our top plan. Thank you!"
+msgstr ""
+
 #. js-lingui-id: 6x8lJe
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
 msgid "You’ve reached your AI usage limit."
 msgstr "AI 사용 한도에 도달했습니다."
+
+#. js-lingui-id: w328ML
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your account has full access to the CRM."
+msgstr ""
 
 #. js-lingui-id: tOPGvO
 #: src/modules/apollo/services/apollo.factory.ts
@@ -23571,6 +24658,11 @@ msgstr "결제 주기가 즉시 월간으로 변경되며 체험판은 계속됩
 msgid "Your billing interval will switch to yearly immediately and your trial will continue. When it ends, you will be charged ${yearlyPrice} per user per year billed annually."
 msgstr "결제 주기가 즉시 연간으로 변경되며 체험판은 계속됩니다. 체험판 종료 시 사용자당 연간 ${yearlyPrice}(연간 결제 기준)가 청구됩니다."
 
+#. js-lingui-id: GMUujR
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Your built-in AI agent can fill your CRM for you, pull in your contacts, find new leads, and tell you who to follow up with. Three quick steps and it does the work."
+msgstr ""
+
 #. js-lingui-id: u1O1GV
 #: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 msgid "Your card was saved, but the payment still needs attention."
@@ -23580,6 +24672,16 @@ msgstr "카드는 저장되었지만, 결제에 여전히 조치가 필요합니
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
 msgid "Your details"
 msgstr "귀하의 정보"
+
+#. js-lingui-id: cSUBI1
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Your feedback"
+msgstr ""
+
+#. js-lingui-id: OSmWqR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Your Fio ad was submitted. We'll be in touch."
+msgstr ""
 
 #. js-lingui-id: gUv6/H
 #: src/pages/settings/applications/utils/getClaimErrorContent.ts
@@ -23621,6 +24723,17 @@ msgstr "조직 구독이 취소되었습니다."
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
 msgid "Your payment details are incomplete. Please review and retry."
 msgstr "결제 정보가 완전하지 않습니다. 확인 후 다시 시도해 주세요."
+
+#. js-lingui-id: f4DO/O
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your plan"
+msgstr ""
+
+#. js-lingui-id: lDBxkO
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your plan is updating. It may take a few seconds to reflect here."
+msgstr ""
 
 #. js-lingui-id: IxG5gy
 #: src/modules/settings/billing/hooks/useBillingWording.ts

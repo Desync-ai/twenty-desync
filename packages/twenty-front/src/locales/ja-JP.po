@@ -237,6 +237,12 @@ msgstr "{0, plural, other {シート}}"
 msgid "{0, plural, one {You do not have permission to access the {fieldsList} field} other {You do not have permission to access the {fieldsList} fields}}"
 msgstr "{0, plural, other {フィールド {fieldsList} にアクセスする権限がありません}}"
 
+#. js-lingui-id: srV4+B
+#. placeholder {0}: seat.planName
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "{0} · you pay"
+msgstr ""
+
 #. js-lingui-id: 6lE3tD
 #. placeholder {0}: formatNumber(counts.hardSuppressed)
 #: src/modules/activities/emails/utils/buildExcludedRecipientReasons.ts
@@ -376,13 +382,6 @@ msgstr "{0} 件にメールアドレスがありません"
 #: src/modules/object-record/record-field/ui/form-types/components/FormWorkspaceMemberFilterValueInput.tsx
 msgid "{0} workspace members"
 msgstr "{0}人のワークスペースメンバー"
-
-#. js-lingui-id: kofqAN
-#. placeholder {0}: selectedResolvedTier.label
-#. placeholder {1}: selectedResolvedTier.model.label
-#: src/modules/ai/components/AiModelTierDropdown.tsx
-msgid "{0}: {1}"
-msgstr "{0}: {1}"
 
 #. js-lingui-id: qdQhzv
 #: src/modules/views/advanced-filter-chip/components/AdvancedFilterChip.tsx
@@ -600,6 +599,32 @@ msgstr "{minutes, plural, other {# 分}}"
 msgid "{morphRelationCount} Objects"
 msgstr "{morphRelationCount} 個のオブジェクト"
 
+#. js-lingui-id: 6CXv6p
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} connected."
+msgstr ""
+
+#. js-lingui-id: apDNfL
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#. placeholder {0}: final?.error ?? 'unknown error'
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} sync failed: {0}"
+msgstr ""
+
+#. js-lingui-id: gylK9G
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} sync is still running in the background. Check back shortly."
+msgstr ""
+
+#. js-lingui-id: 1nOTVV
+#. placeholder {0}: c.created ?? 0
+#. placeholder {1}: c.skipped ?? 0
+#. placeholder {2}: (c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "{name} synced: {0} imported, {1} already up to date{2}."
+msgstr ""
+
 #. js-lingui-id: g9mDO3
 #: src/utils/format/getOrdinalNumber.ts
 msgid "{num, selectordinal, one {{num}st} two {{num}nd} few {{num}rd} other {{num}th}}"
@@ -758,6 +783,11 @@ msgstr "{unitCount, plural, one {週} other {週}}"
 msgid "{unitCount, plural, one {Year} other {Years}}"
 msgstr "{unitCount, plural, one {年} other {年}}"
 
+#. js-lingui-id: DSD1of
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "{usedStr} of {quotaStr} leads used this period"
+msgstr ""
+
 #. js-lingui-id: YdwR4T
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCustomView.tsx
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownDefaultView.tsx
@@ -851,6 +881,11 @@ msgstr "0"
 #: src/modules/workflow/workflow-trigger/components/WorkflowEditTriggerCronForm.tsx
 msgid "0 */1 * * *"
 msgstr "0 */1 * * *"
+
+#. js-lingui-id: 3jxkNE
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "1 is most serious, 3 is least."
+msgstr ""
 
 #. js-lingui-id: 4pzLrc
 #: src/modules/settings/data-model/object-details/components/SettingsObjectRelationItemTableRow.tsx
@@ -1095,10 +1130,20 @@ msgstr "このワークスペースについて"
 msgid "About your app"
 msgstr "アプリについて"
 
+#. js-lingui-id: iFAZVR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "About your brand"
+msgstr ""
+
 #. js-lingui-id: nJJAYH
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
 msgid "Accepted and signed DPAs for this workspace, with their template version and date."
 msgstr "このワークスペースで受諾および署名済みの DPA と、そのテンプレートバージョンおよび日付です。"
+
+#. js-lingui-id: Xcdlbt
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Access ends on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: pNW+Rt
 #: src/pages/settings/admin-panel/SettingsAdminNewAiProvider.tsx
@@ -1238,6 +1283,7 @@ msgstr "有効化中..."
 
 #. js-lingui-id: F6pfE9
 #: src/modules/ai/constants/AgentChatThreadFilterStatusLabels.ts
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
 #: src/modules/object-core/workflows/constants/CoreWorkflowStatusFilterOptions.ts
 #: src/modules/object-core/workflows/versions/constants/CoreWorkflowVersionStatusTagProps.ts
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
@@ -1248,6 +1294,7 @@ msgstr "有効化中..."
 #: src/pages/settings/applications/tabs/SettingsApplicationTimelineActivityTypeSettingsTab.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 #: src/pages/settings/profile/SettingsProfile.tsx
 msgid "Active"
 msgstr "アクティブ"
@@ -1311,11 +1358,6 @@ msgstr "場所を追加"
 msgid "Add a meeting link"
 msgstr "会議リンクを追加"
 
-#. js-lingui-id: CZDwqQ
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Add a new company we're in touch with (e.g. name, website, industry). Details: "
-msgstr "連絡を取っている新しい企業を追加（例：名称、ウェブサイト、業種）。詳細： "
-
 #. js-lingui-id: 5xxrhm
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Add a note"
@@ -1351,6 +1393,12 @@ msgstr "ステップを追加"
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Add a step to this workflow that "
 msgstr "このワークフローに次のステップを追加する: "
+
+#. js-lingui-id: YQ9Rdn
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Add a teammate"
+msgstr ""
 
 #. js-lingui-id: KKfos4
 #: src/modules/workflow/workflow-diagram/workflow-nodes/components/WorkflowDiagramEmptyTriggerEditable.tsx
@@ -1463,6 +1511,11 @@ msgstr "カスタムエンドポイント、プライベートゲートウェイ
 #: src/modules/settings/admin-panel/ai/components/SettingsAdminAiProviderListCard.tsx
 msgid "Add Custom Provider"
 msgstr "カスタムプロバイダーを追加"
+
+#. js-lingui-id: cJbo96
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Add Desync as a Streamable HTTP extension in Goose."
+msgstr ""
 
 #. js-lingui-id: 094J9M
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -1679,40 +1732,45 @@ msgstr "SSOアイデンティティプロバイダーを追加"
 msgid "Add test input for evaluation (e.g., \"Find all customers in NY\")"
 msgstr "評価用のテスト入力を追加(例: 「ニューヨークのすべての顧客を検索」)"
 
-#. js-lingui-id: FKGcEL
+#. js-lingui-id: YgJ55i
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server as a remote context server in Zed."
-msgstr "Twenty MCP サーバーを Zed のリモートコンテキストサーバーとして追加します。"
+msgid "Add the Desync MCP server as a remote context server in Zed."
+msgstr ""
 
-#. js-lingui-id: iA2nHX
+#. js-lingui-id: M7GPN5
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server from Augment Code settings."
-msgstr "Augment Code の設定から Twenty MCP サーバーを追加します。"
+msgid "Add the Desync MCP server from Augment Code settings."
+msgstr ""
 
-#. js-lingui-id: l+NzAk
+#. js-lingui-id: SBNhsw
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server from Raycast's MCP commands or settings."
-msgstr "Raycast の MCP コマンドまたは設定から Twenty MCP サーバーを追加します。"
+msgid "Add the Desync MCP server from Raycast's MCP commands or settings."
+msgstr ""
 
-#. js-lingui-id: j6G/yI
+#. js-lingui-id: UmFYbe
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server in Gemini CLI settings."
-msgstr "Gemini CLI の設定で Twenty MCP サーバーを追加します。"
+msgid "Add the Desync MCP server in Gemini CLI settings."
+msgstr ""
 
-#. js-lingui-id: /OyhlM
+#. js-lingui-id: Z8sy5Z
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty MCP server to your LibreChat configuration file."
-msgstr "Twenty MCP サーバーを LibreChat の構成ファイルに追加します。"
+msgid "Add the Desync MCP server to your LibreChat configuration file."
+msgstr ""
 
-#. js-lingui-id: K0DXoj
+#. js-lingui-id: ghQ5RI
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add the Twenty remote server with LM Studio's install link."
-msgstr "LM Studio のインストールリンクを使って Twenty リモートサーバーを追加します。"
+msgid "Add the Desync remote server with LM Studio's install link."
+msgstr ""
 
-#. js-lingui-id: BTFMKE
+#. js-lingui-id: ppkvcg
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Add the people you email with — your saved Google contacts plus the \"other contacts\" Google collects automatically — to your People list."
+msgstr ""
+
+#. js-lingui-id: kNrza3
 #: src/pages/settings/communications/SettingsWorkspaceCommunicationGroupChannelDetail.tsx
-msgid "Add these records at your DNS provider. Twenty checks them automatically."
-msgstr "DNSプロバイダーでこれらのレコードを追加してください。Twentyが自動的に確認します。"
+msgid "Add these records at your DNS provider. Desync checks them automatically."
+msgstr ""
 
 #. js-lingui-id: 5+ttxv
 #: src/modules/settings/accounts/components/SettingsAccountsBlocklistInput.tsx
@@ -1728,11 +1786,6 @@ msgstr "お気に入りに追加"
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 msgid "Add topic"
 msgstr "トピックを追加"
-
-#. js-lingui-id: 4D/zWv
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Add Twenty as a Streamable HTTP extension in Goose."
-msgstr "Goose で Twenty を Streamable HTTP 拡張として追加します。"
 
 #. js-lingui-id: XnwceV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationRedirectURIsInput.tsx
@@ -1889,7 +1942,6 @@ msgid "Administrators"
 msgstr "管理者"
 
 #. js-lingui-id: sxkWRg
-#: src/modules/ai/components/AiModelPicker.tsx
 #: src/modules/navigation/components/SettingsNavigationDrawerContent.tsx
 #: src/modules/settings/components/SettingsMorphRelationMultiSelect.tsx
 #: src/modules/ui/input/components/AdvancedSettingsSwitch.tsx
@@ -1910,6 +1962,11 @@ msgstr "高度なフィルター"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionEmailBase.tsx
 msgid "Advanced options"
 msgstr "高度なオプション"
+
+#. js-lingui-id: jCxxQi
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Advertisement image"
+msgstr ""
 
 #. js-lingui-id: 1Cox/a
 #: src/localization/hooks/useLocaleOptions.ts
@@ -2000,7 +2057,6 @@ msgid "Aggregate Chart"
 msgstr "集計チャート"
 
 #. js-lingui-id: jsQZMk
-#: src/modules/navigation/hooks/useNavigationDrawerModes.ts
 #: src/modules/settings/admin-panel/hooks/useSettingsAdminTabs.ts
 #: src/modules/settings/billing/constants/UsageLimitResourceTypeLabels.ts
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -2027,6 +2083,11 @@ msgstr "AI"
 msgid "AI & Automations"
 msgstr "AI と自動化"
 
+#. js-lingui-id: MnmJG1
+#: src/modules/navigation/hooks/useNavigationDrawerModes.ts
+msgid "AI Agent"
+msgstr ""
+
 #. js-lingui-id: oI7HO0
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowRunStepLogsAiAgentDetail.tsx
 msgid "AI agent run"
@@ -2036,6 +2097,11 @@ msgstr "AI エージェントの実行"
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
 msgid "AI agents"
 msgstr "AI エージェント"
+
+#. js-lingui-id: eaVev5
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "AI budget used"
+msgstr ""
 
 #. js-lingui-id: n2fhCy
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
@@ -2073,6 +2139,11 @@ msgstr "AI リクエストの準備"
 #: src/modules/settings/logic-functions/components/triggers/SettingsLogicFunctionToolTriggerSection.tsx
 msgid "AI tool"
 msgstr "AI ツール"
+
+#. js-lingui-id: i1RFI2
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "AI usage"
+msgstr ""
 
 #. js-lingui-id: tzhisR
 #: src/pages/settings/ai/components/SettingsAiUsageTab.tsx
@@ -2135,10 +2206,20 @@ msgstr "AI の利用上限に達しました。管理者にプランのアップ
 msgid "AI usage limit reached. Contact support to upgrade."
 msgstr "AI の利用上限に達しました。アップグレードするにはサポートにお問い合わせください。"
 
+#. js-lingui-id: P3UoHx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "AI usage: {aiPct}% — ${aiUsedDollars} of ${aiQuotaDollars} this period"
+msgstr ""
+
 #. js-lingui-id: KLyZ6L
 #: src/pages/settings/ai/SettingsAiUsageUserDetail.tsx
 msgid "AI User Usage"
 msgstr "ユーザーの AI 使用状況"
+
+#. js-lingui-id: AOCP2j
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "AI voice"
+msgstr ""
 
 #. js-lingui-id: TLbVxH
 #: src/modules/settings/usage/constants/UsageOperationTypeLabels.ts
@@ -2590,6 +2671,12 @@ msgstr "および"
 msgid "Annual"
 msgstr "年額"
 
+#. js-lingui-id: QyHYOr
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Annual (save 10%)"
+msgstr ""
+
 #. js-lingui-id: GqCA/t
 #: src/modules/settings/admin-panel/components/SettingsAdminChatAskQuestionsPart.tsx
 msgid "Answered"
@@ -2642,6 +2729,7 @@ msgstr "API コール"
 #. js-lingui-id: iq3W+B
 #: src/modules/settings/billing/constants/UsageLimitSpenderGroups.ts
 #: src/modules/settings/billing/constants/UsageLimitSpenderTypeLabels.ts
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "API key"
 msgstr "API キー"
 
@@ -2981,6 +3069,11 @@ msgstr "本当によろしいですか？現在の情報は保存されません
 msgid "Armenian"
 msgstr "アルメニア語"
 
+#. js-lingui-id: 1kbfBv
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "As a workspace admin you can pay for a teammate’s plan (charged to your card) and invite them. Each seat is its own subscription you can cancel anytime."
+msgstr ""
+
 #. js-lingui-id: cybVUo
 #: src/modules/settings/members/components/MemberInfosTab.tsx
 msgid "As it will be displayed in the workspace"
@@ -3087,9 +3180,16 @@ msgid "Assignment"
 msgstr "割り当て"
 
 #. js-lingui-id: d/bvvp
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/ai/SettingsAgentTurnDetail.tsx
 msgid "Assistant"
 msgstr "アシスタント"
+
+#. js-lingui-id: +BYU/g
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Assistant error: {0}"
+msgstr ""
 
 #. js-lingui-id: 4H6WHS
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminHealthStatus.tsx
@@ -3131,6 +3231,16 @@ msgstr "ひと目でわかる概要"
 #: src/modules/workflow/workflow-steps/workflow-actions/delay-actions/components/WorkflowEditActionDelay.tsx
 msgid "At a specific date or time"
 msgstr "特定の日付または時間に"
+
+#. js-lingui-id: ByxKBF
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "At least 500x500, up to 1MB. JPG or non-transparent PNG."
+msgstr ""
+
+#. js-lingui-id: YFUztS
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "At least 500x500, up to 1MB. JPG or transparent PNG."
+msgstr ""
 
 #. js-lingui-id: H8QGSx
 #: src/modules/auth/sign-in-up/components/internal/SignInUpPasswordField.tsx
@@ -3183,9 +3293,15 @@ msgid "Attendees"
 msgstr "出席者"
 
 #. js-lingui-id: /rTz0M
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Audio"
 msgstr "音声"
+
+#. js-lingui-id: sSZSHW
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Audio (20 to 30 seconds)"
+msgstr ""
 
 #. js-lingui-id: y2W2Hg
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
@@ -3289,12 +3405,6 @@ msgstr "{agentDisplayName} 用に自動生成されたロール"
 msgid "Auto-upgrade"
 msgstr "自動アップグレード"
 
-#. js-lingui-id: Dnn2XG
-#: src/modules/ai/components/AiModelPicker.tsx
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Automatic"
-msgstr "自動"
-
 #. js-lingui-id: YRT7ZW
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarChannelDetails.tsx
 msgid "Automatically create contacts for people you've participated in an event with."
@@ -3314,11 +3424,6 @@ msgstr "メールの受信・送信時に自動的に人物レコードを作成
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationGeneralSwitches.tsx
 msgid "Automatically install this app on every newly created workspace"
 msgstr "新しく作成されたすべてのワークスペースに、このアプリを自動的にインストールする"
-
-#. js-lingui-id: MHsVk5
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "Automatically selected by Twenty for this mode."
-msgstr "このモードでは Twenty により自動的に選択されます。"
 
 #. js-lingui-id: XFGV21
 #: src/pages/settings/applications/tabs/SettingsApplicationGeneralSection.tsx
@@ -3356,6 +3461,7 @@ msgstr "軸名"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification.tsx
 #: src/modules/side-panel/components/SidePanelBackButton.tsx
 #: src/modules/spreadsheet-import/components/StepNavigationButton.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/onboarding/BookCall.tsx
 msgid "Back"
 msgstr "戻る"
@@ -3473,8 +3579,14 @@ msgstr "{start} 分から {end} 分まで"
 msgid "between the {startOrdinal} and {endOrdinal} of the month"
 msgstr "月の {startOrdinal} から {endOrdinal} の間"
 
+#. js-lingui-id: K9cTJe
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Billed annually"
+msgstr ""
+
 #. js-lingui-id: aIkeAd
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Billed monthly"
 msgstr "月額請求"
 
@@ -3512,6 +3624,12 @@ msgstr "請求履歴"
 msgid "Billing interval"
 msgstr "請求間隔"
 
+#. js-lingui-id: 4CApuf
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Billing isn’t configured on this environment."
+msgstr ""
+
 #. js-lingui-id: 8tzR0k
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
 #: src/modules/settings/billing/constants/UsageLimitPeriodNameLabels.ts
@@ -3519,10 +3637,10 @@ msgstr "請求間隔"
 msgid "Billing period"
 msgstr "請求期間"
 
-#. js-lingui-id: xF/NXI
+#. js-lingui-id: JKKVdf
 #: src/modules/settings/billing/hooks/useBillingPortalSession.ts
-msgid "Billing portal session error. Please retry or contact Twenty team"
-msgstr "請求ポータルセッションエラー。再試行するか、Twenty チームに連絡してください"
+msgid "Billing portal session error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: 8kIU+G
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
@@ -3567,6 +3685,16 @@ msgstr "ボディ入力"
 msgid "Book a 30-minute call and we'll help you get your workspace production-ready."
 msgstr "30分間の通話を予約していただければ、お客様のワークスペースが本番環境で使える状態になるようサポートします。"
 
+#. js-lingui-id: fxbNMG
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Book a 30-minute call with Mark or Jackson."
+msgstr ""
+
+#. js-lingui-id: MkvsWx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Book a call"
+msgstr ""
+
 #. js-lingui-id: 2yl5lQ
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
 msgid "Book a Call"
@@ -3598,6 +3726,16 @@ msgstr "両方"
 #: src/modules/settings/unsubscribers/utils/getMessageSuppressionReasonBadge.ts
 msgid "Bounce"
 msgstr "バウンス"
+
+#. js-lingui-id: peaanf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Brand"
+msgstr ""
+
+#. js-lingui-id: 7C7tMy
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Brand name"
+msgstr ""
 
 #. js-lingui-id: 1hGdwj
 #: src/pages/settings/ai/components/SettingsAiUsageTab.tsx
@@ -3645,6 +3783,11 @@ msgstr "パートナーを閲覧する"
 msgid "BTREE (default, good for sorting and equality)"
 msgstr "BTREE（デフォルト。ソートや等価比較に適している）"
 
+#. js-lingui-id: vXemf6
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Bug"
+msgstr ""
+
 #. js-lingui-id: pN5hZf
 #: src/pages/settings/applications/tabs/SettingsApplicationFrontComponentSettingsTab.tsx
 msgid "Build and runtime metadata for this component"
@@ -3659,6 +3802,11 @@ msgstr "ビルドチェックサム"
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "Build many-to-many relations"
 msgstr "多対多リレーションを作成する"
+
+#. js-lingui-id: 1JcBEO
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Build my CRM"
+msgstr ""
 
 #. js-lingui-id: uvoIrk
 #: src/pages/settings/admin-panel/SettingsAdminAiProviderDetail.tsx
@@ -3706,16 +3854,33 @@ msgstr "ボタン"
 msgid "Button"
 msgstr "ボタン"
 
+#. js-lingui-id: bvat20
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy & invite"
+msgstr ""
+
+#. js-lingui-id: 1kxw0W
+#. placeholder {0}: target.email
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy a seat for {0}"
+msgstr ""
+
+#. js-lingui-id: NXZz0n
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Buy seat"
+msgstr ""
+
 #. js-lingui-id: 8ds4Hj
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 #: src/pages/settings/applications/components/SettingsAvailableApplicationCard.tsx
 msgid "by {author}"
 msgstr "提供: {author}"
 
-#. js-lingui-id: 8Pfllj
+#. js-lingui-id: 3Rof1A
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
-msgid "By using Twenty, you agree to the"
-msgstr "Twentyを利用することにより、以下の事項に同意したものとみなされます。"
+msgid "By using Desync, you agree to the"
+msgstr ""
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3892,6 +4057,11 @@ msgstr "このレコードでは通話録音を利用できません。"
 msgid "Call-to-action button"
 msgstr "CTA ボタン"
 
+#. js-lingui-id: wt+Dd/
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Call-to-action button URL (https://...)"
+msgstr ""
+
 #. js-lingui-id: qIlodj
 #: src/modules/object-record/record-field/ui/form-types/components/FormPhoneFieldInput.tsx
 msgid "Calling Code"
@@ -3927,8 +4097,15 @@ msgstr "標準オブジェクトのAPI名は変更できません"
 msgid "Can't scan? Copy the"
 msgstr "スキャンできませんか？ コピーしてください"
 
+#. js-lingui-id: d8/6/v
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "cancel"
+msgstr ""
+
 #. js-lingui-id: dEgA5A
 #: src/modules/applications/components/AuthorizeActionButtons.tsx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/object-record/record-update-multiple/components/UpdateMultipleRecordsFooter.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
 #: src/modules/settings/billing/components/AddCreditCardModal.tsx
@@ -3936,6 +4113,8 @@ msgstr "スキャンできませんか？ コピーしてください"
 #: src/modules/settings/billing/components/UpdatePaymentMethodModal.tsx
 #: src/modules/settings/components/SaveAndCancelButtons/CancelButton.tsx
 #: src/modules/settings/components/SaveAndCancelButtons/CancelButton.tsx
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/modules/spreadsheet-import/provider/components/SpreadsheetImport.tsx
 #: src/modules/spreadsheet-import/steps/components/ImportDataStep.tsx
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/MatchColumnsStep.tsx
@@ -3945,6 +4124,8 @@ msgstr "スキャンできませんか？ コピーしてください"
 #: src/modules/ui/feedback/toast/utils/getLocalizedToastProps.ts
 #: src/modules/ui/layout/modal/components/ConfirmationModal.tsx
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Cancel"
 msgstr "キャンセル"
 
@@ -3974,6 +4155,11 @@ msgstr "間隔切替をキャンセル"
 msgid "Cancel interval switching?"
 msgstr "間隔切替をキャンセルしますか？"
 
+#. js-lingui-id: Bu+BBn
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancel plan"
+msgstr ""
+
 #. js-lingui-id: rRK/Lf
 #: src/modules/settings/billing/components/SettingsBillingContent.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -3994,6 +4180,24 @@ msgstr "プラン切替をキャンセルしますか？"
 #: src/modules/page-layout/widgets/email-thread/components/EmailThreadComposer.tsx
 msgid "Cancel reply"
 msgstr "返信をキャンセル"
+
+#. js-lingui-id: XCBaVZ
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Cancel seat"
+msgstr ""
+
+#. js-lingui-id: fHXMPy
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancel subscription"
+msgstr ""
+
+#. js-lingui-id: BqbtvX
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Cancel this seat?"
+msgstr ""
 
 #. js-lingui-id: N6gPiD
 #: src/modules/settings/billing/components/SettingsBillingContent.tsx
@@ -4017,6 +4221,11 @@ msgstr "キャンセル日"
 msgid "Cancelling"
 msgstr "キャンセル中"
 
+#. js-lingui-id: LP3MyV
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Cancels {dateStr}"
+msgstr ""
+
 #. js-lingui-id: zbbpgB
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 msgid "Cancels at"
@@ -4031,6 +4240,17 @@ msgstr "請求期間の終了時にキャンセル"
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Cancels on"
 msgstr "キャンセル予定日"
+
+#. js-lingui-id: Gnfo4D
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "cancels soon"
+msgstr ""
+
+#. js-lingui-id: TaH0sM
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Cancels soon"
+msgstr ""
 
 #. js-lingui-id: XDbjjW
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCustomView.tsx
@@ -4064,6 +4284,7 @@ msgid "Captcha (anti-bot check) is still loading, try again"
 msgstr "キャプチャ (ボット対策チェック) はまだ読み込み中です。再試行してください。"
 
 #. js-lingui-id: kryGs+
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/side-panel/pages/page-layout/components/dropdown-content/FieldWidgetLayoutDropdownContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/record-page/SidePanelRecordPageFieldSettings.tsx
 msgid "Card"
@@ -4084,6 +4305,17 @@ msgstr "カタルーニャ語"
 #: src/pages/settings/applications/components/SettingsClaimApplicationSection.tsx
 msgid "Catalog sync started. Try your lookup again in a moment."
 msgstr "カタログの同期を開始しました。しばらくしてからもう一度検索をお試しください。"
+
+#. js-lingui-id: NUrY9o
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Categories"
+msgstr ""
+
+#. js-lingui-id: zrDM9A
+#. placeholder {0}: categories.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Categories ({0}/{MAX_CATEGORIES})"
+msgstr ""
 
 #. js-lingui-id: RpYfjZ
 #: src/modules/activities/emails/components/EmailComposerFields.tsx
@@ -4133,6 +4365,11 @@ msgstr "パスワードを変更"
 #: src/pages/auth/PasswordReset.tsx
 msgid "Change Password"
 msgstr "パスワードを変更"
+
+#. js-lingui-id: Ts/A07
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Change payment method"
+msgstr ""
 
 #. js-lingui-id: EYSFEW
 #: src/modules/settings/domains/components/SettingsSubdomain.tsx
@@ -4255,11 +4492,17 @@ msgstr "メールを確認してください"
 msgid "Check your inbox to verify your new email address."
 msgstr "新しいメールアドレスを確認するため、受信トレイを確認してください。"
 
-#. js-lingui-id: SxwQE8
+#. js-lingui-id: RLe7Vk
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Checking…"
+msgstr ""
+
+#. js-lingui-id: yKu7Nn
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
-msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "チェックアウトセッションエラー。再試行するか、Twentyチームに連絡してください"
+msgid "Checkout session error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: SviKkE
 #: src/localization/hooks/useLocaleOptions.ts
@@ -4281,6 +4524,11 @@ msgstr "{intervalAdjective} クレジットを選択"
 msgid "Choose a model mode"
 msgstr "モデルモードを選択"
 
+#. js-lingui-id: zMquA7
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Choose a plan"
+msgstr ""
+
 #. js-lingui-id: sHa2Dg
 #: src/modules/settings/billing/components/SettingsBillingLimitSpenderSelect.tsx
 msgid "Choose a spender"
@@ -4301,11 +4549,6 @@ msgstr "先に使用量を選択してください"
 msgid "Choose a Workspace"
 msgstr "ワークスペースを選択"
 
-#. js-lingui-id: KsP4Tg
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Choose automatically"
-msgstr "自動的に選択"
-
 #. js-lingui-id: Qz73jD
 #: src/modules/settings/security/components/sso/SettingsSsoIdentitiesProvidersForm.tsx
 msgid "Choose between OIDC and SAML protocols"
@@ -4321,6 +4564,16 @@ msgstr "ショートとフルの間で選択"
 msgid "Choose folders to sync"
 msgstr "同期するフォルダーを選択"
 
+#. js-lingui-id: RrLmIw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Choose image"
+msgstr ""
+
+#. js-lingui-id: o1dp6g
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Choose logo"
+msgstr ""
+
 #. js-lingui-id: 5EMoSo
 #: src/modules/settings/billing/components/internal/SettingsBillingPlansWithoutSubscription.tsx
 msgid "Choose plan"
@@ -4331,10 +4584,10 @@ msgstr "プランを選択"
 msgid "Choose the default currency that will apply"
 msgstr "適用されるデフォルト通貨を選択"
 
-#. js-lingui-id: KoXi44
+#. js-lingui-id: XnAuzq
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Choose the default modes for people and agents"
-msgstr "ユーザーとエージェントのデフォルトモードを選択"
+msgid "Choose the default mode for people and agents"
+msgstr ""
 
 #. js-lingui-id: LHce7q
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectSettings.tsx
@@ -4554,6 +4807,7 @@ msgstr "クリップボードの使用にはセキュアな接続 (HTTPS) が必
 #: src/modules/settings/applications/components/SettingsApplicationScreenshotLightbox.tsx
 #: src/modules/ui/feedback/toast/components/__tests__/AppToaster.test.tsx
 #: src/modules/ui/feedback/toast/utils/getLocalizedToastProps.ts
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Close"
 msgstr "閉じる"
 
@@ -4567,6 +4821,11 @@ msgstr "バナーを閉じる"
 #: src/modules/blocknote-editor/components/BlockEditor.tsx
 msgid "Close menu"
 msgstr "メニューを閉じる"
+
+#. js-lingui-id: sUQBA7
+#: src/modules/settings/data-model/graph-overview/components/SettingsDataModelOverview.tsx
+msgid "Close overview"
+msgstr ""
 
 #. js-lingui-id: saip/v
 #: src/modules/side-panel/components/SidePanelCloseButton.tsx
@@ -4759,7 +5018,6 @@ msgstr "コミュニケーション"
 
 #. js-lingui-id: chL5IG
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
 #: src/pages/settings/community/SettingsCommunity.tsx
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Community"
@@ -4940,6 +5198,16 @@ msgstr "メールを受信および同期するためにIMAP設定を構成し�
 msgid "Configure SMTP settings to send emails from your account."
 msgstr "アカウントからメールを送信するには、SMTP設定を構成します。"
 
+#. js-lingui-id: NOBg69
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Configure the Desync MCP server manually in Cascade."
+msgstr ""
+
+#. js-lingui-id: QTjg6Y
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Configure the Desync MCP server manually in Cline."
+msgstr ""
+
 #. js-lingui-id: CcCy4C
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Configure the remote MCP server through Warp's agent settings."
@@ -4949,16 +5217,6 @@ msgstr "Warp のエージェント設定からリモート MCP サーバーを�
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Configure the remote server in Amazon Q Developer's MCP settings."
 msgstr "Amazon Q Developer の MCP 設定でリモートサーバーを構成します。"
-
-#. js-lingui-id: g1/8jH
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Configure the Twenty MCP server manually in Cascade."
-msgstr "Twenty MCP サーバーを Cascade で手動設定します。"
-
-#. js-lingui-id: XiyvRh
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Configure the Twenty MCP server manually in Cline."
-msgstr "Twenty MCP サーバーを Cline で手動設定します。"
 
 #. js-lingui-id: qA9AGQ
 #: src/modules/settings/domains/components/SettingsDomainRecords.tsx
@@ -5052,10 +5310,22 @@ msgstr "設定内容を確認してください:"
 msgid "Confirming your payment"
 msgstr "お支払いを確認しています"
 
+#. js-lingui-id: iSLIjg
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect"
+msgstr ""
+
 #. js-lingui-id: LOM1MR
 #: src/pages/auth/Authorize.tsx
 msgid "Connect {appName} to your account"
 msgstr "{appName} をあなたのアカウントに接続"
+
+#. js-lingui-id: UA993i
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect {name}"
+msgstr ""
 
 #. js-lingui-id: bFJIPh
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -5067,6 +5337,11 @@ msgstr "カレンダーアカウントを接続"
 msgid "Connect a new account to your workspace"
 msgstr "新しいアカウントをワークスペースに接続"
 
+#. js-lingui-id: SKFp0I
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply."
+msgstr ""
+
 #. js-lingui-id: CMrq4R
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
 msgid "Connect additional MCP clients using install links or client docs."
@@ -5077,6 +5352,11 @@ msgstr "インストールリンクまたはクライアントのドキュメン
 msgid "Connect AI assistants like Claude or Cursor to your workspace via the Model Context Protocol"
 msgstr "Model Context Protocol を通じて、Claude や Cursor などの AI アシスタントをワークスペースに接続します"
 
+#. js-lingui-id: 7OVsRI
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Connect Google"
+msgstr ""
+
 #. js-lingui-id: TA7R1S
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 msgid "Connect Google, Microsoft or CalDAV and enable calendar sync before creating an event."
@@ -5086,6 +5366,11 @@ msgstr "イベントを作成する前に、Google、Microsoft、またはCalDAV
 #: src/modules/settings/accounts/components/SettingsAccountsListEmptyStateCard.tsx
 msgid "Connect via IMAP/SMTP"
 msgstr "IMAP/SMTP で接続"
+
+#. js-lingui-id: H+M0h7
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Connect where your leads live"
+msgstr ""
 
 #. js-lingui-id: Zgi9Fd
 #: src/modules/settings/accounts/components/SettingsAccountsListEmptyStateCard.tsx
@@ -5102,9 +5387,20 @@ msgstr "Microsoftと接続"
 msgid "Connect your email and calendar to see your entire network instantly. Takes only 30 seconds."
 msgstr "メールとカレンダーを接続して、ネットワーク全体をすぐに確認しましょう。所要時間は 30 秒だけです。"
 
+#. js-lingui-id: NJKXTa
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Connect your Google account to add the people you email with to your People list."
+msgstr ""
+
+#. js-lingui-id: HPbRf3
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Connect your tools and AI agents to your CRM."
+msgstr ""
+
 #. js-lingui-id: QHcLEN
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/tabs/SettingsApplicationConnectionsSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Connected"
 msgstr "接続済み"
 
@@ -5160,6 +5456,11 @@ msgstr "フィルターを追加するか、日付の粒度を変更すると、
 msgid "Consider adding a filter to display more data."
 msgstr "フィルターを追加すると、より多くのデータを表示できます。"
 
+#. js-lingui-id: jfC/xh
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact"
+msgstr ""
+
 #. js-lingui-id: AOwjMZ
 #: src/modules/settings/billing/hooks/useBillingPlanActions.ts
 msgid "Contact admin"
@@ -5170,6 +5471,16 @@ msgstr "管理者に連絡"
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
 msgid "Contact auto-creation"
 msgstr "連絡先自動作成"
+
+#. js-lingui-id: i3p844
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact email"
+msgstr ""
+
+#. js-lingui-id: /B41w4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Contact full name"
+msgstr ""
 
 #. js-lingui-id: cByGGA
 #: src/modules/information-banner/components/billing/InformationBannerEndTrialPeriod.tsx
@@ -5328,6 +5639,11 @@ msgstr "クリップボードにコピーされました"
 msgid "Copy"
 msgstr "コピー"
 
+#. js-lingui-id: C03pZD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Copy & links"
+msgstr ""
+
 #. js-lingui-id: 6gAr5+
 #: src/modules/page-layout/widgets/call-recording-transcript/components/WidgetActionCallRecordingTranscript.tsx
 msgid "Copy audio download link"
@@ -5478,6 +5794,11 @@ msgstr "100万トークンあたりのコスト（USD）"
 msgid "Cost per million tokens for cached input (USD)"
 msgstr "キャッシュ済み入力の100万トークンあたりのコスト（USD）"
 
+#. js-lingui-id: Phb3rR
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Could not buy the seat."
+msgstr ""
+
 #. js-lingui-id: T8ACay
 #: src/pages/settings/applications/components/SettingsClaimApplicationSection.tsx
 msgid "Could not claim this application"
@@ -5503,6 +5824,11 @@ msgstr "ドキュメントをダウンロードできませんでした。"
 msgid "Could not generate the signed DPA. Please try again."
 msgstr "署名済み DPA を生成できませんでした。もう一度お試しください。"
 
+#. js-lingui-id: eOmcN6
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Could not import your Google contacts. Please try again."
+msgstr ""
+
 #. js-lingui-id: FR0Fbp
 #: src/modules/object-core/workflows/versions/components/SidePanelCoreWorkflowVersionsPage.tsx
 msgid "Could not load versions."
@@ -5522,6 +5848,21 @@ msgstr "Stripe を開けませんでした。サポートに連絡してくだ�
 #: src/modules/settings/mcp-and-apis/hooks/useOpenPlayground.ts
 msgid "Could not open the API playground"
 msgstr "API プレイグラウンドを開けませんでした"
+
+#. js-lingui-id: pjCYgw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not process the recording."
+msgstr ""
+
+#. js-lingui-id: 6wgdTI
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not read that audio file."
+msgstr ""
+
+#. js-lingui-id: YbOI+l
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Could not read that image."
+msgstr ""
 
 #. js-lingui-id: w1HkE9
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -5569,6 +5910,16 @@ msgstr "組織キーを転送できませんでした。サポートに連絡し
 msgid "Could not update the instance type"
 msgstr "インスタンスタイプを更新できませんでした"
 
+#. js-lingui-id: sJJv5P
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Could not upgrade the seat."
+msgstr ""
+
+#. js-lingui-id: 1o1eYE
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't access the microphone. Check this site's microphone permission."
+msgstr ""
+
 #. js-lingui-id: PiYvMl
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
@@ -5580,20 +5931,63 @@ msgstr "お気に入りに追加できませんでした"
 msgid "Couldn't check availability. Please try again."
 msgstr "利用可能かどうかを確認できませんでした。もう一度お試しください。"
 
+#. js-lingui-id: mQ0ZQF
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't connect {name}: {0}"
+msgstr ""
+
 #. js-lingui-id: s8lFtq
 #: src/hooks/useCopyToClipboard.tsx
 msgid "Couldn't copy to clipboard"
 msgstr "クリップボードにコピーできませんでした"
+
+#. js-lingui-id: rlnqM+
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't disconnect {name}: {0}"
+msgstr ""
+
+#. js-lingui-id: 9OXGgm
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't generate voiceover: {0}"
+msgstr ""
 
 #. js-lingui-id: TU+LOV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationInstalledWorkspaces.tsx
 msgid "Couldn't load installed workspaces"
 msgstr "インストール済みワークスペースを読み込めませんでした"
 
+#. js-lingui-id: Otslhr
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't play a sample: {0}"
+msgstr ""
+
 #. js-lingui-id: kjbTwZ
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
 msgid "Couldn't remove favorite"
 msgstr "お気に入りから削除できませんでした"
+
+#. js-lingui-id: CjWmm9
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't send: {0}"
+msgstr ""
+
+#. js-lingui-id: v5TABg
+#. placeholder {0}: String( (error as Error)?.message ?? error, )
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Couldn't start {name} connection: {0}"
+msgstr ""
+
+#. js-lingui-id: e4RAJ8
+#. placeholder {0}: String((error as Error)?.message ?? error)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Couldn't submit: {0}"
+msgstr ""
 
 #. js-lingui-id: WSmI/y
 #: src/modules/navigation-menu-item/edit/hooks/useNavigationMenuItemEditController.ts
@@ -5684,11 +6078,6 @@ msgstr ""
 msgid "Create a {0} to automate your work."
 msgstr "作業を自動化する{0}を作成します。"
 
-#. js-lingui-id: fQFALn
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Create a new contact and link them to a company. Details: "
-msgstr "新しい連絡先を作成し、会社に関連付けます。詳細： "
-
 #. js-lingui-id: j85EUk
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Create a new record in this view. Details: "
@@ -5696,7 +6085,6 @@ msgstr "このビューに新しいレコードを作成する。詳細: "
 
 #. js-lingui-id: n1Nbbe
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
 msgid "Create a record"
 msgstr "レコードを作成"
 
@@ -5720,11 +6108,6 @@ msgstr "この会社のタスクを作成する: "
 #: src/modules/ai/components/suggested-prompts/contextual-suggested-prompts.ts
 msgid "Create a task for this record: "
 msgstr "このレコードのタスクを作成する: "
-
-#. js-lingui-id: Xn2Nlq
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Create a workflow"
-msgstr "ワークフローを作成"
 
 #. js-lingui-id: zNoOC2
 #: src/modules/object-record/record-table/empty-state/utils/getEmptyStateSubTitle.ts
@@ -5860,7 +6243,6 @@ msgid "Create workspace"
 msgstr "ワークスペースを作成"
 
 #. js-lingui-id: kdLGki
-#: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/MultiWorkspaceDropdownDefaultComponents.tsx
 #: src/utils/title-utils.ts
 msgid "Create Workspace"
 msgstr "ワークスペースの作成"
@@ -6079,6 +6461,11 @@ msgstr "CSV インポートとエクスポート"
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
 msgid "cta"
 msgstr "cta"
+
+#. js-lingui-id: g2OLW6
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "CTA URL"
+msgstr ""
 
 #. js-lingui-id: J1QT+3
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
@@ -6755,8 +7142,11 @@ msgstr "削除"
 #: src/modules/settings/data-model/objects/components/SettingsObjectInactiveMenuDropDown.tsx
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
+#: src/modules/settings/domains/components/SettingPublicDomain.tsx
 #: src/modules/settings/domains/components/SettingPublicDomainRowDropdownMenu.tsx
+#: src/modules/settings/domains/components/SettingsCustomDomain.tsx
 #: src/modules/settings/security/components/sso/SettingsSecuritySsoRowDropdownMenu.tsx
+#: src/modules/side-panel/pages/page-layout/components/record-table-settings/RecordTableSettingsSortsContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/RegularTabSettingsContent.tsx
 #: src/modules/side-panel/pages/page-layout/components/SingleWidgetTabSettingsContent.tsx
 #: src/modules/views/view-picker/components/ViewPickerCreateButton.tsx
@@ -6764,6 +7154,9 @@ msgstr "削除"
 #: src/modules/views/view-picker/components/ViewPickerOptionDropdown.tsx
 #: src/modules/workflow/workflow-steps/components/WorkflowStepFooter.tsx
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterOptionsDropdown.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/find-records-action/components/WorkflowFindRecordsSorts.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/KeyValuePairInput.tsx
+#: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/KeyValuePairInput.tsx
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
 #: src/pages/settings/ai/components/SettingsAgentEvalsTab.tsx
 #: src/pages/settings/ai/components/SettingsAgentEvalsTab.tsx
@@ -7060,10 +7453,20 @@ msgstr "降順"
 msgid "Descending"
 msgstr "降順"
 
+#. js-lingui-id: EXihgB
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Describe the problem…"
+msgstr ""
+
 #. js-lingui-id: g+5exC
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowAiAgentPromptTab.tsx
 msgid "Describe what you want the AI to do..."
 msgstr "AIにさせたいことを説明してください..."
+
+#. js-lingui-id: KepWTT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Describe what you want to promote and the assistant will draft a 20 to 30 second script from your brand and website. Edit anything it gives you."
+msgstr ""
 
 #. js-lingui-id: Nu4oKW
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -7117,6 +7520,11 @@ msgstr "{objectLabelPlural}を破壊する"
 #: src/modules/settings/roles/role-permissions/objects-permissions/components/SettingsRolePermissionsObjectsSection.tsx
 msgid "Destroy Records on All Objects"
 msgstr "全オブジェクトでレコードを破棄する"
+
+#. js-lingui-id: 5vinRl
+#: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
+msgid "Desync fields"
+msgstr ""
 
 #. js-lingui-id: FOcBn3
 #: src/modules/object-record/record-field-list/record-detail-section/relation/components/RecordDetailRelationRecordsListItem.tsx
@@ -7219,6 +7627,7 @@ msgstr "破棄"
 #. js-lingui-id: +K0AvT
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Disconnect"
 msgstr "切断"
 
@@ -7332,7 +7741,6 @@ msgid "Document"
 msgstr "ドキュメント"
 
 #. js-lingui-id: TvY/XA
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
 #: src/pages/settings/api-webhooks/SettingsApiWebhooks.tsx
 msgid "Documentation"
 msgstr "ドキュメント"
@@ -7558,6 +7966,11 @@ msgstr "例: 2.50"
 msgid "e.g. 3.75"
 msgstr "例: 3.75"
 
+#. js-lingui-id: ed0cQX
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "e.g. acme.com and 2 other companies, or paste a list of names"
+msgstr ""
+
 #. js-lingui-id: QVVmxi
 #: src/modules/settings/developers/components/ApiKeyNameInput.tsx
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeyDetail.tsx
@@ -7595,6 +8008,16 @@ msgstr "例: my-workspace"
 msgid "e.g. OpenAI EU"
 msgstr "例: OpenAI EU"
 
+#. js-lingui-id: kHJglt
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "e.g. Pipedrive, Zoho, Notion…"
+msgstr ""
+
+#. js-lingui-id: tNWYAT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "e.g. Promote our parish youth retreat in July"
+msgstr ""
+
 #. js-lingui-id: p5P8NB
 #: src/pages/settings/ai/components/SettingsAiOverviewTab.tsx
 msgid "E.g., \"We are a B2B SaaS company. Always use formal language...\""
@@ -7609,6 +8032,11 @@ msgstr "例: 要約、ステータス、カウント"
 #: src/pages/settings/data-model/new-index/SettingsObjectNewIndex.tsx
 msgid "Each index speeds up reads on the fields it covers, but slows down every insert and update, and uses disk space. Only add an index when you know which queries it serves."
 msgstr "各インデックスは対象となるフィールドの読み取りを高速化しますが、その代わりにすべての挿入や更新が遅くなり、ディスク容量も消費します。どのクエリに利用されるかが分かっている場合にのみインデックスを追加してください。"
+
+#. js-lingui-id: 3caNlB
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Each seat is its own subscription on your card, cancel anytime. If they’re not on Desync yet, we’ll invite them and the seat activates when they join."
+msgstr ""
 
 #. js-lingui-id: 79hamt
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
@@ -7641,8 +8069,10 @@ msgstr "eddy@gmail.com, @apple.com"
 #: src/modules/object-record/record-field/ui/form-types/components/FormMultiSelectFieldInput.tsx
 #: src/modules/object-record/record-field/ui/meta-types/input/components/MultiItemFieldMenuItem.tsx
 #: src/modules/object-record/record-group/hooks/useRecordGroupActions.ts
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
 #: src/modules/settings/data-model/object-details/components/SettingsObjectFieldDisabledActionDropdown.tsx
 #: src/modules/settings/data-model/objects/components/SettingsObjectInactiveMenuDropDown.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRowOptionsDropdown.tsx
 #: src/modules/settings/roles/role-permissions/object-level-permissions/field-permissions/components/SettingsRolePermissionsObjectLevelObjectFieldPermissionTable.tsx
 #: src/modules/side-panel/hooks/useSidePanelMenu.ts
@@ -7677,6 +8107,11 @@ msgstr "データ構造とフィールドを編集する"
 #: src/modules/side-panel/pages/email-block-settings/components/EmailBoxSidesInput.tsx
 msgid "Edit each side"
 msgstr "各辺を個別に編集"
+
+#. js-lingui-id: 48e2R8
+#: src/modules/settings/profile/components/EmailField.tsx
+msgid "Edit email"
+msgstr ""
 
 #. js-lingui-id: 9QCQIc
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownHiddenRecordGroupsContent.tsx
@@ -7767,6 +8202,11 @@ msgstr "リレーションを編集"
 #: src/modules/settings/translations/components/SettingsTranslationsButton.tsx
 msgid "Edit translations"
 msgstr "翻訳を編集"
+
+#. js-lingui-id: 8TA4hU
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+msgid "Edit variable"
+msgstr ""
 
 #. js-lingui-id: eMFB6/
 #: src/modules/views/view-picker/components/ViewPickerContentEditMode.tsx
@@ -8567,10 +9007,10 @@ msgstr "間隔切替のキャンセル中にエラーが発生しました。"
 msgid "Error while cancelling plan switching."
 msgstr "プラン切替のキャンセル中にエラーが発生しました。"
 
-#. js-lingui-id: QmR+2U
+#. js-lingui-id: Pd6rw+
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
-msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "試用期間の終了中にエラーが発生しました。Twentyチームにお問い合わせください。"
+msgid "Error while ending trial period. Please contact Desync team."
+msgstr ""
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -8848,11 +9288,18 @@ msgid "Expiration Date"
 msgstr "有効期限"
 
 #. js-lingui-id: M1RnFv
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 #: src/modules/settings/developers/utils/formatExpiration.ts
 #: src/pages/settings/members/tabs/SettingsWorkspaceMembersInviteTab.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Expired"
 msgstr "期限切れ"
+
+#. js-lingui-id: Zx6GyO
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Expired on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: KnN1Tu
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
@@ -8921,16 +9368,6 @@ msgstr "式"
 #: src/modules/onboarding/components/upgrade-free-trial/OnboardingTrialExtensionTag.tsx
 msgid "Extended"
 msgstr "延長済み"
-
-#. js-lingui-id: 4NR4Ja
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Extra Fast"
-msgstr "超高速"
-
-#. js-lingui-id: Y64TrM
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Extra Smart"
-msgstr "超高性能"
 
 #. js-lingui-id: 7Bj3x9
 #: src/modules/activities/calendar/components/CalendarEventCallRecorderAvatar.tsx
@@ -9405,6 +9842,11 @@ msgstr "機能"
 msgid "Features active until"
 msgstr "機能の有効期限"
 
+#. js-lingui-id: YirHq7
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Feedback"
+msgstr ""
+
 #. js-lingui-id: 2lOBKV
 #: src/modules/metadata-error-handler/hooks/useMetadataErrorHandler.ts
 msgid "field"
@@ -9664,6 +10106,31 @@ msgstr "絞り込み"
 msgid "Filters"
 msgstr "フィルター"
 
+#. js-lingui-id: BxSWR8
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find contacts at a company"
+msgstr ""
+
+#. js-lingui-id: eyqTxJ
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find leads"
+msgstr ""
+
+#. js-lingui-id: 41jxEH
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find marketing directors at mid-size ecommerce companies and add them to my CRM as contacts."
+msgstr ""
+
+#. js-lingui-id: kV/Gjb
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find me a list of SaaS companies in New York with 50-200 employees and add them to my CRM."
+msgstr ""
+
+#. js-lingui-id: eUmJ6S
+#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
+msgid "Find the key people (name, title, email) at this company and add them to my CRM as contacts. Company: "
+msgstr ""
+
 #. js-lingui-id: YTaTdm
 #: src/modules/ai/constants/crud-tool-operation-verbs.constant.ts
 msgid "Finding {objectLabel}"
@@ -9684,16 +10151,6 @@ msgstr "完了"
 msgid "Finish editing the layout to expand chat"
 msgstr "チャットを拡大するには、レイアウトの編集を完了してください"
 
-#. js-lingui-id: yJoako
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Finish editing the layout to open AI"
-msgstr "AI を開くには、レイアウトの編集を完了してください"
-
-#. js-lingui-id: 6cOXRd
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Finish editing the layout to open Settings"
-msgstr "設定を開くには、レイアウトの編集を完了してください"
-
 #. js-lingui-id: SNdnlf
 #: src/modules/spreadsheet-import/steps/components/ValidationStep/ValidationStep.tsx
 msgid "Finish flow with errors"
@@ -9708,6 +10165,26 @@ msgstr "セットアップを完了"
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "Finnish"
 msgstr "フィンランド語"
+
+#. js-lingui-id: cm6GQ8
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads are available on paid plans (Starter and above). Referral accounts aren't eligible."
+msgstr ""
+
+#. js-lingui-id: fZyUK0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads are available on Starter and above. Upgrade your plan to launch one."
+msgstr ""
+
+#. js-lingui-id: t2yzYY
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio ads aren't available on your account yet."
+msgstr ""
+
+#. js-lingui-id: VUoz0i
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Fio is a Catholic podcast network"
+msgstr ""
 
 #. js-lingui-id: hy+Mfg
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -9880,6 +10357,11 @@ msgstr "第四"
 msgid "Fourth"
 msgstr "第四"
 
+#. js-lingui-id: 2POOFK
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Free"
+msgstr ""
+
 #. js-lingui-id: lm4S7P
 #: src/modules/onboarding/components/import-contacts/OnboardingCreditsRewardTag.tsx
 #: src/modules/onboarding/components/OnboardingHeader.tsx
@@ -10032,6 +10514,16 @@ msgstr "一般 - 設定"
 msgid "Generate"
 msgstr "生成"
 
+#. js-lingui-id: SQq4cO
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generate AI voiceover"
+msgstr ""
+
+#. js-lingui-id: YQbBvj
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generate an AI voiceover of your script, record one in your browser, or upload an MP3."
+msgstr ""
+
 #. js-lingui-id: H3rta9
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
@@ -10053,10 +10545,20 @@ msgstr "生成されたファイル"
 msgid "Generates a Google Meet or Microsoft Teams link depending on the account."
 msgstr "アカウントに応じて、Google Meet または Microsoft Teams のリンクを生成します。"
 
+#. js-lingui-id: NOdFZR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Generating..."
+msgstr ""
+
 #. js-lingui-id: DDcvSo
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "German"
 msgstr "ドイツ語"
+
+#. js-lingui-id: hd59yv
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Get connection details"
+msgstr ""
 
 #. js-lingui-id: gRFvyL
 #: src/modules/onboarding/constants/OnboardingInstallableApps.ts
@@ -10084,6 +10586,11 @@ msgstr "組織を取得"
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Get Organization Key"
 msgstr "組織キーを取得"
+
+#. js-lingui-id: ZDIydz
+#: src/modules/navigation/components/DesyncGetStartedSection.tsx
+msgid "Get started"
+msgstr ""
 
 #. js-lingui-id: wwPywk
 #: src/pages/onboarding/InstallAppsContent.tsx
@@ -10116,7 +10623,6 @@ msgid "Go back"
 msgstr "戻る"
 
 #. js-lingui-id: y0SPQU
-#: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 #: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 msgid "Go to billing"
 msgstr "請求情報へ移動します。‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎】【。】【”】【pluralForm"
@@ -10408,6 +10914,17 @@ msgstr "ヘッドレス"
 msgid "Headless component"
 msgstr "ヘッドレスコンポーネント"
 
+#. js-lingui-id: +670Zw
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Headline"
+msgstr ""
+
+#. js-lingui-id: f7ipCg
+#. placeholder {0}: headline.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Headline ({0}/{HEADLINE_MAX})"
+msgstr ""
+
 #. js-lingui-id: UPqS9C
 #: src/modules/settings/admin-panel/hooks/useSettingsAdminTabs.ts
 msgid "Health"
@@ -10423,6 +10940,11 @@ msgstr "最新のインスタンスコマンドの健全性"
 msgid "Health Status"
 msgstr "健康状態"
 
+#. js-lingui-id: cbo/E4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Hear a short sample before generating."
+msgstr ""
+
 #. js-lingui-id: 3oTCgM
 #: src/localization/hooks/useLocaleOptions.ts
 msgid "Hebrew"
@@ -10432,6 +10954,11 @@ msgstr "ヘブライ語"
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
 msgid "Help center"
 msgstr "ヘルプセンター"
+
+#. js-lingui-id: mOS4do
+#: src/modules/ai/components/suggested-prompts/AiChatSuggestedPrompts.tsx
+msgid "Hi 👋 I'm your Desync AI agent — what can I help you find?"
+msgstr ""
 
 #. js-lingui-id: D+zLDD
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownHiddenRecordGroupsContent.tsx
@@ -10506,10 +11033,10 @@ msgstr "システムインデックスを非表示"
 msgid "High"
 msgstr "高"
 
-#. js-lingui-id: 1ETc0T
+#. js-lingui-id: MWp8n+
 #: src/pages/settings/community/SettingsCommunity.tsx
-msgid "Hire a partner to help you implement and customize Twenty."
-msgstr "パートナーに依頼して、Twenty の導入とカスタマイズを支援してもらいましょう。"
+msgid "Hire a partner to help you implement and customize Desync."
+msgstr ""
 
 #. js-lingui-id: i0qMbr
 #: src/modules/navigation/hooks/useMobileNavigationBarItems.ts
@@ -10699,6 +11226,11 @@ msgstr "人の入力"
 msgid "Hungarian"
 msgstr "ハンガリー語"
 
+#. js-lingui-id: QiiPm6
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "I've already subscribed — continue"
+msgstr ""
+
 #. js-lingui-id: VNC0Db
 #: src/modules/settings/admin-panel/ai/components/SettingsAdminAiProviderListCard.tsx
 msgid "IAM credentials"
@@ -10810,10 +11342,20 @@ msgstr "画像"
 msgid "Image \"{fileName}\" exceeds {maxUploadSize}"
 msgstr "画像 \"{fileName}\" が {maxUploadSize} を超えています"
 
+#. js-lingui-id: sYsiVD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "image set"
+msgstr ""
+
 #. js-lingui-id: VyUuZb
 #: src/modules/advanced-text-editor/components/AdvancedTextEditorInsertRail.tsx
 msgid "Image URL"
 msgstr "画像 URL"
+
+#. js-lingui-id: an5hVd
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Images"
+msgstr ""
 
 #. js-lingui-id: ijW9MW
 #: src/modules/settings/accounts/components/SettingsAccountsConnectionForm.tsx
@@ -10900,10 +11442,20 @@ msgstr "インポート"
 msgid "Import all emails"
 msgstr "すべてのメールをインポート"
 
+#. js-lingui-id: RQkDtT
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Import contacts"
+msgstr ""
+
 #. js-lingui-id: 2CeOI3
 #: src/modules/settings/roles/role-permissions/permission-flags/hooks/useActionRolePermissionFlagConfig.ts
 msgid "Import CSV"
 msgstr "CSVをインポート"
+
+#. js-lingui-id: gAxUg2
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Import from Google"
+msgstr ""
 
 #. js-lingui-id: D5QSQM
 #: src/modules/settings/accounts/components/SettingsAccountsMessageFolderCard.tsx
@@ -10919,6 +11471,17 @@ msgstr "JetBrains の設定から MCP 構成をインポートまたは追加し
 #: src/pages/onboarding/ImportContacts.tsx
 msgid "Import your contacts"
 msgstr "連絡先をインポート"
+
+#. js-lingui-id: qlsHAs
+#. placeholder {0}: c.created ?? 0
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Imported {0} so far…"
+msgstr ""
+
+#. js-lingui-id: bPOBi2
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "Imported {imported} new people from Google ({found} contacts found)."
+msgstr ""
 
 #. js-lingui-id: wsKZ+v
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
@@ -11214,6 +11777,13 @@ msgstr "指示"
 msgid "Instructions Editor"
 msgstr "指示エディター"
 
+#. js-lingui-id: nbfdhU
+#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Integrations"
+msgstr ""
+
 #. js-lingui-id: RGm66q
 #: src/utils/title-utils.ts
 msgid "Integrations - Settings"
@@ -11229,6 +11799,12 @@ msgstr "インテリジェンス"
 #: src/pages/settings/profile/appearance/components/SettingsExperience.tsx
 msgid "Interface"
 msgstr "インターフェース"
+
+#. js-lingui-id: wv1e0F
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Internal"
+msgstr ""
 
 #. js-lingui-id: a+PGuG
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
@@ -11403,6 +11979,11 @@ msgstr "ユーザーを招待"
 #: src/pages/onboarding/InviteTeam.tsx
 msgid "Invite your team"
 msgstr "チームを招待"
+
+#. js-lingui-id: js9NdT
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Invited (seat active when they join)"
+msgstr ""
 
 #. js-lingui-id: 2InwTp
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
@@ -11957,6 +12538,12 @@ msgstr "緯度"
 msgid "Launch"
 msgstr "起動"
 
+#. js-lingui-id: KLsJEy
+#: src/modules/navigation/components/DesyncFioAdsSection.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Launch a Fio ad"
+msgstr ""
+
 #. js-lingui-id: 9BjbLR
 #: src/modules/side-panel/components/SidePanelWorkflowStepInfo.tsx
 msgid "Launch manually"
@@ -12005,11 +12592,31 @@ msgstr "レイアウトモード: {0}"
 msgid "Layouts"
 msgstr "レイアウト"
 
+#. js-lingui-id: LhgWCf
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Leads"
+msgstr ""
+
+#. js-lingui-id: o7Mb1h
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Leads generated this cycle"
+msgstr ""
+
 #. js-lingui-id: zwWKhA
 #: src/modules/information-banner/components/maintenance/InformationBannerMaintenance.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowEditActionFormBuilder.tsx
 msgid "Learn more"
 msgstr "さらに詳しく"
+
+#. js-lingui-id: NgeSlx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Learn More"
+msgstr ""
+
+#. js-lingui-id: zfagGa
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Learn More URL (https://...)"
+msgstr ""
 
 #. js-lingui-id: wYPbcI
 #: src/modules/ai/utils/tool-display/get-tool-display-message.ts
@@ -12098,6 +12705,11 @@ msgstr "以下"
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectOpenRecordInPicker.tsx
 msgid "Let each member decide for themselves"
 msgstr "各メンバーに任せる"
+
+#. js-lingui-id: r5kwln
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Let the agent build your CRM"
+msgstr ""
 
 #. js-lingui-id: vhRvfF
 #: src/modules/advanced-text-editor/constants/getAdvancedTextEditorTypographySettings.ts
@@ -12419,6 +13031,7 @@ msgstr "スレッドを読み込み中"
 #: src/modules/settings/admin-panel/components/SettingsAdminVersionDisplay.tsx
 #: src/modules/settings/roles/role-assignment/components/SettingsRoleAssignmentEntityPickerDropdown.tsx
 #: src/modules/views/hooks/useComputeRecordRelationFilterDisplayValue.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Loading..."
 msgstr "ロード中…"
 
@@ -12446,13 +13059,10 @@ msgstr "ロケール"
 msgid "Location"
 msgstr "場所"
 
-#. js-lingui-id: B6ANJW
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "Log a new deal (company, amount, stage, expected close). Details: "
-msgstr "新しい案件を記録（会社、金額、ステージ、予定クローズ日）。詳細： "
-
 #. js-lingui-id: FgAxTj
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
 #: src/modules/auth/sign-in-up/components/WorkspaceSelectionFooter.tsx
+#: src/modules/navigation/components/NavigationDrawerLogoutButton.tsx
 #: src/modules/onboarding/components/upgrade-free-trial/ChooseYourPlanErrorState.tsx
 #: src/modules/settings/profile/devices/components/SettingsDeviceSessionRowDropdownMenu.tsx
 #: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/MultiWorkspaceDropdownDefaultComponents.tsx
@@ -12508,10 +13118,20 @@ msgstr "ロジック関数"
 msgid "Login token missing. Two Factor Authentication setup can not be initiated."
 msgstr "ログイントークンがありません。二要素認証のセットアップを開始できません。"
 
-#. js-lingui-id: nOhz3x
-#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
-msgid "Logout"
-msgstr "ログアウト"
+#. js-lingui-id: iG7KNr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Logo"
+msgstr ""
+
+#. js-lingui-id: ao3wWA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Logo / image"
+msgstr ""
+
+#. js-lingui-id: 42GEJY
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "logo set"
+msgstr ""
 
 #. js-lingui-id: w/bY7R
 #: src/modules/logic-functions/components/LogicFunctionLogs.tsx
@@ -12666,6 +13286,11 @@ msgstr "ビューを管理"
 msgid "Manage workflows"
 msgstr "ワークフローを管理"
 
+#. js-lingui-id: act4Md
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Manage your Desync subscription, billing cadence, and usage."
+msgstr ""
+
 #. js-lingui-id: FyFNsd
 #: src/pages/settings/accounts/SettingsAccounts.tsx
 msgid "Manage your internet accounts."
@@ -12689,11 +13314,6 @@ msgstr "手動"
 #: src/modules/settings/mcp-and-apis/components/SettingsMcpSetup.tsx
 msgid "Manual configuration"
 msgstr "手動構成"
-
-#. js-lingui-id: ospBFm
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "Manually selected for this mode."
-msgstr "このモードでは手動で選択されています。"
 
 #. js-lingui-id: lkcAoj
 #: src/modules/advanced-text-editor/constants/AdvancedTextEditorBlockCatalog.ts
@@ -12754,6 +13374,11 @@ msgstr "最大出力は正の整数である必要があります"
 #: src/modules/side-panel/pages/page-layout/constants/settings/ChartConfigurationSettingLabels.ts
 msgid "Max range"
 msgstr "最大範囲"
+
+#. js-lingui-id: uT7ydO
+#: src/modules/ai/utils/getAiModelTierLabel.ts
+msgid "Max Thinking"
+msgstr ""
 
 #. js-lingui-id: DBiUDH
 #: src/modules/settings/data-model/fields/forms/components/SettingsDataModelFieldMaxValuesForm.tsx
@@ -12845,6 +13470,11 @@ msgstr "中"
 #: src/modules/advanced-text-editor/extensions/slash-command/DefaultSlashCommands.ts
 msgid "Medium section heading"
 msgstr "中見出し"
+
+#. js-lingui-id: OvoEq7
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Member"
+msgstr ""
 
 #. js-lingui-id: Sma10A
 #: src/modules/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/internal/components/WorkspacesForSignIn.tsx
@@ -13014,6 +13644,13 @@ msgstr "分"
 msgid "Minutes between triggers"
 msgstr "トリガー間の分"
 
+#. js-lingui-id: 8DvOLm
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "missing"
+msgstr ""
+
 #. js-lingui-id: cOFpUq
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
 msgid "Missing calendar permission."
@@ -13040,8 +13677,17 @@ msgstr "モバイル"
 msgid "Mode"
 msgstr "モード"
 
+#. js-lingui-id: HPec50
+#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
+msgid "Mode agents use when they run on their own"
+msgstr ""
+
+#. js-lingui-id: /1sxVR
+#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
+msgid "Mode used when you chat with Desync"
+msgstr ""
+
 #. js-lingui-id: scu3wk
-#: src/modules/ai/components/AiModelTierInformationButton.tsx
 #: src/modules/ai/components/AiModelTierSlider.tsx
 msgid "Model"
 msgstr "モデル"
@@ -13058,11 +13704,6 @@ msgstr "モデル \"{0}\" を追加しました"
 msgid "Model \"{0}\" removed"
 msgstr "モデル \"{0}\" を削除しました"
 
-#. js-lingui-id: 8jgO3g
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Model agents use when they run on their own"
-msgstr "エージェントが自律実行時に使用するモデル"
-
 #. js-lingui-id: IzB3v0
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Model ID"
@@ -13077,11 +13718,6 @@ msgstr "モデル ID は必須です"
 #: src/modules/ai/components/AiModelTierInformationButton.tsx
 msgid "Model information"
 msgstr "モデル情報"
-
-#. js-lingui-id: iaurWj
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Model used when you chat with Twenty"
-msgstr "Twenty とチャットするときに使用するモデル"
 
 #. js-lingui-id: //nm2/
 #: src/pages/settings/admin-panel/SettingsAdminAiProviderDetail.tsx
@@ -13142,10 +13778,12 @@ msgid "monthly"
 msgstr "月払い"
 
 #. js-lingui-id: +8Nek/
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 #: src/modules/settings/billing/components/internal/SettingsBillingPlanComparisonTable.tsx
 #: src/modules/settings/billing/constants/UsageLimitPeriodNameLabels.ts
 #: src/modules/settings/enterprise/components/EnterprisePlanModal.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Monthly"
 msgstr "月払い"
 
@@ -13271,6 +13909,22 @@ msgstr "メッセージ"
 msgid "Multiple answers"
 msgstr "複数の回答"
 
+#. js-lingui-id: /BEbOG
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be 1MB or smaller."
+msgstr ""
+
+#. js-lingui-id: SFjemy
+#. placeholder {0}: Math.round(duration)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be 20 to 30 seconds (this one is {0}s)."
+msgstr ""
+
+#. js-lingui-id: EcE0u/
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be a JPG or PNG."
+msgstr ""
+
 #. js-lingui-id: asWVA5
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
 msgid "must be a number"
@@ -13290,6 +13944,16 @@ msgstr "有効なURLとラベルを持つオブジェクトの配列でなけれ
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
 msgid "must be an array of valid emails"
 msgstr "有効なメールアドレスの配列でなければなりません"
+
+#. js-lingui-id: pGNPM0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be an MP3."
+msgstr ""
+
+#. js-lingui-id: Yy/yCI
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Must be at least 500x500 pixels."
+msgstr ""
 
 #. js-lingui-id: OJCJh9
 #: src/pages/settings/applications/tabs/SettingsApplicationsDeveloperTab.tsx
@@ -13419,11 +14083,6 @@ msgstr "ナビゲーションメニュー項目"
 #: src/pages/settings/applications/tabs/SettingsApplicationDetailContentTab.tsx
 msgid "Navigation menu items"
 msgstr "ナビゲーションメニュー項目"
-
-#. js-lingui-id: aTTshK
-#: src/modules/navigation/components/MainNavigationDrawerModeSwitcher.tsx
-msgid "Navigation modes"
-msgstr "ナビゲーションモード"
 
 #. js-lingui-id: IbVc4A
 #: src/modules/page-layout/widgets/record-table/utils/getRecordTableWidgetLayoutPickerOptions.ts
@@ -13710,6 +14369,7 @@ msgstr "ニュースレター"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminQueueJobsTable.tsx
 #: src/modules/settings/billing/components/internal/SubscriptionInfoRowContainer.tsx
 #: src/modules/settings/components/SettingsPaginationControls.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 #: src/pages/settings/accounts/SettingsAccountsConfigurationStepEmail.tsx
 msgid "Next"
 msgstr "次へ"
@@ -14234,10 +14894,10 @@ msgstr "利用可能なマイクがありません。マイクを接続して、
 msgid "No model available"
 msgstr "利用可能なモデルがありません"
 
-#. js-lingui-id: xo340M
-#: src/pages/settings/ai/components/SettingsAiModelTiersPreview.tsx
-msgid "No model is available for this mode."
-msgstr "このモードで利用可能なモデルはありません。"
+#. js-lingui-id: K6CQlq
+#: src/modules/settings/accounts/components/SettingsAccountsImportGoogleContactsSection.tsx
+msgid "No new people to import — your {found} Google contacts are already in the CRM."
+msgstr ""
 
 #. js-lingui-id: 9VrTfZ
 #: src/modules/activities/notes/components/NotesCardContent.tsx
@@ -14253,6 +14913,11 @@ msgstr "ビューのあるオブジェクトが見つかりません"
 #: src/modules/ui/field/input/components/MultiSelectInput.tsx
 msgid "No option found"
 msgstr "オプションが見つかりません"
+
+#. js-lingui-id: IWf5/9
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "No other members in this workspace yet."
+msgstr ""
 
 #. js-lingui-id: XRc1G9
 #: src/modules/ai/components/TerminalOutput.tsx
@@ -14291,6 +14956,13 @@ msgstr "このアプリケーションには権限が設定されていません
 #: src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelSection.tsx
 msgid "No permissions have been set for individual objects."
 msgstr "個々のオブジェクトに対して権限が設定されていません。"
+
+#. js-lingui-id: 9+qP8v
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "No plan"
+msgstr ""
 
 #. js-lingui-id: pRxlf6
 #: src/pages/settings/applications/utils/getClaimErrorContent.ts
@@ -14706,6 +15378,11 @@ msgstr "録音なし"
 msgid "Not Recorded"
 msgstr "録音なし"
 
+#. js-lingui-id: 85VBFF
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "not set"
+msgstr ""
+
 #. js-lingui-id: MTqQMG
 #: src/modules/settings/emailing-domains/utils/getVerificationRecordGroupStatusDisplay.ts
 #: src/pages/settings/applications/tabs/SettingsApplicationCommandMenuItemSettingsTab.tsx
@@ -14761,6 +15438,11 @@ msgstr "まだ何も送信されていません。キャンペーンは下書き
 #: src/pages/settings/applications/SettingsApplicationDetails.tsx
 msgid "Nothing to configure for this application"
 msgstr "このアプリケーションで設定する項目はありません"
+
+#. js-lingui-id: hqYwbH
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Nothing to import for your account yet"
+msgstr ""
 
 #. js-lingui-id: DYCPYF
 #: src/modules/page-layout/widgets/components/StandaloneWidgetPlaceholder.tsx
@@ -15083,10 +15765,10 @@ msgstr "オンボーディング特典"
 msgid "One or more filters reference deactivated or deleted fields and will be automatically removed on save."
 msgstr "1 つ以上のフィルターが、無効化または削除されたフィールドを参照しています。保存時に自動的に削除されます。"
 
-#. js-lingui-id: 1WZTTl
+#. js-lingui-id: w2yO3R
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
-msgid "One subscription provides one Organization key that powers one production instance and one potential staging or test instance. To run a staging or test environment, install Twenty on a second server, activate it with this same Organization key, then register that server as a development instance. Development instances unlock premium features without extra billing and do not count toward your production seats."
-msgstr "1 つのサブスクリプションから、1 つの本番インスタンスと、ステージングまたはテスト用インスタンスを 1 つ利用できる組織キーが提供されます。ステージングまたはテスト環境を実行するには、2 台目のサーバーに Twenty をインストールし、同じ組織キーで有効化してから、そのサーバーを開発インスタンスとして登録します。開発インスタンスでは追加の請求なしにプレミアム機能が有効になり、本番シート数にもカウントされません。"
+msgid "One subscription provides one Organization key that powers one production instance and one potential staging or test instance. To run a staging or test environment, install Desync on a second server, activate it with this same Organization key, then register that server as a development instance. Development instances unlock premium features without extra billing and do not count toward your production seats."
+msgstr ""
 
 #. js-lingui-id: JEtonz
 #: src/modules/settings/event-logs/components/SettingsLogs.tsx
@@ -15152,6 +15834,11 @@ msgstr "{remainingDays} と {0} のみ"
 msgid "Only the subject is shared"
 msgstr "件名のみが共有されています"
 
+#. js-lingui-id: VRnwi0
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Only workspace admins can launch a Fio ad. Ask an admin on your workspace to set it up."
+msgstr ""
+
 #. js-lingui-id: P5aFS1
 #: src/modules/onboarding/components/import-contacts/OnboardingImportPrivacyNote.tsx
 msgid "Only you will be able to see your emails and events"
@@ -15169,6 +15856,11 @@ msgstr "開く"
 msgid "Open a maintained integration or prefill clients that accept MCP install links."
 msgstr "保守されている連携を開くか、MCP インストールリンクに対応したクライアントに事前入力します。"
 
+#. js-lingui-id: JHmJS+
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Open a workspace first."
+msgstr ""
+
 #. js-lingui-id: 650kGT
 #: src/modules/side-panel/pages/email-block-settings/components/SidePanelEmailBlockSettingsPage.tsx
 msgid "Open an email editor to edit block settings."
@@ -15179,15 +15871,20 @@ msgstr "ブロック設定を編集するにはメールエディターを開い
 msgid "Open as link"
 msgstr "リンクとして開く"
 
-#. js-lingui-id: n0vVgf
+#. js-lingui-id: n7jeqv
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Claude with the Twenty connector name and MCP URL prefilled."
-msgstr "Twenty コネクタ名と MCP URL が事前入力された状態で Claude を開きます。"
+msgid "Open Claude with the Desync connector name and MCP URL prefilled."
+msgstr ""
 
-#. js-lingui-id: +n2jpB
+#. js-lingui-id: khtqoR
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Cursor's MCP installer with the Twenty remote server config."
-msgstr "Twenty リモートサーバーの設定が事前入力された Cursor の MCP インストーラーを開きます。"
+msgid "Open Cursor's MCP installer with the Desync remote server config."
+msgstr ""
+
+#. js-lingui-id: 5y9E/B
+#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
+msgid "Open Desync's official ChatGPT integration for your workspace."
+msgstr ""
 
 #. js-lingui-id: pZZH4Q
 #: src/modules/auth/sign-in-up/components/EmailVerificationSent.tsx
@@ -15247,20 +15944,25 @@ msgstr "レコードを開く場所"
 msgid "Open records on a dedicated page"
 msgstr "専用ページでレコードを開く"
 
-#. js-lingui-id: q170S2
+#. js-lingui-id: RLQ6Yx
 #: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Replit with the Twenty remote server config."
-msgstr "Twenty リモートサーバーの設定が事前入力された Replit を開きます。"
+msgid "Open Replit with the Desync remote server config."
+msgstr ""
 
-#. js-lingui-id: sBd/cl
-#: src/modules/settings/mcp-and-apis/utils/buildMcpSetupCategories.tsx
-msgid "Open Twenty's official ChatGPT integration for your workspace."
-msgstr "ワークスペース向けの Twenty 公式 ChatGPT 連携を開きます。"
+#. js-lingui-id: bY2Xkv
+#: src/modules/sign-in-background-mock/components/BackgroundMockPage.tsx
+msgid "Open side panel"
+msgstr ""
 
 #. js-lingui-id: OV5wZZ
 #: src/modules/navigation-menu-item/display/sections/components/NavigationDrawerOpenedSection.tsx
 msgid "Opened"
 msgstr "開いた"
+
+#. js-lingui-id: 9NJUeH
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you."
+msgstr ""
 
 #. js-lingui-id: Fzfj4N
 #: src/pages/settings/layout/SettingsLayoutViewDetail.tsx
@@ -15304,6 +16006,11 @@ msgstr "受信者の設定ページに表示される任意の説明テキスト
 msgid "Optional secret used to compute the HMAC signature for webhook payloads"
 msgstr "Webhookペイロード用HMAC署名の計算に使用するオプションのシークレット"
 
+#. js-lingui-id: 7ousH3
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)"
+msgstr ""
+
 #. js-lingui-id: 0zpgxV
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdown.tsx
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
@@ -15321,6 +16028,11 @@ msgstr "オプション"
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterLogicalOperatorCell.tsx
 msgid "Or"
 msgstr "または"
+
+#. js-lingui-id: Hs1qcH
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Or have the agent fill your CRM another way:"
+msgstr ""
 
 #. js-lingui-id: 4OE5Sf
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectFormOptionRow.tsx
@@ -15496,11 +16208,6 @@ msgstr "出力トークン"
 msgid "Override Draft"
 msgstr "下書きを上書き"
 
-#. js-lingui-id: RQCK56
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Overrides the mode above until you switch back to automatic"
-msgstr "自動に戻すまで、上記のモードを上書きします"
-
 #. js-lingui-id: 6/dCYd
 #: src/pages/settings/ai/SettingsAI.tsx
 #: src/pages/settings/data-model/SettingsObjectOverview.tsx
@@ -15604,10 +16311,10 @@ msgstr "ページレイアウト"
 msgid "Page name"
 msgstr "ページ名"
 
-#. js-lingui-id: NRvxzv
+#. js-lingui-id: W5RzSu
 #: src/pages/not-found/NotFound.tsx
-msgid "Page Not Found | Twenty"
-msgstr "ページが見つかりません | Twenty"
+msgid "Page Not Found | Desync"
+msgstr ""
 
 #. js-lingui-id: oIhFvf
 #: src/modules/side-panel/pages/email-block-settings/components/EmailPageStyleSection.tsx
@@ -15682,6 +16389,16 @@ msgstr "ホストされている画像へのリンクを貼り付けてくださ
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationVerification.tsx
 msgid "Paste the code below"
 msgstr "以下のコードを貼り付けてください"
+
+#. js-lingui-id: 0dOXmH
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Paste the script, or add audio and we'll fill it in for you."
+msgstr ""
+
+#. js-lingui-id: tsiTqO
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Paste your API key"
+msgstr ""
 
 #. js-lingui-id: M01WeF
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
@@ -15902,6 +16619,11 @@ msgstr "1 つ以上のフィールドを選択します。選択した順序が�
 msgid "Pick the index type. BTREE covers most queries; GIN is for full-text and JSONB."
 msgstr "インデックスタイプを選択します。BTREE はほとんどのクエリをカバーし、GIN は全文検索と JSONB 向けです。"
 
+#. js-lingui-id: S07uak
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Pick up to 5 listening categories to target."
+msgstr ""
+
 #. js-lingui-id: N0+GsR
 #: src/modules/settings/members/components/MemberInfosTab.tsx
 #: src/pages/settings/general/SettingsGeneral.tsx
@@ -15914,11 +16636,6 @@ msgstr "写真"
 #: src/modules/side-panel/pages/page-layout/constants/GraphTypeInformation.ts
 msgid "Pie Chart"
 msgstr "パイチャート"
-
-#. js-lingui-id: 6U8nJN
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Pin a specific model"
-msgstr "特定のモデルを固定"
 
 #. js-lingui-id: 3pU8e+
 #: src/modules/side-panel/pages/page-layout/utils/getTabSettingsPlacementItems.ts
@@ -15942,11 +16659,6 @@ msgstr "ピン留め"
 msgid "Pinned tab, always shown on the left"
 msgstr "常に左側に表示されるピン留めされたタブ"
 
-#. js-lingui-id: Iaw5/y
-#: src/modules/ai/components/AiModelPicker.tsx
-msgid "Pinned to a specific model"
-msgstr "特定のモデルに固定されています"
-
 #. js-lingui-id: hx1ePY
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowFormFieldSettingsNumber.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowFormFieldSettingsText.tsx
@@ -15965,10 +16677,23 @@ msgid "Plain text paragraph"
 msgstr "通常のテキスト段落"
 
 #. js-lingui-id: GdgCoi
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "Plan"
 msgstr "プラン"
+
+#. js-lingui-id: 6bnoVc
+#: src/modules/settings/hooks/useSettingsNavigationItems.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Plan & Billing"
+msgstr ""
+
+#. js-lingui-id: jJWQWc
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Plan and usage"
+msgstr ""
 
 #. js-lingui-id: XduPHC
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
@@ -16172,6 +16897,11 @@ msgstr "プレビューは利用できません"
 msgid "Preview of the page recipients see when they unsubscribe"
 msgstr "受信者が配信を停止する際に表示されるページのプレビュー"
 
+#. js-lingui-id: ZuBYCT
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Preview voice"
+msgstr ""
+
 #. js-lingui-id: DHhJ7s
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminQueueJobsTable.tsx
 #: src/modules/settings/components/SettingsPaginationControls.tsx
@@ -16278,6 +17008,11 @@ msgstr "録音を処理中"
 #: src/modules/workflow/components/WorkflowStepExecutionResult.tsx
 msgid "Processing..."
 msgstr "処理中…"
+
+#. js-lingui-id: CRDrF5
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Processing…"
+msgstr ""
 
 #. js-lingui-id: vERlcd
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -16656,6 +17391,7 @@ msgstr "レコード"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionDeleteRecord.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionUpdateRecord.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/utils/getActionHeaderTypeOrThrow.ts
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Record"
 msgstr "記録"
 
@@ -16744,10 +17480,25 @@ msgstr "録音中"
 msgid "Recording Failed"
 msgstr "録音に失敗しました"
 
+#. js-lingui-id: 12j3xf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording isn't supported in this browser. Upload an MP3 instead."
+msgstr ""
+
+#. js-lingui-id: dMS+la
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording must be at least 20 seconds (this one was {elapsed}s)."
+msgstr ""
+
 #. js-lingui-id: h9TBi+
 #: src/modules/page-layout/widgets/call-recording/utils/getCallRecordingStatusDisplayConfiguration.ts
 msgid "Recording Scheduled"
 msgstr "録音が予定されています"
+
+#. js-lingui-id: Y3jApD
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Recording, up to 30 seconds. Speak your ad, then press Stop."
+msgstr ""
 
 #. js-lingui-id: PWlTvh
 #: src/modules/navigation-menu-item/edit/side-panel/components/SidePanelNewSidebarItemSearchResults.tsx
@@ -17076,10 +17827,20 @@ msgstr "すべての言語で名前を変更"
 msgid "Renewal date"
 msgstr "更新日"
 
+#. js-lingui-id: qYAz/O
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Renews {dateStr}"
+msgstr ""
+
 #. js-lingui-id: bha0Vl
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "Renews on"
 msgstr "更新日"
+
+#. js-lingui-id: neuNgB
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Renews on {periodEndStr}"
+msgstr ""
 
 #. js-lingui-id: Ee8JBW
 #: src/modules/workflow/workflow-steps/workflow-actions/form-action/components/WorkflowEditActionFormBuilder.tsx
@@ -17091,10 +17852,25 @@ msgstr "フィールドを並べ替え"
 msgid "Reorder options"
 msgstr "オプションを並べ替え"
 
+#. js-lingui-id: YOzD/a
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace image"
+msgstr ""
+
+#. js-lingui-id: ECPoNf
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace logo"
+msgstr ""
+
 #. js-lingui-id: q8Id6J
 #: src/modules/side-panel/pages/page-layout/components/WidgetSettingsManageSection.tsx
 msgid "Replace widget"
 msgstr "ウィジェットを置き換える"
+
+#. js-lingui-id: Vhkt8a
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Replace with MP3"
+msgstr ""
 
 #. js-lingui-id: N8UzTV
 #: src/modules/settings/admin-panel/chats/components/SettingsAdminChatsTable.tsx
@@ -17122,6 +17898,17 @@ msgstr "返信"
 msgid "Reply..."
 msgstr "返信..."
 
+#. js-lingui-id: cd5EXh
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Report a bug"
+msgstr ""
+
+#. js-lingui-id: hV3yAb
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Report a problem"
+msgstr ""
+
 #. js-lingui-id: Q3LOVJ
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 msgid "Report an issue"
@@ -17136,6 +17923,12 @@ msgstr "レポート"
 #: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/WorkflowRunStepLogsHttpRequestDetail.tsx
 msgid "Request"
 msgstr "リクエスト"
+
+#. js-lingui-id: eBQF7D
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Request an integration"
+msgstr ""
 
 #. js-lingui-id: /laZGZ
 #: src/modules/workflow/workflow-steps/workflow-actions/http-request-action/components/HttpRequestExecutionResult.tsx
@@ -17322,6 +18115,16 @@ msgstr "結果"
 msgid "Resume"
 msgstr "履歴書"
 
+#. js-lingui-id: 1K1kvB
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Resume plan"
+msgstr ""
+
+#. js-lingui-id: wBRT4D
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Resuming…"
+msgstr ""
+
 #. js-lingui-id: 6gRgw8
 #: src/modules/ai/components/AiChatErrorMessage.tsx
 #: src/modules/page-layout/widgets/call-recording-transcript/components/CallRecordingAudioPlayer.tsx
@@ -17358,6 +18161,11 @@ msgstr "戻り値"
 #: src/modules/side-panel/pages/page-layout/utils/getSortLabelSuffixForFieldType.ts
 msgid "reverse alphabetical"
 msgstr "アルファベット逆順"
+
+#. js-lingui-id: 5vWqqr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Review & submit"
+msgstr ""
 
 #. js-lingui-id: GXsAby
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantRowDropdownMenu.tsx
@@ -17541,6 +18349,11 @@ msgstr "ルビー"
 msgid "Run"
 msgstr "実行"
 
+#. js-lingui-id: d3FYmd
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Run a 20 to 30 second audio ad for your brand across their shows. A few quick steps and we'll handle delivery."
+msgstr ""
+
 #. js-lingui-id: UX0N2y
 #: src/modules/object-record/record-table/empty-state/utils/getEmptyStateSubTitle.ts
 msgid "Run a workflow and return here to view its executions"
@@ -17615,6 +18428,8 @@ msgstr "土曜日"
 
 #. js-lingui-id: tfDRzk
 #: src/modules/settings/components/SaveAndCancelButtons/SaveButton.tsx
+#: src/modules/settings/config-variables/components/ConfigVariableEdit.tsx
+#: src/modules/settings/profile/components/EmailField.tsx
 #: src/pages/settings/data-model/new-field/SettingsObjectNewFieldConfigure.tsx
 msgid "Save"
 msgstr "保存"
@@ -17712,6 +18527,16 @@ msgstr "スコープ"
 #: src/pages/settings/ai/SettingsAgentTurnDetail.tsx
 msgid "Score"
 msgstr "スコア"
+
+#. js-lingui-id: +zt6D4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Script / transcript"
+msgstr ""
+
+#. js-lingui-id: 5yF7Zr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Script assistant"
+msgstr ""
 
 #. js-lingui-id: oOi11l
 #: src/modules/ai/components/AiChatScrollToBottomButton.tsx
@@ -18052,6 +18877,21 @@ msgstr "座席 / 月"
 msgid "seat / month - billed yearly"
 msgstr "座席 / 月 - 年間請求"
 
+#. js-lingui-id: NsDUXD
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "seat cancels soon"
+msgstr ""
+
+#. js-lingui-id: lUgAe4
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Seat purchased and invite sent to {beneficiary}."
+msgstr ""
+
+#. js-lingui-id: fURW48
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Seat purchased for {beneficiary}."
+msgstr ""
+
 #. js-lingui-id: MpFIca
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "seats"
@@ -18141,6 +18981,11 @@ msgstr "このレコードにリンクされている{relationLabelPlural}をす
 #: src/modules/page-layout/widgets/call-recording/components/WidgetActionCallRecordingSeeAll.tsx
 msgid "See all call recordings linked to this calendar event"
 msgstr "このカレンダーイベントにリンクされているすべての通話録音を表示"
+
+#. js-lingui-id: l3YUC+
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "See all integrations"
+msgstr ""
 
 #. js-lingui-id: 3o+CgI
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationShareLinkButtons.tsx
@@ -18269,6 +19114,11 @@ msgstr "既知のプロバイダーを選択するか、カスタムプロバイ
 #: src/modules/navigation-menu-item/edit/side-panel/components/SidePanelNavigationMenuItemEditPage.tsx
 msgid "Select a navigation item to edit"
 msgstr "編集するナビゲーション項目を選択"
+
+#. js-lingui-id: TD8E92
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Select a plan"
+msgstr ""
 
 #. js-lingui-id: p4N5TB
 #: src/modules/object-record/record-picker/multiple-record-picker/components/MultipleRecordPickerCreateTargetSelect.tsx
@@ -18455,9 +19305,17 @@ msgstr "言語を選択し、インターフェースのサイズを調整しま
 msgid "Selected folders"
 msgstr "選択したフォルダ"
 
+#. js-lingui-id: cBv4wp
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "self-managed"
+msgstr ""
+
 #. js-lingui-id: JlFcis
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/page-layout/widgets/email-thread/components/EmailThreadComposer.tsx
 #: src/modules/side-panel/pages/compose-email/components/SidePanelComposeEmailPage.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Send"
 msgstr "送信"
 
@@ -18497,6 +19355,11 @@ msgstr "メールを送信"
 msgid "Send emails via connected accounts"
 msgstr "接続されたアカウントを通じてメールを送信する"
 
+#. js-lingui-id: RoafuO
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Send feedback"
+msgstr ""
+
 #. js-lingui-id: 6nwEi6
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -18512,6 +19375,11 @@ msgstr "後で送信"
 #: src/modules/side-panel/pages/send-campaign/components/SendCampaignForm.tsx
 msgid "Send now"
 msgstr "今すぐ送信"
+
+#. js-lingui-id: 4k2VbT
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Send request"
+msgstr ""
 
 #. js-lingui-id: doZzL7
 #: src/modules/side-panel/pages/send-campaign-test/components/SidePanelSendCampaignTestPage.tsx
@@ -18764,6 +19632,11 @@ msgstr "2FAをセットアップ"
 msgid "Seventh"
 msgstr "第七"
 
+#. js-lingui-id: BDHA/i
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Severity"
+msgstr ""
+
 #. js-lingui-id: Z8lGw6
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
 msgid "Share"
@@ -18906,6 +19779,11 @@ msgstr "サイドバー項目"
 msgid "Sign in"
 msgstr "サインイン"
 
+#. js-lingui-id: pa0Bbi
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "Sign in again"
+msgstr ""
+
 #. js-lingui-id: Vt3mQ2
 #: src/utils/title-utils.ts
 msgid "Sign in or Create an account"
@@ -18945,6 +19823,11 @@ msgstr "署名キーを失効させました"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminHealthStatus.tsx
 msgid "Signing Keys"
 msgstr "署名キー"
+
+#. js-lingui-id: UOV0wi
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "Signing you in…"
+msgstr ""
 
 #. js-lingui-id: BZdVGR
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectForm.tsx
@@ -19062,11 +19945,6 @@ msgstr "小見出し"
 msgid "Smaller"
 msgstr "より小さいサイズ"
 
-#. js-lingui-id: ZKXQ0a
-#: src/modules/ai/utils/getAiModelTierLabel.ts
-msgid "Smart"
-msgstr "スマート"
-
 #. js-lingui-id: w+rJId
 #: src/modules/settings/accounts/components/SettingsAccountsConnectionForm.tsx
 msgid "SMTP Configuration"
@@ -19155,6 +20033,19 @@ msgstr "ログの読み込み中に問題が発生しました。もう一度お
 #: src/modules/side-panel/routing/components/SidePanelRoutedPage.tsx
 msgid "Something went wrong while loading this page."
 msgstr "このページの読み込み中に問題が発生しました。"
+
+#. js-lingui-id: kf83Ld
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Something went wrong."
+msgstr ""
+
+#. js-lingui-id: mTxXar
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Something's missing. Go back and complete the earlier steps."
+msgstr ""
 
 #. js-lingui-id: yHwG3y
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent.tsx
@@ -19368,6 +20259,11 @@ msgstr "確認プロセスを開始しました"
 msgid "Starting {scheduledChangeStartDate}"
 msgstr "{scheduledChangeStartDate} から開始"
 
+#. js-lingui-id: JD3In6
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Starting…"
+msgstr ""
+
 #. js-lingui-id: W1KkjZ
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
 #: src/modules/activities/calendar/components/CalendarEventComposerFields.tsx
@@ -19439,6 +20335,12 @@ msgstr "ステップのフィルターグループオプション"
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterOptionsDropdown.tsx
 msgid "Step filter options"
 msgstr "ステップのフィルターオプション"
+
+#. js-lingui-id: 84Scru
+#. placeholder {0}: formatSeconds(recordSeconds)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Stop ({0})"
+msgstr ""
 
 #. js-lingui-id: 9QwrMz
 #: src/modules/ai/dictation/components/AiChatDictationButton.tsx
@@ -19519,10 +20421,10 @@ msgstr "サブフィールド"
 msgid "Subdomain"
 msgstr "サブドメイン"
 
-#. js-lingui-id: Sv4BSp
+#. js-lingui-id: O6Cs12
 #: src/modules/settings/billing/constants/SettingsBillingPlanComparisonRows.ts
-msgid "Subdomain (yourco.twenty.com)"
-msgstr "サブドメイン (yourco.twenty.com)"
+msgid "Subdomain (yourco.desync.com)"
+msgstr ""
 
 #. js-lingui-id: mGO3xy
 #: src/modules/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm.tsx
@@ -19592,7 +20494,18 @@ msgstr "件名、本文、添付ファイルがチームと共有されます。
 msgid "Submit"
 msgstr "送信"
 
+#. js-lingui-id: ceXhtA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Submit Fio ad"
+msgstr ""
+
+#. js-lingui-id: LMMGPr
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Submitting..."
+msgstr ""
+
 #. js-lingui-id: EDl9kS
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
 #: src/modules/information-banner/components/billing/InformationBannerNoBillingSubscription.tsx
 msgid "Subscribe"
 msgstr "購読"
@@ -19602,6 +20515,11 @@ msgstr "購読"
 #: src/modules/settings/billing/components/internal/SettingsBillingSubscriptionInfoCardHeaderActions.tsx
 msgid "Subscribe Now"
 msgstr "今すぐ購読"
+
+#. js-lingui-id: /z87rP
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Subscribe to unlock the full CRM. Annual plans save 10%."
+msgstr ""
 
 #. js-lingui-id: WVzGc2
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceBillingContent.tsx
@@ -19615,13 +20533,13 @@ msgstr "サブスクリプション"
 msgid "Subscription activated."
 msgstr "サブスクリプションが有効になりました。"
 
-#. js-lingui-id: 0okvpx
+#. js-lingui-id: 5JLHOO
 #: src/modules/settings/billing/components/AddPaymentMethodForm.tsx
 #: src/modules/settings/billing/components/AddPaymentMethodForm.tsx
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
-msgid "Subscription error. Please retry or contact Twenty team"
-msgstr "サブスクリプションエラー。再試行するか、Twenty チームに連絡してください"
+msgid "Subscription error. Please retry or contact Desync team"
+msgstr ""
 
 #. js-lingui-id: FooJUj
 #. placeholder {0}: getTargetPlanLabel(targetPlanKey)
@@ -19659,8 +20577,15 @@ msgstr "subtitle"
 
 #. js-lingui-id: a0w0iQ
 #: src/modules/advanced-text-editor/components/AdvancedTextEditorInsertRail.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Subtitle"
 msgstr "サブタイトル"
+
+#. js-lingui-id: 2MXxPR
+#. placeholder {0}: subtitle.length
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Subtitle ({0}/{SUBTITLE_MAX})"
+msgstr ""
 
 #. js-lingui-id: zzDlyQ
 #: src/modules/ui/feedback/toast/components/__tests__/AppToaster.test.tsx
@@ -19778,6 +20703,7 @@ msgstr "本番インスタンスに切り替えました。"
 
 #. js-lingui-id: Nu4DdT
 #: src/modules/settings/workspace/components/SettingsWorkspaceEmailSyncSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 msgid "Sync"
 msgstr "同期"
 
@@ -19939,6 +20865,11 @@ msgstr "npm に公開したアプリの所有権を取得します。検索す�
 msgid "Talk to our team"
 msgstr "弊社チームにご相談ください"
 
+#. js-lingui-id: ezTM0H
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Talk to the Desync team"
+msgstr ""
+
 #. js-lingui-id: sceIIK
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "Target relation on Junction Object"
@@ -19969,6 +20900,26 @@ msgstr "チーム"
 #: src/modules/activities/emails/recipients/hooks/useEmailRecipientSuggestions.ts
 msgid "Team member"
 msgstr "チームメンバー"
+
+#. js-lingui-id: T0u3ig
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Team members"
+msgstr ""
+
+#. js-lingui-id: PEiTw7
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Teammate email"
+msgstr ""
+
+#. js-lingui-id: K1hNyg
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "teammate@email.com"
+msgstr ""
+
+#. js-lingui-id: Hmgm6w
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Tell us what's on your mind."
+msgstr ""
 
 #. js-lingui-id: lKXcJz
 #: src/pages/settings/emailing-domains/utils/getEmailingDomainStatusText.ts
@@ -20045,6 +20996,17 @@ msgstr "テキストがクリップボードにコピーされました"
 msgid "Text Editor"
 msgstr "テキストエディタ"
 
+#. js-lingui-id: BmfK6Z
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Thanks, sent to the Desync team."
+msgstr ""
+
+#. js-lingui-id: 1OAoa8
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "The ad image must be a non-transparent PNG (or a JPG)."
+msgstr ""
+
 #. js-lingui-id: Z4WP0F
 #: src/modules/settings/accounts/components/SettingsAccountsNewEmailGroupChannel.tsx
 msgid "The address your workspace will send and receive email from (e.g. support@mycompany.com). Outbound sending requires the domain to be verified in Outbound Domains."
@@ -20060,14 +21022,14 @@ msgstr "OpenAI 互換プロバイダー用の API エンドポイント"
 msgid "The AWS region for Bedrock"
 msgstr "Bedrock 用の AWS リージョン"
 
-#. js-lingui-id: HP7per
+#. js-lingui-id: 9pMTah
 #: src/pages/settings/applications/utils/getStandardApplicationDescription.ts
 msgid ""
-"The base data model every Twenty workspace runs on.\n"
+"The base data model every Desync workspace runs on.\n"
 "\n"
 "#### What \"foundation\" means\n"
 "\n"
-"Every Twenty workspace starts with this set of objects. They define the shape of your CRM, including relationships, activity, and reporting. Everything else, including marketplace apps, AI agents, and custom objects, plugs into them.\n"
+"Every Desync workspace starts with this set of objects. They define the shape of your CRM, including relationships, activity, and reporting. Everything else, including marketplace apps, AI agents, and custom objects, plugs into them.\n"
 "\n"
 "#### Included objects\n"
 "- **People & Companies**: contact and account records\n"
@@ -20075,11 +21037,11 @@ msgid ""
 "- **Notes & Tasks**: activity and follow-ups\n"
 "- **Workflows & Dashboards**: automation and reporting\n"
 "\n"
-"Remove this app and the rest of Twenty has nothing to hang off.\n"
+"Remove this app and the rest of Desync has nothing to hang off.\n"
 "\n"
 "#### Build your own app\n"
 "\n"
-"Extend Twenty with your own objects, fields, logic functions, or AI skills. Scaffold a new app in one command:\n"
+"Extend Desync with your own objects, fields, logic functions, or AI skills. Scaffold a new app in one command:\n"
 "\n"
 "```bash\n"
 "npx create-twenty-app@latest my-twenty-app\n"
@@ -20094,36 +21056,6 @@ msgid ""
 "\n"
 "See the [Getting Started guide](https://twenty.com/developers/extend/apps/getting-started) for the full walkthrough, and [Building Apps](https://twenty.com/developers/extend/apps/building) for the `defineApplication` / `defineEntity` APIs."
 msgstr ""
-"すべての Twenty ワークスペースが稼働する基盤となるデータモデル。\n"
-"\n"
-"#### 「基盤」の意味\n"
-"\n"
-"すべての Twenty ワークスペースは、この一連のオブジェクトから始まります。これらが、関係性、アクティビティ、レポーティングを含む CRM の構造を定義します。マーケットプレイスのアプリ、AI エージェント、カスタムオブジェクトなど、その他のすべてはこれらに接続されます。\n"
-"\n"
-"#### 含まれるオブジェクト\n"
-"- **人物と企業**: 連絡先およびアカウントのレコード\n"
-"- **商談**: 営業パイプライン\n"
-"- **メモとタスク**: アクティビティとフォローアップ\n"
-"- **ワークフローとダッシュボード**: 自動化とレポーティング\n"
-"\n"
-"このアプリを削除すると、Twenty の他のすべてが成り立たなくなります。\n"
-"\n"
-"#### 独自のアプリを構築する\n"
-"\n"
-"独自のオブジェクト、フィールド、ロジック関数、または AI スキルで Twenty を拡張できます。1 つのコマンドで新しいアプリのひな型を作成します:\n"
-"\n"
-"```bash\n"
-"npx create-twenty-app@latest my-twenty-app\n"
-"```\n"
-"\n"
-"次に、そのフォルダー内で:\n"
-"\n"
-"```bash\n"
-"cd my-twenty-app\n"
-"yarn twenty dev\n"
-"```\n"
-"\n"
-"詳しい手順は[はじめにガイド](https://twenty.com/developers/extend/apps/getting-started)を、`defineApplication` / `defineEntity` API については[アプリの構築](https://twenty.com/developers/extend/apps/building)をご覧ください。"
 
 #. js-lingui-id: VsxjzF
 #: src/modules/page-layout/widgets/call-recording/utils/getCallRecordingStatusDisplayConfiguration.ts
@@ -20237,6 +21169,11 @@ msgstr "受信者があなたのアドレスの横に表示される名前です
 msgid "The page you're seeking is either gone or never was. Let's get you back on track"
 msgstr "お探しのページは存在しないか、削除されました。元のページに戻りましょう"
 
+#. js-lingui-id: xloE1p
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "The payment didn't complete. Try a different card."
+msgstr ""
+
 #. js-lingui-id: Ya1wb4
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
 msgid "The PDF is pre-signed by Twenty and executed with your legal entity and authorized signatory."
@@ -20256,6 +21193,11 @@ msgstr "録音を読み込めませんでした。"
 #: src/modules/object-record/record-field/ui/hooks/useCreateJunctionRecordWithNestedTarget.ts
 msgid "The relation configuration could not be resolved."
 msgstr "リレーション設定を解決できませんでした。"
+
+#. js-lingui-id: /wbqWf
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "The seat has been upgraded."
+msgstr ""
 
 #. js-lingui-id: wxyrqd
 #: src/modules/workflow/workflow-steps/workflow-actions/pick-record-action/components/WorkflowEditActionPickRecord.tsx
@@ -20301,6 +21243,12 @@ msgstr "このフィールドの値"
 #: src/pages/settings/data-model/SettingsObjectFieldEdit.tsx
 msgid "The values of this field must be unique"
 msgstr "このフィールドの値は一意でなければなりません"
+
+#. js-lingui-id: wHb04I
+#. placeholder {0}: Math.round(duration)
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "The voiceover is {0}s; aim for a script that reads in 20 to 30 seconds, then regenerate."
+msgstr ""
 
 #. js-lingui-id: MHLapp
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarVisibilitySettingsCard.tsx
@@ -20377,6 +21325,11 @@ msgstr "太さ"
 #: src/modules/ai/components/AiChatThinkingRow.tsx
 msgid "Thinking"
 msgstr "考え中"
+
+#. js-lingui-id: Ed99mE
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Thinking..."
+msgstr ""
 
 #. js-lingui-id: 9ItHLu
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -20502,6 +21455,11 @@ msgstr "この請求期間"
 msgid "This call is being recorded…"
 msgstr "この通話は録音中です…"
 
+#. js-lingui-id: M2ohgY
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "This cancels the paid seat at the end of its current billing period — they keep access until then."
+msgstr ""
+
 #. js-lingui-id: WCa/7U
 #: src/pages/settings/applications/tabs/SettingsApplicationFrontComponentPreviewTab.tsx
 msgid "This component runs without a UI and renders nothing here."
@@ -20566,6 +21524,11 @@ msgstr "これは非本番インスタンスです。"
 #: src/modules/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationJunctionForm.tsx
 msgid "This is a relation to a Junction Object"
 msgstr "これはジャンクションオブジェクトへのリレーションです"
+
+#. js-lingui-id: Km4wPr
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "This is an internal Desync account with unlimited access. No billing actions apply."
+msgstr ""
 
 #. js-lingui-id: E4JJ5C
 #: src/modules/object-record/record-index/components/RecordIndexRemoveSortingModal.tsx
@@ -20642,6 +21605,11 @@ msgstr "この役割はこれらの{roleTargetDisplayName}に割り当てられ�
 msgid "This role is shared with other users or agents and cannot be edited here."
 msgstr "このロールは他のユーザーやエージェントと共有されているため、ここでは編集できません。"
 
+#. js-lingui-id: KkZ+Og
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "This runs inside {name}, not in Desync, so there is no connection status to show here. Add the connection details in {name} and you are all set."
+msgstr ""
+
 #. js-lingui-id: IBWuXb
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "This server has an Organization key configured. Make sure you keep a copy of it somewhere safe: you need the same key to activate a development instance or to move your license to a replacement server. If you no longer have access to your key, contact support."
@@ -20672,6 +21640,11 @@ msgstr "このサブドメインは予約済みです"
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 msgid "This takes {0} credits back off this workspace straight away. Revoking cannot be undone."
 msgstr "これにより、このワークスペースから直ちに {0} クレジットが回収されます。取り消しは元に戻せません。"
+
+#. js-lingui-id: zFwAll
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "This teammate is already on the top plan."
+msgstr ""
 
 #. js-lingui-id: MMGDfe
 #: src/modules/settings/admin-panel/config-variables/components/ConfigVariableHelpText.tsx
@@ -20764,6 +21737,11 @@ msgstr "これにより、二要素認証の方法が完全に削除されます
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdminAccess.tsx
 msgid "This will revoke {0} for {userLabel}."
 msgstr "これにより {userLabel} の {0} が取り消されます。"
+
+#. js-lingui-id: WneKvA
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "This workspace has already submitted its Fio ad. We'll be in touch; reach out if you need to change it."
+msgstr ""
 
 #. js-lingui-id: f8HOUp
 #: src/modules/ai/components/ThinkingStepsDisplay.tsx
@@ -21045,8 +22023,14 @@ msgstr "合計時間"
 msgid "Track AI consumption across your workspace."
 msgstr "ワークスペース全体の AI 消費を追跡します。"
 
+#. js-lingui-id: ipzSMZ
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Transcribing your audio..."
+msgstr ""
+
 #. js-lingui-id: DDziIo
 #: src/modules/page-layout/widgets/call-recording-transcript/components/CallRecordingTranscriptEntryList.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Transcript"
 msgstr "文字起こし"
 
@@ -21260,16 +22244,6 @@ msgstr "ターンが見つかりません"
 msgid "Turquoise"
 msgstr "ターコイズ"
 
-#. js-lingui-id: JnaRPe
-#: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
-msgid "Twenty fields"
-msgstr "Twenty のフィールド"
-
-#. js-lingui-id: pNo8xt
-#: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
-msgid "Twenty fills each level with the best model that meets your requirements"
-msgstr "Twentyは、要件を満たす最適なモデルで各レベルを構成します"
-
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
 msgid "Twitter/X Search"
@@ -21314,6 +22288,7 @@ msgid "Two-factor authentication setup completed successfully!"
 msgstr "二要素認証のセットアップが正常に完了しました！"
 
 #. js-lingui-id: +zy2Nq
+#: src/modules/navigation/components/DesyncHelpSection.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantModal.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminWorkspaceCreditGrantsTable.tsx
 #: src/modules/settings/components/SettingsDnsRecordsTable.tsx
@@ -21342,11 +22317,21 @@ msgstr "コマンドを入力するには「/」と入力してください"
 msgid "Type '/' for commands, '@' for mentions"
 msgstr "コマンドは'/'、メンションは'@'を入力してください"
 
+#. js-lingui-id: wEWQRM
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
+msgid "Type \"cancel\" to confirm."
+msgstr ""
+
 #. js-lingui-id: qzD6hf
 #: src/modules/side-panel/components/SidePanelTopBar.tsx
 #: src/modules/workflow/workflow-steps/workflow-actions/ai-agent-action/components/WorkflowAiAgentPermissionsTab.tsx
 msgid "Type anything..."
 msgstr "何でも入力..."
+
+#. js-lingui-id: uz+96A
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Type cancel"
+msgstr ""
 
 #. js-lingui-id: LaEX5I
 #: src/modules/activities/emails/components/CampaignBodyField.tsx
@@ -21692,6 +22677,11 @@ msgstr "配信停止者"
 msgid "Unsupported image format"
 msgstr "サポートされていない画像形式です"
 
+#. js-lingui-id: HLxHPm
+#: src/modules/desync-onboarding/components/DesyncUsageWidget.tsx
+msgid "Until {dateStr}"
+msgstr ""
+
 #. js-lingui-id: wja8aL
 #: src/modules/ai/components/AiChatThreadListItem.tsx
 #: src/modules/ai/components/ChatReferenceChip.tsx
@@ -21884,9 +22874,15 @@ msgstr "{objectLabel} を更新中"
 msgid "Updating..."
 msgstr "更新中..."
 
+#. js-lingui-id: Jqe+Dc
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Updating…"
+msgstr ""
+
 #. js-lingui-id: kwkhPe
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
+#: src/modules/desync-onboarding/components/DesyncTeamSeats.tsx
 #: src/modules/information-banner/components/billing/InformationBannerNoMoreCredits.tsx
 #: src/modules/settings/billing/components/internal/ResourceCreditPriceSelector.tsx
 #: src/modules/settings/billing/hooks/useBillingPlanActions.ts
@@ -21894,6 +22890,17 @@ msgstr "更新中..."
 #: src/modules/settings/roles/role-permissions/object-level-permissions/record-level-permissions/components/SettingsRolePermissionsObjectLevelRecordLevelSection.tsx
 msgid "Upgrade"
 msgstr "アップグレード"
+
+#. js-lingui-id: EHnRfs
+#. placeholder {0}: target.email
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Upgrade {0}'s seat"
+msgstr ""
+
+#. js-lingui-id: B/WhgE
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Upgrade for more records and features. Your leftover records carry over, and you’re charged the new plan’s price right away."
+msgstr ""
 
 #. js-lingui-id: IEtN5Y
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminWorkspacesStatusSummaryCard.tsx
@@ -21925,7 +22932,11 @@ msgstr "アップグレードステータスが更新されました"
 
 #. js-lingui-id: doMiaH
 #. placeholder {0}: latestAvailableVersion ?? ''
+#. placeholder {0}: selectedPlan.name
+#. placeholder {0}: selectedPlan?.name ?? ''
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
 #: src/modules/settings/applications/components/SettingsApplicationActionButton.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
 msgid "Upgrade to {0}"
 msgstr "{0} にアップグレード"
 
@@ -21957,6 +22968,11 @@ msgstr "監査ログにアクセスするには、Organization にアップグ�
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
 msgid "Upgrade your free trial"
 msgstr "無料トライアルをアップグレード"
+
+#. js-lingui-id: 21QsyA
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Upgrade your plan"
+msgstr ""
 
 #. js-lingui-id: T1mDWj
 #: src/pages/onboarding/UpgradeFreeTrial.tsx
@@ -22010,6 +23026,11 @@ msgstr "ファイルをアップロード"
 #: src/modules/auth/sign-in-up/components/internal/SignInUpWorkspaceCreationForm.tsx
 msgid "Upload logo"
 msgstr "ロゴをアップロード"
+
+#. js-lingui-id: Yi/8c6
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Upload MP3"
+msgstr ""
 
 #. js-lingui-id: sl/qWH
 #: src/modules/onboarding/components/OnboardingProfilePictureUploader.tsx
@@ -22143,10 +23164,25 @@ msgstr "利用期間"
 msgid "Use a dedicated form when creating records."
 msgstr "レコード作成時に専用フォームを使用します。"
 
+#. js-lingui-id: I3AwBO
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Use a different card"
+msgstr ""
+
+#. js-lingui-id: mvljGL
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Use as script"
+msgstr ""
+
 #. js-lingui-id: 6kLyt5
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationProvision.tsx
 msgid "Use authenticator apps and browser extensions like 1Password, Authy, Microsoft Authenticator to generate one-time passwords"
 msgstr "1Password、Authy、Microsoft Authenticatorなどの認証アプリやブラウザ拡張機能を使用して、ワンタイムパスワードを生成します"
+
+#. js-lingui-id: 22KOw3
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Use card on file"
+msgstr ""
 
 #. js-lingui-id: 5ZehS/
 #: src/pages/settings/ai/components/SettingsAgentSkillsTab.tsx
@@ -22526,7 +23562,6 @@ msgstr "ドキュメントを表示"
 
 #. js-lingui-id: Mv1YVf
 #: src/modules/error-handler/utils/getToastOptionsFromError.tsx
-#: src/modules/error-handler/utils/getToastOptionsFromError.tsx
 msgid "View existing record"
 msgstr "既存のレコードを表示"
 
@@ -22802,6 +23837,11 @@ msgstr "パッケージレジストリに接続できず、パッケージのプ
 msgid "We couldn't confirm your payment method. Please retry."
 msgstr "お支払い方法を確認できませんでした。再試行してください。"
 
+#. js-lingui-id: 1sa/dE
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "We couldn't finish signing you in. Please try again."
+msgstr ""
+
 #. js-lingui-id: TvNBSn
 #: src/modules/onboarding/components/upgrade-free-trial/ChooseYourPlanErrorState.tsx
 #: src/modules/settings/billing/components/SettingsBillingPlansErrorState.tsx
@@ -22818,6 +23858,11 @@ msgstr "認証中に問題が発生しました"
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionUpsertRecord.tsx
 msgid "We match on these fields. If a {0} already exists, we update it. Otherwise, we create a new one."
 msgstr "これらのフィールドで一致します。既に{0}が存在する場合は更新します。そうでなければ、新しいものを作成します。"
+
+#. js-lingui-id: V/kD6G
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "We prefilled what we already know. Edit anything."
+msgstr ""
 
 #. js-lingui-id: id6ein
 #: src/modules/ui/input/components/ImageInput.tsx
@@ -22930,8 +23975,14 @@ msgstr "Webhooks"
 
 #. js-lingui-id: On0aF2
 #: src/modules/settings/applications/components/SettingsApplicationAboutSidebar.tsx
+#: src/pages/fio-ads/FioAdsPage.tsx
 msgid "Website"
 msgstr "ウェブサイト"
+
+#. js-lingui-id: fVUMW4
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Website (https://...)"
+msgstr ""
 
 #. js-lingui-id: zx4BuL
 #: src/modules/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent.tsx
@@ -22956,26 +24007,25 @@ msgstr "毎週"
 msgid "weeks"
 msgstr "週間"
 
-#. js-lingui-id: nTuObL
+#. js-lingui-id: 6jfS51
 #: src/pages/auth/SignInUp.tsx
-msgid "Welcome to Twenty"
-msgstr "Twentyへようこそ"
+msgid "Welcome"
+msgstr ""
+
+#. js-lingui-id: 9FXDWs
+#: src/pages/auth/SignInUp.tsx
+msgid "Welcome to Desync"
+msgstr ""
+
+#. js-lingui-id: b3bMNK
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Welcome to Desync. Let's set up your CRM."
+msgstr ""
 
 #. js-lingui-id: t8ZvkC
 #: src/modules/onboarding/constants/WelcomeTitleMessage.ts
-#: src/pages/auth/SignInUp.tsx
 msgid "Welcome to your workspace"
 msgstr "ワークスペースへようこそ"
-
-#. js-lingui-id: Vin3Dv
-#: src/pages/auth/SignInUp.tsx
-msgid "Welcome, {workspaceName}."
-msgstr "ようこそ、{workspaceName}。"
-
-#. js-lingui-id: Itn+J7
-#: src/modules/ai/components/suggested-prompts/AiChatSuggestedPrompts.tsx
-msgid "What can I help you with?"
-msgstr "何をお手伝いできますか？"
 
 #. js-lingui-id: ivJ1Xk
 #: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
@@ -22992,11 +24042,22 @@ msgstr "このフィールドのラベルについて各言語で表示される
 msgid "What each language displays for this object's labels"
 msgstr "このオブジェクトのラベルについて各言語で表示される内容"
 
+#. js-lingui-id: y/K0Dz
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "What happened?"
+msgstr ""
+
 #. js-lingui-id: cE4SvC
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeyDetail.tsx
 #: src/pages/settings/developers/api-keys/SettingsDevelopersApiKeysNew.tsx
 msgid "What this API can do: Select a user role to define its permissions."
 msgstr "このAPIでできること：ユーザーのロールを選択して、その権限を定義します。"
+
+#. js-lingui-id: sY9iJW
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "What you expected, what happened, and where."
+msgstr ""
 
 #. js-lingui-id: drC+Tq
 #: src/pages/settings/ai/components/SettingsAiOverviewTab.tsx
@@ -23007,21 +24068,6 @@ msgstr "ワークスペースにインストールされ、使用されている
 #: src/pages/settings/communications/SettingsWorkspaceCommunications.tsx
 msgid "Whatsapp"
 msgstr "WhatsApp"
-
-#. js-lingui-id: m7GziZ
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When a deal's stage changes to Closed Won, create a task assigned to the deal owner, due 7 days after the close date, with title \"Post-sale check-in\" and the company name in the description."
-msgstr "案件のステージが Closed Won に変更されたとき、案件オーナーに割り当てられたタスクを作成し、期日はクローズ日から7日後、タイトルは \"Post-sale check-in\"、説明に会社名を含めてください。"
-
-#. js-lingui-id: IHLoUB
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When a new lead is created with source \"Website\", assign it to the sales rep whose territory (by region/country) matches the lead's address; if no match, assign to the team lead."
-msgstr "ソースが \"Website\" の新しいリードが作成されたとき、テリトリー（地域/国別）がリードの住所と一致する営業担当に割り当ててください。一致しない場合はチームリードに割り当ててください。"
-
-#. js-lingui-id: haFWB2
-#: src/modules/ai/components/suggested-prompts/default-suggested-prompts.ts
-msgid "When any deal with amount over $100,000 has its stage or amount updated, send a notification to the sales channel with the deal name, company, new stage, amount and owner."
-msgstr "金額が $100,000 を超える案件でステージまたは金額が更新されたとき、案件名、会社名、新しいステージ、金額、オーナーを含めて営業チャネルに通知を送信してください。"
 
 #. js-lingui-id: aEaoKJ
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -23055,6 +24101,11 @@ msgstr "このオブジェクトのレコードを開く場所"
 #: src/pages/settings/admin-panel/SettingsAdminNewAiModel.tsx
 msgid "Whether this model supports chain-of-thought reasoning"
 msgstr "このモデルが Chain-of-Thought（思考の連鎖）による推論をサポートするかどうか"
+
+#. js-lingui-id: JNCYjr
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
+msgid "Which platform would you like?"
+msgstr ""
 
 #. js-lingui-id: 9y+sLE
 #: src/modules/workflow/workflow-variables/utils/getWorkflowVariableSpecialItems.ts
@@ -23216,6 +24267,7 @@ msgstr "ワークフロー"
 #: src/pages/settings/developers/playground/SettingsRestPlayground.tsx
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 #: src/pages/settings/general/SettingsGeneral.tsx
+#: src/pages/settings/integrations/SettingsIntegrations.tsx
 #: src/pages/settings/layout/components/SettingsLayoutDetailScaffold.tsx
 #: src/pages/settings/layout/SettingsLayout.tsx
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
@@ -23285,6 +24337,11 @@ msgstr "ワークスペースメンバー"
 msgid "Workspace members"
 msgstr "ワークスペースメンバー"
 
+#. js-lingui-id: 7etw3b
+#: src/modules/desync-onboarding/components/SeatCheckoutModal.tsx
+msgid "Workspace role"
+msgstr ""
+
 #. js-lingui-id: PHF7zj
 #: src/pages/settings/applications/SettingsApplicationConnectionDetail.tsx
 #: src/pages/settings/applications/tabs/SettingsApplicationConnectionsSection.tsx
@@ -23337,6 +24394,11 @@ msgstr "説明を記入"
 #: src/pages/settings/ai/components/SettingsAgentSettingsTab.tsx
 msgid "Write a description for this agent"
 msgstr "このエージェントの説明を書く"
+
+#. js-lingui-id: 3NOsWS
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Write or generate a script first, then I can voice it."
+msgstr ""
 
 #. js-lingui-id: zeCIJi
 #: src/modules/settings/logic-functions/components/tabs/SettingsLogicFunctionCodeEditorTab.tsx
@@ -23430,6 +24492,11 @@ msgstr "はい"
 msgid "Yesterday"
 msgstr "昨日"
 
+#. js-lingui-id: kWJmRL
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "You"
+msgstr ""
+
 #. js-lingui-id: lWUeEt
 #: src/modules/auth/sign-in-up/hooks/useWorkspaceFromInviteHash.ts
 msgid "You already belong to the workspace {workspaceDisplayName}"
@@ -23501,6 +24568,11 @@ msgstr "このオブジェクトにアクセスする権限がありません。
 msgid "You don't have access to this settings page."
 msgstr "この設定ページにアクセスする権限がありません。"
 
+#. js-lingui-id: J5Sr/d
+#: src/modules/auth/sign-in-up/components/internal/SignInUpWithClerk.tsx
+msgid "You don't have an active Desync subscription yet. Subscribe to start using the CRM, then come back and continue."
+msgstr ""
+
 #. js-lingui-id: tzk0bz
 #: src/pages/settings/enterprise/SettingsEnterprise.tsx
 msgid "You have reached the maximum number of server transfers allowed in the last 30 days for this Organization key. Please try again later or contact support."
@@ -23546,15 +24618,30 @@ msgstr "すべてのマッピングが失われます。"
 msgid "You will stop receiving these emails."
 msgstr "これらのメールは今後受信しなくなります。"
 
+#. js-lingui-id: 6CBP/6
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "You’ll keep access, and your workspace, until the end of the period you’ve already paid for. Type <0>cancel</0> to confirm."
+msgstr ""
+
 #. js-lingui-id: Cl+hUj
 #: src/modules/settings/domains/components/SettingsSubdomain.tsx
 msgid "You're about to change your workspace subdomain. This action will log out all users."
 msgstr "ワークスペースのサブドメインを変更しようとしています。この操作により、すべてのユーザーがログアウトされます。"
 
+#. js-lingui-id: PRZEsv
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "You’re on our top plan. Thank you!"
+msgstr ""
+
 #. js-lingui-id: 6x8lJe
 #: src/modules/ai/components/AIChatNoMoreBillingCreditsBanner.tsx
 msgid "You’ve reached your AI usage limit."
 msgstr "AIの利用上限に達しました。"
+
+#. js-lingui-id: w328ML
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your account has full access to the CRM."
+msgstr ""
 
 #. js-lingui-id: tOPGvO
 #: src/modules/apollo/services/apollo.factory.ts
@@ -23571,6 +24658,11 @@ msgstr "請求間隔はただちに月次に切り替わり、トライアルは
 msgid "Your billing interval will switch to yearly immediately and your trial will continue. When it ends, you will be charged ${yearlyPrice} per user per year billed annually."
 msgstr "請求間隔はただちに年次に切り替わり、トライアルは継続します。終了後は、年次請求でユーザー 1 人あたり年額 ${yearlyPrice} が請求されます。"
 
+#. js-lingui-id: GMUujR
+#: src/pages/get-started/GetStartedPage.tsx
+msgid "Your built-in AI agent can fill your CRM for you, pull in your contacts, find new leads, and tell you who to follow up with. Three quick steps and it does the work."
+msgstr ""
+
 #. js-lingui-id: u1O1GV
 #: src/modules/settings/billing/hooks/useWaitForPaymentRecovery.tsx
 msgid "Your card was saved, but the payment still needs attention."
@@ -23580,6 +24672,16 @@ msgstr "カードは保存されましたが、支払いには引き続き対応
 #: src/pages/settings/legal/SettingsLegalDpaNew.tsx
 msgid "Your details"
 msgstr "お客様の詳細情報"
+
+#. js-lingui-id: cSUBI1
+#: src/modules/navigation/components/DesyncHelpSection.tsx
+msgid "Your feedback"
+msgstr ""
+
+#. js-lingui-id: OSmWqR
+#: src/pages/fio-ads/FioAdsPage.tsx
+msgid "Your Fio ad was submitted. We'll be in touch."
+msgstr ""
 
 #. js-lingui-id: gUv6/H
 #: src/pages/settings/applications/utils/getClaimErrorContent.ts
@@ -23621,6 +24723,17 @@ msgstr "組織サブスクリプションはキャンセルされました。"
 #: src/modules/settings/billing/hooks/useSubmitSubscriptionPayment.ts
 msgid "Your payment details are incomplete. Please review and retry."
 msgstr "お支払い情報が不完全です。内容を確認して再試行してください。"
+
+#. js-lingui-id: f4DO/O
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your plan"
+msgstr ""
+
+#. js-lingui-id: lDBxkO
+#: src/pages/settings/plan-billing/SettingsPlanBilling.tsx
+msgid "Your plan is updating. It may take a few seconds to reflect here."
+msgstr ""
 
 #. js-lingui-id: IxG5gy
 #: src/modules/settings/billing/hooks/useBillingWording.ts
