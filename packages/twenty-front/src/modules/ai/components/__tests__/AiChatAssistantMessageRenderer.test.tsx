@@ -424,4 +424,66 @@ describe('AiChatAssistantMessageRenderer', () => {
       'thinking-1-answer-started',
     );
   });
+
+  it('should render a web search answer split around citations as one markdown block', () => {
+    const messageParts = [
+      {
+        type: 'tool-web_search',
+        toolCallId: 'tool-1',
+        input: { query: 'catholic schools springfield' },
+        output: { result: { ok: true } },
+        state: 'output-available',
+      },
+      { type: 'text', text: 'The docs say ' },
+      { type: 'text', text: 'widgets are read-only by default' },
+      { type: 'text', text: '.\n\n| School | City |\n|---|---|\n| ' },
+      {
+        type: 'source-url',
+        sourceId: 'source-1',
+        url: 'https://example.com/schools',
+        title: 'Schools',
+      },
+      { type: 'text', text: 'St. Mary Academy' },
+      { type: 'text', text: ' | Springfield |' },
+    ] as ExtendedUIMessagePart[];
+
+    renderAssistantRenderer(messageParts);
+
+    const markdownBlocks = screen.getAllByTestId('markdown-renderer');
+
+    expect(markdownBlocks).toHaveLength(1);
+    expect(markdownBlocks[0].textContent).toBe(
+      'The docs say widgets are read-only by default.\n\n| School | City |\n|---|---|\n| St. Mary Academy | Springfield |',
+    );
+    expect(screen.getByTestId('thinking-steps-display')).toHaveTextContent(
+      'thinking-1-answer-started',
+    );
+  });
+
+  it('should keep text separated by tool steps as separate blocks in order', () => {
+    const messageParts = [
+      { type: 'text', text: 'Let me look that up.' },
+      {
+        type: 'tool-web_search',
+        toolCallId: 'tool-1',
+        input: { query: 'crm software' },
+        output: { result: { ok: true } },
+        state: 'output-available',
+      },
+      { type: 'text', text: 'Here is ' },
+      { type: 'text', text: 'what I found.' },
+    ] as ExtendedUIMessagePart[];
+
+    renderAssistantRenderer(messageParts);
+
+    expect(
+      screen
+        .getAllByTestId(/markdown-renderer|thinking-steps-display/)
+        .map((element) => element.textContent),
+    ).toEqual([
+      'Let me look that up.',
+      'thinking-1-answer-started',
+      'Here is what I found.',
+    ]);
+  });
 });

@@ -10,6 +10,7 @@ import { ToolStepRenderer } from '@/ai/components/ToolStepRenderer';
 import { groupContiguousThinkingStepParts } from '@/ai/utils/groupContiguousThinkingStepParts';
 import { isCodeInterpreterToolPart } from '@/ai/utils/isCodeInterpreterToolPart';
 import { isHiddenCompleteWorkspaceSetupToolPart } from '@/ai/utils/isHiddenCompleteWorkspaceSetupToolPart';
+import { mergeAdjacentTextParts } from '@/ai/utils/mergeAdjacentTextParts';
 import { styled } from '@linaria/react';
 import { getToolName, isToolUIPart } from 'ai';
 import {
@@ -90,7 +91,9 @@ export const AiChatAssistantMessageRenderer = ({
       !isHiddenCompleteWorkspaceSetupToolPart(part) &&
       !(hasCodeExecutionData && isCodeInterpreterToolPart(part)),
   );
-  const renderItems = groupContiguousThinkingStepParts(filteredParts);
+  const renderItems = groupContiguousThinkingStepParts(
+    mergeAdjacentTextParts(filteredParts),
+  );
 
   const lastRenderItemIndex = renderItems.length - 1;
 
