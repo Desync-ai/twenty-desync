@@ -87,23 +87,30 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           Icon: IconCreditCard,
         },
         {
+          // Desync: the native Accounts section (Accounts/Emails/Calendars) is
+          // HIDDEN for now. Connecting a Google/Microsoft account here runs our
+          // own OAuth app, which Google still shows as an unverified-app warning
+          // (verification pending), and that scary screen was upsetting users.
+          // Until verification clears, users connect email/calendar via the
+          // Integrations tab (Composio) and use them through the AI agent.
+          // Reversible: restore `isHidden` to the permission check below.
           label: t`Accounts`,
           path: SettingsPath.Accounts,
           Icon: IconAt,
-          isHidden: !permissionMap[PermissionFlagType.CONNECTED_ACCOUNTS],
+          isHidden: true,
           subItems: [
             {
               label: t`Emails`,
               path: SettingsPath.AccountsEmails,
               Icon: IconMail,
-              isHidden: !permissionMap[PermissionFlagType.CONNECTED_ACCOUNTS],
+              isHidden: true,
               indentationLevel: 2,
             },
             {
               label: t`Calendars`,
               path: SettingsPath.AccountsCalendars,
               Icon: IconCalendarEvent,
-              isHidden: !permissionMap[PermissionFlagType.CONNECTED_ACCOUNTS],
+              isHidden: true,
               indentationLevel: 2,
             },
           ],
