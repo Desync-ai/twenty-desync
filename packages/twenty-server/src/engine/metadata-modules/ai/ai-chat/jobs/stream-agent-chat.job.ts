@@ -85,6 +85,10 @@ export class StreamAgentChatJob {
   // error reply under it.
   private hasPersistedTurnReply = false;
 
+  // Set once the job saved the user message itself (no existingTurnId), so a
+  // later failure can still attach its error reply to that turn.
+  private savedTurnId: string | undefined;
+
   constructor(
     @InjectWorkspaceScopedRepository(AgentChatThreadEntity)
     private readonly threadRepository: WorkspaceScopedRepository<AgentChatThreadEntity>,
@@ -213,14 +217,16 @@ export class StreamAgentChatJob {
       // keeps this turn from reading as silently ignored afterwards. An empty
       // response may still have saved reasoning-only parts, which read as no
       // answer.
+      const failedTurnId = data.existingTurnId ?? this.savedTurnId;
+
       if (
-        isDefined(data.existingTurnId) &&
+        isDefined(failedTurnId) &&
         (!this.hasPersistedTurnReply ||
           error instanceof EmptyAgentChatResponseError)
       ) {
         await this.persistTurnError(
           data,
-          data.existingTurnId,
+          failedTurnId,
           buildAgentChatTurnError(error),
         );
       }
@@ -387,7 +393,11 @@ export class StreamAgentChatJob {
           workspaceId: data.workspaceId,
         });
 
-    userMessagePromise.catch(() => {});
+    userMessagePromise
+      .then(({ turnId }) => {
+        this.savedTurnId = turnId ?? undefined;
+      })
+      .catch(() => {});
 
     const titlePromise = data.hasTitle
       ? Promise.resolve(null)
