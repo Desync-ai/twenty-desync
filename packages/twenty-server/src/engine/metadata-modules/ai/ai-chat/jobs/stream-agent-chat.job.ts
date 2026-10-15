@@ -593,9 +593,7 @@ export class StreamAgentChatJob {
                   });
                   await titleWritePromise;
 
-                  hasReply = !isEmptyAgentChatResponse(
-                    responseMessage.parts,
-                  );
+                  hasReply = !isEmptyAgentChatResponse(responseMessage.parts);
 
                   if (
                     !isAborted &&
