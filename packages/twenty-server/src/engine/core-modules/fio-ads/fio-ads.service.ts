@@ -511,13 +511,22 @@ export class FioAdsService {
   async generateScripts({
     brand,
     email,
+    notes,
   }: {
     brand?: { name?: string; website?: string };
     email?: string;
+    notes?: string;
   }): Promise<{ scripts: FioAdScript[] }> {
     if (!this.anthropicKey) {
       throw new Error('Script ideas are not configured (ANTHROPIC_API_KEY).');
     }
+
+    // Extra things the user typed in the "add to the scripts" box. Layered on
+    // top of the signup + website grounding; clamped and dash-stripped.
+    const extra = (notes ?? '')
+      .replace(/\s*[—–]\s*/g, ', ')
+      .trim()
+      .slice(0, 1000);
 
     const brandLine =
       brand?.name || brand?.website
@@ -551,7 +560,9 @@ export class FioAdsService {
       `Rules for every script: spoken words only, no titles, no headings, no ` +
       `markdown, no quotation marks, no stage directions, no word counts, no ` +
       `labels. Never use em dashes or en dashes; use commas, periods, or ` +
-      `parentheses instead. Stay within the 20 to 30 second limit.\n\n` +
+      `parentheses instead. Stay within the 20 to 30 second limit. Write in ` +
+      `short, punchy sentences; the app lays each sentence on its own line for ` +
+      `easy reading.\n\n` +
       `Return ONLY a JSON array of exactly five objects, in the order above, each ` +
       `with keys: "flavor" (one of bell, trumpet, latin, prayer, plain), "label" ` +
       `(two to four words naming the idea), "highlight" (one short sentence on ` +
@@ -580,7 +591,12 @@ export class FioAdsService {
           {
             role: 'user',
             content:
-              'Write the five script ideas now as the JSON array described.',
+              'Write the five script ideas now as the JSON array described.' +
+              (extra
+                ? `\n\nThe user specifically wants the scripts to include or ` +
+                  `reflect the following. Honor it in every script where it ` +
+                  `fits naturally, without breaking the rules above:\n${extra}`
+                : ''),
           },
         ],
       }),
@@ -635,7 +651,7 @@ export class FioAdsService {
           flavor,
           label: clean(row.label).slice(0, 60),
           highlight: clean(row.highlight).slice(0, 200),
-          script: clean(row.script).slice(0, 2000),
+          script: this.formatScript(clean(row.script).slice(0, 2000)),
         };
       })
       .filter((s) => allowedFlavors.has(s.flavor) && s.script.length > 0);
@@ -645,6 +661,25 @@ export class FioAdsService {
     }
 
     return scripts;
+  }
+
+  // Lay a one-paragraph script out as one sentence (beat) per line so it reads
+  // easily while recording, instead of a single wall of text. If the model
+  // already added line breaks, keep them as-is.
+  private formatScript(text: string): string {
+    const s = text.trim();
+    if (!s || s.includes('\n')) {
+      return s;
+    }
+    const parts = s.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g);
+    if (!parts || parts.length <= 1) {
+      return s;
+    }
+
+    return parts
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join('\n');
   }
 
   // Optional auto-transcription of the ad audio via Groq-hosted Whisper. Returns

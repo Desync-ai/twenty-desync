@@ -239,6 +239,7 @@ const StyledSelect = styled.select`
   font-size: ${themeCssVariables.font.size.sm};
   max-width: 320px;
   padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+  width: 100%;
 `;
 
 const StyledCategoryGrid = styled.div`
@@ -283,9 +284,9 @@ const StyledMessage = styled.div`
 `;
 
 const StyledScriptList = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: ${themeCssVariables.spacing[3]};
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 `;
 
 const StyledScriptCard = styled.div`
@@ -328,6 +329,19 @@ const StyledScriptText = styled.div`
   font-size: ${themeCssVariables.font.size.sm};
   line-height: 1.5;
   white-space: pre-wrap;
+`;
+
+// The "Use this script" button, pinned to the bottom of each card so the
+// buttons line up across a row even when scripts differ in length.
+const StyledScriptAction = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  padding-top: ${themeCssVariables.spacing[2]};
+
+  & > button {
+    width: 100%;
+  }
 `;
 
 const StyledReviewRow = styled.div`
@@ -442,6 +456,7 @@ export const FioAdsPage = () => {
   const [transcript, setTranscript] = useState('');
   const [transcribing, setTranscribing] = useState(false);
   const [scripts, setScripts] = useState<ScriptIdea[]>([]);
+  const [scriptNotes, setScriptNotes] = useState('');
   const [generatingScripts, setGeneratingScripts] = useState(false);
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
   const [introSound, setIntroSound] = useState<IntroSound | null>(null);
@@ -522,6 +537,7 @@ export const FioAdsPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brand: { name: brandName.trim(), website: website.trim() },
+          notes: scriptNotes.trim(),
         }),
       });
       if (!res.ok) {
@@ -813,6 +829,7 @@ export const FioAdsPage = () => {
     setAudioPreviewUrl(null);
     setTranscript('');
     setScripts([]);
+    setScriptNotes('');
     setSelectedFlavor(null);
     setIntroSound(null);
     setCategories([]);
@@ -1100,6 +1117,20 @@ export const FioAdsPage = () => {
                     <StyledHelper>
                       {t`Generate 5 short script ideas from your brand and website, each with a different opening. Use one as is, or pick one to edit, then record it in your own voice below.`}
                     </StyledHelper>
+                    <StyledField>
+                      <TextArea
+                        textAreaId="fio-script-notes"
+                        label={t`Anything you want in the scripts? (optional)`}
+                        placeholder={t`For example: mention our Easter concert, we're based in Austin, name our patron saint, keep it gentle.`}
+                        value={scriptNotes}
+                        onChange={setScriptNotes}
+                        minRows={2}
+                        maxRows={5}
+                      />
+                      <StyledHelper>
+                        {t`We already use your brand and website. Add anything extra you want worked into the ideas.`}
+                      </StyledHelper>
+                    </StyledField>
                     <StyledUploadRow>
                       <Button
                         variant="solid"
@@ -1134,13 +1165,6 @@ export const FioAdsPage = () => {
                                 <StyledScriptBadge>
                                   {idea.label}
                                 </StyledScriptBadge>
-                                <Button
-                                  variant={selected ? 'solid' : 'outline'}
-                                  color={selected ? 'accent' : undefined}
-                                  onClick={() => chooseScript(idea)}
-                                >
-                                  {selected ? t`Selected` : t`Use this script`}
-                                </Button>
                               </StyledScriptHead>
                               {idea.highlight && (
                                 <StyledScriptHighlight>
@@ -1175,6 +1199,15 @@ export const FioAdsPage = () => {
                                   </StyledHelper>
                                 </StyledField>
                               )}
+                              <StyledScriptAction>
+                                <Button
+                                  variant={selected ? 'solid' : 'outline'}
+                                  color={selected ? 'accent' : undefined}
+                                  onClick={() => chooseScript(idea)}
+                                >
+                                  {selected ? t`Selected` : t`Use this script`}
+                                </Button>
+                              </StyledScriptAction>
                             </StyledScriptCard>
                           );
                         })}

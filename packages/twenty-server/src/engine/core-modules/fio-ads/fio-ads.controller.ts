@@ -95,7 +95,8 @@ export class FioAdsController {
 
   @Post('scripts')
   async scripts(
-    @Body() body: { brand?: { name?: string; website?: string } },
+    @Body()
+    body: { brand?: { name?: string; website?: string }; notes?: string },
     @Req() request: AuthenticatedRequest,
   ) {
     // Generating the five script ideas spends AI budget, so gate it like launch.
@@ -117,6 +118,7 @@ export class FioAdsController {
     return this.fioAdsService.generateScripts({
       brand: body?.brand,
       email: this.userEmail(request),
+      notes: body?.notes,
     });
   }
 
