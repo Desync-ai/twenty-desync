@@ -12,7 +12,11 @@ import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
 import { FIO_LOGO } from './fioLogo';
-import { FIO_INTRO_SOUNDS, playIntroSound } from './fioIntroSounds';
+import {
+  buildRecordingWithIntro,
+  FIO_INTRO_SOUNDS,
+  playIntroSound,
+} from './fioIntroSounds';
 
 // Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
 // Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
@@ -500,6 +504,7 @@ export const FioAdsPage = () => {
   const [generatingScripts, setGeneratingScripts] = useState(false);
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
   const [introSound, setIntroSound] = useState<IntroSound | null>(null);
+  const [combinedUrl, setCombinedUrl] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -816,6 +821,35 @@ export const FioAdsPage = () => {
     };
   }, []);
 
+  // On the review step, build a preview of the recording with the chosen intro
+  // sound spliced onto the front, so the user hears the final ad before sending.
+  useEffect(() => {
+    if (step !== 3 || !audio || !introSound) {
+      setCombinedUrl(null);
+      return;
+    }
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    void (async () => {
+      const combined = await buildRecordingWithIntro({
+        recordingBase64: audio.dataBase64,
+        recordingContentType: audio.contentType,
+        kind: introSound.kind,
+        variant: introSound.variant,
+      });
+      if (combined && !cancelled) {
+        objectUrl = URL.createObjectURL(combined.blob);
+        setCombinedUrl(objectUrl);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [step, audio, introSound]);
+
   const toggleCategory = (category: string) => {
     setCategories((prev) =>
       prev.includes(category)
@@ -874,6 +908,29 @@ export const FioAdsPage = () => {
     if (!isValid || submitting) return;
     setSubmitting(true);
     try {
+      // If an intro sound is chosen, splice it onto the front of the recording
+      // so the submitted audio already contains it. Best-effort: on any failure
+      // we send the raw recording, and the choice still rides along as a label.
+      let audioPayload = audio;
+      if (audio && introSound) {
+        try {
+          const combined = await buildRecordingWithIntro({
+            recordingBase64: audio.dataBase64,
+            recordingContentType: audio.contentType,
+            kind: introSound.kind,
+            variant: introSound.variant,
+          });
+          if (combined) {
+            audioPayload = {
+              filename: 'fio-ad-with-intro.wav',
+              contentType: 'audio/wav',
+              dataBase64: combined.dataBase64,
+            };
+          }
+        } catch {
+          // keep the raw recording
+        }
+      }
       const res = await fetch(`${FIO_BASE}/launch`, {
         method: 'POST',
         credentials: 'include',
@@ -896,7 +953,7 @@ export const FioAdsPage = () => {
           introSound: introSound ?? undefined,
           logo,
           adImage,
-          audio,
+          audio: audioPayload,
         }),
       });
       if (!res.ok) {
@@ -1360,7 +1417,11 @@ export const FioAdsPage = () => {
                   {reviewRow(
                     t`Intro sound`,
                     introSound
-                      ? `${introSound.kind === 'bell' ? t`Church bell` : t`Trumpet`} (${introSound.variant})`
+                      ? (FIO_INTRO_SOUNDS.find(
+                          (s) =>
+                            s.kind === introSound.kind &&
+                            s.variant === introSound.variant,
+                        )?.label ?? introSound.variant)
                       : t`none`,
                   )}
                   {reviewRow(
@@ -1374,6 +1435,18 @@ export const FioAdsPage = () => {
                       src={audioPreviewUrl}
                       style={{ maxWidth: '100%' }}
                     />
+                  )}
+                  {combinedUrl && (
+                    <StyledField>
+                      <StyledFieldLabel>
+                        {t`Your ad with the intro sound`}
+                      </StyledFieldLabel>
+                      <audio
+                        controls
+                        src={combinedUrl}
+                        style={{ maxWidth: '100%' }}
+                      />
+                    </StyledField>
                   )}
                   {reviewRow(t`Transcript`, transcript)}
                   {!isValid && (

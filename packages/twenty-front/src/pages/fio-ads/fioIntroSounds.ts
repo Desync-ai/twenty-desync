@@ -1,9 +1,8 @@
-// Fio ad intro-sound previews, synthesized on the fly with the Web Audio API.
-// No audio files are bundled (no asset weight, no licensing): each sound is
-// generated when the user presses Play, so they can hear a church bell or a
-// trumpet before choosing one (or pick none). These are tasteful stand-ins;
-// they can be swapped for real recordings later without changing the picker,
-// as long as the same kind + variant labels are kept.
+import { FIO_INTRO_SOUND_DATA } from './fioIntroSoundData';
+
+// Fio ad intro sounds. Real public-domain / CC0 recordings (see fioIntroSoundData
+// for sources + licensing) that the user can preview and, if chosen, have spliced
+// onto the very start of their own recording at submit time.
 
 export type IntroSoundKind = 'bell' | 'trumpet';
 
@@ -13,139 +12,163 @@ export type IntroSoundOption = {
   label: string;
 };
 
-// The options shown in the picker, in display order. The variant strings are
-// what rides along with the submission, so keep them stable.
+// The options shown in the picker, in display order. The kind + variant pair is
+// what rides along with the submission and keys into FIO_INTRO_SOUND_DATA, so
+// keep them stable when swapping the underlying clips.
 export const FIO_INTRO_SOUNDS: IntroSoundOption[] = [
-  { kind: 'bell', variant: 'Single toll', label: 'Church bell, single toll' },
-  { kind: 'bell', variant: 'Triple peal', label: 'Church bell, triple peal' },
-  { kind: 'bell', variant: 'Distant bells', label: 'Church bell, distant' },
-  { kind: 'trumpet', variant: 'Short fanfare', label: 'Trumpet, short fanfare' },
-  { kind: 'trumpet', variant: 'Herald call', label: 'Trumpet, herald call' },
+  { kind: 'bell', variant: 'Church bells', label: 'Church bells' },
+  { kind: 'bell', variant: 'Distant bells', label: 'Church bells, distant' },
+  { kind: 'bell', variant: 'Orthodox chimes', label: 'Orthodox chimes' },
+  { kind: 'trumpet', variant: 'Fanfare', label: 'Trumpet fanfare' },
+  { kind: 'trumpet', variant: 'Herald call', label: 'Trumpet herald call' },
 ];
 
-let sharedContext: AudioContext | null = null;
+const keyOf = (kind: string, variant: string): string => `${kind}|${variant}`;
 
-const getContext = (): AudioContext | null => {
-  if (typeof window === 'undefined') {
+export const getIntroSoundDataUrl = (
+  kind: string,
+  variant: string,
+): string | null => FIO_INTRO_SOUND_DATA[keyOf(kind, variant)] ?? null;
+
+let currentAudio: HTMLAudioElement | null = null;
+
+// Play a preview of the given intro sound (best-effort; stops any prior preview).
+export const playIntroSound = (kind: IntroSoundKind, variant: string): void => {
+  const url = getIntroSoundDataUrl(kind, variant);
+  if (!url || typeof Audio === 'undefined') {
+    return;
+  }
+  try {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    currentAudio = new Audio(url);
+    void currentAudio.play();
+  } catch {
+    // best-effort
+  }
+};
+
+const blobToBase64 = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result ?? '');
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+
+// Encode a (mono) rendered AudioBuffer as a 16-bit PCM WAV blob.
+const audioBufferToWavBlob = (buffer: AudioBuffer): Blob => {
+  const samples = buffer.getChannelData(0);
+  const sampleRate = buffer.sampleRate;
+  const dataLength = samples.length * 2;
+  const arrayBuffer = new ArrayBuffer(44 + dataLength);
+  const view = new DataView(arrayBuffer);
+  const writeString = (offset: number, text: string): void => {
+    for (let i = 0; i < text.length; i += 1) {
+      view.setUint8(offset + i, text.charCodeAt(i));
+    }
+  };
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataLength, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataLength, true);
+  let offset = 44;
+  for (let i = 0; i < samples.length; i += 1) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    offset += 2;
+  }
+
+  return new Blob([view], { type: 'audio/wav' });
+};
+
+// Prepend the chosen intro sound onto the user's recording, returning a single
+// mixed WAV (base64 + blob). Best-effort: returns null if Web Audio is missing
+// or the recording can't be decoded, so the caller can fall back to the raw
+// recording. Both clips are decoded and rendered offline into one mono track.
+export const buildRecordingWithIntro = async ({
+  recordingBase64,
+  recordingContentType,
+  kind,
+  variant,
+}: {
+  recordingBase64: string;
+  recordingContentType: string;
+  kind: string;
+  variant: string;
+}): Promise<{ blob: Blob; dataBase64: string } | null> => {
+  const introUrl = getIntroSoundDataUrl(kind, variant);
+  if (!introUrl || typeof window === 'undefined') {
     return null;
   }
-  const Ctor =
+  const AudioCtor =
     window.AudioContext ||
     (window as unknown as { webkitAudioContext?: typeof AudioContext })
       .webkitAudioContext;
-  if (!Ctor) {
+  const OfflineCtor =
+    window.OfflineAudioContext ||
+    (
+      window as unknown as {
+        webkitOfflineAudioContext?: typeof OfflineAudioContext;
+      }
+    ).webkitOfflineAudioContext;
+  if (!AudioCtor || !OfflineCtor) {
     return null;
   }
-  if (!sharedContext) {
-    sharedContext = new Ctor();
-  }
-  if (sharedContext.state === 'suspended') {
-    void sharedContext.resume();
-  }
 
-  return sharedContext;
-};
+  const decodeCtx = new AudioCtor();
+  try {
+    const recordingUrl = `data:${
+      recordingContentType || 'audio/webm'
+    };base64,${recordingBase64}`;
+    const [introAb, voiceAb] = await Promise.all([
+      fetch(introUrl).then((r) => r.arrayBuffer()),
+      fetch(recordingUrl).then((r) => r.arrayBuffer()),
+    ]);
+    const [introBuf, voiceBuf] = await Promise.all([
+      decodeCtx.decodeAudioData(introAb),
+      decodeCtx.decodeAudioData(voiceAb),
+    ]);
 
-// One struck-bell timbre: a set of inharmonic partials with exponential decay,
-// the classic additive recipe for a bell (a minor-third church-bell spectrum).
-const strikeBell = (
-  ctx: AudioContext,
-  at: number,
-  base: number,
-  gainScale: number,
-  decay: number,
-  dest: AudioNode,
-): void => {
-  const partials: Array<[number, number]> = [
-    [0.56, 0.6],
-    [0.92, 0.2],
-    [1.0, 1.0],
-    [1.2, 0.5],
-    [1.5, 0.3],
-    [2.0, 0.4],
-    [2.74, 0.18],
-    [3.0, 0.12],
-  ];
-  for (const [ratio, amp] of partials) {
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = base * ratio;
-    const gain = ctx.createGain();
-    const peak = Math.max(0.2 * amp * gainScale, 0.0002);
-    gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.exponentialRampToValueAtTime(peak, at + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + decay);
-    osc.connect(gain).connect(dest);
-    osc.start(at);
-    osc.stop(at + decay + 0.05);
-  }
-};
+    const rate = 44100;
+    const gap = 0.12; // short breath between the intro and the voice
+    const frames = Math.ceil(
+      (introBuf.duration + gap + voiceBuf.duration) * rate,
+    );
+    const offline = new OfflineCtor(1, frames, rate);
 
-// One brass note: a sawtooth through a lowpass with a quick attack and a short
-// release, which reads as a trumpet-ish tone.
-const brassNote = (
-  ctx: AudioContext,
-  at: number,
-  freq: number,
-  dur: number,
-  dest: AudioNode,
-): void => {
-  const osc = ctx.createOscillator();
-  osc.type = 'sawtooth';
-  osc.frequency.value = freq;
-  const lowpass = ctx.createBiquadFilter();
-  lowpass.type = 'lowpass';
-  lowpass.frequency.value = Math.min(freq * 6, 6000);
-  const gain = ctx.createGain();
-  const peak = 0.16;
-  gain.gain.setValueAtTime(0.0001, at);
-  gain.gain.exponentialRampToValueAtTime(peak, at + 0.03);
-  gain.gain.setValueAtTime(peak, at + dur * 0.7);
-  gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-  osc.connect(lowpass).connect(gain).connect(dest);
-  osc.start(at);
-  osc.stop(at + dur + 0.05);
-};
+    const introSource = offline.createBufferSource();
+    introSource.buffer = introBuf;
+    introSource.connect(offline.destination);
+    introSource.start(0);
 
-// Play a short preview of the given intro sound. Best-effort: silently no-ops
-// if Web Audio is unavailable.
-export const playIntroSound = (kind: IntroSoundKind, variant: string): void => {
-  const ctx = getContext();
-  if (!ctx) {
-    return;
-  }
-  const now = ctx.currentTime + 0.02;
-  const master = ctx.createGain();
-  master.gain.value = 0.8;
-  master.connect(ctx.destination);
+    const voiceSource = offline.createBufferSource();
+    voiceSource.buffer = voiceBuf;
+    voiceSource.connect(offline.destination);
+    voiceSource.start(introBuf.duration + gap);
 
-  if (kind === 'bell') {
-    if (variant === 'Triple peal') {
-      strikeBell(ctx, now, 587.33, 1, 1.8, master);
-      strikeBell(ctx, now + 0.55, 587.33, 0.95, 1.8, master);
-      strikeBell(ctx, now + 1.1, 587.33, 0.95, 2.4, master);
-    } else if (variant === 'Distant bells') {
-      const lowpass = ctx.createBiquadFilter();
-      lowpass.type = 'lowpass';
-      lowpass.frequency.value = 1100;
-      lowpass.connect(master);
-      strikeBell(ctx, now, 523.25, 0.5, 2.6, lowpass);
-      strikeBell(ctx, now + 0.4, 392.0, 0.4, 2.8, lowpass);
-    } else {
-      strikeBell(ctx, now, 587.33, 1, 2.8, master);
-    }
+    const rendered = await offline.startRendering();
+    const blob = audioBufferToWavBlob(rendered);
+    const dataBase64 = await blobToBase64(blob);
 
-    return;
-  }
-
-  if (variant === 'Herald call') {
-    brassNote(ctx, now, 783.99, 0.35, master);
-    brassNote(ctx, now + 0.4, 783.99, 0.25, master);
-    brassNote(ctx, now + 0.7, 1046.5, 0.6, master);
-  } else {
-    brassNote(ctx, now, 523.25, 0.2, master);
-    brassNote(ctx, now + 0.18, 659.25, 0.2, master);
-    brassNote(ctx, now + 0.36, 783.99, 0.2, master);
-    brassNote(ctx, now + 0.54, 1046.5, 0.5, master);
+    return { blob, dataBase64 };
+  } catch {
+    return null;
+  } finally {
+    void decodeCtx.close();
   }
 };

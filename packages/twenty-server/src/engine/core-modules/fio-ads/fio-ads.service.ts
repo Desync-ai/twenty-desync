@@ -1110,7 +1110,7 @@ export class FioAdsService {
     const introLabel = intro
       ? `${intro.kind === 'bell' ? 'Church bell' : 'Trumpet'}${
           intro.variant ? ` (${intro.variant})` : ''
-        }, add to the start of the recording`
+        }`
       : 'None';
 
     const html =
@@ -1126,7 +1126,8 @@ export class FioAdsService {
       `<p><strong>Intro sound:</strong> ${esc(introLabel)}</p>` +
       `<p><strong>Transcript:</strong><br/>` +
       `<span style="white-space:pre-wrap">${esc(p.audioTranscript ?? '')}</span></p>` +
-      `<p>Logo, advertisement image, the MP3, and a machine-readable JSON file are attached.</p>`;
+      `<p>Logo, advertisement image, the audio file (with the intro sound mixed ` +
+      `in when one was chosen), and a machine-readable JSON file are attached.</p>`;
 
     const attachments = [
       {
