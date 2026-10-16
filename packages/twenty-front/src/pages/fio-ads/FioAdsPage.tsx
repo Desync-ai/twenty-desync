@@ -40,23 +40,6 @@ const STEPS = ['Brand', 'Creative', 'Audio', 'Review'];
 const formatSeconds = (s: number) =>
   `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-const extractScript = (content: string): string => {
-  const marked = content.match(/\[SCRIPT\]([\s\S]*?)\[\/SCRIPT\]/i);
-  if (marked) {
-    return marked[1].trim();
-  }
-  let text = content.replace(/^#.*$/gm, '').replace(/^\s*-{3,}\s*$/gm, '');
-  const labelAt = text.search(/\*{0,2}(headline|subtitle)\b[^:\n]*:/i);
-  if (labelAt !== -1) {
-    text = text.slice(0, labelAt);
-  }
-
-  return text.trim();
-};
-
-const stripScriptMarkers = (content: string): string =>
-  content.replace(/\[\/?SCRIPT\]/gi, '').trim();
-
 const FIO_CATEGORIES = [
   'Apologetics', 'Arts', 'AudioDramas', 'Business', 'Catechism', 'Children',
   'Coaching', 'Comedy', 'Dating&Relationships', 'Development&Philanthropy',
@@ -73,7 +56,19 @@ const FIO_CATEGORIES = [
 ];
 
 type UploadedFile = { filename: string; contentType: string; dataBase64: string };
-type Voice = { id: string; name: string; description: string };
+type ScriptIdea = {
+  flavor: 'bell' | 'trumpet' | 'latin' | 'prayer' | 'plain';
+  label: string;
+  highlight: string;
+  script: string;
+};
+type IntroSound = { kind: 'bell' | 'trumpet'; variant: string };
+
+// Intro-sound options shown in the bell/trumpet cards. The final audio files
+// are provided separately; the chosen label rides along with the submission so
+// whoever cuts the ad knows which one to add to the start of the recording.
+const FIO_BELL_OPTIONS = ['Single toll', 'Triple peal', 'Distant church bells'];
+const FIO_TRUMPET_OPTIONS = ['Short fanfare', 'Herald call'];
 type StatusResponse = {
   eligible: boolean;
   reason: string;
@@ -287,50 +282,52 @@ const StyledMessage = styled.div`
   line-height: 1.5;
 `;
 
-const StyledChat = styled.div`
+const StyledScriptList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+`;
+
+const StyledScriptCard = styled.div`
   background: ${themeCssVariables.background.secondary};
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
+  gap: ${themeCssVariables.spacing[2]};
   padding: ${themeCssVariables.spacing[3]};
+
+  &[data-selected='true'] {
+    border-color: ${themeCssVariables.color.blue};
+  }
 `;
 
-const StyledChatMessages = styled.div`
+const StyledScriptHead = styled.div`
+  align-items: center;
   display: flex;
-  flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
-  max-height: 240px;
-  overflow-y: auto;
+  justify-content: space-between;
 `;
 
-const StyledChatMsg = styled.div`
+const StyledScriptBadge = styled.span`
+  background: ${themeCssVariables.background.tertiary};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.xs};
+  font-weight: ${themeCssVariables.font.weight.semiBold};
+  padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+`;
+
+const StyledScriptHighlight = styled.div`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.xs};
+`;
+
+const StyledScriptText = styled.div`
   color: ${themeCssVariables.font.color.primary};
   font-size: ${themeCssVariables.font.size.sm};
   line-height: 1.5;
   white-space: pre-wrap;
-
-  &[data-role='user'] {
-    color: ${themeCssVariables.font.color.secondary};
-  }
-`;
-
-const StyledChatRole = styled.div`
-  color: ${themeCssVariables.font.color.light};
-  font-size: ${themeCssVariables.font.size.xs};
-  font-weight: ${themeCssVariables.font.weight.medium};
-  margin-bottom: ${themeCssVariables.spacing[1]};
-`;
-
-const StyledChatInputRow = styled.div`
-  align-items: flex-end;
-  display: flex;
-  gap: ${themeCssVariables.spacing[2]};
-
-  & > *:first-child {
-    flex: 1;
-  }
 `;
 
 const StyledReviewRow = styled.div`
@@ -399,15 +396,6 @@ const readImageMeta = (
     img.src = url;
   });
 
-const base64ToBlob = (b64: string, type: string): Blob => {
-  const bytes = atob(b64);
-  const arr = new Uint8Array(bytes.length);
-  for (let i = 0; i < bytes.length; i += 1) {
-    arr[i] = bytes.charCodeAt(i);
-  }
-  return new Blob([arr], { type });
-};
-
 const readAudioDuration = (file: Blob): Promise<number> =>
   new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -453,17 +441,16 @@ export const FioAdsPage = () => {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [transcribing, setTranscribing] = useState(false);
-  const [generatingVoiceover, setGeneratingVoiceover] = useState(false);
-  const [voices, setVoices] = useState<Voice[]>([]);
-  const [voiceId, setVoiceId] = useState('');
-  const [previewingVoice, setPreviewingVoice] = useState(false);
+  const [scripts, setScripts] = useState<ScriptIdea[]>([]);
+  const [generatingScripts, setGeneratingScripts] = useState(false);
+  const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
+  const [introSound, setIntroSound] = useState<IntroSound | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const adImageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const voiceSampleCacheRef = useRef<Map<string, string>>(new Map());
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordChunksRef = useRef<Blob[]>([]);
   const recordStreamRef = useRef<MediaStream | null>(null);
@@ -472,12 +459,6 @@ export const FioAdsPage = () => {
 
   const currentUser = useAtomStateValue(currentUserState);
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
-
-  const [assistantMessages, setAssistantMessages] = useState<
-    Array<{ role: 'user' | 'assistant'; content: string }>
-  >([]);
-  const [assistantInput, setAssistantInput] = useState('');
-  const [assistantLoading, setAssistantLoading] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     setLoadingStatus(true);
@@ -510,7 +491,7 @@ export const FioAdsPage = () => {
     }
   }, [currentUser, currentWorkspaceMember]);
 
-  // Prefill brand + website from what we know (scraper_db) + load voices, once.
+  // Prefill brand + website from what we know (scraper_db), once.
   useEffect(() => {
     void (async () => {
       try {
@@ -527,40 +508,20 @@ export const FioAdsPage = () => {
         // best-effort prefill
       }
     })();
-    void (async () => {
-      try {
-        const res = await fetch(`${FIO_BASE}/voices`, { credentials: 'include' });
-        const j = (await res.json()) as { voices?: Voice[] };
-        if (Array.isArray(j?.voices) && j.voices.length > 0) {
-          setVoices(j.voices);
-          setVoiceId((prev) => prev || j.voices![0].id);
-        }
-      } catch {
-        // no picker; backend uses its default voice
-      }
-    })();
     // run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const sendAssistant = async () => {
-    const text = assistantInput.trim();
-    if (!text || assistantLoading) return;
-    const next = [
-      ...assistantMessages,
-      { role: 'user' as const, content: text },
-    ];
-    setAssistantMessages(next);
-    setAssistantInput('');
-    setAssistantLoading(true);
+  const generateScripts = async () => {
+    if (generatingScripts) return;
+    setGeneratingScripts(true);
     try {
-      const res = await fetch(`${FIO_BASE}/assistant`, {
+      const res = await fetch(`${FIO_BASE}/scripts`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           brand: { name: brandName.trim(), website: website.trim() },
-          messages: next,
         }),
       });
       if (!res.ok) {
@@ -573,18 +534,33 @@ export const FioAdsPage = () => {
         }
         throw new Error(msg);
       }
-      const j = (await res.json()) as { reply?: string };
-      setAssistantMessages((cur) => [
-        ...cur,
-        { role: 'assistant', content: String(j?.reply ?? '') },
-      ]);
+      const j = (await res.json()) as { scripts?: ScriptIdea[] };
+      const list = Array.isArray(j?.scripts) ? j.scripts : [];
+      if (list.length === 0) {
+        throw new Error('No scripts were returned. Please try again.');
+      }
+      setScripts(list);
     } catch (error) {
       enqueueToast({
         variant: 'error',
-        children: t`Assistant error: ${String((error as Error)?.message ?? error)}`,
+        children: t`Couldn't generate scripts: ${String((error as Error)?.message ?? error)}`,
       });
     } finally {
-      setAssistantLoading(false);
+      setGeneratingScripts(false);
+    }
+  };
+
+  // Load a chosen idea into the editable script, and set the intro sound for the
+  // bell/trumpet ideas (the others carry their flourish in the spoken words).
+  const chooseScript = (idea: ScriptIdea) => {
+    setTranscript(idea.script);
+    setSelectedFlavor(idea.flavor);
+    if (idea.flavor === 'bell') {
+      setIntroSound({ kind: 'bell', variant: FIO_BELL_OPTIONS[0] });
+    } else if (idea.flavor === 'trumpet') {
+      setIntroSound({ kind: 'trumpet', variant: FIO_TRUMPET_OPTIONS[0] });
+    } else {
+      setIntroSound(null);
     }
   };
 
@@ -651,105 +627,6 @@ export const FioAdsPage = () => {
       // best-effort
     } finally {
       setTranscribing(false);
-    }
-  };
-
-  // Generate the ad audio from the script via ElevenLabs (returns an MP3).
-  const generateVoiceover = async () => {
-    const script = transcript.trim();
-    if (!script) {
-      setAudioError(t`Write or generate a script first, then I can voice it.`);
-      return;
-    }
-    setGeneratingVoiceover(true);
-    try {
-      const res = await fetch(`${FIO_BASE}/voiceover`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: script, voiceId }),
-      });
-      if (!res.ok) {
-        let msg = `Request failed (${res.status})`;
-        try {
-          const j = await res.json();
-          msg = j?.error ?? j?.message ?? msg;
-        } catch {
-          // keep default
-        }
-        throw new Error(msg);
-      }
-      const j = (await res.json()) as { audio?: UploadedFile };
-      if (!j.audio?.dataBase64) {
-        throw new Error('No audio returned');
-      }
-      const blob = base64ToBlob(j.audio.dataBase64, 'audio/mpeg');
-      let duration = 0;
-      try {
-        duration = await readAudioDuration(blob);
-      } catch {
-        // non-fatal
-      }
-      setAudio(j.audio);
-      if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
-      setAudioPreviewUrl(URL.createObjectURL(blob));
-      if (duration && (duration < AUDIO_MIN_SEC || duration > AUDIO_MAX_SEC)) {
-        setAudioError(
-          t`The voiceover is ${Math.round(duration)}s; aim for a script that reads in 20 to 30 seconds, then regenerate.`,
-        );
-      } else {
-        setAudioError(null);
-      }
-    } catch (error) {
-      enqueueToast({
-        variant: 'error',
-        children: t`Couldn't generate voiceover: ${String((error as Error)?.message ?? error)}`,
-      });
-    } finally {
-      setGeneratingVoiceover(false);
-    }
-  };
-
-  // Play a short sample of the selected voice before committing to a full
-  // voiceover. Cached per voice on both ends so it is cheap to click around.
-  const previewVoice = async () => {
-    if (!voiceId || previewingVoice) return;
-    setPreviewingVoice(true);
-    try {
-      let b64 = voiceSampleCacheRef.current.get(voiceId);
-      if (!b64) {
-        const res = await fetch(
-          `${FIO_BASE}/voice-sample?voiceId=${encodeURIComponent(voiceId)}`,
-          { credentials: 'include' },
-        );
-        if (!res.ok) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const j = await res.json();
-            msg = j?.error ?? j?.message ?? msg;
-          } catch {
-            // keep default
-          }
-          throw new Error(msg);
-        }
-        const j = (await res.json()) as { audio?: UploadedFile };
-        b64 = j.audio?.dataBase64;
-        if (!b64) {
-          throw new Error('No audio returned');
-        }
-        voiceSampleCacheRef.current.set(voiceId, b64);
-      }
-      const url = URL.createObjectURL(base64ToBlob(b64, 'audio/mpeg'));
-      const audioEl = new Audio(url);
-      audioEl.onended = () => URL.revokeObjectURL(url);
-      await audioEl.play();
-    } catch (error) {
-      enqueueToast({
-        variant: 'error',
-        children: t`Couldn't play a sample: ${String((error as Error)?.message ?? error)}`,
-      });
-    } finally {
-      setPreviewingVoice(false);
     }
   };
 
@@ -935,8 +812,10 @@ export const FioAdsPage = () => {
     setAudio(null);
     setAudioPreviewUrl(null);
     setTranscript('');
+    setScripts([]);
+    setSelectedFlavor(null);
+    setIntroSound(null);
     setCategories([]);
-    setAssistantMessages([]);
     setStep(0);
   };
 
@@ -963,6 +842,7 @@ export const FioAdsPage = () => {
           },
           categories,
           audioTranscript: transcript.trim(),
+          introSound: introSound ?? undefined,
           logo,
           adImage,
           audio,
@@ -1216,66 +1096,98 @@ export const FioAdsPage = () => {
               {step === 2 && (
                 <>
                   <StyledFieldset>
-                    <StyledGroupTitle>{t`Script assistant`}</StyledGroupTitle>
+                    <StyledGroupTitle>{t`Script ideas`}</StyledGroupTitle>
                     <StyledHelper>
-                      {t`Describe what you want to promote and the assistant will draft a 20 to 30 second script from your brand and website. Edit anything it gives you.`}
+                      {t`Generate 5 short script ideas from your brand and website, each with a different opening. Use one as is, or pick one to edit, then record it in your own voice below.`}
                     </StyledHelper>
-                    <StyledChat>
-                      {assistantMessages.length > 0 && (
-                        <StyledChatMessages>
-                          {assistantMessages.map((m, i) => (
-                            <div key={i}>
-                              <StyledChatRole>
-                                {m.role === 'user' ? t`You` : t`Assistant`}
-                              </StyledChatRole>
-                              <StyledChatMsg data-role={m.role}>
-                                {m.role === 'assistant'
-                                  ? stripScriptMarkers(m.content)
-                                  : m.content}
-                              </StyledChatMsg>
-                              {m.role === 'assistant' && (
-                                <div style={{ marginTop: '6px' }}>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() =>
-                                      setTranscript(extractScript(m.content))
+                    <StyledUploadRow>
+                      <Button
+                        variant="solid"
+                        color="accent"
+                        onClick={() => void generateScripts()}
+                        disabled={generatingScripts}
+                      >
+                        {generatingScripts
+                          ? t`Writing ideas...`
+                          : scripts.length > 0
+                            ? t`Regenerate 5 ideas`
+                            : t`Generate 5 script ideas`}
+                      </Button>
+                    </StyledUploadRow>
+                    {scripts.length > 0 && (
+                      <StyledScriptList>
+                        {scripts.map((idea, i) => {
+                          const selected = selectedFlavor === idea.flavor;
+                          const options =
+                            idea.flavor === 'bell'
+                              ? FIO_BELL_OPTIONS
+                              : idea.flavor === 'trumpet'
+                                ? FIO_TRUMPET_OPTIONS
+                                : null;
+
+                          return (
+                            <StyledScriptCard
+                              key={i}
+                              data-selected={selected ? 'true' : 'false'}
+                            >
+                              <StyledScriptHead>
+                                <StyledScriptBadge>
+                                  {idea.label}
+                                </StyledScriptBadge>
+                                <Button
+                                  variant={selected ? 'solid' : 'outline'}
+                                  color={selected ? 'accent' : undefined}
+                                  onClick={() => chooseScript(idea)}
+                                >
+                                  {selected ? t`Selected` : t`Use this script`}
+                                </Button>
+                              </StyledScriptHead>
+                              {idea.highlight && (
+                                <StyledScriptHighlight>
+                                  {idea.highlight}
+                                </StyledScriptHighlight>
+                              )}
+                              <StyledScriptText>{idea.script}</StyledScriptText>
+                              {selected && options && (
+                                <StyledField>
+                                  <StyledFieldLabel>
+                                    {idea.flavor === 'bell'
+                                      ? t`Church bell to open with`
+                                      : t`Trumpet to open with`}
+                                  </StyledFieldLabel>
+                                  <StyledSelect
+                                    value={introSound?.variant ?? options[0]}
+                                    onChange={(e) =>
+                                      setIntroSound({
+                                        kind: idea.flavor as 'bell' | 'trumpet',
+                                        variant: e.target.value,
+                                      })
                                     }
                                   >
-                                    {t`Use as script`}
-                                  </Button>
-                                </div>
+                                    {options.map((option) => (
+                                      <option key={option} value={option}>
+                                        {option}
+                                      </option>
+                                    ))}
+                                  </StyledSelect>
+                                  <StyledHelper>
+                                    {t`We'll add this sound to the start of your recording.`}
+                                  </StyledHelper>
+                                </StyledField>
                               )}
-                            </div>
-                          ))}
-                        </StyledChatMessages>
-                      )}
-                      <StyledChatInputRow>
-                        <TextArea
-                          textAreaId="fio-assistant-input"
-                          placeholder={t`e.g. Promote our parish youth retreat in July`}
-                          value={assistantInput}
-                          onChange={setAssistantInput}
-                          minRows={2}
-                          maxRows={4}
-                        />
-                        <Button
-                          variant="solid"
-                          color="accent"
-                          onClick={sendAssistant}
-                          disabled={!assistantInput.trim() || assistantLoading}
-                        >
-                          {assistantLoading ? t`Thinking...` : t`Send`}
-                        </Button>
-                      </StyledChatInputRow>
-                    </StyledChat>
+                            </StyledScriptCard>
+                          );
+                        })}
+                      </StyledScriptList>
+                    )}
                     <TextArea
                       textAreaId="fio-transcript"
-                      label={t`Script / transcript`}
-                      placeholder={t`Paste the script, or add audio and we'll fill it in for you.`}
+                      label={t`Your script (edit freely)`}
+                      placeholder={t`Generate ideas above and pick one, or write your own.`}
                       value={transcript}
                       onChange={setTranscript}
                       minRows={3}
-                      maxRows={8}
+                      maxRows={10}
                     />
                     {transcribing && (
                       <StyledHelper>{t`Transcribing your audio...`}</StyledHelper>
@@ -1283,46 +1195,13 @@ export const FioAdsPage = () => {
                   </StyledFieldset>
 
                   <StyledFieldset>
-                    <StyledGroupTitle>{t`Audio (20 to 30 seconds)`}</StyledGroupTitle>
+                    <StyledGroupTitle>
+                      {t`Record your ad (20 to 30 seconds)`}
+                    </StyledGroupTitle>
                     <StyledHelper>
-                      {t`Generate an AI voiceover of your script, record one in your browser, or upload an MP3.`}
+                      {t`Read your chosen script and record it in your own voice, or upload an MP3.`}
                     </StyledHelper>
-                    {voices.length > 0 && (
-                      <StyledField>
-                        <StyledFieldLabel>{t`AI voice`}</StyledFieldLabel>
-                        <StyledUploadRow>
-                          <StyledSelect
-                            value={voiceId}
-                            onChange={(e) => setVoiceId(e.target.value)}
-                          >
-                            {voices.map((v) => (
-                              <option key={v.id} value={v.id}>
-                                {v.name} ({v.description})
-                              </option>
-                            ))}
-                          </StyledSelect>
-                          <Button
-                            variant="outline"
-                            onClick={() => void previewVoice()}
-                            disabled={!voiceId || previewingVoice}
-                          >
-                            {previewingVoice ? t`Loading...` : t`Preview voice`}
-                          </Button>
-                        </StyledUploadRow>
-                        <StyledHelper>{t`Hear a short sample before generating.`}</StyledHelper>
-                      </StyledField>
-                    )}
                     <StyledUploadRow>
-                      <Button
-                        variant="solid"
-                        color="accent"
-                        onClick={() => void generateVoiceover()}
-                        disabled={recording || generatingVoiceover}
-                      >
-                        {generatingVoiceover
-                          ? t`Generating...`
-                          : t`Generate AI voiceover`}
-                      </Button>
                       {recording ? (
                         <Button
                           variant="solid"
@@ -1333,7 +1212,8 @@ export const FioAdsPage = () => {
                         </Button>
                       ) : (
                         <Button
-                          variant="outline"
+                          variant="solid"
+                          color="accent"
                           onClick={() => void startRecording()}
                         >
                           {t`Record`}
@@ -1359,7 +1239,7 @@ export const FioAdsPage = () => {
                     </StyledUploadRow>
                     {recording && (
                       <StyledHelper>
-                        {t`Recording, up to 30 seconds. Speak your ad, then press Stop.`}
+                        {t`Recording, up to 30 seconds. Read your script, then press Stop.`}
                       </StyledHelper>
                     )}
                     {audioPreviewUrl && !recording && (
@@ -1385,6 +1265,12 @@ export const FioAdsPage = () => {
                   {reviewRow(t`CTA URL`, ctaUrl)}
                   {reviewRow(t`Learn More`, learnMoreUrl)}
                   {reviewRow(t`Categories`, categories.join(', '))}
+                  {reviewRow(
+                    t`Intro sound`,
+                    introSound
+                      ? `${introSound.kind === 'bell' ? t`Church bell` : t`Trumpet`} (${introSound.variant})`
+                      : t`none`,
+                  )}
                   {reviewRow(
                     t`Logo / image`,
                     `${logo ? t`logo set` : t`missing`}, ${adImage ? t`image set` : t`missing`}`,
