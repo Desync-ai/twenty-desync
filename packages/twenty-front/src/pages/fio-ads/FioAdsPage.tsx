@@ -12,6 +12,7 @@ import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
 import { FIO_LOGO } from './fioLogo';
+import { FIO_INTRO_SOUNDS, playIntroSound } from './fioIntroSounds';
 
 // Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
 // Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
@@ -63,12 +64,6 @@ type ScriptIdea = {
   script: string;
 };
 type IntroSound = { kind: 'bell' | 'trumpet'; variant: string };
-
-// Intro-sound options shown in the bell/trumpet cards. The final audio files
-// are provided separately; the chosen label rides along with the submission so
-// whoever cuts the ad knows which one to add to the start of the recording.
-const FIO_BELL_OPTIONS = ['Single toll', 'Triple peal', 'Distant church bells'];
-const FIO_TRUMPET_OPTIONS = ['Short fanfare', 'Herald call'];
 type StatusResponse = {
   eligible: boolean;
   reason: string;
@@ -91,7 +86,7 @@ const StyledContent = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[6]};
   margin: 0 auto;
-  max-width: 680px;
+  max-width: 1080px;
   padding: ${themeCssVariables.spacing[8]} ${themeCssVariables.spacing[6]};
   width: 100%;
 `;
@@ -181,10 +176,15 @@ const StyledStepCard = styled.div`
   min-height: 180px;
 `;
 
+// Form sections stay at a comfortable reading width and centered; the wide
+// script grid below breaks out of this to use the full page width.
 const StyledFieldset = styled.div`
+  align-self: center;
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
+  max-width: 680px;
+  width: 100%;
 `;
 
 const StyledGroupTitle = styled.div`
@@ -231,17 +231,6 @@ const StyledThumb = styled.img`
   width: 56px;
 `;
 
-const StyledSelect = styled.select`
-  background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  color: ${themeCssVariables.font.color.primary};
-  font-size: ${themeCssVariables.font.size.sm};
-  max-width: 320px;
-  padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
-  width: 100%;
-`;
-
 const StyledCategoryGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -285,8 +274,10 @@ const StyledMessage = styled.div`
 
 const StyledScriptList = styled.div`
   display: grid;
-  gap: ${themeCssVariables.spacing[3]};
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: ${themeCssVariables.spacing[4]};
+  grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+  justify-content: center;
+  width: 100%;
 `;
 
 const StyledScriptCard = styled.div`
@@ -341,6 +332,55 @@ const StyledScriptAction = styled.div`
 
   & > button {
     width: 100%;
+  }
+`;
+
+const StyledSoundGrid = styled.div`
+  display: grid;
+  gap: ${themeCssVariables.spacing[2]};
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+`;
+
+const StyledSoundRow = styled.div`
+  align-items: stretch;
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  display: flex;
+  overflow: hidden;
+
+  &[data-selected='true'] {
+    border-color: ${themeCssVariables.color.blue};
+  }
+`;
+
+const StyledSoundSelect = styled.button`
+  background: ${themeCssVariables.background.secondary};
+  border: none;
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  flex: 1;
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[3]};
+  text-align: left;
+
+  &[data-selected='true'] {
+    color: ${themeCssVariables.color.blue};
+    font-weight: ${themeCssVariables.font.weight.medium};
+  }
+`;
+
+const StyledPlay = styled.button`
+  background: ${themeCssVariables.background.tertiary};
+  border: none;
+  border-left: 1px solid ${themeCssVariables.border.color.medium};
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.xs};
+  padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[3]};
+  white-space: nowrap;
+
+  &:hover {
+    color: ${themeCssVariables.font.color.primary};
   }
 `;
 
@@ -566,18 +606,12 @@ export const FioAdsPage = () => {
     }
   };
 
-  // Load a chosen idea into the editable script, and set the intro sound for the
-  // bell/trumpet ideas (the others carry their flourish in the spoken words).
+  // Load a chosen idea into the editable script. The intro sound is picked
+  // separately (it goes with any idea, or none), so choosing a script no
+  // longer changes it.
   const chooseScript = (idea: ScriptIdea) => {
     setTranscript(idea.script);
     setSelectedFlavor(idea.flavor);
-    if (idea.flavor === 'bell') {
-      setIntroSound({ kind: 'bell', variant: FIO_BELL_OPTIONS[0] });
-    } else if (idea.flavor === 'trumpet') {
-      setIntroSound({ kind: 'trumpet', variant: FIO_TRUMPET_OPTIONS[0] });
-    } else {
-      setIntroSound(null);
-    }
   };
 
   const handleImage = async (
@@ -1145,74 +1179,43 @@ export const FioAdsPage = () => {
                             : t`Generate 5 script ideas`}
                       </Button>
                     </StyledUploadRow>
-                    {scripts.length > 0 && (
-                      <StyledScriptList>
-                        {scripts.map((idea, i) => {
-                          const selected = selectedFlavor === idea.flavor;
-                          const options =
-                            idea.flavor === 'bell'
-                              ? FIO_BELL_OPTIONS
-                              : idea.flavor === 'trumpet'
-                                ? FIO_TRUMPET_OPTIONS
-                                : null;
+                  </StyledFieldset>
 
-                          return (
-                            <StyledScriptCard
-                              key={i}
-                              data-selected={selected ? 'true' : 'false'}
-                            >
-                              <StyledScriptHead>
-                                <StyledScriptBadge>
-                                  {idea.label}
-                                </StyledScriptBadge>
-                              </StyledScriptHead>
-                              {idea.highlight && (
-                                <StyledScriptHighlight>
-                                  {idea.highlight}
-                                </StyledScriptHighlight>
-                              )}
-                              <StyledScriptText>{idea.script}</StyledScriptText>
-                              {selected && options && (
-                                <StyledField>
-                                  <StyledFieldLabel>
-                                    {idea.flavor === 'bell'
-                                      ? t`Church bell to open with`
-                                      : t`Trumpet to open with`}
-                                  </StyledFieldLabel>
-                                  <StyledSelect
-                                    value={introSound?.variant ?? options[0]}
-                                    onChange={(e) =>
-                                      setIntroSound({
-                                        kind: idea.flavor as 'bell' | 'trumpet',
-                                        variant: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    {options.map((option) => (
-                                      <option key={option} value={option}>
-                                        {option}
-                                      </option>
-                                    ))}
-                                  </StyledSelect>
-                                  <StyledHelper>
-                                    {t`We'll add this sound to the start of your recording.`}
-                                  </StyledHelper>
-                                </StyledField>
-                              )}
-                              <StyledScriptAction>
-                                <Button
-                                  variant={selected ? 'solid' : 'outline'}
-                                  color={selected ? 'accent' : undefined}
-                                  onClick={() => chooseScript(idea)}
-                                >
-                                  {selected ? t`Selected` : t`Use this script`}
-                                </Button>
-                              </StyledScriptAction>
-                            </StyledScriptCard>
-                          );
-                        })}
-                      </StyledScriptList>
-                    )}
+                  {scripts.length > 0 && (
+                    <StyledScriptList>
+                      {scripts.map((idea, i) => {
+                        const selected = selectedFlavor === idea.flavor;
+
+                        return (
+                          <StyledScriptCard
+                            key={i}
+                            data-selected={selected ? 'true' : 'false'}
+                          >
+                            <StyledScriptHead>
+                              <StyledScriptBadge>{idea.label}</StyledScriptBadge>
+                            </StyledScriptHead>
+                            {idea.highlight && (
+                              <StyledScriptHighlight>
+                                {idea.highlight}
+                              </StyledScriptHighlight>
+                            )}
+                            <StyledScriptText>{idea.script}</StyledScriptText>
+                            <StyledScriptAction>
+                              <Button
+                                variant={selected ? 'solid' : 'outline'}
+                                color={selected ? 'accent' : undefined}
+                                onClick={() => chooseScript(idea)}
+                              >
+                                {selected ? t`Selected` : t`Use this script`}
+                              </Button>
+                            </StyledScriptAction>
+                          </StyledScriptCard>
+                        );
+                      })}
+                    </StyledScriptList>
+                  )}
+
+                  <StyledFieldset>
                     <TextArea
                       textAreaId="fio-transcript"
                       label={t`Your script (edit freely)`}
@@ -1225,6 +1228,62 @@ export const FioAdsPage = () => {
                     {transcribing && (
                       <StyledHelper>{t`Transcribing your audio...`}</StyledHelper>
                     )}
+                  </StyledFieldset>
+
+                  <StyledFieldset>
+                    <StyledGroupTitle>{t`Intro sound (optional)`}</StyledGroupTitle>
+                    <StyledHelper>
+                      {t`Add a short church bell or trumpet to the very start of your ad, or choose none. Press play to hear each one. Any sound works with any script.`}
+                    </StyledHelper>
+                    <StyledSoundGrid>
+                      <StyledSoundRow
+                        data-selected={introSound === null ? 'true' : 'false'}
+                      >
+                        <StyledSoundSelect
+                          type="button"
+                          data-selected={introSound === null ? 'true' : 'false'}
+                          onClick={() => setIntroSound(null)}
+                        >
+                          {t`No sound`}
+                          {introSound === null ? ' ✓' : ''}
+                        </StyledSoundSelect>
+                      </StyledSoundRow>
+                      {FIO_INTRO_SOUNDS.map((sound) => {
+                        const selected =
+                          introSound?.kind === sound.kind &&
+                          introSound?.variant === sound.variant;
+
+                        return (
+                          <StyledSoundRow
+                            key={`${sound.kind}-${sound.variant}`}
+                            data-selected={selected ? 'true' : 'false'}
+                          >
+                            <StyledSoundSelect
+                              type="button"
+                              data-selected={selected ? 'true' : 'false'}
+                              onClick={() =>
+                                setIntroSound({
+                                  kind: sound.kind,
+                                  variant: sound.variant,
+                                })
+                              }
+                            >
+                              {sound.label}
+                              {selected ? ' ✓' : ''}
+                            </StyledSoundSelect>
+                            <StyledPlay
+                              type="button"
+                              aria-label={t`Play ${sound.label}`}
+                              onClick={() =>
+                                playIntroSound(sound.kind, sound.variant)
+                              }
+                            >
+                              {'▶'} {t`Play`}
+                            </StyledPlay>
+                          </StyledSoundRow>
+                        );
+                      })}
+                    </StyledSoundGrid>
                   </StyledFieldset>
 
                   <StyledFieldset>
