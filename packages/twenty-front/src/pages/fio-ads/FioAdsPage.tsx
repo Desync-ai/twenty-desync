@@ -11,6 +11,7 @@ import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
+import { FIO_LOGO } from './fioLogo';
 
 // Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
 // Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
@@ -101,9 +102,39 @@ const StyledContent = styled.div`
 `;
 
 const StyledHeader = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[5]};
+
+  @media (max-width: 480px) {
+    gap: ${themeCssVariables.spacing[4]};
+  }
+`;
+
+// The Fio brand mark, shown prominently next to the title and linking to fio.fm.
+const StyledBrandMark = styled.a`
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+
+  img {
+    display: block;
+    height: 88px;
+    width: auto;
+  }
+
+  @media (max-width: 480px) {
+    img {
+      height: 64px;
+    }
+  }
+`;
+
+const StyledHeaderText = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[2]};
+  min-width: 0;
 `;
 
 const StyledTitle = styled.h1`
@@ -993,16 +1024,26 @@ export const FioAdsPage = () => {
     <StyledPage>
       <StyledContent>
         <StyledHeader>
-          <StyledTitle>{t`Launch a Fio ad`}</StyledTitle>
-          <StyledBlurb>
-            {t`Fio is a Catholic podcast network`}{' '}
-            (
-            <a href="https://fio.fm/" target="_blank" rel="noopener noreferrer">
-              fio.fm
-            </a>
-            ).{' '}
-            {t`Run a 20 to 30 second audio ad for your brand across their shows. A few quick steps and we'll handle delivery.`}
-          </StyledBlurb>
+          <StyledBrandMark
+            href="https://fio.fm/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Fio"
+          >
+            <img src={FIO_LOGO} alt="Fio" />
+          </StyledBrandMark>
+          <StyledHeaderText>
+            <StyledTitle>{t`Launch a Fio ad`}</StyledTitle>
+            <StyledBlurb>
+              {t`Fio is a Catholic podcast network`}{' '}
+              (
+              <a href="https://fio.fm/" target="_blank" rel="noopener noreferrer">
+                fio.fm
+              </a>
+              ).{' '}
+              {t`Run a 20 to 30 second audio ad for your brand across their shows. A few quick steps and we'll handle delivery.`}
+            </StyledBlurb>
+          </StyledHeaderText>
         </StyledHeader>
 
         {loadingStatus ? null : !canShowForm ? (
