@@ -8,8 +8,8 @@ import {
   IconArrowRight,
   IconDatabase,
   IconMail,
-  IconPhone,
   IconPlug,
+  IconRefresh,
   IconSparkles,
   IconTargetArrow,
   IconUsers,
@@ -17,7 +17,10 @@ import {
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-import { useOpenAskAiPageWithPreprompt } from '@/ai/hooks/useOpenAskAiPageWithPreprompt';
+import {
+  type AgentChatModelPreselection,
+  useOpenAskAiPageWithPreprompt,
+} from '@/ai/hooks/useOpenAskAiPageWithPreprompt';
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
@@ -79,13 +82,13 @@ const NO_SEND_RULE =
 const ENRICH_PROMPT =
   'Enrich the people already in my CRM. Start with the 50 most recently added People that have missing details. For each one, fill in any missing job title, company, work email, LinkedIn URL and location using my connected tools and the web. Update the records in place, do not create duplicates, and do not invent anything: if you cannot verify a field, leave it blank. When you are done, tell me how many people you updated and which fields were most often missing.';
 
-const CALLS_PROMPT =
-  'Go through my call and meeting transcripts from the last two weeks, using my connected tools (Fathom, Granola, Pocket, meeting notes, calendar). For each call: find the matching Person or Company in my CRM (only create one if it is clearly missing), add a Note with a short summary and the key takeaways, and create Tasks for any clear follow-ups or commitments, with a due date when one was mentioned. When you are done, give me a short list of the calls you processed and the follow-up tasks you created.';
+const CATCHUP_PROMPT =
+  'Catch my CRM up on my recent activity. Look at my interactions from the last two weeks across my connected tools: email, calendar, and call or meeting transcripts (Fathom, Granola, Pocket). Only for people and companies already in my CRM, and skip newsletters, automated or no-reply senders, and purely internal threads. For each real interaction: add a short Note summarizing it on the matching Person or Company, and create a Task for any clear follow-up or commitment, with a due date when one was mentioned. Skip anything you have already logged so you do not create duplicates. When you are done, give me a short summary: who I interacted with, the notes and tasks you added, and who I have not been in touch with in a while.';
 
 const LOOKALIKES_PROMPT =
   'Find new leads that look like my best customers. First look at my won opportunities and the companies and people I clearly do business with, and tell me the pattern you see (industry, company size, the roles of the people). Then find about 15 new leads that fit that same profile and add them as People and Companies, tagged as AI-suggested, each with a one-line reason it matches. Do not draft or send any outreach: just build the list and show me who you added and why.';
 
-const FOLLOWUPS_PROMPT = `Find the people I have gone quiet on: open opportunities with no activity in the last two weeks, and people I have emailed or met with before but have not contacted recently. For each, draft a short, personalized follow-up. ${OUTREACH_BRIEF} Draft everything for my review and do not send anything. When you are done, show me the drafts grouped by person so I can review and send them myself.`;
+const FOLLOWUPS_PROMPT = `Help me see who I have gone quiet on and reach out on my own terms. Using my CRM activity (and email or calendar if connected), find my open opportunities with no activity in the last two weeks, and people I have emailed or met with before but have not contacted recently. Give me a short, ranked list: the person, our last contact and when, the open deal or reason it matters, and a one-line suggested angle. Create a "Follow up with <name>" task for each so it is on my list. Do NOT draft any messages yet. Only when I pick a person and ask you to, draft a single personalized follow-up for that one person for me to review and send myself. ${OUTREACH_BRIEF} Never send anything yourself.`;
 
 type Playbook = {
   key: string;
@@ -98,11 +101,32 @@ type Playbook = {
   // Composio integrations this play benefits from, shown as real connect cards
   // in the detail panel. Empty/undefined renders "No integration needed".
   plugins?: string[];
+  // Model tier preselected when the play runs. Omit = follow the workspace
+  // default (Max Thinking). Mechanical plays use a cheaper tier to save budget.
+  model?: AgentChatModelPreselection;
 };
 
 // The one-tap plays. Populate is handled separately because its detail asks
 // questions and runs with review rather than firing the agent immediately.
 const PLAYBOOKS: Playbook[] = [
+  {
+    key: 'catchup',
+    title: 'Catch up my CRM',
+    outcome:
+      'Pull your recent email, calendar and call activity into notes and follow-up tasks, and refresh who you last spoke to. For people already in your CRM.',
+    cta: 'Catch up my CRM',
+    Icon: IconRefresh,
+    prompt: CATCHUP_PROMPT,
+    plugins: [
+      'gmail',
+      'outlook',
+      'googlecalendar',
+      'fathom',
+      'granola_mcp',
+      'pocket',
+    ],
+    model: 'BALANCED',
+  },
   {
     key: 'enrich',
     title: 'Enrich your people',
@@ -111,16 +135,7 @@ const PLAYBOOKS: Playbook[] = [
     cta: 'Enrich my people',
     Icon: IconUsers,
     prompt: ENRICH_PROMPT,
-  },
-  {
-    key: 'calls',
-    title: 'Turn calls into notes & tasks',
-    outcome:
-      'Read your recent call transcripts, log a note on each contact and create the follow-up tasks.',
-    cta: 'Process my calls',
-    Icon: IconPhone,
-    prompt: CALLS_PROMPT,
-    plugins: ['fathom', 'granola_mcp', 'pocket'],
+    model: 'BALANCED',
   },
   {
     key: 'lookalikes',
@@ -134,14 +149,15 @@ const PLAYBOOKS: Playbook[] = [
   },
   {
     key: 'followups',
-    title: 'Draft follow-ups for quiet contacts',
+    title: 'Follow up with quiet contacts',
     outcome:
-      'Find people and deals that have gone quiet and draft a personalized nudge for each, ready to review.',
-    cta: 'Draft my follow-ups',
+      "Find the people and deals you've gone quiet on with a suggested angle, then draft a nudge one at a time when you're ready. You review and send.",
+    cta: 'See who to follow up with',
     Icon: IconMail,
     prompt: FOLLOWUPS_PROMPT,
-    hint: 'Drafts only. A playbook never sends anything itself.',
+    hint: 'Lists who to reach out to and drafts one at a time, only when you ask. Nothing is ever sent for you.',
     plugins: ['gmail', 'outlook'],
+    model: 'BALANCED',
   },
 ];
 
@@ -395,10 +411,11 @@ export const GetStartedPage = () => {
 
   // Plays fire the agent straight away: one tap, it opens and runs. Every play
   // carries the no-send rule so the agent can draft but never send.
-  const runPlaybook = (prompt: string) => {
+  const runPlaybook = (playbook: Playbook) => {
     openAskAiPageWithPreprompt({
-      text: `${prompt}\n\n${NO_SEND_RULE}`,
+      text: `${playbook.prompt}\n\n${NO_SEND_RULE}`,
       mode: 'SEND',
+      model: playbook.model,
     });
   };
 
@@ -542,7 +559,7 @@ export const GetStartedPage = () => {
             variant="solid"
             color="accent"
             startIcon={<IconSparkles size={16} />}
-            onClick={() => runPlaybook(playbook.prompt)}
+            onClick={() => runPlaybook(playbook)}
           >
             {playbook.cta}
           </Button>
