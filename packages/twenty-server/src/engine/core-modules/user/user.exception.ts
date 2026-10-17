@@ -9,6 +9,7 @@ export enum UserExceptionCode {
   EMAIL_ALREADY_IN_USE = 'EMAIL_ALREADY_IN_USE',
   EMAIL_UNCHANGED = 'EMAIL_UNCHANGED',
   EMAIL_UPDATE_RESTRICTED_TO_SINGLE_WORKSPACE = 'EMAIL_UPDATE_RESTRICTED_TO_SINGLE_WORKSPACE',
+  EMAIL_MANAGED_BY_IDENTITY_PROVIDER = 'EMAIL_MANAGED_BY_IDENTITY_PROVIDER',
 }
 
 const getUserExceptionUserFriendlyMessage = (code: UserExceptionCode) => {
@@ -21,6 +22,8 @@ const getUserExceptionUserFriendlyMessage = (code: UserExceptionCode) => {
       return msg`Email is unchanged.`;
     case UserExceptionCode.EMAIL_UPDATE_RESTRICTED_TO_SINGLE_WORKSPACE:
       return msg`Email update is restricted to single workspace users.`;
+    case UserExceptionCode.EMAIL_MANAGED_BY_IDENTITY_PROVIDER:
+      return msg`Your email is managed by your sign-in account.`;
     default:
       assertUnreachable(code);
   }
