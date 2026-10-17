@@ -86,7 +86,7 @@ const CATCHUP_PROMPT =
   'Catch my CRM up on my recent activity. Look at my interactions from the last two weeks across my connected tools: email, calendar, and call or meeting transcripts (Fathom, Granola, Pocket). Only for people and companies already in my CRM, and skip newsletters, automated or no-reply senders, and purely internal threads. For each real interaction: add a short Note summarizing it on the matching Person or Company, and create a Task for any clear follow-up or commitment, with a due date when one was mentioned. Skip anything you have already logged so you do not create duplicates. When you are done, give me a short summary: who I interacted with, the notes and tasks you added, and who I have not been in touch with in a while.';
 
 const LOOKALIKES_PROMPT =
-  'Find new leads that look like my best customers. First look at my won opportunities and the companies and people I clearly do business with, and tell me the pattern you see (industry, company size, the roles of the people). Then find about 15 new leads that fit that same profile and add them as People and Companies, tagged as AI-suggested, each with a one-line reason it matches. Do not draft or send any outreach: just build the list and show me who you added and why.';
+  'Find new leads that look like my best customers. Work with the standard Opportunities, Companies and People objects and keep your searches targeted; do not repeatedly re-fetch object metadata or re-learn the search tool. A won deal is an Opportunity in a Won stage. First, from my won opportunities and the companies and people I clearly do business with, tell me the pattern you see (industry, company size, the roles of the people). Then find about 15 new leads that fit that same profile and add them as People and Companies, tagged as AI-suggested, each with a one-line reason it matches. Do not draft or send any outreach: just build the list and show me who you added and why.';
 
 const FOLLOWUPS_PROMPT = `Help me see who I have gone quiet on and reach out on my own terms. Using my CRM activity (and email or calendar if connected), find my open opportunities with no activity in the last two weeks, and people I have emailed or met with before but have not contacted recently. Give me a short, ranked list: the person, our last contact and when, the open deal or reason it matters, and a one-line suggested angle. Create a "Follow up with <name>" task for each so it is on my list. Do NOT draft any messages yet. Only when I pick a person and ask you to, draft a single personalized follow-up for that one person for me to review and send myself. ${OUTREACH_BRIEF} Never send anything yourself.`;
 
@@ -146,6 +146,7 @@ const PLAYBOOKS: Playbook[] = [
     Icon: IconTargetArrow,
     prompt: LOOKALIKES_PROMPT,
     plugins: ['apollo', 'hubspot', 'salesforce'],
+    model: 'BALANCED',
   },
   {
     key: 'followups',
