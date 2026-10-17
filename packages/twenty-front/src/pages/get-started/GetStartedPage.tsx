@@ -6,6 +6,7 @@ import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
 import {
   IconArrowRight,
+  IconDatabase,
   IconMail,
   IconPhone,
   IconPlug,
@@ -29,7 +30,7 @@ import {
 } from '~/pages/settings/integrations/SettingsIntegrations';
 
 // The integrations that are "places leads/contacts live", shown inline on the
-// Playbooks page so the user can connect without leaving the tab.
+// Populate play so the user can connect without leaving the tab.
 const LEAD_SOURCE_PLUGINS = [
   'hubspot',
   'salesforce',
@@ -46,10 +47,13 @@ const LEAD_SOURCE_INTEGRATIONS = INTEGRATIONS.filter((integration) =>
 
 // Desync "Playbooks" (was "Get started"): one-tap recipes that open the built-in
 // agent pre-loaded with a battle-tested prompt and run it. Most users don't know
-// how to prompt an AI; each card packages a high-value job (enrich, log calls,
-// find lookalike leads, draft follow-ups) into a single button so they get the
-// payoff without writing anything. The first play (Populate your CRM) keeps the
-// original review-before-send flow because it clears the demo data.
+// how to prompt an AI; each card packages a high-value job into a single button
+// so they get the payoff without writing anything. The page opens on just the
+// cards; a play that needs input (Populate) reveals its questions only once the
+// user picks it. Populate keeps the original review-before-send flow because it
+// clears the demo data.
+
+const POPULATE_KEY = 'populate';
 
 const EXAMPLE_PROMPTS = [
   'Find leads that fit my business and add them to my CRM.',
@@ -88,6 +92,8 @@ type Playbook = {
   hint?: string;
 };
 
+// The one-tap plays. Populate is handled separately because it asks questions
+// first rather than firing the agent immediately.
 const PLAYBOOKS: Playbook[] = [
   {
     key: 'enrich',
@@ -323,6 +329,8 @@ export const GetStartedPage = () => {
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
   const [leadsSource, setLeadsSource] = useState('');
+  // Which play has its questions open. Null = the page shows only the cards.
+  const [activePlaybook, setActivePlaybook] = useState<string | null>(null);
 
   // Desync: once the user has reached Playbooks, don't auto-land them here
   // again on future entries to this workspace (the sidebar link still works).
@@ -360,102 +368,52 @@ export const GetStartedPage = () => {
       .join('\n');
   };
 
+  const isPopulateOpen = activePlaybook === POPULATE_KEY;
+
   return (
     <StyledPage>
       <StyledContent>
         <StyledHeader>
           <StyledTitle>{t`Playbooks`}</StyledTitle>
           <StyledSubtitle>
-            {t`Pick a play and your built-in AI agent does the work for you. One tap, no prompting needed. New here? Start by populating your CRM.`}
+            {t`Pick a play and your built-in AI agent does the work for you. One tap, no prompting needed.`}
           </StyledSubtitle>
         </StyledHeader>
 
         <StyledSection>
-          <StyledSectionLabel>{t`Start here: populate your CRM`}</StyledSectionLabel>
-          <StyledSteps>
-            <StyledStep>
-              <StyledStepTop>
-                <StyledStepNumber>1</StyledStepNumber>
-                <StyledStepText>
-                  <StyledStepTitle>{t`Connect where your leads live`}</StyledStepTitle>
-                  <StyledStepHint>
-                    {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
-                  </StyledStepHint>
-                </StyledStepText>
-              </StyledStepTop>
-              <StyledIntegrationsGrid>
-                {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
-                  <ConnectIntegrationCard
-                    key={integration.plugin}
-                    integration={integration}
-                    compact
-                  />
-                ))}
-              </StyledIntegrationsGrid>
-              <div>
-                <Button
-                  variant="outline"
-                  startIcon={<IconPlug size={16} />}
-                  onClick={() =>
-                    navigate(getSettingsPath(SettingsPath.Integrations))
-                  }
-                >
-                  {t`See all integrations`}
-                </Button>
-              </div>
-            </StyledStep>
-
-            <StyledStep>
-              <StyledStepTop>
-                <StyledStepNumber>2</StyledStepNumber>
-                <StyledStepText>
-                  <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
-                  <StyledStepHint>
-                    {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you.`}
-                  </StyledStepHint>
-                </StyledStepText>
-              </StyledStepTop>
-              <TextArea
-                textAreaId="get-started-leads-source"
-                label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
-                placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
-                value={leadsSource}
-                onChange={setLeadsSource}
-                minRows={2}
-                maxRows={3}
-              />
-              <div>
-                <Button
-                  variant="solid"
-                  color="accent"
-                  startIcon={<IconSparkles size={16} />}
-                  onClick={() => openCopilotWith(buildPopulatePrompt())}
-                >
-                  {t`Build my CRM`}
-                </Button>
-              </div>
-            </StyledStep>
-          </StyledSteps>
-
-          <StyledExamples>
-            <StyledExamplesLabel>
-              {t`Or have the agent fill your CRM another way:`}
-            </StyledExamplesLabel>
-            {EXAMPLE_PROMPTS.map((prompt) => (
-              <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
-                <IconArrowRight
-                  size={14}
-                  style={{ marginRight: 6, verticalAlign: 'middle' }}
-                />
-                {prompt}
-              </StyledChip>
-            ))}
-          </StyledExamples>
-        </StyledSection>
-
-        <StyledSection>
-          <StyledSectionLabel>{t`More plays`}</StyledSectionLabel>
+          <StyledSectionLabel>{t`Pick a play`}</StyledSectionLabel>
           <StyledPlaybookGrid>
+            <StyledPlaybookCard
+              style={
+                isPopulateOpen
+                  ? { borderColor: themeCssVariables.color.blue }
+                  : undefined
+              }
+            >
+              <StyledPlaybookTop>
+                <IconDatabase size={18} />
+                <StyledPlaybookTitle>{t`Populate your CRM`}</StyledPlaybookTitle>
+              </StyledPlaybookTop>
+              <StyledPlaybookOutcome>
+                {t`Import your existing contacts and companies, and let the agent set it all up for you.`}
+              </StyledPlaybookOutcome>
+              <StyledPlaybookFooter>
+                <Button
+                  variant={isPopulateOpen ? 'solid' : 'outline'}
+                  color={isPopulateOpen ? 'accent' : undefined}
+                  startIcon={<IconDatabase size={16} />}
+                  onClick={() =>
+                    setActivePlaybook((prev) =>
+                      prev === POPULATE_KEY ? null : POPULATE_KEY,
+                    )
+                  }
+                  title={t`Set up my CRM`}
+                >
+                  {isPopulateOpen ? t`Hide setup` : t`Set up my CRM`}
+                </Button>
+              </StyledPlaybookFooter>
+            </StyledPlaybookCard>
+
             {PLAYBOOKS.map((playbook) => (
               <StyledPlaybookCard key={playbook.key}>
                 <StyledPlaybookTop>
@@ -480,6 +438,91 @@ export const GetStartedPage = () => {
             ))}
           </StyledPlaybookGrid>
         </StyledSection>
+
+        {isPopulateOpen && (
+          <StyledSection>
+            <StyledSectionLabel>{t`Populate your CRM`}</StyledSectionLabel>
+            <StyledSteps>
+              <StyledStep>
+                <StyledStepTop>
+                  <StyledStepNumber>1</StyledStepNumber>
+                  <StyledStepText>
+                    <StyledStepTitle>{t`Connect where your leads live`}</StyledStepTitle>
+                    <StyledStepHint>
+                      {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
+                    </StyledStepHint>
+                  </StyledStepText>
+                </StyledStepTop>
+                <StyledIntegrationsGrid>
+                  {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
+                    <ConnectIntegrationCard
+                      key={integration.plugin}
+                      integration={integration}
+                      compact
+                    />
+                  ))}
+                </StyledIntegrationsGrid>
+                <div>
+                  <Button
+                    variant="outline"
+                    startIcon={<IconPlug size={16} />}
+                    onClick={() =>
+                      navigate(getSettingsPath(SettingsPath.Integrations))
+                    }
+                  >
+                    {t`See all integrations`}
+                  </Button>
+                </div>
+              </StyledStep>
+
+              <StyledStep>
+                <StyledStepTop>
+                  <StyledStepNumber>2</StyledStepNumber>
+                  <StyledStepText>
+                    <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
+                    <StyledStepHint>
+                      {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you.`}
+                    </StyledStepHint>
+                  </StyledStepText>
+                </StyledStepTop>
+                <TextArea
+                  textAreaId="get-started-leads-source"
+                  label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
+                  placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
+                  value={leadsSource}
+                  onChange={setLeadsSource}
+                  minRows={2}
+                  maxRows={3}
+                />
+                <div>
+                  <Button
+                    variant="solid"
+                    color="accent"
+                    startIcon={<IconSparkles size={16} />}
+                    onClick={() => openCopilotWith(buildPopulatePrompt())}
+                  >
+                    {t`Build my CRM`}
+                  </Button>
+                </div>
+              </StyledStep>
+            </StyledSteps>
+
+            <StyledExamples>
+              <StyledExamplesLabel>
+                {t`Or have the agent fill your CRM another way:`}
+              </StyledExamplesLabel>
+              {EXAMPLE_PROMPTS.map((prompt) => (
+                <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
+                  <IconArrowRight
+                    size={14}
+                    style={{ marginRight: 6, verticalAlign: 'middle' }}
+                  />
+                  {prompt}
+                </StyledChip>
+              ))}
+            </StyledExamples>
+          </StyledSection>
+        )}
       </StyledContent>
     </StyledPage>
   );

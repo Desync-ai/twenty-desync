@@ -26,6 +26,8 @@ export const DesyncGetStartedSection = () => {
         label={t`Playbooks`}
         Icon={IconSparkles}
         to={AppPath.GetStarted}
+        withIconBackground
+        modifier="new"
       />
     </StyledSection>
   );
