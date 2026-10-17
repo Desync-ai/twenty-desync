@@ -29,7 +29,7 @@ import {
   INTEGRATIONS,
 } from '~/pages/settings/integrations/SettingsIntegrations';
 
-// The integrations that are "places leads/contacts live", shown inline on the
+// The integrations that are "places leads/contacts live", shown inline in the
 // Populate play so the user can connect without leaving the tab.
 const LEAD_SOURCE_PLUGINS = [
   'hubspot',
@@ -53,10 +53,10 @@ const INTEGRATION_BY_PLUGIN = new Map(
 // Desync "Playbooks" (was "Get started"): one-tap recipes that open the built-in
 // agent pre-loaded with a battle-tested prompt and run it. Most users don't know
 // how to prompt an AI; each card packages a high-value job into a single button
-// so they get the payoff without writing anything. The page opens on just the
-// cards; a play that needs input (Populate) reveals its questions only once the
-// user picks it. Populate keeps the original review-before-send flow because it
-// clears the demo data.
+// so they get the payoff without writing anything. Master-detail layout: pick a
+// play on the left, its detail (what it does, the tools it uses, the run button)
+// opens on the right. Populate keeps the review-before-send flow since it clears
+// the demo data; the other plays auto-run with a hard no-send rule.
 
 const POPULATE_KEY = 'populate';
 
@@ -80,7 +80,7 @@ const ENRICH_PROMPT =
   'Enrich the people already in my CRM. Start with the 50 most recently added People that have missing details. For each one, fill in any missing job title, company, work email, LinkedIn URL and location using my connected tools and the web. Update the records in place, do not create duplicates, and do not invent anything: if you cannot verify a field, leave it blank. When you are done, tell me how many people you updated and which fields were most often missing.';
 
 const CALLS_PROMPT =
-  'Go through my call and meeting transcripts from the last two weeks, using my connected tools (Fathom, Pocket, meeting notes, calendar). For each call: find the matching Person or Company in my CRM (only create one if it is clearly missing), add a Note with a short summary and the key takeaways, and create Tasks for any clear follow-ups or commitments, with a due date when one was mentioned. When you are done, give me a short list of the calls you processed and the follow-up tasks you created.';
+  'Go through my call and meeting transcripts from the last two weeks, using my connected tools (Fathom, Granola, Pocket, meeting notes, calendar). For each call: find the matching Person or Company in my CRM (only create one if it is clearly missing), add a Note with a short summary and the key takeaways, and create Tasks for any clear follow-ups or commitments, with a due date when one was mentioned. When you are done, give me a short list of the calls you processed and the follow-up tasks you created.';
 
 const LOOKALIKES_PROMPT =
   'Find new leads that look like my best customers. First look at my won opportunities and the companies and people I clearly do business with, and tell me the pattern you see (industry, company size, the roles of the people). Then find about 15 new leads that fit that same profile and add them as People and Companies, tagged as AI-suggested, each with a one-line reason it matches. Do not draft or send any outreach: just build the list and show me who you added and why.';
@@ -95,13 +95,13 @@ type Playbook = {
   Icon: ComponentType<{ size?: number }>;
   prompt: string;
   hint?: string;
-  // Composio integrations this play benefits from; shown as "connect these"
-  // chips on the card. Empty/undefined renders "No integration needed".
+  // Composio integrations this play benefits from, shown as real connect cards
+  // in the detail panel. Empty/undefined renders "No integration needed".
   plugins?: string[];
 };
 
-// The one-tap plays. Populate is handled separately because it asks questions
-// first rather than firing the agent immediately.
+// The one-tap plays. Populate is handled separately because its detail asks
+// questions and runs with review rather than firing the agent immediately.
 const PLAYBOOKS: Playbook[] = [
   {
     key: 'enrich',
@@ -145,6 +145,28 @@ const PLAYBOOKS: Playbook[] = [
   },
 ];
 
+// Left-rail entries: Populate first (its own detail), then the one-tap plays.
+const PLAY_LIST: {
+  key: string;
+  title: string;
+  outcome: string;
+  Icon: ComponentType<{ size?: number }>;
+}[] = [
+  {
+    key: POPULATE_KEY,
+    title: 'Populate your CRM',
+    outcome:
+      'Import your existing contacts and companies, and let the agent set it all up for you.',
+    Icon: IconDatabase,
+  },
+  ...PLAYBOOKS.map(({ key, title, outcome, Icon }) => ({
+    key,
+    title,
+    outcome,
+    Icon,
+  })),
+];
+
 const StyledPage = styled.div`
   background: ${themeCssVariables.background.primary};
   display: flex;
@@ -159,7 +181,7 @@ const StyledContent = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[6]};
   margin: 0 auto;
-  max-width: 640px;
+  max-width: 1120px;
   padding: ${themeCssVariables.spacing[8]} ${themeCssVariables.spacing[6]};
   width: 100%;
 `;
@@ -184,10 +206,115 @@ const StyledSubtitle = styled.p`
   margin: 0;
 `;
 
-const StyledSection = styled.div`
+const StyledLayout = styled.div`
+  align-items: flex-start;
   display: flex;
+  gap: ${themeCssVariables.spacing[6]};
+
+  @media (max-width: 899px) {
+    flex-direction: column;
+  }
+`;
+
+const StyledPlayList = styled.div`
+  display: flex;
+  flex: 0 0 360px;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
+  width: 360px;
+
+  @media (max-width: 899px) {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+`;
+
+const StyledPlayCard = styled.button`
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.md};
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+  padding: ${themeCssVariables.spacing[4]};
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    border-color: ${themeCssVariables.color.blue};
+  }
+`;
+
+const StyledPlayCardTop = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.primary};
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledPlayCardTitle = styled.span`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledPlayCardOutcome = styled.span`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.4;
+`;
+
+const StyledDetail = styled.div`
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.md};
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[4]};
+  min-height: 320px;
+  min-width: 0;
+  padding: ${themeCssVariables.spacing[6]};
+  width: 100%;
+`;
+
+const StyledPlaceholder = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.light};
+  display: flex;
+  flex: 1;
+  font-size: ${themeCssVariables.font.size.md};
+  justify-content: center;
+  text-align: center;
+`;
+
+const StyledDetailHeader = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.primary};
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledDetailTitle = styled.h2`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.lg};
+  font-weight: ${themeCssVariables.font.weight.semiBold};
+  margin: 0;
+`;
+
+const StyledDetailText = styled.p`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.md};
+  line-height: 1.5;
+  margin: 0;
+`;
+
+const StyledDetailNote = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.4;
 `;
 
 const StyledSectionLabel = styled.span`
@@ -198,52 +325,10 @@ const StyledSectionLabel = styled.span`
   letter-spacing: 0.04em;
 `;
 
-const StyledSteps = styled.div`
+const StyledBlock = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[4]};
-`;
-
-const StyledStep = styled.div`
-  background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.md};
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
-  padding: ${themeCssVariables.spacing[4]};
-`;
-
-const StyledStepTop = styled.div`
-  align-items: center;
-  display: flex;
-  gap: ${themeCssVariables.spacing[3]};
-`;
-
-const StyledStepNumber = styled.div`
-  align-items: center;
-  background: ${themeCssVariables.color.blue};
-  border-radius: 50%;
-  color: #fff;
-  display: flex;
-  flex: 0 0 auto;
-  font-size: ${themeCssVariables.font.size.sm};
-  font-weight: ${themeCssVariables.font.weight.semiBold};
-  height: 24px;
-  justify-content: center;
-  width: 24px;
-`;
-
-const StyledStepText = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[1]};
-`;
-
-const StyledStepTitle = styled.span`
-  color: ${themeCssVariables.font.color.primary};
-  font-size: ${themeCssVariables.font.size.md};
-  font-weight: ${themeCssVariables.font.weight.medium};
+  gap: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledStepHint = styled.span`
@@ -255,7 +340,7 @@ const StyledStepHint = styled.span`
 const StyledIntegrationsGrid = styled.div`
   display: grid;
   gap: ${themeCssVariables.spacing[2]};
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 `;
 
 const StyledExamples = styled.div`
@@ -286,89 +371,6 @@ const StyledChip = styled.button`
   }
 `;
 
-const StyledPlaybookGrid = styled.div`
-  display: grid;
-  gap: ${themeCssVariables.spacing[3]};
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-`;
-
-const StyledPlaybookCard = styled.div`
-  background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.md};
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[2]};
-  padding: ${themeCssVariables.spacing[4]};
-`;
-
-const StyledPlaybookTop = styled.div`
-  align-items: center;
-  color: ${themeCssVariables.font.color.primary};
-  display: flex;
-  gap: ${themeCssVariables.spacing[2]};
-`;
-
-const StyledPlaybookTitle = styled.span`
-  color: ${themeCssVariables.font.color.primary};
-  font-size: ${themeCssVariables.font.size.md};
-  font-weight: ${themeCssVariables.font.weight.medium};
-`;
-
-const StyledPlaybookOutcome = styled.span`
-  color: ${themeCssVariables.font.color.secondary};
-  font-size: ${themeCssVariables.font.size.sm};
-  line-height: 1.4;
-`;
-
-const StyledPlaybookHint = styled.span`
-  color: ${themeCssVariables.font.color.light};
-  font-size: ${themeCssVariables.font.size.sm};
-  line-height: 1.4;
-`;
-
-const StyledPlaybookFooter = styled.div`
-  margin-top: ${themeCssVariables.spacing[1]};
-`;
-
-const StyledSuggested = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[1]};
-`;
-
-const StyledSuggestedLabel = styled.span`
-  color: ${themeCssVariables.font.color.light};
-  font-size: ${themeCssVariables.font.size.sm};
-  font-weight: ${themeCssVariables.font.weight.medium};
-`;
-
-const StyledChipRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${themeCssVariables.spacing[1]};
-`;
-
-const StyledIntegrationChip = styled.button`
-  background: ${themeCssVariables.background.primary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  color: ${themeCssVariables.font.color.secondary};
-  cursor: pointer;
-  font-size: ${themeCssVariables.font.size.sm};
-  padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
-
-  &:hover {
-    border-color: ${themeCssVariables.color.blue};
-    color: ${themeCssVariables.font.color.primary};
-  }
-`;
-
-const StyledNoIntegration = styled.span`
-  color: ${themeCssVariables.font.color.light};
-  font-size: ${themeCssVariables.font.size.sm};
-`;
-
 export const GetStartedPage = () => {
   const { t } = useLingui();
   const navigate = useNavigate();
@@ -377,7 +379,7 @@ export const GetStartedPage = () => {
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
   const [leadsSource, setLeadsSource] = useState('');
-  // Which play has its questions open. Null = the page shows only the cards.
+  // Which play's detail is open. Null = nothing selected yet.
   const [activePlaybook, setActivePlaybook] = useState<string | null>(null);
 
   // Desync: once the user has reached Playbooks, don't auto-land them here
@@ -391,8 +393,8 @@ export const GetStartedPage = () => {
     navigate('/chat');
   };
 
-  // Playbooks fire the agent straight away: one tap, it opens and runs. Every
-  // play carries the no-send rule so the agent can draft but never send.
+  // Plays fire the agent straight away: one tap, it opens and runs. Every play
+  // carries the no-send rule so the agent can draft but never send.
   const runPlaybook = (prompt: string) => {
     openAskAiPageWithPreprompt({
       text: `${prompt}\n\n${NO_SEND_RULE}`,
@@ -416,7 +418,138 @@ export const GetStartedPage = () => {
       .join('\n');
   };
 
-  const isPopulateOpen = activePlaybook === POPULATE_KEY;
+  const activePlay =
+    activePlaybook !== null && activePlaybook !== POPULATE_KEY
+      ? PLAYBOOKS.find((playbook) => playbook.key === activePlaybook)
+      : undefined;
+
+  const renderPopulateDetail = () => (
+    <>
+      <StyledDetailHeader>
+        <IconDatabase size={22} />
+        <StyledDetailTitle>{t`Populate your CRM`}</StyledDetailTitle>
+      </StyledDetailHeader>
+      <StyledDetailText>
+        {t`Import your real customers and leads from the tools you already use, then let the agent set up your People, Companies, and deals for you.`}
+      </StyledDetailText>
+
+      <StyledBlock>
+        <StyledSectionLabel>{t`1. Connect where your leads live`}</StyledSectionLabel>
+        <StyledStepHint>
+          {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
+        </StyledStepHint>
+        <StyledIntegrationsGrid>
+          {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
+            <ConnectIntegrationCard
+              key={integration.plugin}
+              integration={integration}
+              compact
+            />
+          ))}
+        </StyledIntegrationsGrid>
+        <div>
+          <Button
+            variant="outline"
+            startIcon={<IconPlug size={16} />}
+            onClick={() => navigate(getSettingsPath(SettingsPath.Integrations))}
+          >
+            {t`See all integrations`}
+          </Button>
+        </div>
+      </StyledBlock>
+
+      <StyledBlock>
+        <StyledSectionLabel>{t`2. Let the agent build your CRM`}</StyledSectionLabel>
+        <StyledStepHint>
+          {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected. If you connected nothing, it finds a few leads for you.`}
+        </StyledStepHint>
+        <TextArea
+          textAreaId="get-started-leads-source"
+          label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
+          placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
+          value={leadsSource}
+          onChange={setLeadsSource}
+          minRows={2}
+          maxRows={3}
+        />
+        <div>
+          <Button
+            variant="solid"
+            color="accent"
+            startIcon={<IconSparkles size={16} />}
+            onClick={() => openCopilotWith(buildPopulatePrompt())}
+          >
+            {t`Build my CRM`}
+          </Button>
+        </div>
+      </StyledBlock>
+
+      <StyledExamples>
+        <StyledExamplesLabel>
+          {t`Or have the agent fill your CRM another way:`}
+        </StyledExamplesLabel>
+        {EXAMPLE_PROMPTS.map((prompt) => (
+          <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
+            <IconArrowRight
+              size={14}
+              style={{ marginRight: 6, verticalAlign: 'middle' }}
+            />
+            {prompt}
+          </StyledChip>
+        ))}
+      </StyledExamples>
+    </>
+  );
+
+  const renderPlayDetail = (playbook: Playbook) => {
+    const suggested = (playbook.plugins ?? [])
+      .map((plugin) => INTEGRATION_BY_PLUGIN.get(plugin))
+      .filter((def): def is NonNullable<typeof def> => def !== undefined);
+
+    return (
+      <>
+        <StyledDetailHeader>
+          <playbook.Icon size={22} />
+          <StyledDetailTitle>{playbook.title}</StyledDetailTitle>
+        </StyledDetailHeader>
+        <StyledDetailText>{playbook.outcome}</StyledDetailText>
+
+        <StyledBlock>
+          <StyledSectionLabel>{t`Tools this play can use`}</StyledSectionLabel>
+          {suggested.length > 0 ? (
+            <StyledIntegrationsGrid>
+              {suggested.map((integration) => (
+                <ConnectIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                  compact
+                />
+              ))}
+            </StyledIntegrationsGrid>
+          ) : (
+            <StyledStepHint>{t`No integration needed for this one.`}</StyledStepHint>
+          )}
+        </StyledBlock>
+
+        <StyledDetailNote>
+          {playbook.hint
+            ? playbook.hint
+            : t`The agent drafts and prepares changes for you. It never sends anything on its own.`}
+        </StyledDetailNote>
+
+        <div>
+          <Button
+            variant="solid"
+            color="accent"
+            startIcon={<IconSparkles size={16} />}
+            onClick={() => runPlaybook(playbook.prompt)}
+          >
+            {playbook.cta}
+          </Button>
+        </div>
+      </>
+    );
+  };
 
   return (
     <StyledPage>
@@ -428,177 +561,41 @@ export const GetStartedPage = () => {
           </StyledSubtitle>
         </StyledHeader>
 
-        <StyledSection>
-          <StyledSectionLabel>{t`Pick a play`}</StyledSectionLabel>
-          <StyledPlaybookGrid>
-            <StyledPlaybookCard
-              style={
-                isPopulateOpen
-                  ? { borderColor: themeCssVariables.color.blue }
-                  : undefined
-              }
-            >
-              <StyledPlaybookTop>
-                <IconDatabase size={18} />
-                <StyledPlaybookTitle>{t`Populate your CRM`}</StyledPlaybookTitle>
-              </StyledPlaybookTop>
-              <StyledPlaybookOutcome>
-                {t`Import your existing contacts and companies, and let the agent set it all up for you.`}
-              </StyledPlaybookOutcome>
-              <StyledPlaybookFooter>
-                <Button
-                  variant={isPopulateOpen ? 'solid' : 'outline'}
-                  color={isPopulateOpen ? 'accent' : undefined}
-                  startIcon={<IconDatabase size={16} />}
-                  onClick={() =>
-                    setActivePlaybook((prev) =>
-                      prev === POPULATE_KEY ? null : POPULATE_KEY,
-                    )
-                  }
-                  title={t`Set up my CRM`}
-                >
-                  {isPopulateOpen ? t`Hide setup` : t`Set up my CRM`}
-                </Button>
-              </StyledPlaybookFooter>
-            </StyledPlaybookCard>
-
-            {PLAYBOOKS.map((playbook) => (
-              <StyledPlaybookCard key={playbook.key}>
-                <StyledPlaybookTop>
-                  <playbook.Icon size={18} />
-                  <StyledPlaybookTitle>{playbook.title}</StyledPlaybookTitle>
-                </StyledPlaybookTop>
-                <StyledPlaybookOutcome>{playbook.outcome}</StyledPlaybookOutcome>
-                {playbook.hint ? (
-                  <StyledPlaybookHint>{playbook.hint}</StyledPlaybookHint>
-                ) : null}
-                {playbook.plugins && playbook.plugins.length > 0 ? (
-                  <StyledSuggested>
-                    <StyledSuggestedLabel>{t`Suggested integrations`}</StyledSuggestedLabel>
-                    <StyledChipRow>
-                      {playbook.plugins.map((plugin) => {
-                        const def = INTEGRATION_BY_PLUGIN.get(plugin);
-                        if (!def) {
-                          return null;
-                        }
-                        return (
-                          <StyledIntegrationChip
-                            key={plugin}
-                            onClick={() =>
-                              navigate(
-                                getSettingsPath(SettingsPath.Integrations),
-                              )
-                            }
-                            title={t`Connect ${def.name}`}
-                          >
-                            {def.name}
-                          </StyledIntegrationChip>
-                        );
-                      })}
-                    </StyledChipRow>
-                  </StyledSuggested>
-                ) : (
-                  <StyledNoIntegration>{t`No integration needed.`}</StyledNoIntegration>
-                )}
-                <StyledPlaybookFooter>
-                  <Button
-                    variant="outline"
-                    startIcon={<IconSparkles size={16} />}
-                    onClick={() => runPlaybook(playbook.prompt)}
-                    title={playbook.cta}
-                  >
-                    {playbook.cta}
-                  </Button>
-                </StyledPlaybookFooter>
-              </StyledPlaybookCard>
+        <StyledLayout>
+          <StyledPlayList>
+            {PLAY_LIST.map((play) => (
+              <StyledPlayCard
+                key={play.key}
+                onClick={() =>
+                  setActivePlaybook((prev) =>
+                    prev === play.key ? null : play.key,
+                  )
+                }
+                style={
+                  activePlaybook === play.key
+                    ? { borderColor: themeCssVariables.color.blue }
+                    : undefined
+                }
+              >
+                <StyledPlayCardTop>
+                  <play.Icon size={18} />
+                  <StyledPlayCardTitle>{play.title}</StyledPlayCardTitle>
+                </StyledPlayCardTop>
+                <StyledPlayCardOutcome>{play.outcome}</StyledPlayCardOutcome>
+              </StyledPlayCard>
             ))}
-          </StyledPlaybookGrid>
-        </StyledSection>
+          </StyledPlayList>
 
-        {isPopulateOpen && (
-          <StyledSection>
-            <StyledSectionLabel>{t`Populate your CRM`}</StyledSectionLabel>
-            <StyledSteps>
-              <StyledStep>
-                <StyledStepTop>
-                  <StyledStepNumber>1</StyledStepNumber>
-                  <StyledStepText>
-                    <StyledStepTitle>{t`Connect where your leads live`}</StyledStepTitle>
-                    <StyledStepHint>
-                      {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
-                    </StyledStepHint>
-                  </StyledStepText>
-                </StyledStepTop>
-                <StyledIntegrationsGrid>
-                  {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
-                    <ConnectIntegrationCard
-                      key={integration.plugin}
-                      integration={integration}
-                      compact
-                    />
-                  ))}
-                </StyledIntegrationsGrid>
-                <div>
-                  <Button
-                    variant="outline"
-                    startIcon={<IconPlug size={16} />}
-                    onClick={() =>
-                      navigate(getSettingsPath(SettingsPath.Integrations))
-                    }
-                  >
-                    {t`See all integrations`}
-                  </Button>
-                </div>
-              </StyledStep>
-
-              <StyledStep>
-                <StyledStepTop>
-                  <StyledStepNumber>2</StyledStepNumber>
-                  <StyledStepText>
-                    <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
-                    <StyledStepHint>
-                      {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you.`}
-                    </StyledStepHint>
-                  </StyledStepText>
-                </StyledStepTop>
-                <TextArea
-                  textAreaId="get-started-leads-source"
-                  label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
-                  placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
-                  value={leadsSource}
-                  onChange={setLeadsSource}
-                  minRows={2}
-                  maxRows={3}
-                />
-                <div>
-                  <Button
-                    variant="solid"
-                    color="accent"
-                    startIcon={<IconSparkles size={16} />}
-                    onClick={() => openCopilotWith(buildPopulatePrompt())}
-                  >
-                    {t`Build my CRM`}
-                  </Button>
-                </div>
-              </StyledStep>
-            </StyledSteps>
-
-            <StyledExamples>
-              <StyledExamplesLabel>
-                {t`Or have the agent fill your CRM another way:`}
-              </StyledExamplesLabel>
-              {EXAMPLE_PROMPTS.map((prompt) => (
-                <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
-                  <IconArrowRight
-                    size={14}
-                    style={{ marginRight: 6, verticalAlign: 'middle' }}
-                  />
-                  {prompt}
-                </StyledChip>
-              ))}
-            </StyledExamples>
-          </StyledSection>
-        )}
+          <StyledDetail>
+            {activePlaybook === null && (
+              <StyledPlaceholder>
+                {t`Pick a play on the left to see what it does and the tools it uses.`}
+              </StyledPlaceholder>
+            )}
+            {activePlaybook === POPULATE_KEY && renderPopulateDetail()}
+            {activePlay && renderPlayDetail(activePlay)}
+          </StyledDetail>
+        </StyledLayout>
       </StyledContent>
     </StyledPage>
   );
