@@ -45,6 +45,11 @@ const LEAD_SOURCE_INTEGRATIONS = INTEGRATIONS.filter((integration) =>
   LEAD_SOURCE_PLUGINS.includes(integration.plugin),
 );
 
+// Quick lookup so a play can name the Composio integrations it benefits from.
+const INTEGRATION_BY_PLUGIN = new Map(
+  INTEGRATIONS.map((integration) => [integration.plugin, integration] as const),
+);
+
 // Desync "Playbooks" (was "Get started"): one-tap recipes that open the built-in
 // agent pre-loaded with a battle-tested prompt and run it. Most users don't know
 // how to prompt an AI; each card packages a high-value job into a single button
@@ -90,6 +95,9 @@ type Playbook = {
   Icon: ComponentType<{ size?: number }>;
   prompt: string;
   hint?: string;
+  // Composio integrations this play benefits from; shown as "connect these"
+  // chips on the card. Empty/undefined renders "No integration needed".
+  plugins?: string[];
 };
 
 // The one-tap plays. Populate is handled separately because it asks questions
@@ -112,7 +120,7 @@ const PLAYBOOKS: Playbook[] = [
     cta: 'Process my calls',
     Icon: IconPhone,
     prompt: CALLS_PROMPT,
-    hint: 'Works best with Fathom or Pocket connected.',
+    plugins: ['fathom', 'granola_mcp', 'pocket'],
   },
   {
     key: 'lookalikes',
@@ -122,6 +130,7 @@ const PLAYBOOKS: Playbook[] = [
     cta: 'Find lookalike leads',
     Icon: IconTargetArrow,
     prompt: LOOKALIKES_PROMPT,
+    plugins: ['apollo', 'hubspot', 'salesforce'],
   },
   {
     key: 'followups',
@@ -131,7 +140,8 @@ const PLAYBOOKS: Playbook[] = [
     cta: 'Draft my follow-ups',
     Icon: IconMail,
     prompt: FOLLOWUPS_PROMPT,
-    hint: 'Drafts only. A playbook never sends anything itself. Connect Gmail to save the drafts to your inbox.',
+    hint: 'Drafts only. A playbook never sends anything itself.',
+    plugins: ['gmail', 'outlook'],
   },
 ];
 
@@ -321,6 +331,44 @@ const StyledPlaybookFooter = styled.div`
   margin-top: ${themeCssVariables.spacing[1]};
 `;
 
+const StyledSuggested = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+`;
+
+const StyledSuggestedLabel = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledChipRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[1]};
+`;
+
+const StyledIntegrationChip = styled.button`
+  background: ${themeCssVariables.background.primary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+
+  &:hover {
+    border-color: ${themeCssVariables.color.blue};
+    color: ${themeCssVariables.font.color.primary};
+  }
+`;
+
+const StyledNoIntegration = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+`;
+
 export const GetStartedPage = () => {
   const { t } = useLingui();
   const navigate = useNavigate();
@@ -424,6 +472,34 @@ export const GetStartedPage = () => {
                 {playbook.hint ? (
                   <StyledPlaybookHint>{playbook.hint}</StyledPlaybookHint>
                 ) : null}
+                {playbook.plugins && playbook.plugins.length > 0 ? (
+                  <StyledSuggested>
+                    <StyledSuggestedLabel>{t`Suggested integrations`}</StyledSuggestedLabel>
+                    <StyledChipRow>
+                      {playbook.plugins.map((plugin) => {
+                        const def = INTEGRATION_BY_PLUGIN.get(plugin);
+                        if (!def) {
+                          return null;
+                        }
+                        return (
+                          <StyledIntegrationChip
+                            key={plugin}
+                            onClick={() =>
+                              navigate(
+                                getSettingsPath(SettingsPath.Integrations),
+                              )
+                            }
+                            title={t`Connect ${def.name}`}
+                          >
+                            {def.name}
+                          </StyledIntegrationChip>
+                        );
+                      })}
+                    </StyledChipRow>
+                  </StyledSuggested>
+                ) : (
+                  <StyledNoIntegration>{t`No integration needed.`}</StyledNoIntegration>
+                )}
                 <StyledPlaybookFooter>
                   <Button
                     variant="outline"
