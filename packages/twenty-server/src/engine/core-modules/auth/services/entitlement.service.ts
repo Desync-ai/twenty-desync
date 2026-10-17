@@ -44,7 +44,10 @@ export class EntitlementService {
   }
 
   async isEntitled(email: string, clerkId?: string): Promise<boolean> {
-    // Desync team / admins are always allowed (internal use).
+    // Desync team / admins are always allowed (internal use). Trusting the
+    // suffix relies on the stored email being Clerk's verified primary email:
+    // Clerk sign-in syncs it and in-app email changes are refused while Clerk
+    // is on (UserService.updateUserEmail).
     if (email.toLowerCase().endsWith('@desync.ai')) {
       return true;
     }
