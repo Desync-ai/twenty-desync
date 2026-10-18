@@ -516,6 +516,14 @@ export class ChatExecutionService {
       });
     };
 
+    // Transient model errors (provider overload, rate limits, dropped streams)
+    // mid-run would otherwise surface to the user as a generic failure they
+    // must retry by hand. streamRetries reruns ONLY the current model step: the
+    // SDK discards that step's buffered tool calls before re-calling, so no tool
+    // side effect is ever duplicated. maxRetries covers the pre-stream case.
+    const MODEL_STREAM_RETRIES = 2;
+    let modelStreamRetryCount = 0;
+
     const stream = streamText({
       model: registeredModel.model,
       instructions: systemMessage,
@@ -524,6 +532,8 @@ export class ChatExecutionService {
       // Every step of the kickoff turn is forced so it cannot end in prose; stopWhen ends it at the first ask_questions.
       toolChoice: isWorkspaceSetupKickoffTurn ? 'required' : 'auto',
       abortSignal,
+      maxRetries: 3,
+      streamRetries: MODEL_STREAM_RETRIES,
       stopWhen: (step) =>
         isStepCount(AGENT_CONFIG.MAX_STEPS)(step) ||
         hasToolCall(ASK_QUESTIONS_TOOL_NAME)(step) ||
@@ -569,11 +579,23 @@ export class ChatExecutionService {
           });
         }
       },
-      onError: ({ error }) => {
+      onError: async ({ error }) => {
         lastUnderlyingStreamError = error;
         this.logger.error(
           `Stream ${streamId} emitted an error: ${error instanceof Error ? error.message : String(error)}`,
         );
+        // streamRetries reruns the current model step with no delay of its own;
+        // give an overloaded/rate-limited provider a short backoff first, and
+        // only while retries remain so the final surfaced error is not delayed.
+        modelStreamRetryCount += 1;
+        if (modelStreamRetryCount <= MODEL_STREAM_RETRIES) {
+          await new Promise((resolve) =>
+            setTimeout(
+              resolve,
+              Math.min(4000, 800 * 2 ** (modelStreamRetryCount - 1)),
+            ),
+          );
+        }
       },
       onToolExecutionEnd: (event) => {
         this.metricsService.recordHistogram({
