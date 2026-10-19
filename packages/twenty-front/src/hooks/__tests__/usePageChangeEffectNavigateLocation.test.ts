@@ -5,6 +5,7 @@ import { useIsWorkspaceActivationStatusEqualsTo } from '@/workspace/hooks/useIsW
 import { useQuery } from '@apollo/client/react';
 import { useLocation } from 'react-router-dom';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
 import { AppPath, SettingsPath } from 'twenty-shared/types';
 import { getAppPath, getSettingsPath } from 'twenty-shared/utils';
 
@@ -459,6 +460,18 @@ const testCases: {
 ];
 
 describe('usePageChangeEffectNavigateLocation', () => {
+  // Desync: the default mock workspace is pre-marked as "already seen" so the
+  // baseline cases below exercise the normal landing. The first-run Get-started
+  // redirect is covered by its own case at the end.
+  beforeEach(() => {
+    try {
+      window.localStorage.clear();
+    } catch {
+      // jsdom always has localStorage; ignore defensively
+    }
+    markGetStartedSeen('mock-workspace-id');
+  });
+
   it.each(testCases)(
     'with location $loc and onboardingStatus $onboardingStatus and isWorkspaceSuspended $isWorkspaceSuspended should return $res`',
     ({
@@ -499,6 +512,40 @@ describe('usePageChangeEffectNavigateLocation', () => {
       expect(usePageChangeEffectNavigateLocation()).toEqual(res);
     },
   );
+
+  describe('Desync first-run Get-started redirect', () => {
+    it('lands a COMPLETED user on /get-started the first time they enter a workspace (flag unset)', () => {
+      try {
+        window.localStorage.clear();
+      } catch {
+        // ignore
+      }
+      setupMockIsMatchingLocation(AppPath.Index);
+      setupMockOnboardingStatus(OnboardingStatus.COMPLETED);
+      setupMockIsWorkspaceActivationStatusEqualsTo(false);
+      setupMockIsLogged(true);
+      setupMockIsOnAWorkspace(true);
+      setupMockUseQuery(undefined);
+      setupMockUseLocation(AppPath.Index);
+      setupMockState(undefined, undefined, undefined, undefined, true, true, false);
+
+      expect(usePageChangeEffectNavigateLocation()).toEqual(AppPath.GetStarted);
+    });
+
+    it('does NOT redirect once the workspace has been seen (flag set)', () => {
+      markGetStartedSeen('mock-workspace-id');
+      setupMockIsMatchingLocation(AppPath.Index);
+      setupMockOnboardingStatus(OnboardingStatus.COMPLETED);
+      setupMockIsWorkspaceActivationStatusEqualsTo(false);
+      setupMockIsLogged(true);
+      setupMockIsOnAWorkspace(true);
+      setupMockUseQuery(undefined);
+      setupMockUseLocation(AppPath.Index);
+      setupMockState(undefined, undefined, undefined, undefined, true, true, false);
+
+      expect(usePageChangeEffectNavigateLocation()).toEqual(defaultHomePagePath);
+    });
+  });
 
   describe('tests should be exhaustive', () => {
     it('all location, onboarding status and suspended/not suspended workspace activation status should be tested', () => {

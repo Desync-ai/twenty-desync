@@ -41,6 +41,18 @@ const AiChatPage = lazy(() =>
   })),
 );
 
+const FioAdsPage = lazy(() =>
+  import('~/pages/fio-ads/FioAdsPage').then((module) => ({
+    default: module.FioAdsPage,
+  })),
+);
+
+const GetStartedPage = lazy(() =>
+  import('~/pages/get-started/GetStartedPage').then((module) => ({
+    default: module.GetStartedPage,
+  })),
+);
+
 const MobileHomePage = lazy(() =>
   import('~/pages/mobile-home/MobileHomePage').then((module) => ({
     default: module.MobileHomePage,
@@ -128,6 +140,22 @@ export const createWorkspaceRouteObjects = ({
       ),
     },
     {
+      path: AppPath.FioAds,
+      element: (
+        <LazyRoute>
+          <FioAdsPage />
+        </LazyRoute>
+      ),
+    },
+    {
+      path: AppPath.GetStarted,
+      element: (
+        <LazyRoute>
+          <GetStartedPage />
+        </LazyRoute>
+      ),
+    },
+    {
       path: AppPath.Home,
       element: (
         <LazyRoute>
@@ -143,6 +171,15 @@ export const createWorkspaceRouteObjects = ({
     {
       path: AppPath.Dpa,
       element: <Navigate to={getSettingsPath(SettingsPath.LegalDpa)} replace />,
+    },
+    {
+      // Clerk's configured sign-in path ("/login") doesn't exist on workspace
+      // subdomains (auth is centralized via Clerk on the root domain). When the
+      // Clerk SDK bounces there — e.g. after a login token expires during a slow
+      // workspace activation — send it to the workspace root so the normal gate /
+      // Clerk exchange runs, instead of 404ing. Mirrors clicking "Home".
+      path: '/login',
+      element: <Navigate to={AppPath.Index} replace />,
     },
     {
       path: AppPath.NotFoundWildcard,

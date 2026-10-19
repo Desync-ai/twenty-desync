@@ -18,6 +18,8 @@ export enum AppPath {
 
   // Onboarded
   AiChat = '/chat/:threadId?',
+  FioAds = '/fio-ads',
+  GetStarted = '/get-started',
   Index = '/',
   // Mobile only: the navigation menu is a page there rather than a drawer.
   Home = '/home',

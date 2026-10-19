@@ -4,6 +4,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { msg } from '@lingui/core/macro';
 import { TWENTY_ICONS_BASE_URL } from 'twenty-shared/constants';
 import { isDefined } from 'twenty-shared/utils';
+import { DEFAULT_AI_CHAT_MODEL_TIER } from 'twenty-shared/ai';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
   IsNull,
@@ -80,6 +81,12 @@ import { isWorkEmail } from 'src/utils/is-work-email';
 // oxlint-disable-next-line twenty/inject-workspace-repository
 export class SignInUpService {
   private readonly logger = new Logger(SignInUpService.name);
+  // Desync: new-signup notification (fire-and-forget) — reuses the same Resend
+  // key + verified sender as the integrations feedback email.
+  private readonly signupNotifyResendKey =
+    process.env.RESEND_KEY ?? process.env.RESEND_API_KEY ?? '';
+  private readonly signupNotifyEmail =
+    process.env.SIGNUP_NOTIFY_EMAIL ?? 'jackson@desync.ai';
 
   constructor(
     @InjectRepository(UserEntity)
@@ -487,7 +494,69 @@ export class SignInUpService {
       shouldStoreInCache: false,
     });
 
+    // Desync: notify the team that a new person signed up (fire-and-forget;
+    // must never block or fail signup — mirrors IntegrationsService.feedback()).
+    void this.notifyNewSignup(newUserWithPicture);
+
     return savedUser;
+  }
+
+  private async notifyNewSignup(
+    newUser: PartialUserWithPicture,
+  ): Promise<void> {
+    if (!this.signupNotifyResendKey || !this.signupNotifyEmail) {
+      return;
+    }
+
+    try {
+      const escape = (value: string) =>
+        value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const name =
+        [newUser.firstName, newUser.lastName]
+          .filter(isDefined)
+          .join(' ')
+          .trim() || '(no name given)';
+      const when = new Date().toISOString();
+      const html =
+        `<p><strong>New Desync CRM signup</strong></p>` +
+        `<ul>` +
+        `<li>Name: ${escape(name)}</li>` +
+        `<li>Email: ${escape(newUser.email)}</li>` +
+        `<li>Time: ${when}</li>` +
+        `</ul>`;
+
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.signupNotifyResendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Desync CRM <noreply@desync.support>',
+          to: this.signupNotifyEmail
+            .split(',')
+            .map((address) => address.trim())
+            .filter((address) => address.length > 0),
+          subject: `New Desync CRM signup: ${newUser.email}`,
+          html,
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+
+        this.logger.warn(
+          `Signup notification email failed: Resend ${response.status} ${text.slice(
+            0,
+            200,
+          )}`,
+        );
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Signup notification email error: ${(error as Error)?.message}`,
+      );
+    }
   }
 
   private async isSignUpEnabled(): Promise<boolean> {
@@ -797,6 +866,11 @@ export class SignInUpService {
             displayName,
             inviteHash: v4(),
             activationStatus: WorkspaceActivationStatus.PENDING_CREATION,
+            // Desync: new workspaces default to the highest reasoning tier so the
+            // copilot (including onboarding) runs on Max Thinking out of the box.
+            // (The entity/DB column default is not relied on: core runs
+            // synchronize:false and the 2.40 migration created it as 'fast'.)
+            aiChatModelTier: DEFAULT_AI_CHAT_MODEL_TIER,
           });
 
           const workspace = await queryRunner.manager.save(

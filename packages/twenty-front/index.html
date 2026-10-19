@@ -44,9 +44,14 @@
         var isDev =
           host === "twenty-dev.desync.ai" ||
           host.indexOf(".twenty-dev.desync.ai") !== -1;
+        // Prod is crm.desync.ai (renamed from twenty.desync.ai on 2026-09-29);
+        // the legacy twenty.desync.ai host is kept too. Without crm.desync.ai
+        // here, PostHog never init'd on prod — the quiet break after the rename.
         var isProd =
           !isDev &&
-          (host === "twenty.desync.ai" ||
+          (host === "crm.desync.ai" ||
+            host.indexOf(".crm.desync.ai") !== -1 ||
+            host === "twenty.desync.ai" ||
             host.indexOf(".twenty.desync.ai") !== -1);
         if ((isProd || isDev) && KEY.indexOf("phc_") === 0) {
           var environment = isProd ? "production" : "development";
@@ -56,7 +61,16 @@
             capture_pageview: "history_change",
             capture_pageleave: true,
             person_profiles: "identified_only",
+            // Record the full session (screen-by-screen replay) from the first
+            // screen, so the login + onboarding flow is captured — not just the
+            // app shell. Input fields stay masked by default (no passwords).
+            disable_session_recording: false,
           });
+          // Force recording on for every session (bypassing any project-side
+          // sampling) so every screen, including login/onboarding, is recorded.
+          if (window.posthog && window.posthog.startSessionRecording) {
+            window.posthog.startSessionRecording();
+          }
           // product separates Twenty-CRM from the web_app / Gabriel CRM; exposed
           // as a fn so a future posthog.reset() (on sign-out) can re-register.
           window.__phRegister = function () {

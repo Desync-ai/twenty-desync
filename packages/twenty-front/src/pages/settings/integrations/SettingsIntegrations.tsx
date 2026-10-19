@@ -1,9 +1,9 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
+import { useNavigate } from 'react-router-dom';
 import { IconCheck, IconPlug, IconRefresh } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/primitives/input';
 import { useToast } from 'twenty-ui/primitives/feedback';
@@ -24,30 +24,38 @@ const INTEGRATIONS_BASE_URL = `${REACT_APP_SERVER_BASE_URL}/integrations`;
 // 'connect' = OAuth/sync via the integrations API. 'mcp' = an AI agent that
 // connects to the CRM through our built-in MCP server; the card just deep-links
 // to Settings -> API & MCP where the user makes a key + copies the endpoint.
-type IntegrationKind = 'connect' | 'mcp';
+// 'key' = bring-your-own-key: the user pastes an API key we store directly and
+// use on their behalf (e.g. Pocket, wired to its own MCP server, NOT Composio).
+type IntegrationKind = 'connect' | 'mcp' | 'key';
 
-type IntegrationDef = {
+export type IntegrationDef = {
   plugin: string;
   name: string;
   tags: string[];
   kind: IntegrationKind;
   logoDomain?: string;
+  // Explicit logo image URL, tried before the clearbit/favicon domain fallback.
+  logoUrl?: string;
   blurb: string;
   connectedBlurb?: string;
   // Copilot-tool connects (Slack, Airtable) are used by the AI assistant rather
   // than synced, so they show no "Sync now" action once connected.
   agentTool?: boolean;
+  // For kind 'key': help text + input placeholder shown in the connect modal.
+  keyHelp?: string;
+  keyPlaceholder?: string;
 };
 
-const INTEGRATIONS: IntegrationDef[] = [
+export const INTEGRATIONS: IntegrationDef[] = [
   {
     plugin: 'hubspot',
     name: 'HubSpot',
     kind: 'connect',
     tags: ['CRM'],
     logoDomain: 'hubspot.com',
-    blurb: 'Import contacts, companies & deals',
-    connectedBlurb: 'Contacts, companies & deals',
+    agentTool: true,
+    blurb: 'Let the AI assistant read & manage your HubSpot contacts, companies & deals',
+    connectedBlurb: 'Available to your AI assistant',
   },
   {
     plugin: 'salesforce',
@@ -55,17 +63,9 @@ const INTEGRATIONS: IntegrationDef[] = [
     kind: 'connect',
     tags: ['CRM'],
     logoDomain: 'salesforce.com',
-    blurb: 'Import accounts, contacts & opportunities',
-    connectedBlurb: 'Accounts, contacts & opportunities',
-  },
-  {
-    plugin: 'desync',
-    name: 'Desync Leads',
-    kind: 'connect',
-    tags: ['CRM'],
-    logoDomain: 'desync.ai',
-    blurb: 'Import your leads from the Desync platform',
-    connectedBlurb: 'Your Desync leads',
+    agentTool: true,
+    blurb: 'Let the AI assistant read & manage your Salesforce accounts, contacts & opportunities',
+    connectedBlurb: 'Available to your AI assistant',
   },
   {
     plugin: 'slack',
@@ -96,6 +96,34 @@ const INTEGRATIONS: IntegrationDef[] = [
     agentTool: true,
     blurb: 'Let the AI assistant read your meeting notes & transcripts',
     connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'pocket',
+    name: 'Pocket',
+    kind: 'key',
+    tags: ['Meeting Notes'],
+    logoDomain: 'heypocketai.com',
+    logoUrl:
+      'https://play-lh.googleusercontent.com/CqfEY5MnK7zPHmPLjzO7emJTsDEVpRld4Ri7XIDm6AjDwkGEK8ySTz9W7LSG-EdJwi9uTRzQKDuWtWatEylKjw=w240-h480-rw',
+    agentTool: true,
+    blurb: 'Let the AI assistant search your Pocket recordings, transcripts & action items',
+    connectedBlurb: 'Available to your AI assistant',
+    keyHelp:
+      'Paste your Pocket API key (starts with pk_). Find it in the Pocket app under Settings > Developer > API Keys.',
+    keyPlaceholder: 'pk_...',
+  },
+  {
+    plugin: 'fathom',
+    name: 'Fathom',
+    kind: 'key',
+    tags: ['Meeting Notes'],
+    logoDomain: 'fathom.video',
+    agentTool: true,
+    blurb: 'Let the AI assistant search your Fathom meetings, transcripts & summaries',
+    connectedBlurb: 'Available to your AI assistant',
+    keyHelp:
+      'Paste your Fathom API key. Find it in Fathom under Settings > API.',
+    keyPlaceholder: 'Your Fathom API key',
   },
   {
     plugin: 'gmail',
@@ -175,6 +203,46 @@ const INTEGRATIONS: IntegrationDef[] = [
     logoDomain: 'sheets.google.com',
     agentTool: true,
     blurb: 'Let the AI assistant read & update your spreadsheets',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'instantly',
+    name: 'Instantly',
+    kind: 'connect',
+    tags: ['Email'],
+    logoDomain: 'instantly.ai',
+    agentTool: true,
+    blurb: 'Let the AI assistant run your cold-outreach campaigns & leads',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'attio',
+    name: 'Attio',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'attio.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant read and update your Attio CRM',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'twitter',
+    name: 'X (Twitter)',
+    kind: 'connect',
+    tags: ['Messaging'],
+    logoDomain: 'x.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant post and engage on X for you',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'apollo',
+    name: 'Apollo',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'apollo.io',
+    agentTool: true,
+    blurb: 'Let the AI assistant search, enrich, and manage leads in Apollo',
     connectedBlurb: 'Available to your AI assistant',
   },
   {
@@ -293,27 +361,33 @@ const StyledCardActions = styled.div`
 const IntegrationLogo = ({
   domain,
   name,
+  url,
 }: {
   domain?: string;
   name: string;
+  url?: string;
 }) => {
-  // clearbit logo -> google favicon -> plug icon. Any external block (CSP/404)
-  // falls through gracefully so the card still renders.
-  const [stage, setStage] = useState<0 | 1 | 2>(0);
+  // Try an explicit logo URL first (if given), then clearbit, then the google
+  // favicon, then a plug icon. Any external block (CSP/404) falls through
+  // gracefully so the card still renders.
+  const sources = [
+    url,
+    domain ? `https://logo.clearbit.com/${domain}` : undefined,
+    domain
+      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
+      : undefined,
+  ].filter(Boolean) as string[];
+  const [idx, setIdx] = useState(0);
 
-  if (!domain || stage === 2) {
+  if (idx >= sources.length) {
     return <IconPlug size={22} />;
   }
-  const src =
-    stage === 0
-      ? `https://logo.clearbit.com/${domain}`
-      : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
   return (
     <StyledLogoImg
-      src={src}
+      src={sources[idx]}
       alt={name}
-      onError={() => setStage((s) => (s + 1) as 0 | 1 | 2)}
+      onError={() => setIdx((i) => i + 1)}
     />
   );
 };
@@ -342,10 +416,40 @@ async function callIntegrations(
   return json;
 }
 
-const ConnectIntegrationCard = ({
+// Bring-your-own-key integrations (Pocket) live at the server root (e.g.
+// /pocket/status), NOT under /integrations, since they are not Composio-backed.
+async function callDirect(
+  path: string,
+  method: 'GET' | 'POST',
+  body?: unknown,
+): Promise<any> {
+  const res = await fetch(`${REACT_APP_SERVER_BASE_URL}${path}`, {
+    method,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let json: any = {};
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    json = { raw: text };
+  }
+  if (!res.ok) {
+    throw new Error(json?.error ?? json?.message ?? `Request failed (${res.status})`);
+  }
+  return json;
+}
+
+export const ConnectIntegrationCard = ({
   integration,
+  compact = false,
 }: {
   integration: IntegrationDef;
+  // compact hides the description blurb (used on the Get-started page where
+  // space is tight); the Settings grid keeps the blurbs.
+  compact?: boolean;
 }) => {
   const { t } = useLingui();
   const { enqueueToast } = useToast();
@@ -372,7 +476,9 @@ const ConnectIntegrationCard = ({
   const handleConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      const res = await callIntegrations(`/${plugin}/connect`, 'POST');
+      const res = await callIntegrations(`/${plugin}/connect`, 'POST', {
+        returnPath: window.location.pathname,
+      });
       if (res?.connectUrl) {
         window.location.href = res.connectUrl;
         return;
@@ -415,7 +521,7 @@ const ConnectIntegrationCard = ({
       if (final?.status === 'succeeded') {
         enqueueToast({
           variant: 'success',
-          children: t`${name} synced — ${c.created ?? 0} imported, ${c.skipped ?? 0} already up to date${(c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''}.`,
+          children: t`${name} synced: ${c.created ?? 0} imported, ${c.skipped ?? 0} already up to date${(c.errors ?? 0) > 0 ? `, ${c.errors} skipped` : ''}.`,
         });
       } else if (final?.status === 'failed') {
         enqueueToast({
@@ -425,7 +531,7 @@ const ConnectIntegrationCard = ({
       } else {
         enqueueToast({
           variant: 'success',
-          children: t`${name} sync is still running in the background — check back shortly.`,
+          children: t`${name} sync is still running in the background. Check back shortly.`,
         });
       }
     } catch (error) {
@@ -445,13 +551,21 @@ const ConnectIntegrationCard = ({
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
-              <IntegrationLogo domain={integration.logoDomain} name={name} />
+              <IntegrationLogo
+                domain={integration.logoDomain}
+                name={name}
+                url={integration.logoUrl}
+              />
             </StyledLogoBox>
             <StyledName>{name}</StyledName>
           </StyledHeader>
-          <StyledBlurb>
-            {connected ? integration.connectedBlurb ?? integration.blurb : integration.blurb}
-          </StyledBlurb>
+          {!compact && (
+            <StyledBlurb>
+              {connected
+                ? integration.connectedBlurb ?? integration.blurb
+                : integration.blurb}
+            </StyledBlurb>
+          )}
           {isSyncing && progress ? <StyledStatus>{progress}</StyledStatus> : null}
           <StyledCardActions>
             {connected === null ? (
@@ -511,18 +625,29 @@ const McpIntegrationCard = ({
         <StyledCardInner>
           <StyledHeader>
             <StyledLogoBox>
-              <IntegrationLogo domain={integration.logoDomain} name={name} />
+              <IntegrationLogo
+                domain={integration.logoDomain}
+                name={name}
+                url={integration.logoUrl}
+              />
             </StyledLogoBox>
             <StyledName>{name}</StyledName>
           </StyledHeader>
           <StyledBlurb>{integration.blurb}</StyledBlurb>
-          <StyledStatus>{t`Connects via MCP`}</StyledStatus>
+          {/* This integration runs inside the user's own AI app over MCP: they
+              paste our endpoint + key INTO it, so it does not run in Desync.
+              Because it lives entirely inside their agent, there is no
+              connection state we can observe or show here, so we say so plainly
+              rather than imply a status will appear. */}
+          <StyledStatus>
+            {t`This runs inside ${name}, not in Desync, so there is no connection status to show here. Add the connection details in ${name} and you are all set.`}
+          </StyledStatus>
           <StyledCardActions>
             <Button
               variant="outline"
               onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
             >
-              {t`Set up`}
+              {t`Get connection details`}
             </Button>
           </StyledCardActions>
         </StyledCardInner>
@@ -551,6 +676,168 @@ const StyledModalActions = styled.div`
     min-width: 0;
   }
 `;
+
+// Bring-your-own-key card: the user pastes an API key in a modal; we store it
+// directly and use it on their behalf (Pocket -> its own MCP server). Status /
+// connect / disconnect hit /<plugin>/{status,connect,disconnect} at the root.
+const KeyIntegrationCard = ({
+  integration,
+}: {
+  integration: IntegrationDef;
+}) => {
+  const { t } = useLingui();
+  const { enqueueToast } = useToast();
+  const { openModal, closeModal } = useModal();
+  const { plugin, name } = integration;
+  const modalId = `key-connect-${plugin}`;
+
+  const [connected, setConnected] = useState<boolean | null>(null);
+  const [apiKey, setApiKey] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const res = await callDirect(`/${plugin}/status`, 'GET');
+      setConnected(Boolean(res?.connected));
+    } catch {
+      setConnected(false);
+    }
+  }, [plugin]);
+
+  useEffect(() => {
+    void refreshStatus();
+  }, [refreshStatus]);
+
+  const submitKey = useCallback(async () => {
+    const key = apiKey.trim();
+    if (!key) return;
+    setBusy(true);
+    try {
+      await callDirect(`/${plugin}/connect`, 'POST', { apiKey: key });
+      enqueueToast({ variant: 'success', children: t`${name} connected.` });
+      setApiKey('');
+      closeModal(modalId);
+      await refreshStatus();
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Couldn't connect ${name}: ${String(
+          (error as Error)?.message ?? error,
+        )}`,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }, [apiKey, plugin, name, modalId, enqueueToast, t, closeModal, refreshStatus]);
+
+  const disconnect = useCallback(async () => {
+    setBusy(true);
+    try {
+      await callDirect(`/${plugin}/disconnect`, 'POST');
+      await refreshStatus();
+    } catch (error) {
+      enqueueToast({
+        variant: 'error',
+        children: t`Couldn't disconnect ${name}: ${String(
+          (error as Error)?.message ?? error,
+        )}`,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }, [plugin, name, enqueueToast, t, refreshStatus]);
+
+  return (
+    <StyledCard rounded>
+      <StyledCardContent>
+        <StyledCardInner>
+          <StyledHeader>
+            <StyledLogoBox>
+              <IntegrationLogo
+                domain={integration.logoDomain}
+                name={name}
+                url={integration.logoUrl}
+              />
+            </StyledLogoBox>
+            <StyledName>{name}</StyledName>
+          </StyledHeader>
+          <StyledBlurb>
+            {connected
+              ? integration.connectedBlurb ?? integration.blurb
+              : integration.blurb}
+          </StyledBlurb>
+          <StyledCardActions>
+            {connected === null ? (
+              <Button variant="outline" disabled>
+                {t`Checking…`}
+              </Button>
+            ) : connected ? (
+              <Button variant="outline" onClick={disconnect} loading={busy}>
+                {t`Disconnect`}
+              </Button>
+            ) : (
+              <Button
+                variant="solid"
+                color="accent"
+                startIcon={<IconCheck size={16} />}
+                onClick={() => {
+                  setApiKey('');
+                  openModal(modalId);
+                }}
+              >
+                {t`Connect`}
+              </Button>
+            )}
+          </StyledCardActions>
+        </StyledCardInner>
+      </StyledCardContent>
+
+      <ModalStatefulWrapper
+        modalInstanceId={modalId}
+        onClose={() => closeModal(modalId)}
+        isClosable
+        size="medium"
+        padding="large"
+        overlay="dark"
+        width="420px"
+        dataGloballyPreventClickOutside
+        renderInDocumentBody
+        smallBorderRadius
+        autoHeight
+      >
+        <H1Title title={t`Connect ${name}`} fontColor={H1TitleFontColor.Primary} />
+        <StyledModalBody>
+          {integration.keyHelp ? (
+            <StyledStatus>{integration.keyHelp}</StyledStatus>
+          ) : null}
+          <SettingsTextInput
+            instanceId={`${modalId}-key`}
+            label={t`API key`}
+            placeholder={integration.keyPlaceholder ?? t`Paste your API key`}
+            value={apiKey}
+            onChange={setApiKey}
+            autoFocusOnMount
+            fullWidth
+          />
+        </StyledModalBody>
+        <StyledModalActions>
+          <Button variant="outline" onClick={() => closeModal(modalId)} fullWidth>
+            {t`Cancel`}
+          </Button>
+          <Button
+            variant="solid"
+            color="accent"
+            onClick={submitKey}
+            disabled={!apiKey.trim() || busy}
+            fullWidth
+          >
+            {t`Connect`}
+          </Button>
+        </StyledModalActions>
+      </ModalStatefulWrapper>
+    </StyledCard>
+  );
+};
 
 const FEEDBACK_MODAL_ID = 'integrations-feedback-modal';
 const ALL_TAG = 'All';
@@ -595,7 +882,7 @@ export const SettingsIntegrations = () => {
     setSending(true);
     try {
       await callIntegrations('/feedback', 'POST', { kind: feedbackKind, message: text });
-      enqueueToast({ variant: 'success', children: t`Thanks — sent to the Desync team.` });
+      enqueueToast({ variant: 'success', children: t`Thanks, sent to the Desync team.` });
       setMessage('');
       closeModal(FEEDBACK_MODAL_ID);
     } catch (error) {
@@ -638,7 +925,15 @@ export const SettingsIntegrations = () => {
           <StyledGrid>
             {visible.map((integration) =>
               integration.kind === 'mcp' ? (
-                <McpIntegrationCard key={integration.plugin} integration={integration} />
+                <McpIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                />
+              ) : integration.kind === 'key' ? (
+                <KeyIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                />
               ) : (
                 <ConnectIntegrationCard key={integration.plugin} integration={integration} />
               ),
@@ -647,9 +942,6 @@ export const SettingsIntegrations = () => {
           <StyledFooter>
             <Button variant="outline" onClick={() => openFeedback('request')}>
               {t`Request an integration`}
-            </Button>
-            <Button variant="outline" onClick={() => openFeedback('problem')}>
-              {t`Report a problem`}
             </Button>
           </StyledFooter>
         </Section>

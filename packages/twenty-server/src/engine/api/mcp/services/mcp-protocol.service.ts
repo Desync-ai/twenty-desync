@@ -26,8 +26,11 @@ import {
 } from 'src/engine/api/mcp/tools/list-skills.tool';
 import { type McpToolAnnotations } from 'src/engine/api/mcp/types/mcp-tool-annotations.type';
 import { wrapJsonRpcResponse } from 'src/engine/api/mcp/utils/wrap-jsonrpc-response.util';
+import { MCP_CLIENT_CONNECTIONS_KV_KEY } from 'src/engine/api/mcp/constants/mcp-client-connections-kv-key.const';
 import { ApiKeyRoleService } from 'src/engine/core-modules/api-key/services/api-key-role.service';
 import { type FlatApiKey } from 'src/engine/core-modules/api-key/types/flat-api-key.type';
+import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
+import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
 import { type WorkspaceAuthContext } from 'src/engine/core-modules/auth/types/workspace-auth-context.type';
 import { buildApiKeyAuthContext } from 'src/engine/core-modules/auth/utils/build-api-key-auth-context.util';
 import { COMMON_PRELOAD_TOOLS } from 'src/engine/core-modules/tool-provider/constants/common-preload-tools.const';
@@ -96,7 +99,50 @@ export class McpProtocolService {
     private readonly mcpInstructionBuilderService: McpInstructionBuilderService,
     private readonly flatEntityMapsCacheService: WorkspaceManyOrAllFlatEntityMapsCacheService,
     private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly keyValuePairService: KeyValuePairService,
   ) {}
+
+  // Desync: record which AI client (Claude/Cursor/ChatGPT/Grok) just connected,
+  // keyed by the API key id, so the integrations page can show per-client active
+  // connection counts. Best-effort — callers fire-and-forget and swallow errors
+  // so this never affects the MCP handshake.
+  private async recordMcpClient(
+    workspaceId: string,
+    apiKeyId: string,
+    params: unknown,
+  ): Promise<void> {
+    const clientName = (
+      params as { clientInfo?: { name?: string } } | undefined
+    )?.clientInfo?.name;
+
+    if (!isDefined(clientName)) {
+      return;
+    }
+
+    const rows = await this.keyValuePairService.get({
+      userId: null,
+      workspaceId,
+      applicationId: null,
+      key: MCP_CLIENT_CONNECTIONS_KV_KEY,
+      type: KeyValuePairType.USER_VARIABLE,
+    });
+    const existing = (rows[0]?.value ?? {}) as Record<
+      string,
+      { name: string; lastSeenAt: string }
+    >;
+
+    await this.keyValuePairService.set({
+      userId: null,
+      workspaceId,
+      applicationId: null,
+      key: MCP_CLIENT_CONNECTIONS_KV_KEY,
+      value: {
+        ...existing,
+        [apiKeyId]: { name: clientName, lastSeenAt: new Date().toISOString() },
+      },
+      type: KeyValuePairType.USER_VARIABLE,
+    });
+  }
 
   async handleInitialize(
     requestId: string | number,
@@ -306,6 +352,14 @@ export class McpProtocolService {
       }
 
       if (method === 'initialize') {
+        // Desync: stamp which client connected (fire-and-forget, API-key auth
+        // only — OAuth connections have no apiKey row to key on).
+        if (isDefined(apiKey)) {
+          void this.recordMcpClient(workspace.id, apiKey.id, params).catch(
+            () => {},
+          );
+        }
+
         return this.handleInitialize(id, {
           workspaceId: workspace.id,
           roleId: await this.getRoleId(workspace.id, userWorkspaceId, apiKey),

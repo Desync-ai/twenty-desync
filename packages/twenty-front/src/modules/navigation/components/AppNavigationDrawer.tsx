@@ -1,5 +1,8 @@
 import { useIsSettingsDrawer } from '@/navigation/hooks/useIsSettingsDrawer';
 
+import { DesyncGetStartedSection } from '@/navigation/components/DesyncGetStartedSection';
+import { DesyncFioAdsSection } from '@/navigation/components/DesyncFioAdsSection';
+import { DesyncHelpSection } from '@/navigation/components/DesyncHelpSection';
 import { DesyncUsageWidget } from '@/desync-onboarding/components/DesyncUsageWidget';
 import { MainNavigationDrawerContent } from '@/navigation/components/MainNavigationDrawerContent';
 import { MainNavigationDrawerModeSwitcher } from '@/navigation/components/MainNavigationDrawerModeSwitcher';
@@ -40,8 +43,28 @@ export const AppNavigationDrawer = ({
         <MainNavigationDrawerContent />
       )}
 
+      {/* Desync: Launch-a-Fio-ad entry (paid users) + Help (book a call +
+          report a bug) pinned on the main sidebar (not the settings drawer). */}
+      {!isSettingsDrawer && (
+        <NavigationDrawerFixedContent>
+          <DesyncGetStartedSection />
+        </NavigationDrawerFixedContent>
+      )}
+
+      {!isSettingsDrawer && (
+        <NavigationDrawerFixedContent>
+          <DesyncFioAdsSection />
+        </NavigationDrawerFixedContent>
+      )}
+
+      {!isSettingsDrawer && (
+        <NavigationDrawerFixedContent>
+          <DesyncHelpSection />
+        </NavigationDrawerFixedContent>
+      )}
+
       {/* Desync: plan + usage summary pinned above logout on the main sidebar
-          (not the settings drawer) — same meters a user sees on lead-gen. */}
+          (not the settings drawer); same meters a user sees on lead-gen. */}
       {!isSettingsDrawer && (
         <NavigationDrawerFixedContent>
           <DesyncUsageWidget />

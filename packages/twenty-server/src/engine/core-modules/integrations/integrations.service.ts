@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
+import { MCP_CLIENT_CONNECTIONS_KV_KEY } from 'src/engine/api/mcp/constants/mcp-client-connections-kv-key.const';
 import { ApiKeyService } from 'src/engine/core-modules/api-key/services/api-key.service';
 import { ComposioService } from 'src/engine/core-modules/composio/composio.service';
+import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
+import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
 import { RoleService } from 'src/engine/metadata-modules/role/role.service';
 
 /**
@@ -22,15 +25,11 @@ import { RoleService } from 'src/engine/metadata-modules/role/role.service';
 @Injectable()
 export class IntegrationsService {
   private readonly logger = new Logger(IntegrationsService.name);
-  private readonly baseUrl = (process.env.CORSAIR_BASE_URL ?? '').replace(
-    /\/+$/,
-    '',
-  );
+  private readonly baseUrl = (process.env.CORSAIR_BASE_URL ?? '').replace(/\/+$/, '');
   private readonly serviceToken = process.env.CORSAIR_SERVICE_TOKEN ?? '';
   // Feedback / integration-request emails go to the team via Resend (the same
   // provider + verified sender the lead-gen platform uses).
-  private readonly resendKey =
-    process.env.RESEND_KEY ?? process.env.RESEND_API_KEY ?? '';
+  private readonly resendKey = process.env.RESEND_KEY ?? process.env.RESEND_API_KEY ?? '';
   private static readonly FEEDBACK_FROM = 'Desync CRM <noreply@desync.support>';
   private static readonly FEEDBACK_TO = ['mark@desync.ai', 'jackson@desync.ai'];
 
@@ -46,7 +45,60 @@ export class IntegrationsService {
     private readonly apiKeyService: ApiKeyService,
     private readonly roleService: RoleService,
     private readonly composioService: ComposioService,
+    private readonly keyValuePairService: KeyValuePairService,
   ) {}
+
+  // Desync: per-AI-client active MCP connection counts for the integrations page.
+  // Reads the workspace KV map the MCP initialize handshake stamps (apiKeyId ->
+  // { name, lastSeenAt }), keeps only entries whose API key is still active
+  // (non-revoked + non-expired), and buckets by client. Self-reported client
+  // name, so it's a best-effort signal; unknowns fall into "other".
+  async mcpConnectionCounts(workspaceId: string): Promise<Record<string, number>> {
+    const rows = await this.keyValuePairService.get({
+      userId: null,
+      workspaceId,
+      applicationId: null,
+      key: MCP_CLIENT_CONNECTIONS_KV_KEY,
+      type: KeyValuePairType.USER_VARIABLE,
+    });
+    const connectionsByApiKeyId = (rows[0]?.value ?? {}) as Record<
+      string,
+      { name?: string; lastSeenAt?: string }
+    >;
+
+    const activeKeys = await this.apiKeyService.findActiveByWorkspaceId(
+      workspaceId,
+    );
+    const now = Date.now();
+    const activeApiKeyIds = new Set(
+      activeKeys
+        .filter((k) => !k.expiresAt || new Date(k.expiresAt).getTime() > now)
+        .map((k) => k.id),
+    );
+
+    const counts: Record<string, number> = {};
+
+    for (const [apiKeyId, info] of Object.entries(connectionsByApiKeyId)) {
+      if (!activeApiKeyIds.has(apiKeyId)) {
+        continue;
+      }
+
+      const name = (info?.name ?? '').toLowerCase();
+      const bucket = name.includes('claude')
+        ? 'claude'
+        : name.includes('cursor')
+          ? 'cursor'
+          : name.includes('chatgpt') || name.includes('openai')
+            ? 'chatgpt'
+            : name.includes('grok')
+              ? 'grok'
+              : 'other';
+
+      counts[bucket] = (counts[bucket] ?? 0) + 1;
+    }
+
+    return counts;
+  }
 
   get isConfigured(): boolean {
     return Boolean(this.baseUrl && this.serviceToken);
@@ -85,12 +137,7 @@ export class IntegrationsService {
 
   // `email` is only used by the Desync (Gabriel CRM) source, which resolves the
   // user's workspace by email rather than an OAuth account.
-  async status(
-    tenant: string,
-    plugin: string,
-    email?: string,
-    userId?: string,
-  ) {
+  async status(tenant: string, plugin: string, email?: string, userId?: string) {
     // Composio-backed copilot integrations (Slack, Airtable, …) are per-user,
     // keyed by the Twenty user id — not Corsair sync sources.
     if (this.composioService.isToolkitEnabled(plugin)) {
@@ -114,6 +161,7 @@ export class IntegrationsService {
     plugin: string,
     email?: string,
     userId?: string,
+    returnUrl?: string,
   ) {
     // Composio toolkits (Slack, Airtable, …) connect via Composio's hosted OAuth,
     // keyed by the Twenty user id (the same id the copilot executes against).
@@ -122,33 +170,44 @@ export class IntegrationsService {
         throw new BadRequestException('No user in session for this connection');
       }
 
-      return this.composioService.getConnectUrl(plugin, userId);
+      return this.composioService.getConnectUrl(plugin, userId, returnUrl);
     }
 
-    return this.call<{
-      connectUrl: string | null;
-      connected?: boolean;
-      expiresAt: string | null;
-    }>('POST', `/integrations/${encodeURIComponent(plugin)}/connect`, {
-      userId: tenant,
-      ...(plugin === 'desync' && email ? { email } : {}),
-    });
+    return this.call<{ connectUrl: string | null; connected?: boolean; expiresAt: string | null }>(
+      'POST',
+      `/integrations/${encodeURIComponent(plugin)}/connect`,
+      { userId: tenant, ...(plugin === 'desync' && email ? { email } : {}) },
+    );
   }
 
-  // Send a user's integration request / problem report to the team via Resend.
+  // Send a user's integration request / bug report / feedback to the team via Resend.
   async feedback(
-    kind: 'request' | 'problem',
+    kind: 'request' | 'problem' | 'bug' | 'feedback',
     message: string,
     fromEmail?: string,
+    severity?: 1 | 2 | 3,
   ): Promise<{ ok: boolean }> {
     if (!this.resendKey) {
       throw new Error('Feedback email is not configured (RESEND_KEY)');
     }
-    const label = kind === 'request' ? 'Integration request' : 'Problem report';
+    const label =
+      kind === 'request'
+        ? 'Integration request'
+        : kind === 'bug'
+          ? 'Bug report'
+          : kind === 'feedback'
+            ? 'Feedback'
+            : 'Problem report';
+    const severityText =
+      severity !== undefined
+        ? { 1: '1 (Critical)', 2: '2 (Major)', 3: '3 (Minor)' }[severity]
+        : undefined;
     const escape = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const html =
-      `<p><strong>${label}</strong> from ${escape(fromEmail ?? 'a Twenty CRM user')}:</p>` +
+      `<p><strong>${label}</strong>` +
+      (severityText ? ` (severity ${escape(severityText)})` : '') +
+      ` from ${escape(fromEmail ?? 'a Twenty CRM user')}:</p>` +
       `<p style="white-space:pre-wrap">${escape(message)}</p>`;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -160,7 +219,8 @@ export class IntegrationsService {
         from: IntegrationsService.FEEDBACK_FROM,
         to: IntegrationsService.FEEDBACK_TO,
         ...(fromEmail ? { reply_to: fromEmail } : {}),
-        subject: `Desync CRM — ${label}`,
+        subject:
+          `Desync CRM: ${label}` + (severity !== undefined ? ` (S${severity})` : ''),
         html,
       }),
     });
@@ -171,21 +231,11 @@ export class IntegrationsService {
     return { ok: true };
   }
 
-  async sync(
-    tenant: string,
-    workspaceId: string,
-    plugin: string,
-    email?: string,
-  ) {
+  async sync(tenant: string, workspaceId: string, plugin: string, email?: string) {
     // Allow-list the plugin BEFORE minting any key. Otherwise an arbitrary
     // `:plugin` would create a persistent named write-key for a bogus integration
     // (keyName falls back to the raw plugin string).
-    if (
-      !Object.prototype.hasOwnProperty.call(
-        IntegrationsService.KEY_NAMES,
-        plugin,
-      )
-    ) {
+    if (!Object.prototype.hasOwnProperty.call(IntegrationsService.KEY_NAMES, plugin)) {
       throw new BadRequestException(`Unsupported integration: ${plugin}`);
     }
     const twentyApiUrl = (process.env.SERVER_URL ?? '').replace(/\/+$/, '');
@@ -202,22 +252,12 @@ export class IntegrationsService {
     return this.call<{ ok: boolean; jobId: string; status: string }>(
       'POST',
       `/integrations/${encodeURIComponent(plugin)}/sync`,
-      {
-        userId: tenant,
-        twentyApiUrl,
-        twentyToken,
-        ...(plugin === 'desync' && email ? { email } : {}),
-      },
+      { userId: tenant, twentyApiUrl, twentyToken, ...(plugin === 'desync' && email ? { email } : {}) },
     );
   }
 
   syncStatus(tenant: string, plugin: string) {
-    return this.call<{
-      status: string;
-      phase: string | null;
-      counts: unknown;
-      error: string | null;
-    }>(
+    return this.call<{ status: string; phase: string | null; counts: unknown; error: string | null }>(
       'GET',
       `/integrations/${encodeURIComponent(plugin)}/sync/status?userId=${encodeURIComponent(tenant)}`,
     );
@@ -225,13 +265,9 @@ export class IntegrationsService {
 
   // Find-or-create a named workspace API key with write access, then mint a
   // short-lived token from it for corsair to use against /rest.
-  private async mintWriteToken(
-    workspaceId: string,
-    keyName: string,
-  ): Promise<string> {
+  private async mintWriteToken(workspaceId: string, keyName: string): Promise<string> {
     const now = Date.now();
-    const activeKeys =
-      await this.apiKeyService.findActiveByWorkspaceId(workspaceId);
+    const activeKeys = await this.apiKeyService.findActiveByWorkspaceId(workspaceId);
 
     let key = activeKeys.find(
       (k) => k.name === keyName && new Date(k.expiresAt).getTime() > now,

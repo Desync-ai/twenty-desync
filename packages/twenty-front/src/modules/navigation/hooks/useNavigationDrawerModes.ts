@@ -46,7 +46,7 @@ export const useNavigationDrawerModes = (): NavigationDrawerMode[] => {
       ? [
           {
             Icon: IconComment,
-            label: t`AI`,
+            label: t`AI Agent`,
             mode: NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY,
           },
         ]

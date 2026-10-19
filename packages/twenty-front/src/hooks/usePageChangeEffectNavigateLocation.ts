@@ -5,12 +5,15 @@ import { useIsLogged } from '@/auth/hooks/useIsLogged';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { returnToPathState } from '@/auth/states/returnToPathState';
 import { billingState } from '@/client-config/states/billingState';
+import { hasSeenGetStarted } from '@/desync-onboarding/utils/getStartedSeen';
 import { useIsCurrentLocationOnAWorkspace } from '@/domain-manager/hooks/useIsCurrentLocationOnAWorkspace';
 import { isMinimalMetadataReadyState } from '@/metadata-store/states/isMinimalMetadataReadyState';
 import { useDefaultHomePagePath } from '@/navigation/hooks/useDefaultHomePagePath';
 import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
 import { useOnboardingStatus } from '@/onboarding/hooks/useOnboardingStatus';
 import { isOnboardingCheckoutPendingState } from '@/onboarding/states/isOnboardingCheckoutPendingState';
+import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
+import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useIsWorkspaceActivationStatusEqualsTo } from '@/workspace/hooks/useIsWorkspaceActivationStatusEqualsTo';
 import { isValidReturnToPath } from '@/auth/utils/isValidReturnToPath';
@@ -18,12 +21,13 @@ import { useQuery } from '@apollo/client/react';
 import { isNonEmptyString } from '@sniptt/guards';
 import { matchPath, useLocation } from 'react-router-dom';
 import { AppPath, SettingsPath } from 'twenty-shared/types';
-import { isDefined } from 'twenty-shared/utils';
+import { getAppPath, isDefined } from 'twenty-shared/utils';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
   FindOnePageLayoutTypeDocument,
   OnboardingStatus,
   PageLayoutType,
+  PermissionFlagType,
 } from '~/generated-metadata/graphql';
 import { isMatchingLocation } from '~/utils/isMatchingLocation';
 
@@ -42,6 +46,8 @@ export const usePageChangeEffectNavigateLocation = () => {
     WorkspaceActivationStatus.SUSPENDED,
   );
   const { defaultHomePagePath } = useDefaultHomePagePath();
+  const hasAiPermission = useHasPermissionFlag(PermissionFlagType.AI);
+  const isMobile = useIsMobile();
   const location = useLocation();
   const billing = useAtomStateValue(billingState);
   const isBillingEnabled = billing?.isBillingEnabled ?? false;
@@ -80,6 +86,28 @@ export const usePageChangeEffectNavigateLocation = () => {
   const resolvedReturnToPath = isNonEmptyString(returnToPath)
     ? returnToPath
     : readReturnToPathFromUrlSearchParams();
+
+  // Desync: the FIRST time a user enters a workspace (just created it / joined
+  // it), land them on the guided "Get started" page so they always have an
+  // obvious next step instead of a dense, empty grid. This fires once per
+  // workspace (tracked in localStorage, set when they reach the page — see
+  // getStartedSeen) and only for a COMPLETED onboarding, so it never interrupts
+  // the signup/onboarding flow and never hijacks a returning user's landing.
+  const shouldLandOnGetStartedFirst =
+    onboardingStatus === OnboardingStatus.COMPLETED &&
+    !hasSeenGetStarted(currentWorkspace?.id);
+
+  // Otherwise the default landing is the AI agent chat for AI-enabled desktop
+  // users — for BOTH opening the workspace (Index) and the post-login /
+  // post-onboarding redirect (a COMPLETED user sitting on an onboarding path).
+  // Falls back to the records home otherwise. defaultHomePagePath itself is left
+  // unchanged so the nav "home" / return destinations still point at records
+  // (avoids the return-to-home → chat loop).
+  const landingPath = shouldLandOnGetStartedFirst
+    ? AppPath.GetStarted
+    : hasAiPermission && !isMobile
+      ? getAppPath(AppPath.AiChat, { threadId: null })
+      : defaultHomePagePath;
 
   const isOnboardingCheckoutPending = useAtomStateValue(
     isOnboardingCheckoutPendingState,
@@ -143,19 +171,7 @@ export const usePageChangeEffectNavigateLocation = () => {
     return AppPath.SyncEmails;
   }
 
-  if (
-    onboardingStatus === OnboardingStatus.APPS_INSTALLATION &&
-    !isMatchingLocation(location, AppPath.InstallApps)
-  ) {
-    return AppPath.InstallApps;
-  }
-
-  if (
-    onboardingStatus === OnboardingStatus.INVITE_TEAM &&
-    !isMatchingLocation(location, AppPath.InviteTeam)
-  ) {
-    return AppPath.InviteTeam;
-  }
+  // Apps-installation and invite-team onboarding steps removed — never route to them.
 
   if (
     onboardingStatus === OnboardingStatus.BOOK_CALL &&
@@ -190,11 +206,11 @@ export const usePageChangeEffectNavigateLocation = () => {
       return;
     }
 
-    return resolvedReturnToPath ?? defaultHomePagePath;
+    return resolvedReturnToPath ?? landingPath;
   }
 
   if (isMatchingLocation(location, AppPath.Index) && isLogged) {
-    return resolvedReturnToPath ?? defaultHomePagePath;
+    return resolvedReturnToPath ?? landingPath;
   }
 
   if (
