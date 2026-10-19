@@ -1,16 +1,23 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
+import { isNonEmptyString } from '@sniptt/guards';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SettingsPath } from 'twenty-shared/types';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { currentUserState } from '@/auth/states/currentUserState';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { calendarBookingPageIdState } from '@/client-config/states/calendarBookingPageIdState';
+import { DESYNC_BOOK_CALL_MODAL_ID } from '@/navigation/constants/DesyncBookCallModalId';
+import { DESYNC_BUG_REPORT_MODAL_ID } from '@/navigation/constants/DesyncBugReportModalId';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { TextArea } from '@/ui/input/components/TextArea';
+import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
+import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 
 // Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
 // Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
@@ -185,18 +192,36 @@ const StyledStepper = styled.div`
 const StyledStep = styled.div`
   border-bottom: 2px solid ${themeCssVariables.border.color.medium};
   color: ${themeCssVariables.font.color.light};
+  cursor: default;
   flex: 1;
   font-size: ${themeCssVariables.font.size.sm};
   font-weight: ${themeCssVariables.font.weight.medium};
   padding-bottom: ${themeCssVariables.spacing[2]};
   text-align: center;
 
-  &[data-done='true'] {
-    border-bottom-color: ${themeCssVariables.color.blue};
-    color: ${themeCssVariables.font.color.secondary};
-  }
   &[data-active='true'] {
     border-bottom-color: ${themeCssVariables.color.blue};
+    color: ${themeCssVariables.font.color.primary};
+  }
+`;
+
+// Completed steps are the only ones you can jump back to; later steps stay
+// static because the Next button is what validates each step.
+const StyledStepButton = styled.button`
+  background: none;
+  border: none;
+  border-bottom: 2px solid ${themeCssVariables.color.blue};
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  flex: 1;
+  font-family: inherit;
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  padding: 0 0 ${themeCssVariables.spacing[2]};
+  text-align: center;
+
+  &:hover,
+  &:focus-visible {
     color: ${themeCssVariables.font.color.primary};
   }
 `;
@@ -237,6 +262,14 @@ const StyledError = styled.span`
 `;
 
 const StyledField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+  width: 100%;
+`;
+
+const StyledUploadField = styled.label`
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[1]};
@@ -307,6 +340,13 @@ const StyledMessage = styled.div`
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.md};
   line-height: 1.5;
+`;
+
+const StyledBlocked = styled.div`
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
 `;
 
 const StyledChat = styled.div`
@@ -449,6 +489,9 @@ const readAudioDuration = (file: Blob): Promise<number> =>
 export const FioAdsPage = () => {
   const { t } = useLingui();
   const { enqueueToast } = useToast();
+  const { openModal } = useModal();
+  const navigateSettings = useNavigateSettings();
+  const calendarBookingPageId = useAtomStateValue(calendarBookingPageIdState);
 
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
@@ -1038,6 +1081,40 @@ export const FioAdsPage = () => {
     return t`Fio ads aren't available on your account yet.`;
   };
 
+  // The book-call and bug-report modals are mounted by the sidebar Help
+  // section; the bug-report one is the fallback when no booking page is set.
+  const contactTeam = () =>
+    openModal(
+      isNonEmptyString(calendarBookingPageId)
+        ? DESYNC_BOOK_CALL_MODAL_ID
+        : DESYNC_BUG_REPORT_MODAL_ID,
+    );
+
+  const blockedAction = () => {
+    if (status?.alreadyLaunched && !status?.allowMultiple) {
+      return null;
+    }
+    if (status?.reason === 'not_paid') {
+      return (
+        <Button
+          variant="solid"
+          color="accent"
+          onClick={() => navigateSettings(SettingsPath.PlanBilling)}
+        >
+          {t`Upgrade plan`}
+        </Button>
+      );
+    }
+    if (status?.reason === 'referral' || status?.reason === 'not_admin') {
+      return (
+        <Button variant="outline" onClick={contactTeam}>
+          {t`Contact the Desync team`}
+        </Button>
+      );
+    }
+    return null;
+  };
+
   const canShowForm =
     status?.eligible && !(status?.alreadyLaunched && !status?.allowMultiple);
 
@@ -1064,19 +1141,32 @@ export const FioAdsPage = () => {
         </StyledHeader>
 
         {loadingStatus ? null : !canShowForm ? (
-          <StyledMessage>{blockedMessage()}</StyledMessage>
+          <StyledBlocked>
+            <StyledMessage>{blockedMessage()}</StyledMessage>
+            {blockedAction()}
+          </StyledBlocked>
         ) : (
           <>
             <StyledStepper>
-              {STEPS.map((label, i) => (
-                <StyledStep
-                  key={label}
-                  data-active={i === step ? 'true' : 'false'}
-                  data-done={i < step ? 'true' : 'false'}
-                >
-                  {i + 1}. {label}
-                </StyledStep>
-              ))}
+              {STEPS.map((label, i) =>
+                i < step ? (
+                  <StyledStepButton
+                    key={label}
+                    type="button"
+                    onClick={() => setStep(i)}
+                  >
+                    {i + 1}. {label}
+                  </StyledStepButton>
+                ) : (
+                  <StyledStep
+                    key={label}
+                    aria-current={i === step ? 'step' : undefined}
+                    data-active={i === step ? 'true' : 'false'}
+                  >
+                    {i + 1}. {label}
+                  </StyledStep>
+                ),
+              )}
             </StyledStepper>
 
             <StyledStepCard>
@@ -1153,7 +1243,7 @@ export const FioAdsPage = () => {
 
                   <StyledFieldset>
                     <StyledGroupTitle>{t`Images`}</StyledGroupTitle>
-                    <StyledField>
+                    <StyledUploadField htmlFor="fio-logo-input">
                       <StyledFieldLabel>{t`Logo`}</StyledFieldLabel>
                       <StyledHelper>{t`At least 500x500, up to 1MB. JPG or transparent PNG.`}</StyledHelper>
                       <StyledUploadRow>
@@ -1167,6 +1257,7 @@ export const FioAdsPage = () => {
                           {logo ? t`Replace logo` : t`Choose logo`}
                         </Button>
                         <input
+                          id="fio-logo-input"
                           ref={logoInputRef}
                           type="file"
                           accept="image/jpeg,image/png"
@@ -1177,8 +1268,8 @@ export const FioAdsPage = () => {
                         />
                       </StyledUploadRow>
                       {logoError && <StyledError>{logoError}</StyledError>}
-                    </StyledField>
-                    <StyledField>
+                    </StyledUploadField>
+                    <StyledUploadField htmlFor="fio-ad-image-input">
                       <StyledFieldLabel>{t`Advertisement image`}</StyledFieldLabel>
                       <StyledHelper>{t`At least 500x500, up to 1MB. JPG or non-transparent PNG.`}</StyledHelper>
                       <StyledUploadRow>
@@ -1192,6 +1283,7 @@ export const FioAdsPage = () => {
                           {adImage ? t`Replace image` : t`Choose image`}
                         </Button>
                         <input
+                          id="fio-ad-image-input"
                           ref={adImageInputRef}
                           type="file"
                           accept="image/jpeg,image/png"
@@ -1204,7 +1296,7 @@ export const FioAdsPage = () => {
                       {adImageError && (
                         <StyledError>{adImageError}</StyledError>
                       )}
-                    </StyledField>
+                    </StyledUploadField>
                   </StyledFieldset>
 
                   <StyledFieldset>
