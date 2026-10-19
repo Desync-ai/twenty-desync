@@ -36,7 +36,8 @@ describe('AiModelTierInformationButton', () => {
     await user.hover(screen.getByRole('button', { name: 'Model information' }));
 
     expect(await screen.findByRole('tooltip')).toBeInTheDocument();
-    expect(screen.getByText('Test model')).toBeInTheDocument();
+    // Desync hides the underlying model name from workspace users.
+    expect(screen.queryByText('Test model')).not.toBeInTheDocument();
     expect(screen.getByText('High')).toBeInTheDocument();
     expect(screen.getByText('Vs Balanced mode')).toBeInTheDocument();
     expect(screen.getByText('+40%')).toBeInTheDocument();

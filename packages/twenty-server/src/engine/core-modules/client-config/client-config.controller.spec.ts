@@ -115,6 +115,8 @@ describe('ClientConfigController', () => {
         isClickHouseConfigured: false,
         isWorkspaceSchemaDDLLocked: false,
         isOnboardingAiChatEnabled: false,
+        clerk: { isEnabled: false, publishableKey: null },
+        isGoogleContactsEnabled: false,
         enterpriseInstanceType: ENTERPRISE_INSTANCE_TYPE.PRODUCTION,
       };
 

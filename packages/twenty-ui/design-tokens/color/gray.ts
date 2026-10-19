@@ -4,24 +4,57 @@ import { token } from '../token';
 // axis. Keys stay gray1..gray12 (backgrounds, borders and font colors all derive
 // from these), only values change. The light end is warm parchment/limestone/rule
 // for surfaces (gray1 = parchment #F7F4EE, gray5 ≈ limestone, gray7 = rule); the
-// dark end cools to Desync slate/ink for text (gray12 = slate #283238). Dark theme
-// uses the "templar dark" surfaces (gray1 = #0E1A17, gray5 = #172420, gray6 = rule
-// #2C3A35) lifting to ink #E9F0EB. Lightness order mirrors the original gray ramp.
+// dark end cools to Desync slate/ink for text (gray12 = slate #283238). The dark
+// theme keeps upstream's values, as shipped. Lightness order mirrors the original
+// gray ramp.
 // The transparent overlays stay pure black/white alpha (hue-neutral on any ground).
 export const GRAY_COLOR_TOKENS = {
   scale: {
-    gray1: token({ light: '#F7F4EE', dark: '#0E1A17' }),
-    gray2: token({ light: '#F3EFE7', dark: '#111E1A' }),
-    gray3: token({ light: '#F1ECE3', dark: '#101C19' }),
-    gray4: token({ light: '#ECE7DC', dark: '#14211D' }),
-    gray5: token({ light: '#E7E1D4', dark: '#172420' }),
-    gray6: token({ light: '#D7CFBC', dark: '#2C3A35' }),
-    gray7: token({ light: '#CCC4B2', dark: '#34433D' }),
-    gray8: token({ light: '#ADA491', dark: '#4A5A53' }),
-    gray9: token({ light: '#8B948E', dark: '#6E7A73' }),
-    gray10: token({ light: '#6E7A7E', dark: '#7C8A83' }),
-    gray11: token({ light: '#55636B', dark: '#C4D0CA' }),
-    gray12: token({ light: '#283238', dark: '#E9F0EB' }),
+    gray1: token({
+      light: '#F7F4EE',
+      dark: 'color(display-p3 0.09 0.09 0.09)',
+    }),
+    gray2: token({
+      light: '#F3EFE7',
+      dark: 'color(display-p3 0.106 0.106 0.106)',
+    }),
+    gray3: token({
+      light: '#F1ECE3',
+      dark: 'color(display-p3 0.098 0.098 0.098)',
+    }),
+    gray4: token({
+      light: '#ECE7DC',
+      dark: 'color(display-p3 0.114 0.114 0.114)',
+    }),
+    gray5: token({
+      light: '#E7E1D4',
+      dark: 'color(display-p3 0.133 0.133 0.133)',
+    }),
+    gray6: token({
+      light: '#D7CFBC',
+      dark: 'color(display-p3 0.282 0.282 0.282)',
+    }),
+    gray7: token({
+      light: '#CCC4B2',
+      dark: 'color(display-p3 0.298 0.298 0.298)',
+    }),
+    gray8: token({ light: '#ADA491', dark: 'color(display-p3 0.4 0.4 0.4)' }),
+    gray9: token({
+      light: '#8B948E',
+      dark: 'color(display-p3 0.506 0.506 0.506)',
+    }),
+    gray10: token({
+      light: '#6E7A7E',
+      dark: 'color(display-p3 0.482 0.482 0.482)',
+    }),
+    gray11: token({
+      light: '#55636B',
+      dark: 'color(display-p3 0.702 0.702 0.702)',
+    }),
+    gray12: token({
+      light: '#283238',
+      dark: 'color(display-p3 0.922 0.922 0.922)',
+    }),
   },
   transparent: {
     gray1: token({

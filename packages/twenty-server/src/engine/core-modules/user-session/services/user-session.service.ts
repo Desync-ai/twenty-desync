@@ -575,9 +575,7 @@ export class UserSessionService {
 
       await Promise.all(
         (data ?? []).map((session) =>
-          clerkClient.sessions
-            .revokeSession(session.id)
-            .catch(() => undefined),
+          clerkClient.sessions.revokeSession(session.id).catch(() => undefined),
         ),
       );
 
@@ -608,9 +606,7 @@ export class UserSessionService {
         // session — logged in. With IS_FULL_ACCOUNT_SIGN_OUT_ENABLED, revoke ALL
         // of the user's sessions so sign-out is account-wide. Default false →
         // prod behaves exactly as before; enabled only on the dev service.
-        if (
-          this.twentyConfigService.get('IS_FULL_ACCOUNT_SIGN_OUT_ENABLED')
-        ) {
+        if (this.twentyConfigService.get('IS_FULL_ACCOUNT_SIGN_OUT_ENABLED')) {
           // Load the session WITH its user so we can also revoke the user's
           // Clerk sessions (need the clerkId).
           const session = await this.userSessionRepository.findOne({
@@ -630,7 +626,9 @@ export class UserSessionService {
             // there. Kill the Clerk session too so `isSignedIn` flips false
             // everywhere and no re-exchange can happen. (This signs the user out
             // of every Clerk app on this instance — the intended "full sign-out".)
-            await this.revokeClerkSessionsForUser(session.user?.clerkId ?? null);
+            await this.revokeClerkSessionsForUser(
+              session.user?.clerkId ?? null,
+            );
           } else {
             await this.revokeSessionByToken(
               sessionToken,

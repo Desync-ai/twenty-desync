@@ -1,6 +1,7 @@
-import { ACCENT_TOKENS } from './accent';
 import { token } from './token';
 
 export const BUTTONS_TOKENS = {
-  secondaryTextColor: token(ACCENT_TOKENS.accent11.dark),
+  // Desync: pinned to the brand teal the shipped theme was built with; the dark
+  // accent ramp is back on upstream's values, so deriving it would drift.
+  secondaryTextColor: token('#A9D6D0'),
 };
