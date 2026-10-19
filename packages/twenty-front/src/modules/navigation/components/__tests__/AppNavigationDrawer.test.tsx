@@ -21,6 +21,18 @@ jest.mock('@/desync-onboarding/components/DesyncUsageWidget', () => ({
   DesyncUsageWidget: () => null,
 }));
 
+jest.mock('@/navigation/components/DesyncGetStartedSection', () => ({
+  DesyncGetStartedSection: () => null,
+}));
+
+jest.mock('@/navigation/components/DesyncFioAdsSection', () => ({
+  DesyncFioAdsSection: () => null,
+}));
+
+jest.mock('@/navigation/components/DesyncHelpSection', () => ({
+  DesyncHelpSection: () => null,
+}));
+
 jest.mock('@/navigation/components/NavigationDrawerLogoutButton', () => ({
   NavigationDrawerLogoutButton: () => null,
 }));
