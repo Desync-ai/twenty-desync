@@ -57,21 +57,74 @@ const stripScriptMarkers = (content: string): string =>
   content.replace(/\[\/?SCRIPT\]/gi, '').trim();
 
 const FIO_CATEGORIES = [
-  'Apologetics', 'Arts', 'AudioDramas', 'Business', 'Catechism', 'Children',
-  'Coaching', 'Comedy', 'Dating&Relationships', 'Development&Philanthropy',
-  'Discernment', 'DivineMercy', 'Education', 'Eucharist', 'Evangelization',
-  'Faith/Formation', 'Fatherhood', 'Finance', 'Fiction', 'Healing',
-  'Health&Fitness', 'History', 'Homeschooling', 'Homilies', 'Leadership',
-  'Literature', 'Liturgy', 'LiturgyoftheHours', 'Marriage&Family', 'Mary',
-  'MentalHealth', 'Men', 'Ministry', 'Motherhood', 'Music', 'News', 'Novenas',
-  'Parenthood', 'PersonalDevelopment', 'Philosophy', 'Prayer', 'Pregnancy',
-  'Priesthood', 'Pro-Life', 'Psychology', 'Reflections', 'Rosary', 'Saints',
-  'Sacraments', 'Scripture', 'Sleep', 'Society&Culture', 'Sports', 'TalkShow',
-  'Talks', 'Theology', 'TheologyoftheBody', 'Travel', 'Women', 'YoungAdults',
+  'Apologetics',
+  'Arts',
+  'AudioDramas',
+  'Business',
+  'Catechism',
+  'Children',
+  'Coaching',
+  'Comedy',
+  'Dating&Relationships',
+  'Development&Philanthropy',
+  'Discernment',
+  'DivineMercy',
+  'Education',
+  'Eucharist',
+  'Evangelization',
+  'Faith/Formation',
+  'Fatherhood',
+  'Finance',
+  'Fiction',
+  'Healing',
+  'Health&Fitness',
+  'History',
+  'Homeschooling',
+  'Homilies',
+  'Leadership',
+  'Literature',
+  'Liturgy',
+  'LiturgyoftheHours',
+  'Marriage&Family',
+  'Mary',
+  'MentalHealth',
+  'Men',
+  'Ministry',
+  'Motherhood',
+  'Music',
+  'News',
+  'Novenas',
+  'Parenthood',
+  'PersonalDevelopment',
+  'Philosophy',
+  'Prayer',
+  'Pregnancy',
+  'Priesthood',
+  'Pro-Life',
+  'Psychology',
+  'Reflections',
+  'Rosary',
+  'Saints',
+  'Sacraments',
+  'Scripture',
+  'Sleep',
+  'Society&Culture',
+  'Sports',
+  'TalkShow',
+  'Talks',
+  'Theology',
+  'TheologyoftheBody',
+  'Travel',
+  'Women',
+  'YoungAdults',
   'YouthMinistry',
 ];
 
-type UploadedFile = { filename: string; contentType: string; dataBase64: string };
+type UploadedFile = {
+  filename: string;
+  contentType: string;
+  dataBase64: string;
+};
 type Voice = { id: string; name: string; description: string };
 type StatusResponse = {
   eligible: boolean;
@@ -490,7 +543,8 @@ export const FioAdsPage = () => {
           brandName?: string | null;
           website?: string | null;
         };
-        if (j?.brandName) setBrandName((prev) => prev || (j.brandName as string));
+        if (j?.brandName)
+          setBrandName((prev) => prev || (j.brandName as string));
         if (j?.website) setWebsite((prev) => prev || (j.website as string));
       } catch {
         // best-effort prefill
@@ -498,7 +552,9 @@ export const FioAdsPage = () => {
     })();
     void (async () => {
       try {
-        const res = await fetch(`${FIO_BASE}/voices`, { credentials: 'include' });
+        const res = await fetch(`${FIO_BASE}/voices`, {
+          credentials: 'include',
+        });
         const j = (await res.json()) as { voices?: Voice[] };
         if (Array.isArray(j?.voices) && j.voices.length > 0) {
           setVoices(j.voices);
@@ -726,7 +782,10 @@ export const FioAdsPage = () => {
     setAudioError(null);
     setAudio(null);
     if (!file) return;
-    if (file.type !== 'audio/mpeg' && !file.name.toLowerCase().endsWith('.mp3')) {
+    if (
+      file.type !== 'audio/mpeg' &&
+      !file.name.toLowerCase().endsWith('.mp3')
+    ) {
       setAudioError(t`Must be an MP3.`);
       return;
     }
@@ -870,19 +929,19 @@ export const FioAdsPage = () => {
 
   const step0Valid = Boolean(
     contactName.trim() &&
-      /.+@.+\..+/.test(contactEmail) &&
-      brandName.trim() &&
-      /^https?:\/\//.test(website),
+    /.+@.+\..+/.test(contactEmail) &&
+    brandName.trim() &&
+    /^https?:\/\//.test(website),
   );
   const step1Valid = Boolean(
     headline.trim() &&
-      headline.length <= HEADLINE_MAX &&
-      subtitle.length <= SUBTITLE_MAX &&
-      /^https?:\/\//.test(ctaUrl) &&
-      /^https?:\/\//.test(learnMoreUrl) &&
-      logo &&
-      adImage &&
-      categories.length >= 1,
+    headline.length <= HEADLINE_MAX &&
+    subtitle.length <= SUBTITLE_MAX &&
+    /^https?:\/\//.test(ctaUrl) &&
+    /^https?:\/\//.test(learnMoreUrl) &&
+    logo &&
+    adImage &&
+    categories.length >= 1,
   );
   const step2Valid = Boolean(audio && transcript.trim());
   const isValid = step0Valid && step1Valid && step2Valid;
@@ -995,8 +1054,7 @@ export const FioAdsPage = () => {
         <StyledHeader>
           <StyledTitle>{t`Launch a Fio ad`}</StyledTitle>
           <StyledBlurb>
-            {t`Fio is a Catholic podcast network`}{' '}
-            (
+            {t`Fio is a Catholic podcast network`} (
             <a href="https://fio.fm/" target="_blank" rel="noopener noreferrer">
               fio.fm
             </a>
@@ -1099,7 +1157,9 @@ export const FioAdsPage = () => {
                       <StyledFieldLabel>{t`Logo`}</StyledFieldLabel>
                       <StyledHelper>{t`At least 500x500, up to 1MB. JPG or transparent PNG.`}</StyledHelper>
                       <StyledUploadRow>
-                        {logoPreview && <StyledThumb src={logoPreview} alt="logo" />}
+                        {logoPreview && (
+                          <StyledThumb src={logoPreview} alt="logo" />
+                        )}
                         <Button
                           variant="outline"
                           onClick={() => logoInputRef.current?.click()}
@@ -1141,7 +1201,9 @@ export const FioAdsPage = () => {
                           }
                         />
                       </StyledUploadRow>
-                      {adImageError && <StyledError>{adImageError}</StyledError>}
+                      {adImageError && (
+                        <StyledError>{adImageError}</StyledError>
+                      )}
                     </StyledField>
                   </StyledFieldset>
 

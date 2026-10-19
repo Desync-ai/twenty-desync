@@ -94,12 +94,15 @@ const postFeedback = async (payload: {
   message: string;
   severity?: Severity;
 }) => {
-  const res = await fetch(`${REACT_APP_SERVER_BASE_URL}/integrations/feedback`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(
+    `${REACT_APP_SERVER_BASE_URL}/integrations/feedback`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   if (!res.ok) {
     let msg = `Request failed (${res.status})`;
     try {
