@@ -8,6 +8,8 @@ import { Button } from 'twenty-ui/primitives/input';
 import { H1Title, H1TitleFontColor } from 'twenty-ui/primitives/typography';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { DESYNC_BOOK_CALL_MODAL_ID } from '@/navigation/constants/DesyncBookCallModalId';
+import { DESYNC_BUG_REPORT_MODAL_ID } from '@/navigation/constants/DesyncBugReportModalId';
 import { calendarBookingPageIdState } from '@/client-config/states/calendarBookingPageIdState';
 import { BookCallEmbed } from '@/onboarding/components/BookCallEmbed';
 import { TextArea } from '@/ui/input/components/TextArea';
@@ -22,9 +24,6 @@ import { REACT_APP_SERVER_BASE_URL } from '~/config';
 // from anywhere in the app. The bug report carries a Bug/Feedback type and a
 // 1-3 severity (1 = most serious). Both post to the same /integrations/feedback
 // endpoint that emails the team via Resend.
-
-const BOOK_CALL_MODAL_ID = 'desync-book-call-modal';
-const BUG_REPORT_MODAL_ID = 'desync-bug-report-modal';
 
 type FeedbackType = 'bug' | 'feedback';
 type Severity = 1 | 2 | 3;
@@ -94,12 +93,15 @@ const postFeedback = async (payload: {
   message: string;
   severity?: Severity;
 }) => {
-  const res = await fetch(`${REACT_APP_SERVER_BASE_URL}/integrations/feedback`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(
+    `${REACT_APP_SERVER_BASE_URL}/integrations/feedback`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   if (!res.ok) {
     let msg = `Request failed (${res.status})`;
     try {
@@ -129,7 +131,7 @@ export const DesyncHelpSection = () => {
     setType('bug');
     setSeverity(2);
     setMessage('');
-    openModal(BUG_REPORT_MODAL_ID);
+    openModal(DESYNC_BUG_REPORT_MODAL_ID);
   };
 
   const submit = async () => {
@@ -149,7 +151,7 @@ export const DesyncHelpSection = () => {
         children: t`Thanks, sent to the Desync team.`,
       });
       setMessage('');
-      closeModal(BUG_REPORT_MODAL_ID);
+      closeModal(DESYNC_BUG_REPORT_MODAL_ID);
     } catch (error) {
       enqueueToast({
         variant: 'error',
@@ -169,7 +171,7 @@ export const DesyncHelpSection = () => {
           <NavigationDrawerItem
             label={t`Book a call`}
             Icon={IconCalendarEvent}
-            onClick={() => openModal(BOOK_CALL_MODAL_ID)}
+            onClick={() => openModal(DESYNC_BOOK_CALL_MODAL_ID)}
           />
         )}
         <NavigationDrawerItem
@@ -181,8 +183,8 @@ export const DesyncHelpSection = () => {
 
       {hasBookingPage && (
         <ModalStatefulWrapper
-          modalInstanceId={BOOK_CALL_MODAL_ID}
-          onClose={() => closeModal(BOOK_CALL_MODAL_ID)}
+          modalInstanceId={DESYNC_BOOK_CALL_MODAL_ID}
+          onClose={() => closeModal(DESYNC_BOOK_CALL_MODAL_ID)}
           isClosable
           size="medium"
           padding="medium"
@@ -206,8 +208,8 @@ export const DesyncHelpSection = () => {
       )}
 
       <ModalStatefulWrapper
-        modalInstanceId={BUG_REPORT_MODAL_ID}
-        onClose={() => closeModal(BUG_REPORT_MODAL_ID)}
+        modalInstanceId={DESYNC_BUG_REPORT_MODAL_ID}
+        onClose={() => closeModal(DESYNC_BUG_REPORT_MODAL_ID)}
         isClosable
         size="medium"
         padding="large"
@@ -265,7 +267,7 @@ export const DesyncHelpSection = () => {
           )}
 
           <TextArea
-            textAreaId={`${BUG_REPORT_MODAL_ID}-message`}
+            textAreaId={`${DESYNC_BUG_REPORT_MODAL_ID}-message`}
             label={isBug ? t`What happened?` : t`Your feedback`}
             placeholder={
               isBug
@@ -281,7 +283,7 @@ export const DesyncHelpSection = () => {
         <StyledModalActions>
           <Button
             variant="outline"
-            onClick={() => closeModal(BUG_REPORT_MODAL_ID)}
+            onClick={() => closeModal(DESYNC_BUG_REPORT_MODAL_ID)}
             fullWidth
           >
             {t`Cancel`}

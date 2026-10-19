@@ -1,16 +1,23 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
+import { isNonEmptyString } from '@sniptt/guards';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SettingsPath } from 'twenty-shared/types';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { currentUserState } from '@/auth/states/currentUserState';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { calendarBookingPageIdState } from '@/client-config/states/calendarBookingPageIdState';
+import { DESYNC_BOOK_CALL_MODAL_ID } from '@/navigation/constants/DesyncBookCallModalId';
+import { DESYNC_BUG_REPORT_MODAL_ID } from '@/navigation/constants/DesyncBugReportModalId';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { TextArea } from '@/ui/input/components/TextArea';
+import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
+import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 
 // Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
 // Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
@@ -57,21 +64,74 @@ const stripScriptMarkers = (content: string): string =>
   content.replace(/\[\/?SCRIPT\]/gi, '').trim();
 
 const FIO_CATEGORIES = [
-  'Apologetics', 'Arts', 'AudioDramas', 'Business', 'Catechism', 'Children',
-  'Coaching', 'Comedy', 'Dating&Relationships', 'Development&Philanthropy',
-  'Discernment', 'DivineMercy', 'Education', 'Eucharist', 'Evangelization',
-  'Faith/Formation', 'Fatherhood', 'Finance', 'Fiction', 'Healing',
-  'Health&Fitness', 'History', 'Homeschooling', 'Homilies', 'Leadership',
-  'Literature', 'Liturgy', 'LiturgyoftheHours', 'Marriage&Family', 'Mary',
-  'MentalHealth', 'Men', 'Ministry', 'Motherhood', 'Music', 'News', 'Novenas',
-  'Parenthood', 'PersonalDevelopment', 'Philosophy', 'Prayer', 'Pregnancy',
-  'Priesthood', 'Pro-Life', 'Psychology', 'Reflections', 'Rosary', 'Saints',
-  'Sacraments', 'Scripture', 'Sleep', 'Society&Culture', 'Sports', 'TalkShow',
-  'Talks', 'Theology', 'TheologyoftheBody', 'Travel', 'Women', 'YoungAdults',
+  'Apologetics',
+  'Arts',
+  'AudioDramas',
+  'Business',
+  'Catechism',
+  'Children',
+  'Coaching',
+  'Comedy',
+  'Dating&Relationships',
+  'Development&Philanthropy',
+  'Discernment',
+  'DivineMercy',
+  'Education',
+  'Eucharist',
+  'Evangelization',
+  'Faith/Formation',
+  'Fatherhood',
+  'Finance',
+  'Fiction',
+  'Healing',
+  'Health&Fitness',
+  'History',
+  'Homeschooling',
+  'Homilies',
+  'Leadership',
+  'Literature',
+  'Liturgy',
+  'LiturgyoftheHours',
+  'Marriage&Family',
+  'Mary',
+  'MentalHealth',
+  'Men',
+  'Ministry',
+  'Motherhood',
+  'Music',
+  'News',
+  'Novenas',
+  'Parenthood',
+  'PersonalDevelopment',
+  'Philosophy',
+  'Prayer',
+  'Pregnancy',
+  'Priesthood',
+  'Pro-Life',
+  'Psychology',
+  'Reflections',
+  'Rosary',
+  'Saints',
+  'Sacraments',
+  'Scripture',
+  'Sleep',
+  'Society&Culture',
+  'Sports',
+  'TalkShow',
+  'Talks',
+  'Theology',
+  'TheologyoftheBody',
+  'Travel',
+  'Women',
+  'YoungAdults',
   'YouthMinistry',
 ];
 
-type UploadedFile = { filename: string; contentType: string; dataBase64: string };
+type UploadedFile = {
+  filename: string;
+  contentType: string;
+  dataBase64: string;
+};
 type Voice = { id: string; name: string; description: string };
 type StatusResponse = {
   eligible: boolean;
@@ -132,18 +192,36 @@ const StyledStepper = styled.div`
 const StyledStep = styled.div`
   border-bottom: 2px solid ${themeCssVariables.border.color.medium};
   color: ${themeCssVariables.font.color.light};
+  cursor: default;
   flex: 1;
   font-size: ${themeCssVariables.font.size.sm};
   font-weight: ${themeCssVariables.font.weight.medium};
   padding-bottom: ${themeCssVariables.spacing[2]};
   text-align: center;
 
-  &[data-done='true'] {
-    border-bottom-color: ${themeCssVariables.color.blue};
-    color: ${themeCssVariables.font.color.secondary};
-  }
   &[data-active='true'] {
     border-bottom-color: ${themeCssVariables.color.blue};
+    color: ${themeCssVariables.font.color.primary};
+  }
+`;
+
+// Completed steps are the only ones you can jump back to; later steps stay
+// static because the Next button is what validates each step.
+const StyledStepButton = styled.button`
+  background: none;
+  border: none;
+  border-bottom: 2px solid ${themeCssVariables.color.blue};
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  flex: 1;
+  font-family: inherit;
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  padding: 0 0 ${themeCssVariables.spacing[2]};
+  text-align: center;
+
+  &:hover,
+  &:focus-visible {
     color: ${themeCssVariables.font.color.primary};
   }
 `;
@@ -184,6 +262,14 @@ const StyledError = styled.span`
 `;
 
 const StyledField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+  width: 100%;
+`;
+
+const StyledUploadField = styled.label`
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[1]};
@@ -254,6 +340,13 @@ const StyledMessage = styled.div`
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.md};
   line-height: 1.5;
+`;
+
+const StyledBlocked = styled.div`
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
 `;
 
 const StyledChat = styled.div`
@@ -396,6 +489,9 @@ const readAudioDuration = (file: Blob): Promise<number> =>
 export const FioAdsPage = () => {
   const { t } = useLingui();
   const { enqueueToast } = useToast();
+  const { openModal } = useModal();
+  const navigateSettings = useNavigateSettings();
+  const calendarBookingPageId = useAtomStateValue(calendarBookingPageIdState);
 
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
@@ -490,7 +586,8 @@ export const FioAdsPage = () => {
           brandName?: string | null;
           website?: string | null;
         };
-        if (j?.brandName) setBrandName((prev) => prev || (j.brandName as string));
+        if (j?.brandName)
+          setBrandName((prev) => prev || (j.brandName as string));
         if (j?.website) setWebsite((prev) => prev || (j.website as string));
       } catch {
         // best-effort prefill
@@ -498,7 +595,9 @@ export const FioAdsPage = () => {
     })();
     void (async () => {
       try {
-        const res = await fetch(`${FIO_BASE}/voices`, { credentials: 'include' });
+        const res = await fetch(`${FIO_BASE}/voices`, {
+          credentials: 'include',
+        });
         const j = (await res.json()) as { voices?: Voice[] };
         if (Array.isArray(j?.voices) && j.voices.length > 0) {
           setVoices(j.voices);
@@ -726,7 +825,10 @@ export const FioAdsPage = () => {
     setAudioError(null);
     setAudio(null);
     if (!file) return;
-    if (file.type !== 'audio/mpeg' && !file.name.toLowerCase().endsWith('.mp3')) {
+    if (
+      file.type !== 'audio/mpeg' &&
+      !file.name.toLowerCase().endsWith('.mp3')
+    ) {
       setAudioError(t`Must be an MP3.`);
       return;
     }
@@ -870,19 +972,19 @@ export const FioAdsPage = () => {
 
   const step0Valid = Boolean(
     contactName.trim() &&
-      /.+@.+\..+/.test(contactEmail) &&
-      brandName.trim() &&
-      /^https?:\/\//.test(website),
+    /.+@.+\..+/.test(contactEmail) &&
+    brandName.trim() &&
+    /^https?:\/\//.test(website),
   );
   const step1Valid = Boolean(
     headline.trim() &&
-      headline.length <= HEADLINE_MAX &&
-      subtitle.length <= SUBTITLE_MAX &&
-      /^https?:\/\//.test(ctaUrl) &&
-      /^https?:\/\//.test(learnMoreUrl) &&
-      logo &&
-      adImage &&
-      categories.length >= 1,
+    headline.length <= HEADLINE_MAX &&
+    subtitle.length <= SUBTITLE_MAX &&
+    /^https?:\/\//.test(ctaUrl) &&
+    /^https?:\/\//.test(learnMoreUrl) &&
+    logo &&
+    adImage &&
+    categories.length >= 1,
   );
   const step2Valid = Boolean(audio && transcript.trim());
   const isValid = step0Valid && step1Valid && step2Valid;
@@ -979,6 +1081,40 @@ export const FioAdsPage = () => {
     return t`Fio ads aren't available on your account yet.`;
   };
 
+  // The book-call and bug-report modals are mounted by the sidebar Help
+  // section; the bug-report one is the fallback when no booking page is set.
+  const contactTeam = () =>
+    openModal(
+      isNonEmptyString(calendarBookingPageId)
+        ? DESYNC_BOOK_CALL_MODAL_ID
+        : DESYNC_BUG_REPORT_MODAL_ID,
+    );
+
+  const blockedAction = () => {
+    if (status?.alreadyLaunched && !status?.allowMultiple) {
+      return null;
+    }
+    if (status?.reason === 'not_paid') {
+      return (
+        <Button
+          variant="solid"
+          color="accent"
+          onClick={() => navigateSettings(SettingsPath.PlanBilling)}
+        >
+          {t`Upgrade plan`}
+        </Button>
+      );
+    }
+    if (status?.reason === 'referral' || status?.reason === 'not_admin') {
+      return (
+        <Button variant="outline" onClick={contactTeam}>
+          {t`Contact the Desync team`}
+        </Button>
+      );
+    }
+    return null;
+  };
+
   const canShowForm =
     status?.eligible && !(status?.alreadyLaunched && !status?.allowMultiple);
 
@@ -995,8 +1131,7 @@ export const FioAdsPage = () => {
         <StyledHeader>
           <StyledTitle>{t`Launch a Fio ad`}</StyledTitle>
           <StyledBlurb>
-            {t`Fio is a Catholic podcast network`}{' '}
-            (
+            {t`Fio is a Catholic podcast network`} (
             <a href="https://fio.fm/" target="_blank" rel="noopener noreferrer">
               fio.fm
             </a>
@@ -1006,19 +1141,32 @@ export const FioAdsPage = () => {
         </StyledHeader>
 
         {loadingStatus ? null : !canShowForm ? (
-          <StyledMessage>{blockedMessage()}</StyledMessage>
+          <StyledBlocked>
+            <StyledMessage>{blockedMessage()}</StyledMessage>
+            {blockedAction()}
+          </StyledBlocked>
         ) : (
           <>
             <StyledStepper>
-              {STEPS.map((label, i) => (
-                <StyledStep
-                  key={label}
-                  data-active={i === step ? 'true' : 'false'}
-                  data-done={i < step ? 'true' : 'false'}
-                >
-                  {i + 1}. {label}
-                </StyledStep>
-              ))}
+              {STEPS.map((label, i) =>
+                i < step ? (
+                  <StyledStepButton
+                    key={label}
+                    type="button"
+                    onClick={() => setStep(i)}
+                  >
+                    {i + 1}. {label}
+                  </StyledStepButton>
+                ) : (
+                  <StyledStep
+                    key={label}
+                    aria-current={i === step ? 'step' : undefined}
+                    data-active={i === step ? 'true' : 'false'}
+                  >
+                    {i + 1}. {label}
+                  </StyledStep>
+                ),
+              )}
             </StyledStepper>
 
             <StyledStepCard>
@@ -1095,11 +1243,13 @@ export const FioAdsPage = () => {
 
                   <StyledFieldset>
                     <StyledGroupTitle>{t`Images`}</StyledGroupTitle>
-                    <StyledField>
+                    <StyledUploadField htmlFor="fio-logo-input">
                       <StyledFieldLabel>{t`Logo`}</StyledFieldLabel>
                       <StyledHelper>{t`At least 500x500, up to 1MB. JPG or transparent PNG.`}</StyledHelper>
                       <StyledUploadRow>
-                        {logoPreview && <StyledThumb src={logoPreview} alt="logo" />}
+                        {logoPreview && (
+                          <StyledThumb src={logoPreview} alt="logo" />
+                        )}
                         <Button
                           variant="outline"
                           onClick={() => logoInputRef.current?.click()}
@@ -1107,6 +1257,7 @@ export const FioAdsPage = () => {
                           {logo ? t`Replace logo` : t`Choose logo`}
                         </Button>
                         <input
+                          id="fio-logo-input"
                           ref={logoInputRef}
                           type="file"
                           accept="image/jpeg,image/png"
@@ -1117,8 +1268,8 @@ export const FioAdsPage = () => {
                         />
                       </StyledUploadRow>
                       {logoError && <StyledError>{logoError}</StyledError>}
-                    </StyledField>
-                    <StyledField>
+                    </StyledUploadField>
+                    <StyledUploadField htmlFor="fio-ad-image-input">
                       <StyledFieldLabel>{t`Advertisement image`}</StyledFieldLabel>
                       <StyledHelper>{t`At least 500x500, up to 1MB. JPG or non-transparent PNG.`}</StyledHelper>
                       <StyledUploadRow>
@@ -1132,6 +1283,7 @@ export const FioAdsPage = () => {
                           {adImage ? t`Replace image` : t`Choose image`}
                         </Button>
                         <input
+                          id="fio-ad-image-input"
                           ref={adImageInputRef}
                           type="file"
                           accept="image/jpeg,image/png"
@@ -1141,8 +1293,10 @@ export const FioAdsPage = () => {
                           }
                         />
                       </StyledUploadRow>
-                      {adImageError && <StyledError>{adImageError}</StyledError>}
-                    </StyledField>
+                      {adImageError && (
+                        <StyledError>{adImageError}</StyledError>
+                      )}
+                    </StyledUploadField>
                   </StyledFieldset>
 
                   <StyledFieldset>
