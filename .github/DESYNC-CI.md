@@ -48,10 +48,10 @@ annotation, but use `continue-on-error` so a green check is not blocked by debt
 that predates CI being turned on. Remove the `continue-on-error` line once each
 item is fixed.
 
-- `ci-front` `lint` (22 errors) and `typecheck` (31 errors) in Desync front
-  code: mostly `desync-onboarding` / plan-billing calling `useQuery`/`useMutation`
-  with untyped `gql` documents (data typed `{}`), plus style rules
-  (hardcoded colors, prop naming, effect-component naming).
+- `ci-front` `typecheck` (31 errors) in Desync front code: mostly
+  `desync-onboarding` / plan-billing calling `useQuery`/`useMutation` with
+  untyped `gql` documents (data typed `{}`). (`lint` was un-quarantined by
+  task 82 once its errors were fixed.)
 - `ci-server` `server-validation` / "Check for Pending Migrations": Desync
   entity changes have no generated instance command. The step prints the
   generated file; commit it via `npx nx run twenty-server:database:migrate:generate`.
