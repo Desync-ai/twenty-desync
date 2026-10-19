@@ -1,11 +1,16 @@
 import { useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
+import { plural } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
 import { ProgressBar } from 'twenty-ui/primitives/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { MY_SUBSCRIPTION_QUERY } from '@/desync-onboarding/graphql/desyncBilling';
+import {
+  getDesyncPlanDaysLeft,
+  isDesyncNonRenewingPlan,
+} from '@/desync-onboarding/utils/getDesyncPlanCountdown';
 import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 
 // Desync: a compact "plan + usage" card pinned to the bottom of the main app nav
@@ -27,6 +32,8 @@ type SubscriptionStatus = {
   used: number | null;
   aiCostCents: number | null;
   aiCostQuotaCents: number | null;
+  stripeActive: boolean;
+  stripeBacked?: boolean | null;
   cancelAtPeriodEnd: boolean;
   isInternal: boolean;
 };
@@ -144,6 +151,9 @@ export const DesyncUsageWidget = () => {
   }
 
   const isFullAccess = sub.isInternal || sub.planLevel === 'Admin';
+  // Trial / complimentary / other non-Stripe plan: it ends, it doesn't renew.
+  const isNonRenewing = isDesyncNonRenewingPlan(sub);
+  const daysLeft = getDesyncPlanDaysLeft(sub, Date.now());
   const planName =
     sub.planLevel != null && sub.planLevel.trim() !== ''
       ? sub.planLevel
@@ -157,6 +167,11 @@ export const DesyncUsageWidget = () => {
     chip = { tone: 'muted', label: t`No plan` };
   } else if (!sub.current) {
     chip = { tone: 'warn', label: t`Expired` };
+  } else if (daysLeft !== null) {
+    chip = {
+      tone: 'warn',
+      label: plural(daysLeft, { one: '# day left', other: '# days left' }),
+    };
   } else if (sub.cancelAtPeriodEnd) {
     chip = { tone: 'warn', label: t`Cancels soon` };
   } else {
@@ -169,6 +184,8 @@ export const DesyncUsageWidget = () => {
   if (dateStr !== '') {
     if (sub.cancelAtPeriodEnd) {
       meta = t`Cancels ${dateStr}`;
+    } else if (isNonRenewing) {
+      meta = t`Ends ${dateStr}`;
     } else if (sub.current) {
       meta = t`Renews ${dateStr}`;
     } else {

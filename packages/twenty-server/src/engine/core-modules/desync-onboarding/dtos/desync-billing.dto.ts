@@ -100,6 +100,13 @@ export class DesyncSubscriptionStatus {
   @Field(() => Boolean)
   stripeActive: boolean;
 
+  // The current row was provisioned from a Stripe subscription (own plan or a
+  // seat a teammate pays for), so it renews. False for Referral/Trial, comp
+  // grants and manual rows, whose access simply ends at periodEnd. Null when the
+  // billing API doesn't report it (unknown).
+  @Field(() => Boolean, { nullable: true })
+  stripeBacked: boolean | null;
+
   // Set to cancel at period end (show "Resume" instead of "Cancel").
   @Field(() => Boolean)
   cancelAtPeriodEnd: boolean;
