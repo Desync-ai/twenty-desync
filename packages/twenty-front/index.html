@@ -61,6 +61,13 @@
             capture_pageview: "history_change",
             capture_pageleave: true,
             person_profiles: "identified_only",
+            // Sign-in on crm.desync.ai redirects to <workspace>.crm.desync.ai.
+            // The distinct id lives in a cookie on the registrable domain, but
+            // by default each origin's localStorage copy wins over it, so a
+            // workspace subdomain with an older id split one person in two.
+            // Make the shared cookie authoritative for identity.
+            cross_subdomain_cookie: true,
+            cookieWinsOnConflict: true,
             // Record the full session (screen-by-screen replay) from the first
             // screen, so the login + onboarding flow is captured — not just the
             // app shell. Input fields stay masked by default (no passwords).
