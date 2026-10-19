@@ -8,12 +8,14 @@ import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Section } from 'twenty-ui/primitives/layout';
 import { H2Title } from 'twenty-ui/primitives/typography';
+import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import {
   DesyncCheckoutForm,
   type DesyncPlan,
 } from '@/desync-onboarding/components/DesyncCheckoutForm';
+import { DesyncBillingPageViewEffect } from '@/desync-onboarding/components/DesyncBillingPageViewEffect';
 import { DesyncPlanCard } from '@/desync-onboarding/components/DesyncPlanCard';
 import { DesyncTeamSeats } from '@/desync-onboarding/components/DesyncTeamSeats';
 import { DesyncUpdateCardForm } from '@/desync-onboarding/components/DesyncUpdateCardForm';
@@ -24,6 +26,7 @@ import {
   MY_SUBSCRIPTION_QUERY,
   RESUME_DESYNC_SUBSCRIPTION,
 } from '@/desync-onboarding/graphql/desyncBilling';
+import { type DesyncBillingPlanStatus } from '@/desync-onboarding/utils/captureDesyncBillingEvent';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
 import { usePermissionFlagMap } from '@/settings/roles/hooks/usePermissionFlagMap';
@@ -183,6 +186,25 @@ const formatDate = (epochSeconds: number | null): string => {
 
 const planDisplayName = (planLevel: string | null): string =>
   planLevel && planLevel.trim() !== '' ? planLevel : 'Free';
+
+// Mirrors the status chip below, as a stable code for analytics.
+const getDesyncBillingPlanStatus = (
+  sub: SubscriptionStatus,
+): DesyncBillingPlanStatus => {
+  if (sub.isInternal || sub.planLevel === 'Admin') {
+    return 'internal';
+  }
+  if (!sub.hasSubscription) {
+    return 'no_plan';
+  }
+  if (!sub.current) {
+    return 'expired';
+  }
+  if (sub.cancelAtPeriodEnd) {
+    return 'cancels_soon';
+  }
+  return 'active';
+};
 
 export const SettingsPlanBilling = () => {
   const { t } = useLingui();
@@ -427,7 +449,11 @@ export const SettingsPlanBilling = () => {
     // checkout IMMEDIATELY so paying is one step.
     return stripePromise !== null ? (
       <Elements stripe={stripePromise}>
-        <DesyncCheckoutForm plans={plans} onComplete={() => refetchSub()} />
+        <DesyncCheckoutForm
+          plans={plans}
+          onComplete={() => refetchSub()}
+          surface="settings"
+        />
       </Elements>
     ) : (
       <StyledMeta>
@@ -462,6 +488,12 @@ export const SettingsPlanBilling = () => {
       links={[{ children: <Trans>Plan & Billing</Trans> }]}
     >
       <SettingsPageContainer>
+        {isDefined(sub) && (
+          <DesyncBillingPageViewEffect
+            planStatus={getDesyncBillingPlanStatus(sub)}
+            isPaidPlan={sub.isPaidPlan}
+          />
+        )}
         <Section>
           <H2Title
             title={t`Your plan`}
