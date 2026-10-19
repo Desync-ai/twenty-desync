@@ -408,7 +408,18 @@ export class ChatExecutionService {
     let stepIndex = 0;
     let lastUnderlyingStreamError: unknown;
 
+    let hasEmittedTurnUsage = false;
+
+    // A stopped turn reaches here twice with the same completed steps: once
+    // from onAbort and once from the steps promise, which the AI SDK still
+    // resolves after an abort when at least one step finished. Bill it once.
     const emitTurnUsageEvent = async (steps: StepResult<ToolSet>[]) => {
+      if (hasEmittedTurnUsage) {
+        return;
+      }
+
+      hasEmittedTurnUsage = true;
+
       const usage = steps.reduce<LanguageModelUsage>(
         (acc, step) => ({
           inputTokens: (acc.inputTokens ?? 0) + (step.usage.inputTokens ?? 0),
