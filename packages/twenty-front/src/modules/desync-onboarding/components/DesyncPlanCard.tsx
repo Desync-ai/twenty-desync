@@ -6,57 +6,62 @@ import { type DesyncPlan } from '@/desync-onboarding/components/DesyncCheckoutFo
 // Desync: per-plan marketing copy (badge + feature list), lifted from the lead-gen
 // subscribe page so the in-CRM plan cards show WHAT each plan includes. Keyed by
 // the catalog plan name; price/records/priceIds come from the live catalog.
-export const PLAN_META: Record<string, { badge?: string; features: string[] }> = {
-  Starter: {
-    features: [
-      'CRM access',
-      '7 hrs/mo of live call transcription & site building (preview)',
-      'AI chat usage included',
-      'Manual Search: free-form AI search',
-      'Access to all databases',
-      'MCP integration',
-      'Direct support with outreach',
-      'Lookup history and custom tables',
-    ],
-  },
-  Crusader: {
-    badge: '50% better than Starter',
-    features: [
-      'CRM access',
-      'Add teammates on paid seats',
-      '12.5 hrs/mo of live call transcription & site building',
-      '2x more AI chat usage than Starter',
-      'Manual Search: free-form AI search',
-      'Access to all databases',
-      'MCP integration',
-      'Direct support with outreach',
-      'Bi-weekly calls with team',
-      'Referral program',
-    ],
-  },
-  Pro: {
-    badge: '2x better than Starter',
-    features: [
-      'CRM access',
-      'Add teammates on paid seats',
-      '12.5 hrs/mo of live call transcription & site building',
-      '13x more AI chat usage than Starter',
-      'Manual Search: free-form AI search',
-      'Access to all databases (new databases first)',
-      'MCP integration',
-      'Direct support with outreach',
-      'Bi-weekly calls with team',
-      'Referral program',
-      'Priority support',
-      'Custom requests',
-    ],
-  },
-};
+export const PLAN_META: Record<string, { badge?: string; features: string[] }> =
+  {
+    Starter: {
+      features: [
+        'CRM access',
+        '7 hrs/mo of live call transcription & site building (preview)',
+        'AI chat usage included',
+        'Manual Search: free-form AI search',
+        'Access to all databases',
+        'MCP integration',
+        'Direct support with outreach',
+        'Lookup history and custom tables',
+      ],
+    },
+    Crusader: {
+      badge: '50% better than Starter',
+      features: [
+        'CRM access',
+        'Add teammates on paid seats',
+        '12.5 hrs/mo of live call transcription & site building',
+        '2x more AI chat usage than Starter',
+        'Manual Search: free-form AI search',
+        'Access to all databases',
+        'MCP integration',
+        'Direct support with outreach',
+        'Bi-weekly calls with team',
+        'Referral program',
+      ],
+    },
+    Pro: {
+      badge: '2x better than Starter',
+      features: [
+        'CRM access',
+        'Add teammates on paid seats',
+        '12.5 hrs/mo of live call transcription & site building',
+        '13x more AI chat usage than Starter',
+        'Manual Search: free-form AI search',
+        'Access to all databases (new databases first)',
+        'MCP integration',
+        'Direct support with outreach',
+        'Bi-weekly calls with team',
+        'Referral program',
+        'Priority support',
+        'Custom requests',
+      ],
+    },
+  };
 
 // Annual = 10% off. Returns the big price (monthly-equivalent) + the yearly total.
 export const planPricing = (monthlyPriceUsd: number, annual: boolean) => {
   if (!annual) {
-    return { big: `$${monthlyPriceUsd.toLocaleString()}`, period: '/mo', subLine: null };
+    return {
+      big: `$${monthlyPriceUsd.toLocaleString()}`,
+      period: '/mo',
+      subLine: null,
+    };
   }
   const yearly = Math.round(monthlyPriceUsd * 12 * 0.9);
   const perMonth = yearly / 12;
@@ -73,10 +78,14 @@ export const planPricing = (monthlyPriceUsd: number, annual: boolean) => {
 const StyledCard = styled.button<{ selected: boolean }>`
   align-items: stretch;
   background: ${({ selected }) =>
-    selected ? themeCssVariables.background.tertiary : themeCssVariables.background.secondary};
+    selected
+      ? themeCssVariables.background.tertiary
+      : themeCssVariables.background.secondary};
   border: 1px solid
     ${({ selected }) =>
-      selected ? themeCssVariables.color.blue : themeCssVariables.border.color.medium};
+      selected
+        ? themeCssVariables.color.blue
+        : themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.md};
   cursor: pointer;
   display: flex;

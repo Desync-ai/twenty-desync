@@ -75,8 +75,10 @@ export class FioAdsService {
   private static readonly TRANSCRIBE_MODEL = 'whisper-large-v3-turbo';
   private readonly groqKey = process.env.GROQ_API_KEY ?? '';
   // Cartesia (Sonic) TTS for optional AI voiceover of the script (returns MP3).
-  private static readonly CARTESIA_TTS_URL = 'https://api.cartesia.ai/tts/bytes';
-  private static readonly CARTESIA_VOICES_URL = 'https://api.cartesia.ai/voices?limit=200';
+  private static readonly CARTESIA_TTS_URL =
+    'https://api.cartesia.ai/tts/bytes';
+  private static readonly CARTESIA_VOICES_URL =
+    'https://api.cartesia.ai/voices?limit=200';
   private static readonly CARTESIA_VERSION = '2026-08-14';
   private static readonly CARTESIA_MODEL = 'sonic-3.6';
   private static readonly DEFAULT_VOICE_ID = CARTESIA_DEFAULT_VOICE_ID;
@@ -99,7 +101,10 @@ export class FioAdsService {
   private prefillPool: Pool | null = null;
   // In-memory cache of website analysis (slow scrape) so the script assistant
   // doesn't re-scrape on every message. Keyed by website URL, 15-min TTL.
-  private readonly websiteCache = new Map<string, { at: number; summary: string }>();
+  private readonly websiteCache = new Map<
+    string,
+    { at: number; summary: string }
+  >();
 
   constructor(
     private readonly desyncOnboardingService: DesyncOnboardingService,
@@ -254,7 +259,8 @@ export class FioAdsService {
       }
 
       // Pick our allowlisted voices, in order, using their real catalog IDs.
-      const curated: Array<{ id: string; name: string; description: string }> = [];
+      const curated: Array<{ id: string; name: string; description: string }> =
+        [];
       for (const rec of CARTESIA_EN_VOICE_ALLOWLIST) {
         const id = byName.get(rec.name.toLowerCase());
         if (id) {
@@ -306,7 +312,8 @@ export class FioAdsService {
       }
       const parts: string[] = [];
       const add = (label: string, v: unknown) => {
-        if (typeof v === 'string' && v.trim()) parts.push(`${label}: ${v.trim()}`);
+        if (typeof v === 'string' && v.trim())
+          parts.push(`${label}: ${v.trim()}`);
       };
       add('Company', r.onboarding_company);
       add('Website', r.onboarding_company_url);
@@ -402,7 +409,9 @@ export class FioAdsService {
     email?: string;
   }): Promise<{ reply: string }> {
     if (!this.anthropicKey) {
-      throw new Error('The ad assistant is not configured (ANTHROPIC_API_KEY).');
+      throw new Error(
+        'The ad assistant is not configured (ANTHROPIC_API_KEY).',
+      );
     }
 
     const cleaned = (Array.isArray(messages) ? messages : [])
@@ -475,7 +484,9 @@ export class FioAdsService {
       content?: Array<{ type?: string; text?: string }>;
     };
     const reply = (data.content ?? [])
-      .filter((block) => block?.type === 'text' && typeof block.text === 'string')
+      .filter(
+        (block) => block?.type === 'text' && typeof block.text === 'string',
+      )
       .map((block) => block.text)
       .join('\n')
       .trim()
@@ -527,7 +538,9 @@ export class FioAdsService {
 
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(`Transcription error ${res.status}: ${text.slice(0, 200)}`);
+      throw new Error(
+        `Transcription error ${res.status}: ${text.slice(0, 200)}`,
+      );
     }
 
     const data = (await res.json()) as { text?: string };
@@ -544,7 +557,9 @@ export class FioAdsService {
   }: {
     text?: string;
     voiceId?: string;
-  }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
+  }): Promise<{
+    audio: { filename: string; contentType: string; dataBase64: string };
+  }> {
     if (!this.cartesiaKey) {
       throw new Error('AI voiceover is not configured (CARTESIA_API_KEY).');
     }
@@ -568,7 +583,11 @@ export class FioAdsService {
     const dataBase64 = await this.synthesizeMp3(voice, script);
 
     return {
-      audio: { filename: 'voiceover.mp3', contentType: 'audio/mpeg', dataBase64 },
+      audio: {
+        filename: 'voiceover.mp3',
+        contentType: 'audio/mpeg',
+        dataBase64,
+      },
     };
   }
 
@@ -599,7 +618,9 @@ export class FioAdsService {
 
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
-      throw new Error(`Voiceover error ${res.status}: ${errText.slice(0, 200)}`);
+      throw new Error(
+        `Voiceover error ${res.status}: ${errText.slice(0, 200)}`,
+      );
     }
 
     return Buffer.from(await res.arrayBuffer()).toString('base64');
@@ -612,7 +633,9 @@ export class FioAdsService {
     voiceId,
   }: {
     voiceId?: string;
-  }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
+  }): Promise<{
+    audio: { filename: string; contentType: string; dataBase64: string };
+  }> {
     if (!this.cartesiaKey) {
       throw new Error('AI voiceover is not configured (CARTESIA_API_KEY).');
     }
@@ -623,12 +646,19 @@ export class FioAdsService {
     }
     let dataBase64 = this.voiceSampleCache.get(voice);
     if (!dataBase64) {
-      dataBase64 = await this.synthesizeMp3(voice, FioAdsService.VOICE_SAMPLE_TEXT);
+      dataBase64 = await this.synthesizeMp3(
+        voice,
+        FioAdsService.VOICE_SAMPLE_TEXT,
+      );
       this.voiceSampleCache.set(voice, dataBase64);
     }
 
     return {
-      audio: { filename: 'voice-sample.mp3', contentType: 'audio/mpeg', dataBase64 },
+      audio: {
+        filename: 'voice-sample.mp3',
+        contentType: 'audio/mpeg',
+        dataBase64,
+      },
     };
   }
 
@@ -670,13 +700,12 @@ export class FioAdsService {
     let isAdmin = false;
     if (workspaceId && userWorkspaceId) {
       try {
-        isAdmin = await this.permissionsService.userHasWorkspaceSettingPermission(
-          {
+        isAdmin =
+          await this.permissionsService.userHasWorkspaceSettingPermission({
             userWorkspaceId,
             workspaceId,
             setting: PermissionFlagType.WORKSPACE,
-          },
-        );
+          });
       } catch (error) {
         this.logger.warn(
           `Fio ads: admin check failed for ${normalizedEmail}: ${
@@ -819,7 +848,10 @@ export class FioAdsService {
     ) {
       throw new BadRequestException('Missing or invalid brand information.');
     }
-    if (!copy.headline?.trim() || copy.headline.length > FIO_AD_LIMITS.headlineMax) {
+    if (
+      !copy.headline?.trim() ||
+      copy.headline.length > FIO_AD_LIMITS.headlineMax
+    ) {
       throw new BadRequestException('Invalid headline.');
     }
     if ((copy.subtitle ?? '').length > FIO_AD_LIMITS.subtitleMax) {
@@ -829,7 +861,9 @@ export class FioAdsService {
       !/^https?:\/\//.test(copy.ctaUrl ?? '') ||
       !/^https?:\/\//.test(copy.learnMoreUrl ?? '')
     ) {
-      throw new BadRequestException('Invalid call-to-action or Learn More URL.');
+      throw new BadRequestException(
+        'Invalid call-to-action or Learn More URL.',
+      );
     }
     if (!p.audioTranscript?.trim()) {
       throw new BadRequestException('Missing audio transcript.');
@@ -848,8 +882,18 @@ export class FioAdsService {
       }
     }
 
-    this.validateUpload('logo', p.logo, ['image/jpeg', 'image/png'], FIO_AD_LIMITS.imageMaxBytes);
-    this.validateUpload('advertisement image', p.adImage, ['image/jpeg', 'image/png'], FIO_AD_LIMITS.imageMaxBytes);
+    this.validateUpload(
+      'logo',
+      p.logo,
+      ['image/jpeg', 'image/png'],
+      FIO_AD_LIMITS.imageMaxBytes,
+    );
+    this.validateUpload(
+      'advertisement image',
+      p.adImage,
+      ['image/jpeg', 'image/png'],
+      FIO_AD_LIMITS.imageMaxBytes,
+    );
     // MP3 for uploads; the in-browser recorder produces webm/mp4/ogg (no native
     // MP3 in browsers). All accepted; delivery-to-Fio MP3 conversion is a later step.
     this.validateUpload(
@@ -889,7 +933,10 @@ export class FioAdsService {
     }
 
     const esc = (s: string) =>
-      (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      (s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     const brand = p.brand ?? {};
     const copy = p.copy ?? {};
 
@@ -913,8 +960,14 @@ export class FioAdsService {
         content: Buffer.from(dataFile, 'utf8').toString('base64'),
       },
       { filename: p.logo?.filename ?? 'logo', content: p.logo?.dataBase64 },
-      { filename: p.adImage?.filename ?? 'ad-image', content: p.adImage?.dataBase64 },
-      { filename: p.audio?.filename ?? 'audio.mp3', content: p.audio?.dataBase64 },
+      {
+        filename: p.adImage?.filename ?? 'ad-image',
+        content: p.adImage?.dataBase64,
+      },
+      {
+        filename: p.audio?.filename ?? 'audio.mp3',
+        content: p.audio?.dataBase64,
+      },
     ];
 
     const res = await fetch('https://api.resend.com/emails', {

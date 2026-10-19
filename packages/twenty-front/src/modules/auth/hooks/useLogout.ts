@@ -20,7 +20,9 @@ import { isDefined } from 'twenty-shared/utils';
 export const useLogout = () => {
   const { signOut: signOutFromTwenty } = useAuth();
   const { signOut: clerkSignOut } = useAtomStateValue(clerkSignOutState);
-  const setIsPendingServerSignOut = useSetAtomState(isPendingServerSignOutState);
+  const setIsPendingServerSignOut = useSetAtomState(
+    isPendingServerSignOutState,
+  );
 
   const logout = useCallback(async () => {
     // Mark sign-out pending up front so SignInUpClerkExchangeEffect stands down

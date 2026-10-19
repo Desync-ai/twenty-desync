@@ -9,7 +9,11 @@ import { Button } from 'twenty-ui/primitives/input';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Section } from 'twenty-ui/primitives/layout';
 import { Card, CardContent } from 'twenty-ui/primitives/surfaces';
-import { H1Title, H1TitleFontColor, H2Title } from 'twenty-ui/primitives/typography';
+import {
+  H1Title,
+  H1TitleFontColor,
+  H2Title,
+} from 'twenty-ui/primitives/typography';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
@@ -54,7 +58,8 @@ export const INTEGRATIONS: IntegrationDef[] = [
     tags: ['CRM'],
     logoDomain: 'hubspot.com',
     agentTool: true,
-    blurb: 'Let the AI assistant read & manage your HubSpot contacts, companies & deals',
+    blurb:
+      'Let the AI assistant read & manage your HubSpot contacts, companies & deals',
     connectedBlurb: 'Available to your AI assistant',
   },
   {
@@ -64,7 +69,8 @@ export const INTEGRATIONS: IntegrationDef[] = [
     tags: ['CRM'],
     logoDomain: 'salesforce.com',
     agentTool: true,
-    blurb: 'Let the AI assistant read & manage your Salesforce accounts, contacts & opportunities',
+    blurb:
+      'Let the AI assistant read & manage your Salesforce accounts, contacts & opportunities',
     connectedBlurb: 'Available to your AI assistant',
   },
   {
@@ -106,7 +112,8 @@ export const INTEGRATIONS: IntegrationDef[] = [
     logoUrl:
       'https://play-lh.googleusercontent.com/CqfEY5MnK7zPHmPLjzO7emJTsDEVpRld4Ri7XIDm6AjDwkGEK8ySTz9W7LSG-EdJwi9uTRzQKDuWtWatEylKjw=w240-h480-rw',
     agentTool: true,
-    blurb: 'Let the AI assistant search your Pocket recordings, transcripts & action items',
+    blurb:
+      'Let the AI assistant search your Pocket recordings, transcripts & action items',
     connectedBlurb: 'Available to your AI assistant',
     keyHelp:
       'Paste your Pocket API key (starts with pk_). Find it in the Pocket app under Settings > Developer > API Keys.',
@@ -119,7 +126,8 @@ export const INTEGRATIONS: IntegrationDef[] = [
     tags: ['Meeting Notes'],
     logoDomain: 'fathom.video',
     agentTool: true,
-    blurb: 'Let the AI assistant search your Fathom meetings, transcripts & summaries',
+    blurb:
+      'Let the AI assistant search your Fathom meetings, transcripts & summaries',
     connectedBlurb: 'Available to your AI assistant',
     keyHelp:
       'Paste your Fathom API key. Find it in Fathom under Settings > API.',
@@ -411,7 +419,9 @@ async function callIntegrations(
     json = { raw: text };
   }
   if (!res.ok) {
-    throw new Error(json?.error ?? json?.message ?? `Request failed (${res.status})`);
+    throw new Error(
+      json?.error ?? json?.message ?? `Request failed (${res.status})`,
+    );
   }
   return json;
 }
@@ -437,7 +447,9 @@ async function callDirect(
     json = { raw: text };
   }
   if (!res.ok) {
-    throw new Error(json?.error ?? json?.message ?? `Request failed (${res.status})`);
+    throw new Error(
+      json?.error ?? json?.message ?? `Request failed (${res.status})`,
+    );
   }
   return json;
 }
@@ -562,11 +574,13 @@ export const ConnectIntegrationCard = ({
           {!compact && (
             <StyledBlurb>
               {connected
-                ? integration.connectedBlurb ?? integration.blurb
+                ? (integration.connectedBlurb ?? integration.blurb)
                 : integration.blurb}
             </StyledBlurb>
           )}
-          {isSyncing && progress ? <StyledStatus>{progress}</StyledStatus> : null}
+          {isSyncing && progress ? (
+            <StyledStatus>{progress}</StyledStatus>
+          ) : null}
           <StyledCardActions>
             {connected === null ? (
               <Button variant="outline" disabled>
@@ -647,7 +661,9 @@ const McpIntegrationCard = ({
               variant="outline"
               // Button has no client-side `to`; href would full-reload the app.
               // oxlint-disable-next-line twenty/no-navigate-prefer-link
-              onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
+              onClick={() =>
+                navigate(getSettingsPath(SettingsPath.ApiWebhooks))
+              }
             >
               {t`Get connection details`}
             </Button>
@@ -730,7 +746,16 @@ const KeyIntegrationCard = ({
     } finally {
       setBusy(false);
     }
-  }, [apiKey, plugin, name, modalId, enqueueToast, t, closeModal, refreshStatus]);
+  }, [
+    apiKey,
+    plugin,
+    name,
+    modalId,
+    enqueueToast,
+    t,
+    closeModal,
+    refreshStatus,
+  ]);
 
   const disconnect = useCallback(async () => {
     setBusy(true);
@@ -765,7 +790,7 @@ const KeyIntegrationCard = ({
           </StyledHeader>
           <StyledBlurb>
             {connected
-              ? integration.connectedBlurb ?? integration.blurb
+              ? (integration.connectedBlurb ?? integration.blurb)
               : integration.blurb}
           </StyledBlurb>
           <StyledCardActions>
@@ -807,7 +832,10 @@ const KeyIntegrationCard = ({
         smallBorderRadius
         autoHeight
       >
-        <H1Title title={t`Connect ${name}`} fontColor={H1TitleFontColor.Primary} />
+        <H1Title
+          title={t`Connect ${name}`}
+          fontColor={H1TitleFontColor.Primary}
+        />
         <StyledModalBody>
           {integration.keyHelp ? (
             <StyledStatus>{integration.keyHelp}</StyledStatus>
@@ -823,7 +851,11 @@ const KeyIntegrationCard = ({
           />
         </StyledModalBody>
         <StyledModalActions>
-          <Button variant="outline" onClick={() => closeModal(modalId)} fullWidth>
+          <Button
+            variant="outline"
+            onClick={() => closeModal(modalId)}
+            fullWidth
+          >
             {t`Cancel`}
           </Button>
           <Button
@@ -850,7 +882,9 @@ export const SettingsIntegrations = () => {
   const { openModal, closeModal } = useModal();
 
   const [activeTag, setActiveTag] = useState<string>(ALL_TAG);
-  const [feedbackKind, setFeedbackKind] = useState<'request' | 'problem'>('request');
+  const [feedbackKind, setFeedbackKind] = useState<'request' | 'problem'>(
+    'request',
+  );
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -883,8 +917,14 @@ export const SettingsIntegrations = () => {
     if (!text) return;
     setSending(true);
     try {
-      await callIntegrations('/feedback', 'POST', { kind: feedbackKind, message: text });
-      enqueueToast({ variant: 'success', children: t`Thanks, sent to the Desync team.` });
+      await callIntegrations('/feedback', 'POST', {
+        kind: feedbackKind,
+        message: text,
+      });
+      enqueueToast({
+        variant: 'success',
+        children: t`Thanks, sent to the Desync team.`,
+      });
       setMessage('');
       closeModal(FEEDBACK_MODAL_ID);
     } catch (error) {
@@ -937,7 +977,10 @@ export const SettingsIntegrations = () => {
                   integration={integration}
                 />
               ) : (
-                <ConnectIntegrationCard key={integration.plugin} integration={integration} />
+                <ConnectIntegrationCard
+                  key={integration.plugin}
+                  integration={integration}
+                />
               ),
             )}
           </StyledGrid>
@@ -969,9 +1012,13 @@ export const SettingsIntegrations = () => {
         <StyledModalBody>
           <SettingsTextInput
             instanceId={`${FEEDBACK_MODAL_ID}-message`}
-            label={isRequest ? t`Which platform would you like?` : t`What happened?`}
+            label={
+              isRequest ? t`Which platform would you like?` : t`What happened?`
+            }
             placeholder={
-              isRequest ? t`e.g. Pipedrive, Zoho, Notion…` : t`Describe the problem…`
+              isRequest
+                ? t`e.g. Pipedrive, Zoho, Notion…`
+                : t`Describe the problem…`
             }
             value={message}
             onChange={setMessage}
@@ -981,7 +1028,11 @@ export const SettingsIntegrations = () => {
           />
         </StyledModalBody>
         <StyledModalActions>
-          <Button variant="outline" onClick={() => closeModal(FEEDBACK_MODAL_ID)} fullWidth>
+          <Button
+            variant="outline"
+            onClick={() => closeModal(FEEDBACK_MODAL_ID)}
+            fullWidth
+          >
             {t`Cancel`}
           </Button>
           <Button

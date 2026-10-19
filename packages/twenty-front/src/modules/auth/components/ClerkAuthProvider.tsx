@@ -16,10 +16,7 @@ type ClerkAuthProviderProps = PropsWithChildren;
 export const ClerkAuthProvider = ({ children }: ClerkAuthProviderProps) => {
   const clerkConfig = useAtomStateValue(clerkConfigState);
 
-  if (
-    !clerkConfig.isEnabled ||
-    !isNonEmptyString(clerkConfig.publishableKey)
-  ) {
+  if (!clerkConfig.isEnabled || !isNonEmptyString(clerkConfig.publishableKey)) {
     return <>{children}</>;
   }
 

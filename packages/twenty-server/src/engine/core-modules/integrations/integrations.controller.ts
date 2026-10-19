@@ -152,7 +152,12 @@ export class IntegrationsController {
     // corsair fetches the provider's records + writes them back via /rest using a
     // short-lived workspace API token minted here (session cookies can't write).
     // Runs as a background job; the UI polls getSyncStatus for progress.
-    return this.integrationsService.sync(tenant, workspaceId, plugin, this.userEmail(request));
+    return this.integrationsService.sync(
+      tenant,
+      workspaceId,
+      plugin,
+      this.userEmail(request),
+    );
   }
 
   @Get(':plugin/sync/status')
@@ -161,7 +166,10 @@ export class IntegrationsController {
     @Param('plugin') plugin: string,
     @AuthWorkspaceMemberId() workspaceMemberId: string,
   ) {
-    return this.integrationsService.syncStatus(this.requireTenant(workspaceMemberId), plugin);
+    return this.integrationsService.syncStatus(
+      this.requireTenant(workspaceMemberId),
+      plugin,
+    );
   }
 
   // Integration request / bug / feedback from the UI → emails the team.

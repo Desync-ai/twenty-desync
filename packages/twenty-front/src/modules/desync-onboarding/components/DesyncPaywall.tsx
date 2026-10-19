@@ -52,7 +52,9 @@ export const DesyncPaywall = () => {
   return (
     <StyledOnboardingStepPage>
       <StyledOnboardingStepHeading>
-        <StyledOnboardingStepTitle>Subscribe to continue</StyledOnboardingStepTitle>
+        <StyledOnboardingStepTitle>
+          Subscribe to continue
+        </StyledOnboardingStepTitle>
         <StyledOnboardingStepSubtitle>
           Your plan has expired. Choose a plan to get back into your workspace.
           Everything is right where you left it.
@@ -66,7 +68,8 @@ export const DesyncPaywall = () => {
           </Elements>
         ) : (
           <StyledStatus>
-            Billing isn’t configured on this environment. Please contact support.
+            Billing isn’t configured on this environment. Please contact
+            support.
           </StyledStatus>
         )}
       </StyledBlock>

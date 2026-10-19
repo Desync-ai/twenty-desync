@@ -5,7 +5,9 @@ import { gql } from '@apollo/client';
 // login token + workspace URL; the frontend hands the user into the workspace via
 // /verify. Avoids relying on the Clerk session reaching the workspace subdomain.
 export const ACCEPT_WORKSPACE_INVITATION_FOR_CURRENT_USER = gql`
-  mutation AcceptWorkspaceInvitationForCurrentUser($personalInviteToken: String!) {
+  mutation AcceptWorkspaceInvitationForCurrentUser(
+    $personalInviteToken: String!
+  ) {
     acceptWorkspaceInvitationForCurrentUser(
       personalInviteToken: $personalInviteToken
     ) {

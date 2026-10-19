@@ -197,7 +197,9 @@ export class FioAdsController {
       email: this.userEmail(request) ?? '',
       workspaceId: this.workspaceId(request),
       userWorkspaceId: this.userWorkspaceId(request),
-      payload: (body ?? {}) as Parameters<FioAdsService['launch']>[0]['payload'],
+      payload: (body ?? {}) as Parameters<
+        FioAdsService['launch']
+      >[0]['payload'],
     });
   }
 }

@@ -510,7 +510,10 @@ export class SignInUpService {
 
     try {
       const escape = (value: string) =>
-        value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        value
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
       const name =
         [newUser.firstName, newUser.lastName]
           .filter(isDefined)

@@ -374,16 +374,49 @@ export const COMPOSIO_GOOGLESHEETS_TOOLS: ComposioTool[] = [
 // managed-OAuth toolkits, Instantly is API_KEY auth: the user pastes their own
 // Instantly v2 API key on Composio's hosted connect page (Composio stores it).
 export const COMPOSIO_INSTANTLY_TOOLS: ComposioTool[] = [
-  { slug: 'INSTANTLY_LIST_CAMPAIGNS', description: "List the user's Instantly outreach campaigns." },
-  { slug: 'INSTANTLY_GET_CAMPAIGN', description: 'Get one Instantly campaign by id (settings, status).' },
-  { slug: 'INSTANTLY_CREATE_CAMPAIGN', description: 'Create a new Instantly outreach campaign.' },
-  { slug: 'INSTANTLY_GET_CAMPAIGN_ANALYTICS', description: 'Get analytics for a campaign (sent, opens, replies, bounces).' },
-  { slug: 'INSTANTLY_LIST_LEADS', description: 'List leads, optionally filtered by campaign or lead list.' },
-  { slug: 'INSTANTLY_CREATE_LEAD', description: 'Add a lead (email, name, company, custom vars) to a campaign/list.' },
-  { slug: 'INSTANTLY_UPDATE_LEAD', description: 'Update an existing Instantly lead.' },
-  { slug: 'INSTANTLY_UPDATE_LEAD_INTEREST_STATUS', description: "Set a lead's interest status (e.g. interested, not interested, meeting booked)." },
-  { slug: 'INSTANTLY_LIST_LEAD_LISTS', description: "List the user's Instantly lead lists." },
-  { slug: 'INSTANTLY_LIST_ACCOUNTS', description: 'List the connected sending email accounts.' },
+  {
+    slug: 'INSTANTLY_LIST_CAMPAIGNS',
+    description: "List the user's Instantly outreach campaigns.",
+  },
+  {
+    slug: 'INSTANTLY_GET_CAMPAIGN',
+    description: 'Get one Instantly campaign by id (settings, status).',
+  },
+  {
+    slug: 'INSTANTLY_CREATE_CAMPAIGN',
+    description: 'Create a new Instantly outreach campaign.',
+  },
+  {
+    slug: 'INSTANTLY_GET_CAMPAIGN_ANALYTICS',
+    description:
+      'Get analytics for a campaign (sent, opens, replies, bounces).',
+  },
+  {
+    slug: 'INSTANTLY_LIST_LEADS',
+    description: 'List leads, optionally filtered by campaign or lead list.',
+  },
+  {
+    slug: 'INSTANTLY_CREATE_LEAD',
+    description:
+      'Add a lead (email, name, company, custom vars) to a campaign/list.',
+  },
+  {
+    slug: 'INSTANTLY_UPDATE_LEAD',
+    description: 'Update an existing Instantly lead.',
+  },
+  {
+    slug: 'INSTANTLY_UPDATE_LEAD_INTEREST_STATUS',
+    description:
+      "Set a lead's interest status (e.g. interested, not interested, meeting booked).",
+  },
+  {
+    slug: 'INSTANTLY_LIST_LEAD_LISTS',
+    description: "List the user's Instantly lead lists.",
+  },
+  {
+    slug: 'INSTANTLY_LIST_ACCOUNTS',
+    description: 'List the connected sending email accounts.',
+  },
 ];
 
 // Curated X (Twitter) tools. OAuth2 via OUR OWN X app (BYO OAuth; no managed
@@ -391,65 +424,161 @@ export const COMPOSIO_INSTANTLY_TOOLS: ComposioTool[] = [
 // deliberately EXCLUDE the expensive full-archive search, DMs (need extra
 // scopes), lists and spaces. Each user still connects their OWN X account.
 export const COMPOSIO_TWITTER_TOOLS: ComposioTool[] = [
-  { slug: 'TWITTER_CREATION_OF_A_POST', description: 'Post a tweet from the connected X account.' },
-  { slug: 'TWITTER_POST_DELETE_BY_POST_ID', description: "Delete one of the connected account's own posts." },
-  { slug: 'TWITTER_RECENT_SEARCH', description: 'Search posts from the last 7 days by query.' },
-  { slug: 'TWITTER_POST_LOOKUP_BY_POST_ID', description: 'Read a specific post by its id.' },
-  { slug: 'TWITTER_USER_LOOKUP_ME', description: "Look up the connected account's own X profile." },
-  { slug: 'TWITTER_USER_LOOKUP_BY_USERNAME', description: 'Look up an X user by @username.' },
+  {
+    slug: 'TWITTER_CREATION_OF_A_POST',
+    description: 'Post a tweet from the connected X account.',
+  },
+  {
+    slug: 'TWITTER_POST_DELETE_BY_POST_ID',
+    description: "Delete one of the connected account's own posts.",
+  },
+  {
+    slug: 'TWITTER_RECENT_SEARCH',
+    description: 'Search posts from the last 7 days by query.',
+  },
+  {
+    slug: 'TWITTER_POST_LOOKUP_BY_POST_ID',
+    description: 'Read a specific post by its id.',
+  },
+  {
+    slug: 'TWITTER_USER_LOOKUP_ME',
+    description: "Look up the connected account's own X profile.",
+  },
+  {
+    slug: 'TWITTER_USER_LOOKUP_BY_USERNAME',
+    description: 'Look up an X user by @username.',
+  },
   { slug: 'TWITTER_FOLLOW_USER', description: 'Follow an X user.' },
   { slug: 'TWITTER_USER_LIKE_POST', description: 'Like a post.' },
   { slug: 'TWITTER_RETWEET_POST', description: 'Repost (retweet) a post.' },
   // Direct messages (needs the X app's "Read and write and Direct Messages"
   // permission + the dm.read/dm.write scopes granted on connect).
-  { slug: 'TWITTER_SEND_A_NEW_MESSAGE_TO_A_USER', description: 'Send a direct message to an X user.' },
-  { slug: 'TWITTER_CREATE_A_NEW_DM_CONVERSATION', description: 'Start a new DM conversation.' },
-  { slug: 'TWITTER_SEND_A_NEW_MESSAGE_TO_A_DM_CONVERSATION', description: 'Send a message in an existing DM conversation.' },
-  { slug: 'TWITTER_GET_RECENT_DM_EVENTS', description: 'Read recent direct-message events (the DM inbox).' },
-  { slug: 'TWITTER_GET_DM_EVENTS_FOR_A_DM_CONVERSATION', description: 'Read messages in a specific DM conversation.' },
+  {
+    slug: 'TWITTER_SEND_A_NEW_MESSAGE_TO_A_USER',
+    description: 'Send a direct message to an X user.',
+  },
+  {
+    slug: 'TWITTER_CREATE_A_NEW_DM_CONVERSATION',
+    description: 'Start a new DM conversation.',
+  },
+  {
+    slug: 'TWITTER_SEND_A_NEW_MESSAGE_TO_A_DM_CONVERSATION',
+    description: 'Send a message in an existing DM conversation.',
+  },
+  {
+    slug: 'TWITTER_GET_RECENT_DM_EVENTS',
+    description: 'Read recent direct-message events (the DM inbox).',
+  },
+  {
+    slug: 'TWITTER_GET_DM_EVENTS_FOR_A_DM_CONVERSATION',
+    description: 'Read messages in a specific DM conversation.',
+  },
 ];
 
 // Curated Apollo tools. API_KEY auth (user pastes their own Apollo key on
 // Composio's hosted connect page, Composio stores it) — same model as Instantly,
 // runs on the user's own Apollo account. Sales-intelligence + lightweight CRM.
 export const COMPOSIO_APOLLO_TOOLS: ComposioTool[] = [
-  { slug: 'APOLLO_PEOPLE_SEARCH', description: "Search Apollo's database for people (leads) by title, company, location, etc." },
-  { slug: 'APOLLO_ORGANIZATION_SEARCH', description: 'Search Apollo for organizations/companies.' },
-  { slug: 'APOLLO_PEOPLE_ENRICHMENT', description: 'Enrich a person (email, title, company, socials) from Apollo.' },
-  { slug: 'APOLLO_ORGANIZATION_ENRICHMENT', description: 'Enrich a company with Apollo firmographic data.' },
-  { slug: 'APOLLO_SEARCH_CONTACTS', description: "Search the user's own Apollo contacts." },
+  {
+    slug: 'APOLLO_PEOPLE_SEARCH',
+    description:
+      "Search Apollo's database for people (leads) by title, company, location, etc.",
+  },
+  {
+    slug: 'APOLLO_ORGANIZATION_SEARCH',
+    description: 'Search Apollo for organizations/companies.',
+  },
+  {
+    slug: 'APOLLO_PEOPLE_ENRICHMENT',
+    description:
+      'Enrich a person (email, title, company, socials) from Apollo.',
+  },
+  {
+    slug: 'APOLLO_ORGANIZATION_ENRICHMENT',
+    description: 'Enrich a company with Apollo firmographic data.',
+  },
+  {
+    slug: 'APOLLO_SEARCH_CONTACTS',
+    description: "Search the user's own Apollo contacts.",
+  },
   { slug: 'APOLLO_CREATE_CONTACT', description: 'Create an Apollo contact.' },
-  { slug: 'APOLLO_UPDATE_CONTACT', description: 'Update an existing Apollo contact.' },
-  { slug: 'APOLLO_SEARCH_ACCOUNTS', description: "Search the user's Apollo accounts." },
+  {
+    slug: 'APOLLO_UPDATE_CONTACT',
+    description: 'Update an existing Apollo contact.',
+  },
+  {
+    slug: 'APOLLO_SEARCH_ACCOUNTS',
+    description: "Search the user's Apollo accounts.",
+  },
   { slug: 'APOLLO_CREATE_DEAL', description: 'Create an Apollo deal.' },
   { slug: 'APOLLO_LIST_DEALS', description: 'List Apollo deals.' },
   { slug: 'APOLLO_CREATE_TASK', description: 'Create an Apollo task.' },
-  { slug: 'APOLLO_ADD_CONTACTS_TO_SEQUENCE', description: 'Add contacts to an Apollo outreach sequence.' },
+  {
+    slug: 'APOLLO_ADD_CONTACTS_TO_SEQUENCE',
+    description: 'Add contacts to an Apollo outreach sequence.',
+  },
 ];
 
 // Curated Attio tools — the user's existing CRM. Read + safe writes; the two
 // destructive deletes (ATTIO_DELETE_RECORD / ATTIO_DELETE_NOTE) are held back.
 // Managed OAuth, so no Attio dev app on our side.
 export const COMPOSIO_ATTIO_TOOLS: ComposioTool[] = [
-  { slug: 'ATTIO_LIST_OBJECTS', description: "List the workspace's objects (people, companies, deals, custom objects)." },
-  { slug: 'ATTIO_GET_OBJECT', description: 'Get one object and its attributes by id or slug.' },
-  { slug: 'ATTIO_LIST_RECORDS', description: 'List records for an object, with optional filters and sorting.' },
-  { slug: 'ATTIO_FIND_RECORD', description: 'Find a specific record (e.g. a person or company) in an object.' },
+  {
+    slug: 'ATTIO_LIST_OBJECTS',
+    description:
+      "List the workspace's objects (people, companies, deals, custom objects).",
+  },
+  {
+    slug: 'ATTIO_GET_OBJECT',
+    description: 'Get one object and its attributes by id or slug.',
+  },
+  {
+    slug: 'ATTIO_LIST_RECORDS',
+    description:
+      'List records for an object, with optional filters and sorting.',
+  },
+  {
+    slug: 'ATTIO_FIND_RECORD',
+    description:
+      'Find a specific record (e.g. a person or company) in an object.',
+  },
   { slug: 'ATTIO_LIST_LISTS', description: "List the workspace's lists." },
-  { slug: 'ATTIO_LIST_NOTES', description: 'List notes, optionally for a given record.' },
-  { slug: 'ATTIO_CREATE_RECORD', description: 'Create a record (person, company, deal, custom object entry).' },
-  { slug: 'ATTIO_UPDATE_RECORD', description: "Update an existing record's attributes." },
+  {
+    slug: 'ATTIO_LIST_NOTES',
+    description: 'List notes, optionally for a given record.',
+  },
+  {
+    slug: 'ATTIO_CREATE_RECORD',
+    description:
+      'Create a record (person, company, deal, custom object entry).',
+  },
+  {
+    slug: 'ATTIO_UPDATE_RECORD',
+    description: "Update an existing record's attributes.",
+  },
   { slug: 'ATTIO_CREATE_NOTE', description: 'Add a note to a record.' },
 ];
 
 // HubSpot via Composio agent tools (managed OAuth). Replaces the old sync-button
 // import: the copilot reads/writes HubSpot on demand, like the other toolkits.
 export const COMPOSIO_HUBSPOT_TOOLS: ComposioTool[] = [
-  { slug: 'HUBSPOT_HUBSPOT_LIST_CONTACTS', description: 'List HubSpot contacts.' },
-  { slug: 'HUBSPOT_SEARCH_CONTACTS_BY_CRITERIA', description: 'Search HubSpot contacts by criteria.' },
+  {
+    slug: 'HUBSPOT_HUBSPOT_LIST_CONTACTS',
+    description: 'List HubSpot contacts.',
+  },
+  {
+    slug: 'HUBSPOT_SEARCH_CONTACTS_BY_CRITERIA',
+    description: 'Search HubSpot contacts by criteria.',
+  },
   { slug: 'HUBSPOT_CREATE_CONTACT', description: 'Create a HubSpot contact.' },
-  { slug: 'HUBSPOT_HUBSPOT_UPDATE_CONTACT', description: "Update a HubSpot contact's properties." },
-  { slug: 'HUBSPOT_HUBSPOT_LIST_COMPANIES', description: 'List HubSpot companies.' },
+  {
+    slug: 'HUBSPOT_HUBSPOT_UPDATE_CONTACT',
+    description: "Update a HubSpot contact's properties.",
+  },
+  {
+    slug: 'HUBSPOT_HUBSPOT_LIST_COMPANIES',
+    description: 'List HubSpot companies.',
+  },
   { slug: 'HUBSPOT_CREATE_COMPANY', description: 'Create a HubSpot company.' },
   { slug: 'HUBSPOT_HUBSPOT_LIST_DEALS', description: 'List HubSpot deals.' },
   { slug: 'HUBSPOT_CREATE_DEAL', description: 'Create a HubSpot deal.' },
@@ -457,15 +586,39 @@ export const COMPOSIO_HUBSPOT_TOOLS: ComposioTool[] = [
 
 // Salesforce via Composio agent tools (managed OAuth). SOQL covers flexible reads.
 export const COMPOSIO_SALESFORCE_TOOLS: ComposioTool[] = [
-  { slug: 'SALESFORCE_EXECUTE_SOQL_QUERY', description: 'Run a SOQL query to read any Salesforce records.' },
-  { slug: 'SALESFORCE_LIST_ACCOUNTS', description: 'List Salesforce accounts.' },
-  { slug: 'SALESFORCE_GET_ACCOUNT', description: 'Get a Salesforce account by id.' },
-  { slug: 'SALESFORCE_CREATE_ACCOUNT', description: 'Create a Salesforce account.' },
-  { slug: 'SALESFORCE_GET_CONTACT', description: 'Get a Salesforce contact by id.' },
-  { slug: 'SALESFORCE_CREATE_CONTACT', description: 'Create a Salesforce contact.' },
+  {
+    slug: 'SALESFORCE_EXECUTE_SOQL_QUERY',
+    description: 'Run a SOQL query to read any Salesforce records.',
+  },
+  {
+    slug: 'SALESFORCE_LIST_ACCOUNTS',
+    description: 'List Salesforce accounts.',
+  },
+  {
+    slug: 'SALESFORCE_GET_ACCOUNT',
+    description: 'Get a Salesforce account by id.',
+  },
+  {
+    slug: 'SALESFORCE_CREATE_ACCOUNT',
+    description: 'Create a Salesforce account.',
+  },
+  {
+    slug: 'SALESFORCE_GET_CONTACT',
+    description: 'Get a Salesforce contact by id.',
+  },
+  {
+    slug: 'SALESFORCE_CREATE_CONTACT',
+    description: 'Create a Salesforce contact.',
+  },
   { slug: 'SALESFORCE_CREATE_LEAD', description: 'Create a Salesforce lead.' },
-  { slug: 'SALESFORCE_CREATE_OPPORTUNITY', description: 'Create a Salesforce opportunity.' },
-  { slug: 'SALESFORCE_GET_OPPORTUNITY', description: 'Get a Salesforce opportunity by id.' },
+  {
+    slug: 'SALESFORCE_CREATE_OPPORTUNITY',
+    description: 'Create a Salesforce opportunity.',
+  },
+  {
+    slug: 'SALESFORCE_GET_OPPORTUNITY',
+    description: 'Get a Salesforce opportunity by id.',
+  },
 ];
 
 type ConnectedAccount = {

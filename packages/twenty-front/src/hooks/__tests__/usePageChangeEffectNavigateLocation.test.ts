@@ -527,7 +527,15 @@ describe('usePageChangeEffectNavigateLocation', () => {
       setupMockIsOnAWorkspace(true);
       setupMockUseQuery(undefined);
       setupMockUseLocation(AppPath.Index);
-      setupMockState(undefined, undefined, undefined, undefined, true, true, false);
+      setupMockState(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true,
+        true,
+        false,
+      );
 
       expect(usePageChangeEffectNavigateLocation()).toEqual(AppPath.GetStarted);
     });
@@ -541,9 +549,19 @@ describe('usePageChangeEffectNavigateLocation', () => {
       setupMockIsOnAWorkspace(true);
       setupMockUseQuery(undefined);
       setupMockUseLocation(AppPath.Index);
-      setupMockState(undefined, undefined, undefined, undefined, true, true, false);
+      setupMockState(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true,
+        true,
+        false,
+      );
 
-      expect(usePageChangeEffectNavigateLocation()).toEqual(defaultHomePagePath);
+      expect(usePageChangeEffectNavigateLocation()).toEqual(
+        defaultHomePagePath,
+      );
     });
   });
 

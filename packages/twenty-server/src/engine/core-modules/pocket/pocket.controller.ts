@@ -39,7 +39,9 @@ export class PocketController {
 
   @Get('status')
   async status(@Req() request: AuthenticatedRequest) {
-    const connected = await this.pocketService.isConnected(this.userId(request));
+    const connected = await this.pocketService.isConnected(
+      this.userId(request),
+    );
 
     return { plugin: 'pocket', connected };
   }

@@ -38,8 +38,14 @@ export const CREATE_DESYNC_SUBSCRIPTION = gql`
 `;
 
 export const ACTIVATE_DESYNC_SUBSCRIPTION = gql`
-  mutation ActivateDesyncSubscription($setupIntentId: String!, $priceId: String!) {
-    activateDesyncSubscription(setupIntentId: $setupIntentId, priceId: $priceId) {
+  mutation ActivateDesyncSubscription(
+    $setupIntentId: String!
+    $priceId: String!
+  ) {
+    activateDesyncSubscription(
+      setupIntentId: $setupIntentId
+      priceId: $priceId
+    ) {
       subscriptionId
       status
     }
@@ -181,7 +187,10 @@ export const CANCEL_DESYNC_SEAT = gql`
 
 export const CHANGE_DESYNC_SEAT_PLAN = gql`
   mutation ChangeDesyncSeatPlan($beneficiaryEmail: String!, $priceId: String!) {
-    changeDesyncSeatPlan(beneficiaryEmail: $beneficiaryEmail, priceId: $priceId) {
+    changeDesyncSeatPlan(
+      beneficiaryEmail: $beneficiaryEmail
+      priceId: $priceId
+    ) {
       success
       message
     }

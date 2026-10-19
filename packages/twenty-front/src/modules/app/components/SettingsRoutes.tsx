@@ -456,9 +456,11 @@ const SettingsBilling = lazy(() =>
 
 // Desync: self-service plan management (own Stripe backend, not Twenty native billing).
 const SettingsPlanBilling = lazy(() =>
-  import('~/pages/settings/plan-billing/SettingsPlanBilling').then((module) => ({
-    default: module.SettingsPlanBilling,
-  })),
+  import('~/pages/settings/plan-billing/SettingsPlanBilling').then(
+    (module) => ({
+      default: module.SettingsPlanBilling,
+    }),
+  ),
 );
 
 const SettingsBillingPlans = lazy(() =>

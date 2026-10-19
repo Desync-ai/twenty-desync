@@ -118,7 +118,9 @@ export const SignInUpClerkExchangeEffect = () => {
     // The /verify page owns the loginToken swap (VerifyLoginTokenEffect). Firing
     // a competing exchange here would redirect away mid-verify and restart the
     // loop, so stand down whenever a loginToken is present in the URL.
-    if (isDefined(new URLSearchParams(window.location.search).get('loginToken'))) {
+    if (
+      isDefined(new URLSearchParams(window.location.search).get('loginToken'))
+    ) {
       return;
     }
 

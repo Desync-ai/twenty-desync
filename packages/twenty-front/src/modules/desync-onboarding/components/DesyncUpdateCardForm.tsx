@@ -80,7 +80,9 @@ export const DesyncUpdateCardForm = ({ onDone }: { onDone?: () => void }) => {
       }
 
       setStatus('Saving…');
-      const { data: saved } = await setDefaultCard({ variables: { setupIntentId } });
+      const { data: saved } = await setDefaultCard({
+        variables: { setupIntentId },
+      });
       const res = saved?.setDesyncDefaultCard;
 
       enqueueToast({
@@ -99,7 +101,9 @@ export const DesyncUpdateCardForm = ({ onDone }: { onDone?: () => void }) => {
       setStatus('');
       enqueueToast({
         children:
-          error instanceof Error ? error.message : 'Could not update your card.',
+          error instanceof Error
+            ? error.message
+            : 'Could not update your card.',
         variant: 'error',
       });
     }
@@ -108,7 +112,9 @@ export const DesyncUpdateCardForm = ({ onDone }: { onDone?: () => void }) => {
   return (
     <StyledForm>
       <StyledCardBox>
-        <CardElement options={{ hidePostalCode: true, style: cardElementStyle }} />
+        <CardElement
+          options={{ hidePostalCode: true, style: cardElementStyle }}
+        />
       </StyledCardBox>
 
       {status !== '' && <StyledStatus>{status}</StyledStatus>}

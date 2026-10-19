@@ -39,7 +39,9 @@ export class FathomController {
 
   @Get('status')
   async status(@Req() request: AuthenticatedRequest) {
-    const connected = await this.fathomService.isConnected(this.userId(request));
+    const connected = await this.fathomService.isConnected(
+      this.userId(request),
+    );
 
     return { plugin: 'fathom', connected };
   }
