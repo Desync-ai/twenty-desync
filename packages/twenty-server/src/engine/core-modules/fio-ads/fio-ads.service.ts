@@ -629,11 +629,7 @@ export class FioAdsService {
   // A short, cached sample of one of our picker voices so the user can hear it
   // before generating a full voiceover. Picker voices only; synthesized at most
   // once per voice (cached in-process) to keep previews ~free. Caller gates.
-  async getVoiceSample({
-    voiceId,
-  }: {
-    voiceId?: string;
-  }): Promise<{
+  async getVoiceSample({ voiceId }: { voiceId?: string }): Promise<{
     audio: { filename: string; contentType: string; dataBase64: string };
   }> {
     if (!this.cartesiaKey) {
