@@ -132,10 +132,14 @@ const StyledTextButton = styled.button<{ danger?: boolean }>`
   background: transparent;
   border: 1px solid
     ${({ danger }) =>
-      danger ? themeCssVariables.border.color.danger : themeCssVariables.border.color.medium};
+      danger
+        ? themeCssVariables.border.color.danger
+        : themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ danger }) =>
-    danger ? themeCssVariables.font.color.danger : themeCssVariables.font.color.secondary};
+    danger
+      ? themeCssVariables.font.color.danger
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   font-size: ${themeCssVariables.font.size.md};
   padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[3]};
@@ -157,7 +161,9 @@ const StyledToggleButton = styled.button<{ active: boolean }>`
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ active }) =>
-    active ? themeCssVariables.font.color.inverted : themeCssVariables.font.color.secondary};
+    active
+      ? themeCssVariables.font.color.inverted
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   font-size: ${themeCssVariables.font.size.sm};
   padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
@@ -244,7 +250,8 @@ export const SettingsPlanBilling = () => {
   const permissionMap = usePermissionFlagMap();
   // CRM workspace ADMIN (can manage members) — NOT a Desync admin. Only they can
   // buy/pay for other members' seats; regular members manage only their own plan.
-  const canManageMembers = permissionMap[PermissionFlagType.WORKSPACE_MEMBERS] === true;
+  const canManageMembers =
+    permissionMap[PermissionFlagType.WORKSPACE_MEMBERS] === true;
 
   const sub = subData?.mySubscription;
   const isInternal = sub?.isInternal === true;
@@ -333,7 +340,9 @@ export const SettingsPlanBilling = () => {
   const effectiveAnnual = curAnnual ? true : pickAnnual;
   const upgradePlans = plans.filter((p) => {
     const r = PLAN_RANK[p.name] ?? 0;
-    return effectiveAnnual ? r > curRank || (r === curRank && !curAnnual) : r > curRank;
+    return effectiveAnnual
+      ? r > curRank || (r === curRank && !curAnnual)
+      : r > curRank;
   });
 
   const renderActions = () => {
@@ -501,25 +510,31 @@ export const SettingsPlanBilling = () => {
           />
           <StyledCard>
             <StyledRow>
-              <StyledPlanTitle>{planDisplayName(sub?.planLevel ?? null)}</StyledPlanTitle>
+              <StyledPlanTitle>
+                {planDisplayName(sub?.planLevel ?? null)}
+              </StyledPlanTitle>
               <StyledChip tone={chip.tone}>{chip.label}</StyledChip>
             </StyledRow>
 
             {sub?.cadence && isActivePaid && (
               <StyledMeta>
-                {sub.cadence === 'annual' ? t`Billed annually` : t`Billed monthly`}
+                {sub.cadence === 'annual'
+                  ? t`Billed annually`
+                  : t`Billed monthly`}
               </StyledMeta>
             )}
 
-            {sub?.periodEnd != null && !isInternal && sub?.planLevel !== 'Admin' && (
-              <StyledMeta>
-                {sub.cancelAtPeriodEnd
-                  ? t`Access ends on ${periodEndStr}`
-                  : sub.current
-                    ? t`Renews on ${periodEndStr}`
-                    : t`Expired on ${periodEndStr}`}
-              </StyledMeta>
-            )}
+            {sub?.periodEnd != null &&
+              !isInternal &&
+              sub?.planLevel !== 'Admin' && (
+                <StyledMeta>
+                  {sub.cancelAtPeriodEnd
+                    ? t`Access ends on ${periodEndStr}`
+                    : sub.current
+                      ? t`Renews on ${periodEndStr}`
+                      : t`Expired on ${periodEndStr}`}
+                </StyledMeta>
+              )}
 
             {quotaKnown && (
               <StyledMeta>

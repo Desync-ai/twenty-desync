@@ -51,7 +51,10 @@ export const getStripeCardStyle = (isDark: boolean) => ({
 
 // Annual shows the full yearly total AND the monthly-equivalent (10% off);
 // monthly shows the plain monthly price. (Kept for callers that want a one-liner.)
-export const formatPlanPrice = (monthlyPriceUsd: number, annual: boolean): string =>
+export const formatPlanPrice = (
+  monthlyPriceUsd: number,
+  annual: boolean,
+): string =>
   annual
     ? `$${Math.round(monthlyPriceUsd * 12 * 0.9).toLocaleString()}/yr ($${Math.round(
         monthlyPriceUsd * 0.9,
@@ -85,7 +88,9 @@ const StyledToggleButton = styled.button<{ active: boolean }>`
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ active }) =>
-    active ? themeCssVariables.font.color.inverted : themeCssVariables.font.color.secondary};
+    active
+      ? themeCssVariables.font.color.inverted
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
 `;
@@ -293,7 +298,9 @@ export const DesyncCheckoutForm = ({
       </StyledPlans>
 
       <StyledCardBox>
-        <CardElement options={{ hidePostalCode: true, style: cardElementStyle }} />
+        <CardElement
+          options={{ hidePostalCode: true, style: cardElementStyle }}
+        />
       </StyledCardBox>
 
       {status !== '' && <StyledStatus>{status}</StyledStatus>}
@@ -303,7 +310,9 @@ export const DesyncCheckoutForm = ({
         disabled={!stripe || submitting || !selectedPlan}
         fullWidth
       >
-        {submitting ? 'Processing…' : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}
+        {submitting
+          ? 'Processing…'
+          : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}
       </MainButton>
     </StyledForm>
   );
