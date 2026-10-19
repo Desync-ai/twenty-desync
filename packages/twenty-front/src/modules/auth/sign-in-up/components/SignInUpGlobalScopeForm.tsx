@@ -235,9 +235,11 @@ export const SignInUpGlobalScopeForm = () => {
 
               const workspaceRow = (
                 <StyledWorkspaceItem
-                  {...(isInvite
-                    ? { onClick: () => handleAcceptInvite(availableWorkspace) }
-                    : {})}
+                  onClick={
+                    isInvite
+                      ? () => handleAcceptInvite(availableWorkspace)
+                      : undefined
+                  }
                 >
                   <StyledWorkspaceContent>
                     <Avatar

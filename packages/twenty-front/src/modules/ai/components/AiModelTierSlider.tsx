@@ -6,10 +6,8 @@ import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierInformationButton } from '@/ai/components/AiModelTierInformationButton';
-import {
-  SELECTABLE_AI_MODEL_TIERS,
-  clampToSelectableAiModelTier,
-} from '@/ai/constants/selectableAiModelTiers';
+import { SELECTABLE_AI_MODEL_TIERS } from '@/ai/constants/selectableAiModelTiers';
+import { clampToSelectableAiModelTier } from '@/ai/utils/clampToSelectableAiModelTier';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 
 const TRACK_HEIGHT_PX = 24;

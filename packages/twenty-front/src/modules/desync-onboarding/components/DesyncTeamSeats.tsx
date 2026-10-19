@@ -115,8 +115,8 @@ const StyledActionButton = styled.button<{ danger?: boolean }>`
 
 const StyledSeatTag = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.sm};
   flex-shrink: 0;
+  font-size: ${themeCssVariables.font.size.sm};
 `;
 
 const StyledActions = styled.div`
@@ -137,10 +137,12 @@ export const DesyncTeamSeats = () => {
   const { enqueueToast } = useToast();
   const { openModal } = useModal();
   const currentUser = useAtomStateValue(currentUserState);
-  const members = useAtomStateValue(currentWorkspaceMembersState);
+  const currentWorkspaceMembers = useAtomStateValue(
+    currentWorkspaceMembersState,
+  );
 
   const myEmail = (currentUser?.email ?? '').toLowerCase();
-  const otherMembers = (members ?? []).filter(
+  const otherMembers = (currentWorkspaceMembers ?? []).filter(
     (m) => (m.userEmail ?? '').toLowerCase() !== myEmail,
   );
   const memberEmails = otherMembers

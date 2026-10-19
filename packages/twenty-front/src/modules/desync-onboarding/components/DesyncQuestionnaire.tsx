@@ -186,7 +186,7 @@ type WebsiteAnalysis = {
   tags: string[];
 };
 
-type Props = {
+type DesyncQuestionnaireProps = {
   onCompleted: () => void;
 };
 
@@ -201,7 +201,7 @@ const emptyCustomer = (): Customer => ({
 // Crude "looks like a domain" test — enough to avoid firing on every keystroke.
 const looksLikeDomain = (value: string) => /\.[a-z]{2,}/i.test(value.trim());
 
-export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
+export const DesyncQuestionnaire = ({ onCompleted }: DesyncQuestionnaireProps) => {
   const { enqueueToast } = useToast();
 
   const [step, setStep] = useState(1);
@@ -217,6 +217,8 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([emptyCustomer()]);
 
+  // Dedupe guard for runAnalyze (last URL analyzed), never rendered.
+  // oxlint-disable-next-line twenty/no-state-useref
   const analyzedForRef = useRef('');
 
   const [saveDesyncOnboarding, { loading }] = useMutation(

@@ -5,6 +5,7 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
+import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme-constants';
 
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
@@ -221,7 +222,7 @@ export const SeatCheckoutModal = ({
 
   const handleBuy = async () => {
     const beneficiary = email.trim().toLowerCase();
-    if (!beneficiary || !selectedPlan || submitting) {
+    if (!beneficiary || !isDefined(selectedPlan) || submitting) {
       return;
     }
     if (!workspaceId) {
@@ -443,7 +444,7 @@ export const SeatCheckoutModal = ({
 
             <MainButton
               onClick={handleBuy}
-              disabled={submitting || !selectedPlan || email.trim() === ''}
+              disabled={submitting || !isDefined(selectedPlan) || email.trim() === ''}
               fullWidth
             >
               {submitting

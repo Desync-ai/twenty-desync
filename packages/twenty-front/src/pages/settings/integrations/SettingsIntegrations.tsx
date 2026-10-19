@@ -645,6 +645,8 @@ const McpIntegrationCard = ({
           <StyledCardActions>
             <Button
               variant="outline"
+              // Button has no client-side `to`; href would full-reload the app.
+              // oxlint-disable-next-line twenty/no-navigate-prefer-link
               onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
             >
               {t`Get connection details`}

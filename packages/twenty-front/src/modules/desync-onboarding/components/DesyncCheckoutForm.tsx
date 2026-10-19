@@ -4,6 +4,7 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
+import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme-constants';
 
 import { DesyncPlanCard } from '@/desync-onboarding/components/DesyncPlanCard';
@@ -33,12 +34,16 @@ export type DesyncPlan = {
 // subscribe checkout and the change-card form.
 export const getStripeCardStyle = (isDark: boolean) => ({
   base: {
+    // oxlint-disable-next-line twenty/no-hardcoded-colors
     color: isDark ? '#EBEBEB' : '#283238',
     fontFamily: 'inherit',
     fontSize: '16px',
+    // oxlint-disable-next-line twenty/no-hardcoded-colors
     '::placeholder': { color: isDark ? '#808080' : '#8B948E' },
+    // oxlint-disable-next-line twenty/no-hardcoded-colors
     iconColor: isDark ? '#EBEBEB' : '#283238',
   },
+  // oxlint-disable-next-line twenty/no-hardcoded-colors
   invalid: { color: '#D4544C', iconColor: '#D4544C' },
 });
 
@@ -127,7 +132,7 @@ export const DesyncCheckoutForm = ({
   const selectedPlan = plans.find((p) => p.key === selectedKey) ?? plans[0];
 
   const handlePay = async () => {
-    if (!stripe || !elements || !selectedPlan || submitting) {
+    if (!stripe || !elements || !isDefined(selectedPlan) || submitting) {
       return;
     }
 
@@ -233,7 +238,7 @@ export const DesyncCheckoutForm = ({
 
       <MainButton
         onClick={handlePay}
-        disabled={!stripe || submitting || !selectedPlan}
+        disabled={!stripe || submitting || !isDefined(selectedPlan)}
         fullWidth
       >
         {submitting ? 'Processing…' : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}

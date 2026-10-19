@@ -6,10 +6,8 @@ import { Card } from 'twenty-ui/primitives/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierIndicator } from '@/ai/components/AiModelTierIndicator';
-import {
-  SELECTABLE_AI_MODEL_TIERS,
-  clampToSelectableAiModelTier,
-} from '@/ai/constants/selectableAiModelTiers';
+import { SELECTABLE_AI_MODEL_TIERS } from '@/ai/constants/selectableAiModelTiers';
+import { clampToSelectableAiModelTier } from '@/ai/utils/clampToSelectableAiModelTier';
 import { useWorkspaceAiModelTiers } from '@/ai/hooks/useWorkspaceAiModelTiers';
 import { getAiModelTierLabel } from '@/ai/utils/getAiModelTierLabel';
 import { SettingsOptionCardContentSelect } from '@/settings/components/SettingsOptions/SettingsOptionCardContentSelect';

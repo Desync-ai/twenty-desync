@@ -1,6 +1,6 @@
 import { type PropsWithChildren } from 'react';
 
-import { ClerkSignOutRegistrar } from '@/auth/components/ClerkSignOutRegistrar';
+import { ClerkSignOutRegistrarEffect } from '@/auth/components/ClerkSignOutRegistrarEffect';
 import { SignInUpClerkExchangeEffect } from '@/auth/sign-in-up/components/internal/SignInUpClerkExchangeEffect';
 import { clerkConfigState } from '@/client-config/states/clerkConfigState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -11,7 +11,9 @@ import { isNonEmptyString } from '@sniptt/guards';
 // a publishable key. Before the client-config has loaded, or when Clerk is
 // disabled, it renders children untouched so the app boots normally and the
 // existing email/password + Google/Microsoft/SSO flows keep working.
-export const ClerkAuthProvider = ({ children }: PropsWithChildren) => {
+type ClerkAuthProviderProps = PropsWithChildren;
+
+export const ClerkAuthProvider = ({ children }: ClerkAuthProviderProps) => {
   const clerkConfig = useAtomStateValue(clerkConfigState);
 
   if (
@@ -23,7 +25,7 @@ export const ClerkAuthProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <ClerkProvider publishableKey={clerkConfig.publishableKey}>
-      <ClerkSignOutRegistrar />
+      <ClerkSignOutRegistrarEffect />
       <SignInUpClerkExchangeEffect />
       {children}
     </ClerkProvider>

@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isDefined } from 'twenty-shared/utils';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -432,11 +433,18 @@ export const FioAdsPage = () => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const adImageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  // Browser handles (recorder, stream, timer) and caches, never rendered.
+  // oxlint-disable-next-line twenty/no-state-useref
   const voiceSampleCacheRef = useRef<Map<string, string>>(new Map());
+  // oxlint-disable-next-line twenty/no-state-useref
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  // oxlint-disable-next-line twenty/no-state-useref
   const recordChunksRef = useRef<Blob[]>([]);
+  // oxlint-disable-next-line twenty/no-state-useref
   const recordStreamRef = useRef<MediaStream | null>(null);
+  // oxlint-disable-next-line twenty/no-state-useref
   const recordTimerRef = useRef<number | null>(null);
+  // oxlint-disable-next-line twenty/no-state-useref
   const recordStartRef = useRef<number>(0);
 
   const currentUser = useAtomStateValue(currentUserState);
@@ -803,7 +811,7 @@ export const FioAdsPage = () => {
     setAudioError(null);
     if (
       typeof MediaRecorder === 'undefined' ||
-      !navigator.mediaDevices?.getUserMedia
+      !isDefined(navigator.mediaDevices?.getUserMedia)
     ) {
       setAudioError(
         t`Recording isn't supported in this browser. Upload an MP3 instead.`,
