@@ -88,7 +88,7 @@ describe('UserService email updates', () => {
 
   const updateUserEmail = () =>
     userService.updateUserEmail({
-      user: storedUser as AuthContextUser,
+      user: storedUser as unknown as AuthContextUser,
       workspace: { id: 'workspace-id' } as WorkspaceEntity,
       newEmail: 'someone-else@example.com',
     });

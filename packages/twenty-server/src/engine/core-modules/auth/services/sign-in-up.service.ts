@@ -524,7 +524,7 @@ export class SignInUpService {
         `<p><strong>New Desync CRM signup</strong></p>` +
         `<ul>` +
         `<li>Name: ${escape(name)}</li>` +
-        `<li>Email: ${escape(newUser.email)}</li>` +
+        `<li>Email: ${escape(newUser.email ?? '')}</li>` +
         `<li>Time: ${when}</li>` +
         `</ul>`;
 
