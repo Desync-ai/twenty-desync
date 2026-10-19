@@ -12,6 +12,7 @@ import {
 import { AuthenticatedRequest } from 'src/engine/api/rest/types/authenticated-request';
 import { RestApiExceptionFilter } from 'src/engine/api/rest/rest-api-exception.filter';
 import { JwtAuthGuard } from 'src/engine/guards/jwt-auth.guard';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { FathomService } from 'src/engine/core-modules/fathom/fathom.service';
 
@@ -22,7 +23,7 @@ import { FathomService } from 'src/engine/core-modules/fathom/fathom.service';
  * copilot then gets Fathom's tools via FathomToolProvider. Not a Composio flow.
  */
 @Controller('fathom')
-@UseGuards(JwtAuthGuard, WorkspaceAuthGuard)
+@UseGuards(JwtAuthGuard, WorkspaceAuthGuard, NoPermissionGuard)
 @UseFilters(RestApiExceptionFilter)
 export class FathomController {
   constructor(private readonly fathomService: FathomService) {}

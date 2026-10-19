@@ -12,6 +12,7 @@ import {
 import { AuthenticatedRequest } from 'src/engine/api/rest/types/authenticated-request';
 import { RestApiExceptionFilter } from 'src/engine/api/rest/rest-api-exception.filter';
 import { JwtAuthGuard } from 'src/engine/guards/jwt-auth.guard';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { PocketService } from 'src/engine/core-modules/pocket/pocket.service';
 
@@ -22,7 +23,7 @@ import { PocketService } from 'src/engine/core-modules/pocket/pocket.service';
  * copilot then gets Pocket's tools via PocketToolProvider. Not a Composio flow.
  */
 @Controller('pocket')
-@UseGuards(JwtAuthGuard, WorkspaceAuthGuard)
+@UseGuards(JwtAuthGuard, WorkspaceAuthGuard, NoPermissionGuard)
 @UseFilters(RestApiExceptionFilter)
 export class PocketController {
   constructor(private readonly pocketService: PocketService) {}

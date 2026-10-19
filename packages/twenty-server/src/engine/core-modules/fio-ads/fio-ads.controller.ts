@@ -14,7 +14,9 @@ import {
 import { AuthenticatedRequest } from 'src/engine/api/rest/types/authenticated-request';
 import { RestApiExceptionFilter } from 'src/engine/api/rest/rest-api-exception.filter';
 import { FioAdsService } from 'src/engine/core-modules/fio-ads/fio-ads.service';
+import { CustomPermissionGuard } from 'src/engine/guards/custom-permission.guard';
 import { JwtAuthGuard } from 'src/engine/guards/jwt-auth.guard';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { PermissionsRestApiExceptionFilter } from 'src/engine/metadata-modules/permissions/utils/permissions-rest-api-exception.filter';
 
@@ -47,6 +49,7 @@ export class FioAdsController {
   }
 
   @Get('status')
+  @UseGuards(NoPermissionGuard)
   async status(@Req() request: AuthenticatedRequest) {
     return this.fioAdsService.getStatus({
       userId: this.userId(request),
@@ -57,11 +60,13 @@ export class FioAdsController {
   }
 
   @Get('prefill')
+  @UseGuards(NoPermissionGuard)
   async prefill(@Req() request: AuthenticatedRequest) {
     return this.fioAdsService.getPrefill(this.userEmail(request));
   }
 
   @Post('assistant')
+  @UseGuards(CustomPermissionGuard)
   async assistant(
     @Body()
     body: {
@@ -94,11 +99,13 @@ export class FioAdsController {
   }
 
   @Get('voices')
+  @UseGuards(NoPermissionGuard)
   async voices() {
     return { voices: await this.fioAdsService.listVoices() };
   }
 
   @Get('voice-sample')
+  @UseGuards(CustomPermissionGuard)
   async voiceSample(
     @Query('voiceId') voiceId: string,
     @Req() request: AuthenticatedRequest,
@@ -123,6 +130,7 @@ export class FioAdsController {
   }
 
   @Post('transcribe')
+  @UseGuards(CustomPermissionGuard)
   async transcribe(
     @Body()
     body: {
@@ -150,6 +158,7 @@ export class FioAdsController {
   }
 
   @Post('voiceover')
+  @UseGuards(CustomPermissionGuard)
   async voiceover(
     @Body() body: { text?: string; voiceId?: string },
     @Req() request: AuthenticatedRequest,
@@ -176,6 +185,7 @@ export class FioAdsController {
   }
 
   @Post('launch')
+  @UseGuards(CustomPermissionGuard)
   async launch(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
     const userId = this.userId(request);
     if (!userId) {
