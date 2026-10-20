@@ -1,3 +1,7 @@
+import {
+  DesyncConnectEmailNudge,
+  type DesyncConnectEmailNudgePlacement,
+} from '@/desync-onboarding/components/DesyncConnectEmailNudge';
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
 import { useObjectLabel } from '@/object-metadata/hooks/useObjectLabel';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
@@ -11,8 +15,19 @@ import { canCreateRecordsForObjectMetadataItem } from '@/object-record/utils/can
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useLingui } from '@lingui/react/macro';
+import { CoreObjectNameSingular } from 'twenty-shared/types';
+import { isDefined } from 'twenty-shared/utils';
 import { IconFilterOff, IconPlus, IconSettings } from 'twenty-ui/icon';
 import { type ObjectPermission } from '~/generated-metadata/graphql';
+
+// Desync: an empty Companies/People list is where a workspace that skipped
+// email sync feels it most, so the connect-email nudge is offered there too.
+const CONNECT_EMAIL_NUDGE_PLACEMENT_BY_OBJECT: Partial<
+  Record<string, DesyncConnectEmailNudgePlacement>
+> = {
+  [CoreObjectNameSingular.Company]: 'empty-companies',
+  [CoreObjectNameSingular.Person]: 'empty-people',
+};
 
 type RecordIndexEmptyStateProps = {
   objectMetadataItem: EnrichedObjectMetadataItem;
@@ -106,6 +121,9 @@ export const RecordIndexEmptyState = ({
   }
 
   if (totalCount === 0) {
+    const connectEmailNudgePlacement =
+      CONNECT_EMAIL_NUDGE_PLACEMENT_BY_OBJECT[objectMetadataItem.nameSingular];
+
     return (
       <RecordIndexEmptyStateDisplay
         animatedPlaceholderType="noRecord"
@@ -121,6 +139,11 @@ export const RecordIndexEmptyState = ({
         buttonTitle={t`Add a ${objectLabelSingular}`}
         onButtonClick={handleAddRecordClick}
         width={width}
+        footer={
+          isDefined(connectEmailNudgePlacement) ? (
+            <DesyncConnectEmailNudge placement={connectEmailNudgePlacement} />
+          ) : undefined
+        }
       />
     );
   }

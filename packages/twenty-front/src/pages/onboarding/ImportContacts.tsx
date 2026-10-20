@@ -75,6 +75,11 @@ export const ImportContacts = ({
             {t`Connect your email and calendar to see your entire network instantly. Takes only 30 seconds.`}
           </StyledSubtitle>
         </OnboardingStepAnimatedItem>
+        <OnboardingStepAnimatedItem index={1}>
+          <StyledSubtitle>
+            {t`We add the people you email and meet with, and their companies, to your CRM. Personal addresses are skipped.`}
+          </StyledSubtitle>
+        </OnboardingStepAnimatedItem>
         {isDefined(creditsReward) && (
           <OnboardingStepAnimatedItem index={2}>
             <StyledOnboardingStepTagsRow>

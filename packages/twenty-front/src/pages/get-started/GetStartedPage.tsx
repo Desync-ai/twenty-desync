@@ -10,6 +10,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
+import { DesyncConnectEmailNudge } from '@/desync-onboarding/components/DesyncConnectEmailNudge';
 import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
 import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -217,6 +218,8 @@ export const GetStartedPage = () => {
             {t`Your built-in AI agent can fill your CRM for you, pull in your contacts, find new leads, and tell you who to follow up with. Three quick steps and it does the work.`}
           </StyledSubtitle>
         </StyledHeader>
+
+        <DesyncConnectEmailNudge placement="get-started" />
 
         <StyledSteps>
           <StyledStep>
