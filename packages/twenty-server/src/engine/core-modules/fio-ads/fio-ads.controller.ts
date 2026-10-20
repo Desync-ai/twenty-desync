@@ -93,6 +93,35 @@ export class FioAdsController {
     });
   }
 
+  @Post('scripts')
+  async scripts(
+    @Body()
+    body: { brand?: { name?: string; website?: string }; notes?: string },
+    @Req() request: AuthenticatedRequest,
+  ) {
+    // Generating the five script ideas spends AI budget, so gate it like launch.
+    const status = await this.fioAdsService.getStatus({
+      userId: this.userId(request),
+      email: this.userEmail(request),
+      workspaceId: this.workspaceId(request),
+      userWorkspaceId: this.userWorkspaceId(request),
+    });
+
+    if (!status.eligible) {
+      throw new ForbiddenException(
+        status.reason === 'not_admin'
+          ? 'Only workspace admins can generate Fio ad scripts.'
+          : 'Fio ad scripts are available on Starter and above.',
+      );
+    }
+
+    return this.fioAdsService.generateScripts({
+      brand: body?.brand,
+      email: this.userEmail(request),
+      notes: body?.notes,
+    });
+  }
+
   @Get('voices')
   async voices() {
     return { voices: await this.fioAdsService.listVoices() };
