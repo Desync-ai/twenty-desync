@@ -1,4 +1,5 @@
 import { AiChatCompactionIndicator } from '@/ai/components/AiChatCompactionIndicator';
+import { AiChatErrorMessage } from '@/ai/components/AiChatErrorMessage';
 import { AiChatInitialLoadingIndicator } from '@/ai/components/AiChatInitialLoadingIndicator';
 import { CodeExecutionDisplay } from '@/ai/components/CodeExecutionDisplay';
 import { RoutingStatusDisplay } from '@/ai/components/RoutingStatusDisplay';
@@ -7,6 +8,7 @@ import { ThinkingStepsDisplay } from '@/ai/components/ThinkingStepsDisplay';
 import { AiChatQuestionStatusRenderer } from '@/ai/components/AiChatQuestionStatusRenderer';
 import { LazyMarkdownContent } from '@/ai/components/LazyMarkdownRenderer';
 import { ToolStepRenderer } from '@/ai/components/ToolStepRenderer';
+import { createAiChatCodedError } from '@/ai/utils/createAiChatCodedError';
 import { groupContiguousThinkingStepParts } from '@/ai/utils/groupContiguousThinkingStepParts';
 import { isCodeInterpreterToolPart } from '@/ai/utils/isCodeInterpreterToolPart';
 import { isHiddenCompleteWorkspaceSetupToolPart } from '@/ai/utils/isHiddenCompleteWorkspaceSetupToolPart';
@@ -40,6 +42,12 @@ const MessagePartRenderer = ({
       return <RoutingStatusDisplay data={part.data} />;
     case 'data-compaction':
       return <AiChatCompactionIndicator />;
+    case 'data-turn-error':
+      return (
+        <AiChatErrorMessage
+          error={createAiChatCodedError(part.data.message, part.data.code)}
+        />
+      );
     case 'data-code-execution':
       return (
         <CodeExecutionDisplay

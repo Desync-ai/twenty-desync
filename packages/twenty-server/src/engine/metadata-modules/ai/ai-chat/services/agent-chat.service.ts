@@ -12,6 +12,7 @@ import { In, IsNull, Not } from 'typeorm';
 import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 import type { UIDataTypes, UIMessagePart, UITools } from 'ai';
+import { v5 as uuidv5 } from 'uuid';
 
 import { CodeInterpreterService } from 'src/engine/core-modules/code-interpreter/code-interpreter.service';
 import { FileEntity } from 'src/engine/core-modules/file/entities/file.entity';
@@ -24,7 +25,9 @@ import {
 import { AgentTurnEntity } from 'src/engine/metadata-modules/ai/ai-agent-execution/entities/agent-turn.entity';
 import { finalizeDanglingToolParts } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/finalize-dangling-tool-parts.util';
 import { mapUIMessagePartsToDBParts } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/mapUIMessagePartsToDBParts';
+import { AGENT_CHAT_TURN_ERROR_MESSAGE_ID_NAMESPACE } from 'src/engine/metadata-modules/ai/ai-chat/constants/agent-chat-turn-error-message-id-namespace.constant';
 import { AgentChatThreadEntity } from 'src/engine/metadata-modules/ai/ai-chat/entities/agent-chat-thread.entity';
+import { type AgentChatTurnError } from 'src/engine/metadata-modules/ai/ai-chat/types/agent-chat-turn-error.type';
 import {
   AiException,
   AiExceptionCode,
@@ -333,6 +336,28 @@ export class AgentChatService {
         dbParts as QueryDeepPartialEntity<AgentMessagePartEntity>[],
       );
     }
+  }
+
+  // Stored as the turn's assistant reply so the failure stays in the thread
+  // history; retrying the turn deletes it like any other reply.
+  async upsertTurnErrorMessage({
+    threadId,
+    turnId,
+    workspaceId,
+    turnError,
+  }: {
+    threadId: string;
+    turnId: string;
+    workspaceId: string;
+    turnError: AgentChatTurnError;
+  }): Promise<void> {
+    await this.upsertAssistantMessage({
+      id: uuidv5(turnId, AGENT_CHAT_TURN_ERROR_MESSAGE_ID_NAMESPACE),
+      threadId,
+      turnId,
+      parts: [{ type: 'data-turn-error', data: turnError }],
+      workspaceId,
+    });
   }
 
   async findLatestSentUserMessage({

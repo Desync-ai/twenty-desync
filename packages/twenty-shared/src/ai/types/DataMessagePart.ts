@@ -83,4 +83,7 @@ export type DataMessagePart = {
   'code-execution': CodeExecutionData;
   'thread-title': { title: string };
   compaction: Record<string, never>;
+  // Persisted as the assistant reply of a turn that failed, so the failure stays
+  // visible in the thread history; never sent to the model.
+  'turn-error': { code: string; message: string };
 };

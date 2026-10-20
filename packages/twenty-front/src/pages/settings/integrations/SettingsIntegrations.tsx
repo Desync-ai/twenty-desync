@@ -14,6 +14,13 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
+import { MCP_SETUP } from '@/settings/mcp-and-apis/constants/McpSetup';
+import {
+  buildClaudeInstallLink,
+  buildCursorInstallLink,
+  buildMcpServerUrl,
+  isHttpsUrl,
+} from '@/settings/mcp-and-apis/utils/mcpSetup';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { ModalStatefulWrapper } from '@/ui/layout/modal/components/ModalStatefulWrapper';
 import { useModal } from '@/ui/layout/modal/hooks/useModal';
@@ -610,6 +617,28 @@ export const ConnectIntegrationCard = ({
   );
 };
 
+// The AI-app providers (ChatGPT/Claude/Cursor) have a one-click "open in the
+// app" link, identical to the Open/Install button on Settings -> MCP & APIs.
+// Non-technical users were bouncing to that page and getting lost, so the card
+// opens the provider directly instead. Grok has no install link, so it falls
+// back to the MCP & APIs page for manual setup.
+const getMcpProviderOpenUrl = (plugin: string): string | undefined => {
+  const mcpServerUrl = buildMcpServerUrl(REACT_APP_SERVER_BASE_URL);
+
+  switch (plugin) {
+    case 'chatgpt':
+      return MCP_SETUP.chatGptTwentyAppUrl;
+    case 'claude':
+      return isHttpsUrl(mcpServerUrl)
+        ? buildClaudeInstallLink(mcpServerUrl)
+        : undefined;
+    case 'cursor':
+      return buildCursorInstallLink(mcpServerUrl);
+    default:
+      return undefined;
+  }
+};
+
 const McpIntegrationCard = ({
   integration,
 }: {
@@ -618,6 +647,7 @@ const McpIntegrationCard = ({
   const { t } = useLingui();
   const navigate = useNavigate();
   const { name } = integration;
+  const openUrl = getMcpProviderOpenUrl(integration.plugin);
 
   return (
     <StyledCard rounded>
@@ -643,12 +673,25 @@ const McpIntegrationCard = ({
             {t`This runs inside ${name}, not in Desync, so there is no connection status to show here. Add the connection details in ${name} and you are all set.`}
           </StyledStatus>
           <StyledCardActions>
-            <Button
-              variant="outline"
-              onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
-            >
-              {t`Get connection details`}
-            </Button>
+            {openUrl ? (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  window.open(openUrl, '_blank', 'noopener,noreferrer')
+                }
+              >
+                {t`Open in ${name}`}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(getSettingsPath(SettingsPath.ApiWebhooks))
+                }
+              >
+                {t`Get connection details`}
+              </Button>
+            )}
           </StyledCardActions>
         </StyledCardInner>
       </StyledCardContent>
