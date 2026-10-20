@@ -62,6 +62,14 @@ export const mapDBPartToUIMessagePart = (
           state: part.state!,
         },
       };
+    case 'data-turn-error':
+      return {
+        type: part.type,
+        data: {
+          code: part.state ?? '',
+          message: part.textContent ?? '',
+        },
+      };
     default:
       {
         const isStaticToolPart = part.type.startsWith('tool-');

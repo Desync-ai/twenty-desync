@@ -31,6 +31,7 @@ import { DashboardToolsModule } from 'src/modules/dashboard/tools/dashboard-tool
 import { WorkflowToolsModule } from 'src/modules/workflow/workflow-tools/workflow-tools.module';
 
 import { AgentChatThreadEntity } from './entities/agent-chat-thread.entity';
+import { AgentChatStaleTurnSweepCronJob } from './crons/jobs/agent-chat-stale-turn-sweep.cron.job';
 import { StreamAgentChatJob } from './jobs/stream-agent-chat.job';
 import { AgentChatResolver } from './resolvers/agent-chat.resolver';
 import { AgentChatSubscriptionResolver } from './resolvers/agent-chat-subscription.resolver';
@@ -40,6 +41,7 @@ import { AgentChatCancelSubscriberService } from './services/agent-chat-cancel-s
 import { AgentChatEventPublisherService } from './services/agent-chat-event-publisher.service';
 import { AgentChatStreamHeartbeatService } from './services/agent-chat-stream-heartbeat.service';
 import { AgentChatStreamingService } from './services/agent-chat-streaming.service';
+import { AgentChatTurnFailureService } from './services/agent-chat-turn-failure.service';
 import { AgentChatService } from './services/agent-chat.service';
 import { AgentTitleGenerationService } from './services/agent-title-generation.service';
 import { ChatExecutionService } from './services/chat-execution.service';
@@ -83,6 +85,8 @@ import { SystemPromptBuilderService } from './services/system-prompt-builder.ser
     WorkspaceSetupChatResolver,
     AgentChatService,
     AgentChatStreamingService,
+    AgentChatTurnFailureService,
+    AgentChatStaleTurnSweepCronJob,
     WorkspaceSetupChatService,
     AgentTitleGenerationService,
     ChatExecutionService,
