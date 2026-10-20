@@ -5,6 +5,8 @@ import { isGoogleMessagingEnabledState } from '@/client-config/states/isGoogleMe
 import { isMicrosoftCalendarEnabledState } from '@/client-config/states/isMicrosoftCalendarEnabledState';
 import { isMicrosoftMessagingEnabledState } from '@/client-config/states/isMicrosoftMessagingEnabledState';
 import { onboardingConfigState } from '@/client-config/states/onboardingConfigState';
+import { captureFunnelEvent } from '@/desync-analytics/utils/captureFunnelEvent';
+import { markEmailSyncConnectionStarted } from '@/desync-analytics/utils/markEmailSyncConnectionStarted';
 import { SyncEmailsAutoSkipEffect } from '@/onboarding/effect-components/SyncEmailsAutoSkipEffect';
 import { useSkipSyncEmailOnboardingStep } from '@/onboarding/hooks/useSkipSyncEmailOnboardingStep';
 import { onboardingFreeCreditsState } from '@/onboarding/states/onboardingFreeCreditsState';
@@ -61,6 +63,10 @@ export const SyncEmails = () => {
       importContacts: creditsReward ?? 0,
     }));
 
+    markEmailSyncConnectionStarted(
+      provider === ConnectedAccountProvider.MICROSOFT ? 'microsoft' : 'google',
+    );
+
     try {
       await triggerApisOAuth(provider, {
         redirectLocation: AppPath.Index,
@@ -79,6 +85,7 @@ export const SyncEmails = () => {
   };
 
   const handleSkip = async () => {
+    captureFunnelEvent('email_sync_skipped');
     await skipSyncEmailOnboardingStep({ isAutoSkipped: false });
 
     setOnboardingFreeCredits((current) => ({

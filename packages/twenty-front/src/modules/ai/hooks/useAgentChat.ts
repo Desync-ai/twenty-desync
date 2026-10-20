@@ -14,6 +14,7 @@ import {
 import { v4 } from 'uuid';
 
 import { AGENT_CHAT_INSTANCE_ID } from '@/ai/constants/AgentChatInstanceId';
+import { captureFunnelEvent } from '@/desync-analytics/utils/captureFunnelEvent';
 import { AGENT_CHAT_REFETCH_MESSAGES_EVENT_NAME } from '@/ai/constants/AgentChatRefetchMessagesEventName';
 import { AGENT_CHAT_RESTORE_EDITOR_CONTENT_EVENT_NAME } from '@/ai/constants/AgentChatRestoreEditorContentEventName';
 import { AGENT_CHAT_SEND_MESSAGE_EVENT_NAME } from '@/ai/constants/AgentChatSendMessageEventName';
@@ -197,6 +198,11 @@ export const useAgentChat = (
           fileAttachments:
             fileAttachments.length > 0 ? fileAttachments : undefined,
         },
+      });
+
+      captureFunnelEvent('ai_chat_prompt_sent', {
+        is_new_thread: draftKey === AGENT_CHAT_NEW_THREAD_DRAFT_KEY,
+        has_files: fileAttachments.length > 0,
       });
 
       // The stream this send started can exhaust the balance and publish
