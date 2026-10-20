@@ -5,7 +5,7 @@ import { isPendingServerSignOutState } from '@/auth/states/isPendingServerSignOu
 import { subscribeRequiredUrlState } from '@/auth/states/subscribeRequiredUrlState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
-import { useAuth as useClerkAuth } from '@clerk/clerk-react';
+import { useAuth as useClerkAuth, useClerk } from '@clerk/clerk-react';
 import { useEffect, useRef, useState } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
@@ -93,6 +93,23 @@ export const SignInUpClerkExchangeEffect = () => {
   const isExchangingRef = useRef(false);
   // Bumped by the cooldown timer to re-run the effect once the pause elapses.
   const [cooldownTick, setCooldownTick] = useState(0);
+
+  // Clerk's <SignIn> is pinned to the current URL (SignInUpWithClerk), so when a
+  // factor completes (e.g. password at #/factor-one) Clerk "redirects" to the
+  // same URL — a no-op that doesn't reliably re-render this effect, leaving the
+  // user stuck on the Clerk step until a manual refresh. Subscribe to Clerk
+  // directly and nudge the re-run lever when a session appears, so the exchange
+  // fires without a refresh.
+  const clerk = useClerk();
+  useEffect(() => {
+    const unsubscribe = clerk.addListener((resources) => {
+      if (isDefined(resources.session)) {
+        setCooldownTick((tick) => tick + 1);
+      }
+    });
+
+    return unsubscribe;
+  }, [clerk]);
 
   // A live Twenty session means the bridge succeeded (or was never needed):
   // reset the attempt ledger so the next genuine expiry starts from a clean
