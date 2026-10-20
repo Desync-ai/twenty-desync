@@ -870,8 +870,29 @@ export const SettingsIntegrations = () => {
     return [ALL_TAG, ...[...set].sort()];
   }, []);
 
-  const isVisible = (integration: IntegrationDef) =>
-    activeTag === ALL_TAG || integration.tags.includes(activeTag);
+  // Built once so a tag click only toggles `hidden` and never re-renders cards.
+  const cards = useMemo(
+    () =>
+      INTEGRATIONS.map((integration) =>
+        integration.kind === 'mcp' ? (
+          <McpIntegrationCard
+            key={integration.plugin}
+            integration={integration}
+          />
+        ) : integration.kind === 'key' ? (
+          <KeyIntegrationCard
+            key={integration.plugin}
+            integration={integration}
+          />
+        ) : (
+          <ConnectIntegrationCard
+            key={integration.plugin}
+            integration={integration}
+          />
+        ),
+      ),
+    [],
+  );
 
   const openFeedback = (kind: 'request' | 'problem') => {
     setFeedbackKind(kind);
@@ -926,18 +947,14 @@ export const SettingsIntegrations = () => {
             ))}
           </StyledFilters>
           <StyledGrid>
-            {INTEGRATIONS.map((integration) => (
+            {INTEGRATIONS.map((integration, index) => (
               <StyledGridItem
                 key={integration.plugin}
-                hidden={!isVisible(integration)}
+                hidden={
+                  activeTag !== ALL_TAG && !integration.tags.includes(activeTag)
+                }
               >
-                {integration.kind === 'mcp' ? (
-                  <McpIntegrationCard integration={integration} />
-                ) : integration.kind === 'key' ? (
-                  <KeyIntegrationCard integration={integration} />
-                ) : (
-                  <ConnectIntegrationCard integration={integration} />
-                )}
+                {cards[index]}
               </StyledGridItem>
             ))}
           </StyledGrid>
