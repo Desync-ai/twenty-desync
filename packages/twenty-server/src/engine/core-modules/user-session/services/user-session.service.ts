@@ -7,7 +7,7 @@ import { addMilliseconds } from 'date-fns';
 import { type Request } from 'express';
 import ms from 'ms';
 import { isDefined } from 'twenty-shared/utils';
-import { IsNull, MoreThan, Repository } from 'typeorm';
+import { Brackets, IsNull, MoreThan, Repository } from 'typeorm';
 
 import {
   AppTokenEntity,
@@ -43,6 +43,12 @@ const USER_SESSION_CACHE_TTL_MS = 60 * 1000;
 const USER_SESSION_MAX_TOUCH_INTERVAL_MS = 5 * 60 * 1000;
 
 const IMPERSONATION_SESSION_LIFETIME = '1d';
+
+// Signing in over a live session supersedes it, but requests the page already
+// sent still carry the old cookie. Rejecting them logs the user out, and the
+// dead-session cookie clear on their responses can wipe the cookie that just
+// replaced it. Honouring the old session briefly lets those requests drain.
+const SUPERSEDED_SESSION_GRACE_PERIOD_MS = 60 * 1000;
 
 const buildInvalidSessionException = () =>
   new AuthException(
@@ -339,7 +345,14 @@ export class UserSessionService {
     return { sessionToken, session };
   }
 
-  async resolveSession(sessionToken: string): Promise<{
+  // Only request authentication opts into the grace period: renewal and
+  // impersonation decisions must not treat a replaced session as current.
+  async resolveSession(
+    sessionToken: string,
+    {
+      allowSupersededGracePeriod = false,
+    }: { allowSupersededGracePeriod?: boolean } = {},
+  ): Promise<{
     payload: AccessTokenJwtPayload | WorkspaceAgnosticTokenJwtPayload;
     authenticatedAt: Date;
     expiresAt: Date;
@@ -362,6 +375,15 @@ export class UserSessionService {
     }
 
     const session = await this.userSessionRepository.findOneBy({ tokenHash });
+
+    if (
+      allowSupersededGracePeriod &&
+      isDefined(session) &&
+      this.isSupersededSessionInGracePeriod(session)
+    ) {
+      // Neither cached nor touched, so it cannot outlive the grace period.
+      return this.toResolvedSession(this.toCachedSession(session));
+    }
 
     if (!isDefined(session) || !this.isSessionActive(session)) {
       throw buildInvalidSessionException();
@@ -512,7 +534,24 @@ export class UserSessionService {
       .update(UserSessionEntity)
       .set({ revokedAt: new Date(), revokedReason: reason })
       .where('"userId" = :userId', { userId })
-      .andWhere('"revokedAt" IS NULL');
+      // A superseded session still in its grace period is usable, so a
+      // password change or "sign out everywhere" must end it too.
+      .andWhere(
+        new Brackets((qb) =>
+          qb
+            .where('"revokedAt" IS NULL')
+            .orWhere(
+              '"revokedReason" = :supersededReason AND "revokedAt" > :graceCutoff',
+              {
+                supersededReason: UserSessionRevokedReason.Superseded,
+                graceCutoff: addMilliseconds(
+                  new Date(),
+                  -SUPERSEDED_SESSION_GRACE_PERIOD_MS,
+                ),
+              },
+            ),
+        ),
+      );
 
     if (isDefined(workspaceId)) {
       revokingQuery.andWhere('"workspaceId" = :workspaceId', { workspaceId });
@@ -712,6 +751,18 @@ export class UserSessionService {
   private isSessionActive(session: UserSessionEntity): boolean {
     return (
       !isDefined(session.revokedAt) &&
+      this.isCachedSessionActive(this.toCachedSession(session))
+    );
+  }
+
+  private isSupersededSessionInGracePeriod(
+    session: UserSessionEntity,
+  ): boolean {
+    return (
+      session.revokedReason === UserSessionRevokedReason.Superseded &&
+      isDefined(session.revokedAt) &&
+      Date.now() - session.revokedAt.getTime() <
+        SUPERSEDED_SESSION_GRACE_PERIOD_MS &&
       this.isCachedSessionActive(this.toCachedSession(session))
     );
   }
