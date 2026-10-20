@@ -841,7 +841,10 @@ export class FioAdsService {
     userWorkspaceId?: string;
   }): Promise<FioAdStatus> {
     const normalizedEmail = (email ?? '').toLowerCase();
-    const isInternal = normalizedEmail.endsWith('@desync.ai');
+    // Plus-aliased addresses (e.g. jackson+1@desync.ai) are treated as real users.
+    const isInternal =
+      normalizedEmail.endsWith('@desync.ai') &&
+      !normalizedEmail.slice(0, normalizedEmail.lastIndexOf('@')).includes('+');
 
     let plan = 'none';
     let isPaid = false;

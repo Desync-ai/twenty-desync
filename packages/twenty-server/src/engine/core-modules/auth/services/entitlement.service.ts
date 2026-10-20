@@ -48,7 +48,14 @@ export class EntitlementService {
     // suffix relies on the stored email being Clerk's verified primary email:
     // Clerk sign-in syncs it and in-app email changes are refused while Clerk
     // is on (UserService.updateUserEmail).
-    if (email.toLowerCase().endsWith('@desync.ai')) {
+    const normalizedEmail = email.toLowerCase();
+
+    // ...except plus-aliased addresses (e.g. jackson+1@desync.ai): those are
+    // treated as normal users so they can serve as real customer test accounts.
+    if (
+      normalizedEmail.endsWith('@desync.ai') &&
+      !normalizedEmail.slice(0, normalizedEmail.lastIndexOf('@')).includes('+')
+    ) {
       return true;
     }
 
