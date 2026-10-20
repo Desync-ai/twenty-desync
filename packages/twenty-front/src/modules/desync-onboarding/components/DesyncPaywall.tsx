@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useMemo } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { useLogout } from '@/auth/hooks/useLogout';
 import {
   DesyncCheckoutForm,
   type DesyncPlan,
@@ -32,8 +33,24 @@ const StyledStatus = styled.div`
   font-size: ${themeCssVariables.font.size.sm};
 `;
 
+const StyledLogoutButton = styled.button`
+  align-self: center;
+  background: none;
+  border: none;
+  color: ${themeCssVariables.font.color.tertiary};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.sm};
+  margin-top: ${themeCssVariables.spacing[6]};
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 export const DesyncPaywall = () => {
   const { data, loading } = useQuery(DESYNC_BILLING_PLANS_QUERY);
+  const { logout } = useLogout();
 
   const publishableKey: string | undefined =
     data?.desyncBillingPlans?.publishableKey;
@@ -83,6 +100,10 @@ export const DesyncPaywall = () => {
           </StyledStatus>
         )}
       </StyledBlock>
+
+      <StyledLogoutButton onClick={() => void logout()}>
+        Log out
+      </StyledLogoutButton>
     </StyledOnboardingStepPage>
   );
 };
