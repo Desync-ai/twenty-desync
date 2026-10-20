@@ -8,7 +8,7 @@ import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierSlider } from '@/ai/components/AiModelTierSlider';
-import { clampToSelectableAiModelTier } from '@/ai/constants/selectableAiModelTiers';
+import { clampToSelectableAiModelTier } from '@/ai/utils/clampToSelectableAiModelTier';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 import { useWorkspaceAiModelTiers } from '@/ai/hooks/useWorkspaceAiModelTiers';
 import { getAiModelTierForAgentModelId } from '@/ai/utils/getAiModelTierForAgentModelId';

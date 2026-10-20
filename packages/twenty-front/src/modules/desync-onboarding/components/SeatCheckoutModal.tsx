@@ -5,6 +5,7 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
+import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme-constants';
 
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
@@ -29,8 +30,16 @@ import { useCreateWorkspaceInvitation } from '@/workspace-invitation/hooks/useCr
 // UPGRADES of the teammate's current plan (same rule as the owner's own plan:
 // higher tier, or annual-of-current-tier when monthly; annual stays annual).
 
-export type SeatRole = { id: string; label: string; canUpdateAllSettings: boolean };
-export type SeatPaymentInfo = { hasCard: boolean; brand: string | null; last4: string | null };
+export type SeatRole = {
+  id: string;
+  label: string;
+  canUpdateAllSettings: boolean;
+};
+export type SeatPaymentInfo = {
+  hasCard: boolean;
+  brand: string | null;
+  last4: string | null;
+};
 export type SeatTarget = {
   email: string;
   isMember: boolean;
@@ -106,7 +115,9 @@ const StyledToggleButton = styled.button<{ active: boolean }>`
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ active }) =>
-    active ? themeCssVariables.font.color.inverted : themeCssVariables.font.color.secondary};
+    active
+      ? themeCssVariables.font.color.inverted
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   font-size: ${themeCssVariables.font.size.sm};
   padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
@@ -191,7 +202,9 @@ export const SeatCheckoutModal = ({
     gated
       ? plans.filter((p) => {
           const r = PLAN_RANK[p.name] ?? 0;
-          return useAnnual ? r > curRank || (r === curRank && !curAnnual) : r > curRank;
+          return useAnnual
+            ? r > curRank || (r === curRank && !curAnnual)
+            : r > curRank;
         })
       : plans;
   const monthlyOpts = optsFor(false);
@@ -213,7 +226,8 @@ export const SeatCheckoutModal = ({
   const availablePlans = effectiveAnnual ? annualOpts : monthlyOpts;
   const selectedPlan =
     availablePlans.find((p) => p.key === planKey) ?? availablePlans[0];
-  const showToggle = !onlyAnnual && monthlyOpts.length > 0 && annualOpts.length > 0;
+  const showToggle =
+    !onlyAnnual && monthlyOpts.length > 0 && annualOpts.length > 0;
 
   const workspaceId = currentWorkspace?.id ?? '';
   const isMember = target.isMember;
@@ -221,7 +235,7 @@ export const SeatCheckoutModal = ({
 
   const handleBuy = async () => {
     const beneficiary = email.trim().toLowerCase();
-    if (!beneficiary || !selectedPlan || submitting) {
+    if (!beneficiary || !isDefined(selectedPlan) || submitting) {
       return;
     }
     if (!workspaceId) {
@@ -272,7 +286,8 @@ export const SeatCheckoutModal = ({
         setStatusText('Confirming your card…');
         const { data: created } = await createSeatSetupIntent();
         const clientSecret = created?.createDesyncSeatSetupIntent?.clientSecret;
-        setupIntentId = created?.createDesyncSeatSetupIntent?.setupIntentId ?? null;
+        setupIntentId =
+          created?.createDesyncSeatSetupIntent?.setupIntentId ?? null;
         const card = elements.getElement(CardElement);
         if (!clientSecret || !setupIntentId || !card) {
           throw new Error('Could not start card setup. Please try again.');
@@ -298,7 +313,9 @@ export const SeatCheckoutModal = ({
       const res = data?.buyDesyncSeat;
       if (res?.status !== 'active') {
         enqueueToast({
-          children: res?.message || t`The payment didn't complete. Try a different card.`,
+          children:
+            res?.message ||
+            t`The payment didn't complete. Try a different card.`,
           variant: 'error',
         });
         setSubmitting(false);
@@ -309,7 +326,10 @@ export const SeatCheckoutModal = ({
       if (!isMember) {
         setStatusText('Sending invite…');
         try {
-          await sendInvitation({ emails: [beneficiary], roleId: roleId || undefined });
+          await sendInvitation({
+            emails: [beneficiary],
+            roleId: roleId || undefined,
+          });
         } catch {
           // Seat is bought regardless; the admin can re-invite from Members.
         }
@@ -329,7 +349,8 @@ export const SeatCheckoutModal = ({
       setSubmitting(false);
       setStatusText('');
       enqueueToast({
-        children: error instanceof Error ? error.message : t`Could not buy the seat.`,
+        children:
+          error instanceof Error ? error.message : t`Could not buy the seat.`,
         variant: 'error',
       });
     }
@@ -375,10 +396,16 @@ export const SeatCheckoutModal = ({
               <StyledFieldLabel>{t`Plan`}</StyledFieldLabel>
               {showToggle && (
                 <StyledToggleRow>
-                  <StyledToggleButton active={!annual} onClick={() => setAnnual(false)}>
+                  <StyledToggleButton
+                    active={!annual}
+                    onClick={() => setAnnual(false)}
+                  >
                     {t`Monthly`}
                   </StyledToggleButton>
-                  <StyledToggleButton active={annual} onClick={() => setAnnual(true)}>
+                  <StyledToggleButton
+                    active={annual}
+                    onClick={() => setAnnual(true)}
+                  >
                     {t`Annual (save 10%)`}
                   </StyledToggleButton>
                 </StyledToggleRow>
@@ -399,7 +426,10 @@ export const SeatCheckoutModal = ({
             {!isMember && roles.length > 0 && (
               <StyledField>
                 <StyledFieldLabel>{t`Workspace role`}</StyledFieldLabel>
-                <StyledSelect value={roleId} onChange={(e) => setRoleId(e.target.value)}>
+                <StyledSelect
+                  value={roleId}
+                  onChange={(e) => setRoleId(e.target.value)}
+                >
                   {roles.map((r) => (
                     <option key={r.id} value={r.id}>
                       {r.label}
@@ -410,40 +440,45 @@ export const SeatCheckoutModal = ({
             )}
 
             {!isUpgrade && (
-            <StyledField>
-              <StyledFieldLabel>{t`Card`}</StyledFieldLabel>
-              {pm.hasCard && !useNewCard ? (
-                <StyledCardOnFile>
-                  <span>
-                    {pm.brand ? `${pm.brand} ` : ''}
-                    •••• {pm.last4 || '••••'}
-                  </span>
-                  <StyledLinkButton onClick={() => setUseNewCard(true)}>
-                    {t`Use a different card`}
-                  </StyledLinkButton>
-                </StyledCardOnFile>
-              ) : (
-                <>
-                  <StyledCardBox>
-                    <CardElement
-                      options={{ hidePostalCode: true, style: getStripeCardStyle(theme.name === 'dark') }}
-                    />
-                  </StyledCardBox>
-                  {pm.hasCard && (
-                    <StyledLinkButton onClick={() => setUseNewCard(false)}>
-                      {t`Use card on file`}
+              <StyledField>
+                <StyledFieldLabel>{t`Card`}</StyledFieldLabel>
+                {pm.hasCard && !useNewCard ? (
+                  <StyledCardOnFile>
+                    <span>
+                      {pm.brand ? `${pm.brand} ` : ''}
+                      •••• {pm.last4 || '••••'}
+                    </span>
+                    <StyledLinkButton onClick={() => setUseNewCard(true)}>
+                      {t`Use a different card`}
                     </StyledLinkButton>
-                  )}
-                </>
-              )}
-            </StyledField>
+                  </StyledCardOnFile>
+                ) : (
+                  <>
+                    <StyledCardBox>
+                      <CardElement
+                        options={{
+                          hidePostalCode: true,
+                          style: getStripeCardStyle(theme.name === 'dark'),
+                        }}
+                      />
+                    </StyledCardBox>
+                    {pm.hasCard && (
+                      <StyledLinkButton onClick={() => setUseNewCard(false)}>
+                        {t`Use card on file`}
+                      </StyledLinkButton>
+                    )}
+                  </>
+                )}
+              </StyledField>
             )}
 
             {statusText !== '' && <StyledStatus>{statusText}</StyledStatus>}
 
             <MainButton
               onClick={handleBuy}
-              disabled={submitting || !selectedPlan || email.trim() === ''}
+              disabled={
+                submitting || !isDefined(selectedPlan) || email.trim() === ''
+              }
               fullWidth
             >
               {submitting
@@ -457,9 +492,9 @@ export const SeatCheckoutModal = ({
 
             <StyledStatus>
               <Trans>
-                Each seat is its own subscription on your card, cancel anytime. If
-                they’re not on Desync yet, we’ll invite them and the seat activates
-                when they join.
+                Each seat is its own subscription on your card, cancel anytime.
+                If they’re not on Desync yet, we’ll invite them and the seat
+                activates when they join.
               </Trans>
             </StyledStatus>
           </>

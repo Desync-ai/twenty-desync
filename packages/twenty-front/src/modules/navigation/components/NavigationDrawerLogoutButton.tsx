@@ -8,6 +8,10 @@ export const NavigationDrawerLogoutButton = () => {
   const { logout } = useLogout();
 
   return (
-    <NavigationDrawerItem label={t`Log out`} Icon={IconLogout} onClick={logout} />
+    <NavigationDrawerItem
+      label={t`Log out`}
+      Icon={IconLogout}
+      onClick={logout}
+    />
   );
 };

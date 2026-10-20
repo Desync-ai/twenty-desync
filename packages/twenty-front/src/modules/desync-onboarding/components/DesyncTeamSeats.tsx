@@ -98,10 +98,14 @@ const StyledActionButton = styled.button<{ danger?: boolean }>`
   background: transparent;
   border: 1px solid
     ${({ danger }) =>
-      danger ? themeCssVariables.border.color.danger : themeCssVariables.border.color.medium};
+      danger
+        ? themeCssVariables.border.color.danger
+        : themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ danger }) =>
-    danger ? themeCssVariables.font.color.danger : themeCssVariables.font.color.secondary};
+    danger
+      ? themeCssVariables.font.color.danger
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   flex-shrink: 0;
   font-size: ${themeCssVariables.font.size.sm};
@@ -115,8 +119,8 @@ const StyledActionButton = styled.button<{ danger?: boolean }>`
 
 const StyledSeatTag = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.sm};
   flex-shrink: 0;
+  font-size: ${themeCssVariables.font.size.sm};
 `;
 
 const StyledActions = styled.div`
@@ -127,7 +131,13 @@ const StyledActions = styled.div`
 
 // plan_level values that mean the member is on a PAID plan (so if it isn't a seat
 // this admin pays, it's self-managed and hands-off).
-const PAID_PLANS = new Set(['Starter', 'Crusader', 'Pro', 'Admin', 'Enterprise']);
+const PAID_PLANS = new Set([
+  'Starter',
+  'Crusader',
+  'Pro',
+  'Admin',
+  'Enterprise',
+]);
 
 const isNonEmpty = (v: string | null | undefined): v is string =>
   typeof v === 'string' && v.trim() !== '';
@@ -137,20 +147,21 @@ export const DesyncTeamSeats = () => {
   const { enqueueToast } = useToast();
   const { openModal } = useModal();
   const currentUser = useAtomStateValue(currentUserState);
-  const members = useAtomStateValue(currentWorkspaceMembersState);
+  const currentWorkspaceMembers = useAtomStateValue(
+    currentWorkspaceMembersState,
+  );
 
   const myEmail = (currentUser?.email ?? '').toLowerCase();
-  const otherMembers = (members ?? []).filter(
+  const otherMembers = (currentWorkspaceMembers ?? []).filter(
     (m) => (m.userEmail ?? '').toLowerCase() !== myEmail,
   );
   const memberEmails = otherMembers
     .map((m) => m.userEmail ?? '')
     .filter((e) => e !== '');
 
-  const { data: seatsData, refetch: refetchSeats } = useQuery<{ myDesyncSeats: Seat[] }>(
-    MY_DESYNC_SEATS_QUERY,
-    { fetchPolicy: 'cache-and-network' },
-  );
+  const { data: seatsData, refetch: refetchSeats } = useQuery<{
+    myDesyncSeats: Seat[];
+  }>(MY_DESYNC_SEATS_QUERY, { fetchPolicy: 'cache-and-network' });
   const { data: plansData } = useQuery(DESYNC_BILLING_PLANS_QUERY);
   const { data: pmData } = useQuery(DESYNC_SEAT_PAYMENT_METHOD_QUERY, {
     fetchPolicy: 'cache-and-network',
@@ -204,7 +215,11 @@ export const DesyncTeamSeats = () => {
     { planLevel: string | null; cadence: string | null }
   >(
     (memberPlansData?.desyncMemberPlans ?? []).map(
-      (p: { email: string; planLevel: string | null; cadence: string | null }) => [
+      (p: {
+        email: string;
+        planLevel: string | null;
+        cadence: string | null;
+      }) => [
         p.email.toLowerCase(),
         { planLevel: p.planLevel, cadence: p.cadence },
       ],
@@ -315,7 +330,13 @@ export const DesyncTeamSeats = () => {
     return (
       <StyledActionButton
         onClick={() =>
-          openSeatModal(memberEmail, true, false, level, planInfo?.cadence ?? null)
+          openSeatModal(
+            memberEmail,
+            true,
+            false,
+            level,
+            planInfo?.cadence ?? null,
+          )
         }
       >
         {t`Buy seat`}
@@ -373,7 +394,10 @@ export const DesyncTeamSeats = () => {
                 <StyledActionButton
                   danger
                   onClick={() =>
-                    requestCancelSeat(s.subscriptionId, s.beneficiaryEmail ?? '')
+                    requestCancelSeat(
+                      s.subscriptionId,
+                      s.beneficiaryEmail ?? '',
+                    )
                   }
                   disabled={cancelling}
                 >
@@ -415,8 +439,7 @@ export const DesyncTeamSeats = () => {
         subtitle={
           <>
             {t`This cancels the paid seat at the end of its current billing period — they keep access until then.`}
-            {cancelTarget?.label ? ` (${cancelTarget.label})` : ''}
-            {' '}
+            {cancelTarget?.label ? ` (${cancelTarget.label})` : ''}{' '}
             {t`Type "cancel" to confirm.`}
           </>
         }

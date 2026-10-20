@@ -13,20 +13,22 @@ import { isDefined } from 'twenty-shared/utils';
 // immediately re-exchange and log them straight back in. So we sign out of Clerk
 // first — flipping Clerk's isSignedIn to false — then sign out of Twenty.
 //
-// The Clerk handle is read from an atom populated by ClerkSignOutRegistrar,
+// The Clerk handle is read from an atom populated by ClerkSignOutRegistrarEffect,
 // which is mounted only inside ClerkProvider. This hook therefore never calls a
 // Clerk hook, so it stays safe when Clerk is disabled and no ClerkProvider is
 // mounted (the handle is simply null and skipped).
 export const useLogout = () => {
   const { signOut: signOutFromTwenty } = useAuth();
   const { signOut: clerkSignOut } = useAtomStateValue(clerkSignOutState);
-  const setPendingServerSignOut = useSetAtomState(isPendingServerSignOutState);
+  const setIsPendingServerSignOut = useSetAtomState(
+    isPendingServerSignOutState,
+  );
 
   const logout = useCallback(async () => {
     // Mark sign-out pending up front so SignInUpClerkExchangeEffect stands down
     // through the whole logout (incl. the async Clerk sign-out) and can't
     // re-exchange us straight back in. Cleared on the next active session.
-    setPendingServerSignOut(true);
+    setIsPendingServerSignOut(true);
 
     // Clear the PostHog identity so post-logout events aren't tied to this user.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,7 +44,7 @@ export const useLogout = () => {
     }
 
     await signOutFromTwenty();
-  }, [clerkSignOut, signOutFromTwenty, setPendingServerSignOut]);
+  }, [clerkSignOut, signOutFromTwenty, setIsPendingServerSignOut]);
 
   return { logout };
 };

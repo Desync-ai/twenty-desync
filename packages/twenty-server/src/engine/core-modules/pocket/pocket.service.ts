@@ -59,7 +59,8 @@ export class PocketService {
       type: KeyValuePairType.USER_VARIABLE,
       key: POCKET_API_KEY_KV,
     });
-    const value = rows.length > 0 ? (rows[0]?.value as { apiKey?: string }) : null;
+    const value =
+      rows.length > 0 ? (rows[0]?.value as { apiKey?: string }) : null;
     const stored = value?.apiKey?.trim();
     if (!stored) {
       return null;
@@ -213,7 +214,9 @@ export class PocketService {
 
       return !payload?.error;
     } catch (error) {
-      this.logger.warn(`Pocket key validation failed: ${(error as Error).message}`);
+      this.logger.warn(
+        `Pocket key validation failed: ${(error as Error).message}`,
+      );
 
       return false;
     }
@@ -240,9 +243,12 @@ export class PocketService {
     this.sessions.set(userId, { id: sessionId, at: Date.now() });
     if (!body?.error && sessionId) {
       // Best-effort initialized notification; ignore the response.
-      await this.mcpFetch(apiKey, 'notifications/initialized', {}, sessionId).catch(
-        () => undefined,
-      );
+      await this.mcpFetch(
+        apiKey,
+        'notifications/initialized',
+        {},
+        sessionId,
+      ).catch(() => undefined);
     }
 
     return sessionId;
@@ -255,7 +261,12 @@ export class PocketService {
     params: Record<string, unknown>,
   ): Promise<McpBody> {
     const sessionId = await this.ensureSession(userId, apiKey);
-    const { res, body } = await this.mcpFetch(apiKey, method, params, sessionId);
+    const { res, body } = await this.mcpFetch(
+      apiKey,
+      method,
+      params,
+      sessionId,
+    );
     // Session expired/invalid: re-initialize once and retry.
     if ((res.status === 400 || res.status === 404) && method !== 'initialize') {
       this.sessions.delete(userId);

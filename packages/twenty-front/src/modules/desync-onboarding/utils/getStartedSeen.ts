@@ -11,9 +11,7 @@
 const storageKey = (workspaceId: string): string =>
   `desync:get-started-seen:${workspaceId}`;
 
-export const hasSeenGetStarted = (
-  workspaceId: string | undefined,
-): boolean => {
+export const hasSeenGetStarted = (workspaceId: string | undefined): boolean => {
   if (!workspaceId) {
     return true; // no workspace yet → nothing to land on, don't force
   }

@@ -5,10 +5,8 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiModelTierBars } from '@/ai/components/AiModelTierBars';
 import { AiModelTierSlider } from '@/ai/components/AiModelTierSlider';
-import {
-  SELECTABLE_AI_MODEL_TIERS,
-  clampToSelectableAiModelTier,
-} from '@/ai/constants/selectableAiModelTiers';
+import { SELECTABLE_AI_MODEL_TIERS } from '@/ai/constants/selectableAiModelTiers';
+import { clampToSelectableAiModelTier } from '@/ai/utils/clampToSelectableAiModelTier';
 import { useAiModelTiers } from '@/ai/hooks/useAiModelTiers';
 import { useIsWorkspaceSetupChat } from '@/ai/hooks/useIsWorkspaceSetupChat';
 import { useWorkspaceAiModelTiers } from '@/ai/hooks/useWorkspaceAiModelTiers';

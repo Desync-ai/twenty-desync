@@ -2,7 +2,7 @@ import { createAtomState } from '@/ui/utilities/state/jotai/utils/createAtomStat
 
 export type ClerkSignOut = () => Promise<void>;
 
-// Holds Clerk's signOut handle, published by ClerkSignOutRegistrar only while a
+// Holds Clerk's signOut handle, published by ClerkSignOutRegistrarEffect only while a
 // ClerkProvider is mounted (i.e. Clerk enabled). The value is wrapped in an
 // object so Jotai never mistakes the function for a state updater. It stays
 // `{ signOut: null }` whenever Clerk is disabled, which lets useLogout reach the

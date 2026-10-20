@@ -4,6 +4,7 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
+import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme-constants';
 
 import { DesyncPlanCard } from '@/desync-onboarding/components/DesyncPlanCard';
@@ -33,18 +34,25 @@ export type DesyncPlan = {
 // subscribe checkout and the change-card form.
 export const getStripeCardStyle = (isDark: boolean) => ({
   base: {
+    // oxlint-disable-next-line twenty/no-hardcoded-colors
     color: isDark ? '#EBEBEB' : '#283238',
     fontFamily: 'inherit',
     fontSize: '16px',
+    // oxlint-disable-next-line twenty/no-hardcoded-colors
     '::placeholder': { color: isDark ? '#808080' : '#8B948E' },
+    // oxlint-disable-next-line twenty/no-hardcoded-colors
     iconColor: isDark ? '#EBEBEB' : '#283238',
   },
+  // oxlint-disable-next-line twenty/no-hardcoded-colors
   invalid: { color: '#D4544C', iconColor: '#D4544C' },
 });
 
 // Annual shows the full yearly total AND the monthly-equivalent (10% off);
 // monthly shows the plain monthly price. (Kept for callers that want a one-liner.)
-export const formatPlanPrice = (monthlyPriceUsd: number, annual: boolean): string =>
+export const formatPlanPrice = (
+  monthlyPriceUsd: number,
+  annual: boolean,
+): string =>
   annual
     ? `$${Math.round(monthlyPriceUsd * 12 * 0.9).toLocaleString()}/yr ($${Math.round(
         monthlyPriceUsd * 0.9,
@@ -78,7 +86,9 @@ const StyledToggleButton = styled.button<{ active: boolean }>`
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ active }) =>
-    active ? themeCssVariables.font.color.inverted : themeCssVariables.font.color.secondary};
+    active
+      ? themeCssVariables.font.color.inverted
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
 `;
@@ -127,7 +137,7 @@ export const DesyncCheckoutForm = ({
   const selectedPlan = plans.find((p) => p.key === selectedKey) ?? plans[0];
 
   const handlePay = async () => {
-    if (!stripe || !elements || !selectedPlan || submitting) {
+    if (!stripe || !elements || !isDefined(selectedPlan) || submitting) {
       return;
     }
 
@@ -226,17 +236,21 @@ export const DesyncCheckoutForm = ({
       </StyledPlans>
 
       <StyledCardBox>
-        <CardElement options={{ hidePostalCode: true, style: cardElementStyle }} />
+        <CardElement
+          options={{ hidePostalCode: true, style: cardElementStyle }}
+        />
       </StyledCardBox>
 
       {status !== '' && <StyledStatus>{status}</StyledStatus>}
 
       <MainButton
         onClick={handlePay}
-        disabled={!stripe || submitting || !selectedPlan}
+        disabled={!stripe || submitting || !isDefined(selectedPlan)}
         fullWidth
       >
-        {submitting ? 'Processing…' : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}
+        {submitting
+          ? 'Processing…'
+          : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}
       </MainButton>
     </StyledForm>
   );

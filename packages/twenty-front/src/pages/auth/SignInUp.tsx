@@ -223,31 +223,32 @@ export const SignInUp = () => {
       {clerkConfig.isEnabled && <SignInUpRedirectToDefaultDomainEffect />}
       {signInUpStep === SignInUpStep.WorkspaceCreation ||
       signInUpStep === SignInUpStep.DesyncQuestionnaire ? (
-    <OnboardingLayout
-      onBack={
-        signInUpStep === SignInUpStep.WorkspaceCreation && !isCreatingWorkspace
-          ? onBackFromWorkspaceCreation
-          : undefined
-      }
-    >
-      <StyledOnboardingStepPage>{signInUpForm}</StyledOnboardingStepPage>
-    </OnboardingLayout>
-  ) : (
-    <StyledBackground>
-      {signInUpStep === SignInUpStep.EmailVerification ? (
-        <ModalContent isVerticallyCentered isHorizontallyCentered>
-          <EmailVerificationSent email={searchParams.get('email')} />
-        </ModalContent>
+        <OnboardingLayout
+          onBack={
+            signInUpStep === SignInUpStep.WorkspaceCreation &&
+            !isCreatingWorkspace
+              ? onBackFromWorkspaceCreation
+              : undefined
+          }
+        >
+          <StyledOnboardingStepPage>{signInUpForm}</StyledOnboardingStepPage>
+        </OnboardingLayout>
       ) : (
-        <SignInUpStandardContent
-          workspacePublicData={workspacePublicData}
-          signInUpForm={signInUpForm}
-          signInUpStep={signInUpStep}
-          title={title}
-          onClickOnLogo={onClickOnLogo}
-        />
-      )}
-    </StyledBackground>
+        <StyledBackground>
+          {signInUpStep === SignInUpStep.EmailVerification ? (
+            <ModalContent isVerticallyCentered isHorizontallyCentered>
+              <EmailVerificationSent email={searchParams.get('email')} />
+            </ModalContent>
+          ) : (
+            <SignInUpStandardContent
+              workspacePublicData={workspacePublicData}
+              signInUpForm={signInUpForm}
+              signInUpStep={signInUpStep}
+              title={title}
+              onClickOnLogo={onClickOnLogo}
+            />
+          )}
+        </StyledBackground>
       )}
     </>
   );

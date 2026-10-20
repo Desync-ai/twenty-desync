@@ -21,7 +21,8 @@ export const PostHogIdentifyEffect = () => {
     ) {
       return;
     }
-    const name = `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim();
+    const name =
+      `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim();
     ph.identify(currentUser.id, {
       ...(currentUser.email ? { email: currentUser.email } : {}),
       ...(name ? { name } : {}),

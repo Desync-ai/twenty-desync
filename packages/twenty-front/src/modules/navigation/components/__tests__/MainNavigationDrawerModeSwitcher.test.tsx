@@ -3,6 +3,7 @@ import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { IconComment, IconHome, IconSettings } from 'twenty-ui/icon';
 
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
@@ -38,11 +39,13 @@ const renderModeSwitcher = (isLayoutCustomizationModeEnabled = false) => {
   );
 
   render(
-    <I18nProvider i18n={i18n}>
-      <JotaiProvider store={store}>
-        <MainNavigationDrawerModeSwitcher />
-      </JotaiProvider>
-    </I18nProvider>,
+    <MemoryRouter>
+      <I18nProvider i18n={i18n}>
+        <JotaiProvider store={store}>
+          <MainNavigationDrawerModeSwitcher />
+        </JotaiProvider>
+      </I18nProvider>
+    </MemoryRouter>,
   );
 
   return { store };
@@ -116,12 +119,9 @@ describe('MainNavigationDrawerModeSwitcher', () => {
       const { store } = renderModeSwitcher(true);
       const settingsButton = screen.getByRole('button', { name: label });
 
-      expect(settingsButton).toHaveAttribute('aria-disabled', 'true');
+      // Desync renders the modes as NavigationDrawerItem rows: the guard lives in
+      // onClick (no aria-disabled attribute), so assert the behaviour only.
       expect(screen.getByRole('button', { name: 'Home' })).toBeEnabled();
-      expect(screen.getByRole('button', { name: 'Home' })).toHaveAttribute(
-        'aria-disabled',
-        'false',
-      );
 
       await userEvent.click(settingsButton);
       expect(settingsButton).toHaveFocus();
@@ -133,7 +133,6 @@ describe('MainNavigationDrawerModeSwitcher', () => {
         store.set(isLayoutCustomizationModeEnabledState.atom, false);
       });
 
-      expect(settingsButton).toHaveAttribute('aria-disabled', 'false');
       await userEvent.click(settingsButton);
 
       expect(mockSwitchNavigationDrawerMode).toHaveBeenCalledTimes(1);

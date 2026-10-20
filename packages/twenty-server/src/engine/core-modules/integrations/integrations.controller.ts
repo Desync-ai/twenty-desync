@@ -18,6 +18,7 @@ import { AuthWorkspaceMemberId } from 'src/engine/decorators/auth/auth-workspace
 import { IntegrationsService } from 'src/engine/core-modules/integrations/integrations.service';
 import { RestApiExceptionFilter } from 'src/engine/api/rest/rest-api-exception.filter';
 import { JwtAuthGuard } from 'src/engine/guards/jwt-auth.guard';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { PermissionsRestApiExceptionFilter } from 'src/engine/metadata-modules/permissions/utils/permissions-rest-api-exception.filter';
@@ -56,6 +57,7 @@ export class IntegrationsController {
   // (Claude/Cursor/ChatGPT/Grok). Single-segment path so it can't collide with
   // the :plugin/status route; declared first to be safe about route ordering.
   @Get('mcp-connections')
+  @UseGuards(NoPermissionGuard)
   async getMcpConnections(@Req() request: AuthenticatedRequest) {
     const workspaceId = (request as { workspace?: { id?: string } }).workspace
       ?.id;
@@ -68,6 +70,7 @@ export class IntegrationsController {
   }
 
   @Get(':plugin/status')
+  @UseGuards(NoPermissionGuard)
   async getStatus(
     @Param('plugin') plugin: string,
     @AuthWorkspaceMemberId() workspaceMemberId: string,
@@ -82,6 +85,7 @@ export class IntegrationsController {
   }
 
   @Post(':plugin/connect')
+  @UseGuards(NoPermissionGuard)
   async connect(
     @Param('plugin') plugin: string,
     @AuthWorkspaceMemberId() workspaceMemberId: string,
@@ -148,19 +152,29 @@ export class IntegrationsController {
     // corsair fetches the provider's records + writes them back via /rest using a
     // short-lived workspace API token minted here (session cookies can't write).
     // Runs as a background job; the UI polls getSyncStatus for progress.
-    return this.integrationsService.sync(tenant, workspaceId, plugin, this.userEmail(request));
+    return this.integrationsService.sync(
+      tenant,
+      workspaceId,
+      plugin,
+      this.userEmail(request),
+    );
   }
 
   @Get(':plugin/sync/status')
+  @UseGuards(NoPermissionGuard)
   async getSyncStatus(
     @Param('plugin') plugin: string,
     @AuthWorkspaceMemberId() workspaceMemberId: string,
   ) {
-    return this.integrationsService.syncStatus(this.requireTenant(workspaceMemberId), plugin);
+    return this.integrationsService.syncStatus(
+      this.requireTenant(workspaceMemberId),
+      plugin,
+    );
   }
 
   // Integration request / bug / feedback from the UI → emails the team.
   @Post('feedback')
+  @UseGuards(NoPermissionGuard)
   async feedback(
     @Body() body: { kind?: string; message?: string; severity?: number },
     @Req() request: AuthenticatedRequest,

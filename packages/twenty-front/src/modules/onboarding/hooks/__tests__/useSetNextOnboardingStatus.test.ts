@@ -152,13 +152,14 @@ describe('useSetNextOnboardingStatus', () => {
     expect(shouldOpenAiChatAfterOnboarding).toBe(false);
   });
 
-  it('should install apps after syncing emails', () => {
+  // Desync skips the apps-installation step.
+  it('should create profile right after syncing emails', () => {
     const {
       nextOnboardingStatus,
       isWelcomeAnimationVisible,
       shouldOpenAiChatAfterOnboarding,
     } = renderHooks(OnboardingStatus.SYNC_EMAIL);
-    expect(nextOnboardingStatus).toEqual(OnboardingStatus.APPS_INSTALLATION);
+    expect(nextOnboardingStatus).toEqual(OnboardingStatus.PROFILE_CREATION);
     expect(isWelcomeAnimationVisible).toBe(false);
     expect(shouldOpenAiChatAfterOnboarding).toBe(false);
   });
@@ -187,14 +188,15 @@ describe('useSetNextOnboardingStatus', () => {
     expect(shouldOpenAiChatAfterOnboarding).toBe(false);
   });
 
-  it('should invite the team right after profile creation', () => {
+  // Desync skips the invite-team step.
+  it('should complete right after profile creation', () => {
     const {
       nextOnboardingStatus,
       isWelcomeAnimationVisible,
       shouldOpenAiChatAfterOnboarding,
     } = renderHooks(OnboardingStatus.PROFILE_CREATION);
-    expect(nextOnboardingStatus).toEqual(OnboardingStatus.INVITE_TEAM);
-    expect(isWelcomeAnimationVisible).toBe(false);
+    expect(nextOnboardingStatus).toEqual(OnboardingStatus.COMPLETED);
+    expect(isWelcomeAnimationVisible).toBe(true);
     expect(shouldOpenAiChatAfterOnboarding).toBe(false);
   });
 

@@ -107,6 +107,8 @@ const StyledStepTop = styled.div`
   gap: ${themeCssVariables.spacing[3]};
 `;
 
+// White numeral on the blue badge in both themes; no theme-invariant white token.
+// oxlint-disable-next-line twenty/no-hardcoded-colors
 const StyledStepNumber = styled.div`
   align-items: center;
   background: ${themeCssVariables.color.blue};
@@ -242,6 +244,8 @@ export const GetStartedPage = () => {
               <Button
                 variant="outline"
                 startIcon={<IconPlug size={16} />}
+                // Button has no client-side `to`; href would full-reload the app.
+                // oxlint-disable-next-line twenty/no-navigate-prefer-link
                 onClick={() =>
                   navigate(getSettingsPath(SettingsPath.Integrations))
                 }

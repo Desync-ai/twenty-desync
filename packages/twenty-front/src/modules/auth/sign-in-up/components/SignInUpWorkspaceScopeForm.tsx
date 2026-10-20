@@ -51,9 +51,7 @@ export const SignInUpWorkspaceScopeForm = () => {
 
         {!clerkConfig.isEnabled && (
           <>
-            {providers.google && (
-              <SignInUpWithGoogle action="join-workspace" />
-            )}
+            {providers.google && <SignInUpWithGoogle action="join-workspace" />}
 
             {providers.microsoft && (
               <SignInUpWithMicrosoft action="join-workspace" />

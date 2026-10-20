@@ -93,11 +93,7 @@ export const SignInUpWithClerk = () => {
           <MainButton
             fullWidth
             onClick={() =>
-              window.open(
-                subscribeRequiredUrl,
-                '_blank',
-                'noopener,noreferrer',
-              )
+              window.open(subscribeRequiredUrl, '_blank', 'noopener,noreferrer')
             }
           >
             {t`Subscribe`}

@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 // useClerk() is always safe. It publishes Clerk's signOut into a Jotai atom so
 // useLogout can reach it without ever calling a Clerk hook itself — those hooks
 // throw when Clerk is disabled and no ClerkProvider is mounted.
-export const ClerkSignOutRegistrar = () => {
+export const ClerkSignOutRegistrarEffect = () => {
   const { signOut } = useClerk();
   const setClerkSignOut = useSetAtomState(clerkSignOutState);
 

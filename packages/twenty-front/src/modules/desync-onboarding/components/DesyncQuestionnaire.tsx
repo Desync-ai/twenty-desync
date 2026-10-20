@@ -174,7 +174,12 @@ const StyledBackButton = styled.button`
   padding: 0;
 `;
 
-type Customer = { id: number; website: string; contact: string; dealSize: string };
+type Customer = {
+  id: number;
+  website: string;
+  contact: string;
+  dealSize: string;
+};
 
 type WebsiteAnalysis = {
   ok: boolean;
@@ -186,7 +191,7 @@ type WebsiteAnalysis = {
   tags: string[];
 };
 
-type Props = {
+type DesyncQuestionnaireProps = {
   onCompleted: () => void;
 };
 
@@ -201,7 +206,9 @@ const emptyCustomer = (): Customer => ({
 // Crude "looks like a domain" test — enough to avoid firing on every keystroke.
 const looksLikeDomain = (value: string) => /\.[a-z]{2,}/i.test(value.trim());
 
-export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
+export const DesyncQuestionnaire = ({
+  onCompleted,
+}: DesyncQuestionnaireProps) => {
   const { enqueueToast } = useToast();
 
   const [step, setStep] = useState(1);
@@ -217,6 +224,8 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([emptyCustomer()]);
 
+  // Dedupe guard for runAnalyze (last URL analyzed), never rendered.
+  // oxlint-disable-next-line twenty/no-state-useref
   const analyzedForRef = useRef('');
 
   const [saveDesyncOnboarding, { loading }] = useMutation(
@@ -230,7 +239,11 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
     (rawUrl: string) => {
       const url = rawUrl.trim();
 
-      if (url === '' || url === analyzedForRef.current || !looksLikeDomain(url)) {
+      if (
+        url === '' ||
+        url === analyzedForRef.current ||
+        !looksLikeDomain(url)
+      ) {
         return;
       }
 
@@ -246,13 +259,15 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
             return;
           }
 
-          setCompany((v) => (v.trim() === '' ? r.company ?? '' : v));
-          setProduct((v) => (v.trim() === '' ? r.product ?? '' : v));
-          setWho((v) => (v.trim() === '' ? r.who ?? '' : v));
-          setBusinessType((v) => (v.trim() === '' ? r.businessType ?? '' : v));
+          setCompany((v) => (v.trim() === '' ? (r.company ?? '') : v));
+          setProduct((v) => (v.trim() === '' ? (r.product ?? '') : v));
+          setWho((v) => (v.trim() === '' ? (r.who ?? '') : v));
+          setBusinessType((v) =>
+            v.trim() === '' ? (r.businessType ?? '') : v,
+          );
           // Intentionally NOT prefilling outreach — the user fills in how they do
           // outreach today themselves.
-          setTags((prev) => (prev.length === 0 ? r.tags ?? [] : prev));
+          setTags((prev) => (prev.length === 0 ? (r.tags ?? []) : prev));
         })
         .catch(() => {
           // fail-silent — leave fields blank for manual entry
@@ -414,14 +429,18 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
                   <TextInput
                     label=""
                     value={c.website}
-                    onChange={(value) => updateCustomer(c.id, { website: value })}
+                    onChange={(value) =>
+                      updateCustomer(c.id, { website: value })
+                    }
                     placeholder="Customer website (required)"
                     fullWidth
                   />
                   <TextInput
                     label=""
                     value={c.contact}
-                    onChange={(value) => updateCustomer(c.id, { contact: value })}
+                    onChange={(value) =>
+                      updateCustomer(c.id, { contact: value })
+                    }
                     placeholder="Contact name (optional)"
                     fullWidth
                   />
@@ -458,7 +477,9 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
         {step === 3 && (
           <>
             {analyzing && (
-              <StyledHint>Still reading your site — filling this in…</StyledHint>
+              <StyledHint>
+                Still reading your site — filling this in…
+              </StyledHint>
             )}
             <StyledGroup>
               <StyledSectionLabel>Tags</StyledSectionLabel>
@@ -533,7 +554,9 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
         {step < TOTAL_STEPS ? (
           <MainButton
             onClick={goNext}
-            disabled={(step === 1 && !step1Valid) || (step === 2 && !step2Valid)}
+            disabled={
+              (step === 1 && !step1Valid) || (step === 2 && !step2Valid)
+            }
             fullWidth
           >
             Next
