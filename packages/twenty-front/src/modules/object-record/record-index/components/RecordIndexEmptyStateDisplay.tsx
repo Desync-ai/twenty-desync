@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { type ReactNode } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import {
   AnimatedPlaceholder,
@@ -24,6 +25,7 @@ type RecordIndexEmptyStateDisplayProps = {
   buttonTitle?: string;
   onButtonClick?: () => void;
   width?: number;
+  footer?: ReactNode;
 };
 
 export const RecordIndexEmptyStateDisplay = ({
@@ -34,6 +36,7 @@ export const RecordIndexEmptyStateDisplay = ({
   buttonTitle,
   onButtonClick,
   width,
+  footer,
 }: RecordIndexEmptyStateDisplayProps) => (
   <StyledEmptyStateContainer>
     <AnimatedPlaceholderEmptyContainer width={width}>
@@ -53,6 +56,7 @@ export const RecordIndexEmptyStateDisplay = ({
           {buttonTitle}
         </Button>
       )}
+      {footer}
     </AnimatedPlaceholderEmptyContainer>
   </StyledEmptyStateContainer>
 );
