@@ -77,6 +77,12 @@ export const mapUIMessagePartsToDBParts = (
         case 'data-thread-title':
           // Thread title is a transient notification for the client
           return null;
+        case 'data-turn-error':
+          return {
+            ...basePart,
+            textContent: part.data.message,
+            state: part.data.code,
+          };
         default: {
           if (isToolUIPart(part)) {
             return {

@@ -11,6 +11,7 @@ export const fromUserEntityToFlat = (entity: UserEntity): FlatUser => ({
   canImpersonate: entity.canImpersonate,
   canAccessFullAdminPanel: entity.canAccessFullAdminPanel,
   locale: entity.locale,
+  clerkId: entity.clerkId,
   createdAt: entity.createdAt.toISOString(),
   updatedAt: entity.updatedAt.toISOString(),
   deletedAt: entity.deletedAt?.toISOString(),

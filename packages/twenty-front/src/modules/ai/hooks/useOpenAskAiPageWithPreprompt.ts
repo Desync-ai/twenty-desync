@@ -10,10 +10,11 @@ import { agentChatUserSelectedModelTierState } from '@/ai/states/agentChatUserSe
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 
 // Kept coarse because it is part of the front component SDK surface.
-export type AgentChatModelPreselection = 'FAST' | 'SMART';
+export type AgentChatModelPreselection = 'FAST' | 'BALANCED' | 'SMART';
 
 const TIER_BY_PRESELECTION: Record<AgentChatModelPreselection, AiModelTier> = {
   FAST: 'fast',
+  BALANCED: 'balanced',
   SMART: 'smart',
 };
 

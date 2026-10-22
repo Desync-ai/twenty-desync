@@ -66,7 +66,9 @@ export class DesyncOnboardingService {
         return true;
       }
 
-      const data = (await response.json()) as { onboarding_completed?: boolean };
+      const data = (await response.json()) as {
+        onboarding_completed?: boolean;
+      };
 
       return data.onboarding_completed === true;
     } catch (error) {
@@ -90,7 +92,9 @@ export class DesyncOnboardingService {
   ): Promise<boolean> {
     if (!this.baseUrl) {
       // No backend wired: nothing to persist, but don't pretend it saved.
-      this.logger.warn('saveDesyncOnboarding called but TWENTY_BACKEND_URL unset');
+      this.logger.warn(
+        'saveDesyncOnboarding called but TWENTY_BACKEND_URL unset',
+      );
 
       return false;
     }
@@ -234,7 +238,9 @@ export class DesyncOnboardingService {
 
   private assertBackend(): void {
     if (!this.baseUrl) {
-      throw new Error('Billing backend is not configured (TWENTY_BACKEND_URL unset)');
+      throw new Error(
+        'Billing backend is not configured (TWENTY_BACKEND_URL unset)',
+      );
     }
   }
 
@@ -296,7 +302,10 @@ export class DesyncOnboardingService {
       throw new Error('create-subscription returned no client secret');
     }
 
-    return { clientSecret: data.clientSecret, setupIntentId: data.setupIntentId };
+    return {
+      clientSecret: data.clientSecret,
+      setupIntentId: data.setupIntentId,
+    };
   }
 
   /** Create the Stripe subscription after the card is confirmed. */
@@ -372,7 +381,9 @@ export class DesyncOnboardingService {
       const response = await this.post('/my-subscription', { email });
 
       if (!response.ok) {
-        this.logger.warn(`my-subscription returned ${response.status} for ${email}`);
+        this.logger.warn(
+          `my-subscription returned ${response.status} for ${email}`,
+        );
 
         return fallback;
       }
@@ -424,18 +435,24 @@ export class DesyncOnboardingService {
       if (!response.ok) {
         return {
           success: false,
-          message: d.error ?? d.message ?? 'Something went wrong. Please try again.',
+          message:
+            d.error ?? d.message ?? 'Something went wrong. Please try again.',
         };
       }
 
       return {
         success: d.success === true,
-        message: d.message ?? (d.success === true ? 'Done.' : 'Unable to complete that action.'),
+        message:
+          d.message ??
+          (d.success === true ? 'Done.' : 'Unable to complete that action.'),
       };
     } catch (error) {
       this.logger.error(`${path} failed: ${(error as Error)?.message}`);
 
-      return { success: false, message: 'Could not reach billing. Please try again.' };
+      return {
+        success: false,
+        message: 'Could not reach billing. Please try again.',
+      };
     }
   }
 
@@ -472,7 +489,10 @@ export class DesyncOnboardingService {
       throw new Error('create-setup-intent returned no client secret');
     }
 
-    return { clientSecret: data.clientSecret, setupIntentId: data.setupIntentId };
+    return {
+      clientSecret: data.clientSecret,
+      setupIntentId: data.setupIntentId,
+    };
   }
 
   /** After the new card is confirmed, make it the default payment method. */
@@ -523,7 +543,10 @@ export class DesyncOnboardingService {
     if (!data.clientSecret || !data.setupIntentId) {
       throw new Error('seats/setup-intent returned no client secret');
     }
-    return { clientSecret: data.clientSecret, setupIntentId: data.setupIntentId };
+    return {
+      clientSecret: data.clientSecret,
+      setupIntentId: data.setupIntentId,
+    };
   }
 
   /** Buy a per-seat subscription for a teammate (charged to the owner's card). */
@@ -534,7 +557,11 @@ export class DesyncOnboardingService {
     workspaceId: string,
     role: string | null,
     setupIntentId: string | null,
-  ): Promise<{ status: string; subscriptionId: string | null; message: string }> {
+  ): Promise<{
+    status: string;
+    subscriptionId: string | null;
+    message: string;
+  }> {
     this.assertBackend();
     const response = await this.post('/seats/activate', {
       email,
@@ -582,7 +609,9 @@ export class DesyncOnboardingService {
       if (!response.ok) {
         return [];
       }
-      const d = (await response.json()) as { seats?: Array<Record<string, unknown>> };
+      const d = (await response.json()) as {
+        seats?: Array<Record<string, unknown>>;
+      };
       return (d.seats ?? []).map((s) => ({
         subscriptionId: (s.subscriptionId as string) ?? '',
         beneficiaryEmail: (s.beneficiaryEmail as string) ?? null,
@@ -598,7 +627,10 @@ export class DesyncOnboardingService {
   }
 
   cancelSeat(email: string, subscriptionId: string) {
-    return this.action('/cancel-seat', { email, subscription_id: subscriptionId });
+    return this.action('/cancel-seat', {
+      email,
+      subscription_id: subscriptionId,
+    });
   }
 
   /** Upgrade a seat the admin pays for to a higher plan (e.g. Pro monthly -> annual). */
@@ -613,7 +645,9 @@ export class DesyncOnboardingService {
   /** Current plan level + cadence per email (member list + seat upgrade gating). */
   async memberPlans(
     emails: string[],
-  ): Promise<Array<{ email: string; planLevel: string | null; cadence: string | null }>> {
+  ): Promise<
+    Array<{ email: string; planLevel: string | null; cadence: string | null }>
+  > {
     if (!this.baseUrl || emails.length === 0) {
       return [];
     }
@@ -623,7 +657,11 @@ export class DesyncOnboardingService {
         return [];
       }
       const d = (await response.json()) as {
-        members?: Array<{ email: string; planLevel?: string; cadence?: string }>;
+        members?: Array<{
+          email: string;
+          planLevel?: string;
+          cadence?: string;
+        }>;
       };
       return (d.members ?? []).map((m) => ({
         email: m.email,

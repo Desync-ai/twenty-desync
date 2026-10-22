@@ -37,6 +37,14 @@ export const AppNavigationDrawer = ({
         </NavigationDrawerFixedContent>
       )}
 
+      {/* Desync: Playbooks (one-tap agent plays) pinned at the very top of the
+          main sidebar so a new user always has a prominent next step. */}
+      {!isSettingsDrawer && (
+        <NavigationDrawerFixedContent>
+          <DesyncGetStartedSection />
+        </NavigationDrawerFixedContent>
+      )}
+
       {isSettingsDrawer ? (
         <SettingsNavigationDrawerContent />
       ) : (
@@ -45,12 +53,6 @@ export const AppNavigationDrawer = ({
 
       {/* Desync: Launch-a-Fio-ad entry (paid users) + Help (book a call +
           report a bug) pinned on the main sidebar (not the settings drawer). */}
-      {!isSettingsDrawer && (
-        <NavigationDrawerFixedContent>
-          <DesyncGetStartedSection />
-        </NavigationDrawerFixedContent>
-      )}
-
       {!isSettingsDrawer && (
         <NavigationDrawerFixedContent>
           <DesyncFioAdsSection />

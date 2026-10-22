@@ -74,7 +74,7 @@ export const THEME_DARK: typeof THEME_LIGHT = {
   clickableElementBackgroundTransition: 'background 0.1s ease',
   lastLayerZIndex: 2147483647,
   buttons: {
-    secondaryTextColor: 'color(display-p3 0.63 0.69 1)',
+    secondaryTextColor: '#A9D6D0',
   },
   accent: {
     primary: 'color(display-p3 0.163 0.22 0.439)',

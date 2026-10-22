@@ -496,6 +496,29 @@ export class UserService {
   }
 
   async updateEmailFromVerificationToken(userId: string, email: string) {
+    this.assertEmailNotManagedByClerk();
+
+    return this.setUserEmail(userId, email);
+  }
+
+  // Desync: Clerk is the source of truth for the email of Clerk-linked users;
+  // called on Clerk sign-in with Clerk's verified primary email.
+  async syncEmailFromClerk(userId: string, email: string) {
+    return this.setUserEmail(userId, email);
+  }
+
+  // Desync: when Clerk handles sign-in, the email is owned and verified by
+  // Clerk. An in-app change would bypass that verification, so refuse it.
+  private assertEmailNotManagedByClerk() {
+    if (isNonEmptyString(this.twentyConfigService.get('CLERK_SECRET_KEY'))) {
+      throw new UserInputError('Email is managed by Clerk', {
+        subCode: UserExceptionCode.EMAIL_MANAGED_BY_IDENTITY_PROVIDER,
+        userFriendlyMessage: msg`Your email is managed by your sign-in account.`,
+      });
+    }
+  }
+
+  private async setUserEmail(userId: string, email: string) {
     const user = await this.findUserByIdOrThrow(userId);
 
     user.email = email;
@@ -523,6 +546,8 @@ export class UserService {
     newEmail: string;
     verifyEmailRedirectPath?: string;
   }): Promise<void> {
+    this.assertEmailNotManagedByClerk();
+
     const normalizedEmail = newEmail.trim().toLowerCase();
 
     if (normalizedEmail === user.email) {

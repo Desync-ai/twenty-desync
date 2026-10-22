@@ -28,6 +28,15 @@ type FioUpload = {
   dataBase64?: string;
 };
 
+// The user records the ad themselves; for the "church bell" / "trumpet" script
+// ideas they can pick an intro sound effect that we prepend to their recording
+// in production. Carried through to the submission so whoever cuts the final
+// audio knows which one (actual mixing is a later step once the sound files land).
+type FioAdIntroSound = {
+  kind: 'bell' | 'trumpet';
+  variant?: string;
+};
+
 type FioAdPayload = {
   brand?: {
     contactName?: string;
@@ -43,9 +52,18 @@ type FioAdPayload = {
   };
   categories?: string[];
   audioTranscript?: string;
+  introSound?: FioAdIntroSound;
   logo?: FioUpload;
   adImage?: FioUpload;
   audio?: FioUpload;
+};
+
+// One of the five generated script ideas, each with a distinct standout element.
+export type FioAdScript = {
+  flavor: 'bell' | 'trumpet' | 'latin' | 'prayer' | 'plain';
+  label: string;
+  highlight: string;
+  script: string;
 };
 
 export type FioAdStatus = {
@@ -485,6 +503,185 @@ export class FioAdsService {
     return { reply: reply || 'Sorry, I could not generate a response.' };
   }
 
+  // Generate five ready-to-read script ideas, each with a distinct standout
+  // element (church bell open, trumpet open, Latin phrase, prayer intention,
+  // plain). The user picks one and records it themselves; AI voiceover is gone.
+  // Grounded in the user's signup answers + a scrape of their site, same as the
+  // assistant. Caller gates on eligibility (spends AI).
+  async generateScripts({
+    brand,
+    email,
+    notes,
+  }: {
+    brand?: { name?: string; website?: string };
+    email?: string;
+    notes?: string;
+  }): Promise<{ scripts: FioAdScript[] }> {
+    if (!this.anthropicKey) {
+      throw new Error('Script ideas are not configured (ANTHROPIC_API_KEY).');
+    }
+
+    // Extra things the user typed in the "add to the scripts" box. Layered on
+    // top of the signup + website grounding; clamped and dash-stripped.
+    const extra = (notes ?? '')
+      .replace(/\s*[—–]\s*/g, ', ')
+      .trim()
+      .slice(0, 1000);
+
+    const brandLine =
+      brand?.name || brand?.website
+        ? `The user's brand is ${brand?.name ?? 'their organization'}${
+            brand?.website ? ` (${brand.website})` : ''
+          }.`
+        : 'The user has not named their brand; keep the scripts usable for a Catholic organization.';
+
+    const system =
+      `You write short audio advertisements for a Desync CRM user to run on ` +
+      `Fio, a Catholic podcast network. ${brandLine} ` +
+      `Each spoken ad must read in 20 to 30 seconds (roughly 50 to 75 words), ` +
+      `warm, clear, and broadcast-ready for a Catholic audience; avoid hype and ` +
+      `anything off-brand for that context. The user will record it in their own ` +
+      `voice, so write natural spoken words, not stage directions.\n\n` +
+      `Write FIVE distinct script options, each with a different standout element, ` +
+      `in this exact order:\n` +
+      `1. "bell": a strong, clean script. A short church bell will play right ` +
+      `before it, so make the opening line land well after a bell. Do NOT write ` +
+      `the bell as words.\n` +
+      `2. "trumpet": like the first, but a short trumpet fanfare plays right ` +
+      `before it. Do NOT write the trumpet as words.\n` +
+      `3. "latin": begin the spoken script with a short, fitting Latin phrase ` +
+      `(choose an apt motto or liturgical line) and then continue in English, ` +
+      `making its meaning clear from what follows. Keep it natural, not showy.\n` +
+      `4. "prayer": weave in a brief, sincere invitation to pray for an intention ` +
+      `(for example the Holy Father, vocations, families, persecuted Christians, ` +
+      `or the faithful departed). VARY the intention; do not always pick the same ` +
+      `one. Tie it to the audience when it fits naturally.\n` +
+      `5. "plain": a clean, strong script with no extra element.\n\n` +
+      `Rules for every script: spoken words only, no titles, no headings, no ` +
+      `markdown, no quotation marks, no stage directions, no word counts, no ` +
+      `labels. Never use em dashes or en dashes; use commas, periods, or ` +
+      `parentheses instead. Stay within the 20 to 30 second limit. Write in ` +
+      `short, punchy sentences; the app lays each sentence on its own line for ` +
+      `easy reading.\n\n` +
+      `Return ONLY a JSON array of exactly five objects, in the order above, each ` +
+      `with keys: "flavor" (one of bell, trumpet, latin, prayer, plain), "label" ` +
+      `(two to four words naming the idea), "highlight" (one short sentence on ` +
+      `what stands out), and "script" (the spoken words). Output the JSON array ` +
+      `and nothing else, with no text or markdown fences before or after it.`;
+
+    const context = await this.getScriptContext(email, brand?.website);
+    const systemWithContext = context
+      ? `${system}\n\nUse this real context about the user and their business to ` +
+        `make the scripts specific and accurate; do not contradict or invent ` +
+        `beyond it:\n${context}`
+      : system;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': this.anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: FioAdsService.ASSIST_MODEL,
+        max_tokens: 1500,
+        system: systemWithContext,
+        messages: [
+          {
+            role: 'user',
+            content:
+              'Write the five script ideas now as the JSON array described.' +
+              (extra
+                ? `\n\nThe user specifically wants the scripts to include or ` +
+                  `reflect the following. Honor it in every script where it ` +
+                  `fits naturally, without breaking the rules above:\n${extra}`
+                : ''),
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Script ideas error ${res.status}: ${text.slice(0, 200)}`);
+    }
+
+    const data = (await res.json()) as {
+      content?: Array<{ type?: string; text?: string }>;
+    };
+    const raw = (data.content ?? [])
+      .filter((block) => block?.type === 'text' && typeof block.text === 'string')
+      .map((block) => block.text)
+      .join('\n');
+
+    return { scripts: this.parseScripts(raw) };
+  }
+
+  private parseScripts(raw: string): FioAdScript[] {
+    const start = raw.indexOf('[');
+    const end = raw.lastIndexOf(']');
+    if (start === -1 || end <= start) {
+      throw new Error('Could not read the generated scripts. Please try again.');
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw.slice(start, end + 1));
+    } catch {
+      throw new Error('Could not read the generated scripts. Please try again.');
+    }
+
+    const allowedFlavors = new Set<FioAdScript['flavor']>([
+      'bell',
+      'trumpet',
+      'latin',
+      'prayer',
+      'plain',
+    ]);
+    const clean = (s: unknown): string =>
+      (typeof s === 'string' ? s : '').replace(/\s*[—–]\s*/g, ', ').trim();
+
+    const scripts = (Array.isArray(parsed) ? parsed : [])
+      .map((item) => {
+        const row = (item ?? {}) as Record<string, unknown>;
+        const flavor = clean(row.flavor) as FioAdScript['flavor'];
+
+        return {
+          flavor,
+          label: clean(row.label).slice(0, 60),
+          highlight: clean(row.highlight).slice(0, 200),
+          script: this.formatScript(clean(row.script).slice(0, 2000)),
+        };
+      })
+      .filter((s) => allowedFlavors.has(s.flavor) && s.script.length > 0);
+
+    if (scripts.length === 0) {
+      throw new Error('Could not read the generated scripts. Please try again.');
+    }
+
+    return scripts;
+  }
+
+  // Lay a one-paragraph script out as one sentence (beat) per line so it reads
+  // easily while recording, instead of a single wall of text. If the model
+  // already added line breaks, keep them as-is.
+  private formatScript(text: string): string {
+    const s = text.trim();
+    if (!s || s.includes('\n')) {
+      return s;
+    }
+    const parts = s.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g);
+    if (!parts || parts.length <= 1) {
+      return s;
+    }
+
+    return parts
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join('\n');
+  }
+
   // Optional auto-transcription of the ad audio via Groq-hosted Whisper. Returns
   // the transcript text; the client only uses it when the transcript is blank.
   async transcribe({
@@ -644,7 +841,10 @@ export class FioAdsService {
     userWorkspaceId?: string;
   }): Promise<FioAdStatus> {
     const normalizedEmail = (email ?? '').toLowerCase();
-    const isInternal = normalizedEmail.endsWith('@desync.ai');
+    // Plus-aliased addresses (e.g. jackson+1@desync.ai) are treated as real users.
+    const isInternal =
+      normalizedEmail.endsWith('@desync.ai') &&
+      !normalizedEmail.slice(0, normalizedEmail.lastIndexOf('@')).includes('+');
 
     let plan = 'none';
     let isPaid = false;
@@ -778,6 +978,7 @@ export class FioAdsService {
         copy: payload.copy,
         categories: payload.categories,
         audioTranscript: payload.audioTranscript,
+        introSound: this.sanitizeIntroSound(payload.introSound),
         assets: {
           logo: payload.logo?.filename,
           adImage: payload.adImage?.filename,
@@ -805,6 +1006,22 @@ export class FioAdsService {
     });
 
     return { ok: true };
+  }
+
+  // Only bell/trumpet carry an intro sound (the other ideas put their flourish
+  // in the spoken words). Keep it to a known kind + a short variant label.
+  private sanitizeIntroSound(
+    introSound?: FioAdIntroSound,
+  ): FioAdIntroSound | undefined {
+    if (introSound?.kind !== 'bell' && introSound?.kind !== 'trumpet') {
+      return undefined;
+    }
+    const variant =
+      typeof introSound.variant === 'string' && introSound.variant.trim()
+        ? introSound.variant.trim().slice(0, 60)
+        : undefined;
+
+    return { kind: introSound.kind, variant };
   }
 
   private validate(p: FioAdPayload): void {
@@ -892,6 +1109,12 @@ export class FioAdsService {
       (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const brand = p.brand ?? {};
     const copy = p.copy ?? {};
+    const intro = this.sanitizeIntroSound(p.introSound);
+    const introLabel = intro
+      ? `${intro.kind === 'bell' ? 'Church bell' : 'Trumpet'}${
+          intro.variant ? ` (${intro.variant})` : ''
+        }`
+      : 'None';
 
     const html =
       `<p>New Fio ad submission from <strong>${esc(brand.brandName ?? '')}</strong> ` +
@@ -903,9 +1126,11 @@ export class FioAdsService {
       `<strong>CTA URL:</strong> ${esc(copy.ctaUrl ?? '')}<br/>` +
       `<strong>Learn More URL:</strong> ${esc(copy.learnMoreUrl ?? '')}</p>` +
       `<p><strong>Categories:</strong> ${esc((p.categories ?? []).join(', '))}</p>` +
+      `<p><strong>Intro sound:</strong> ${esc(introLabel)}</p>` +
       `<p><strong>Transcript:</strong><br/>` +
       `<span style="white-space:pre-wrap">${esc(p.audioTranscript ?? '')}</span></p>` +
-      `<p>Logo, advertisement image, the MP3, and a machine-readable JSON file are attached.</p>`;
+      `<p>Logo, advertisement image, the audio file (with the intro sound mixed ` +
+      `in when one was chosen), and a machine-readable JSON file are attached.</p>`;
 
     const attachments = [
       {

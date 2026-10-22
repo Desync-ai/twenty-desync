@@ -18,7 +18,11 @@ export const getGoogleApisOauthScopes = (
     calendar: true,
   },
 ) => {
-  const scopes = ['email', 'profile', 'https://www.googleapis.com/auth/profile.emails.read'];
+  const scopes = [
+    'email',
+    'profile',
+    'https://www.googleapis.com/auth/profile.emails.read',
+  ];
 
   if (opts.gmail) {
     scopes.push(

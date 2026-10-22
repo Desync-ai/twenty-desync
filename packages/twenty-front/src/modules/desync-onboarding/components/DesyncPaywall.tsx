@@ -2,9 +2,10 @@ import { useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { useLogout } from '@/auth/hooks/useLogout';
 import {
   DesyncCheckoutForm,
   type DesyncPlan,
@@ -32,8 +33,24 @@ const StyledStatus = styled.div`
   font-size: ${themeCssVariables.font.size.sm};
 `;
 
+const StyledLogoutButton = styled.button`
+  align-self: center;
+  background: none;
+  border: none;
+  color: ${themeCssVariables.font.color.tertiary};
+  cursor: pointer;
+  font-size: ${themeCssVariables.font.size.sm};
+  margin-top: ${themeCssVariables.spacing[6]};
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 export const DesyncPaywall = () => {
   const { data, loading } = useQuery(DESYNC_BILLING_PLANS_QUERY);
+  const { logout } = useLogout();
 
   const publishableKey: string | undefined =
     data?.desyncBillingPlans?.publishableKey;
@@ -42,6 +59,19 @@ export const DesyncPaywall = () => {
     () => (publishableKey ? loadStripe(publishableKey) : null),
     [publishableKey],
   );
+
+  // Fires when the entitlement paywall is shown (the gate only mounts this when
+  // the user has no active plan), so we can confirm blocked users actually reach
+  // the payment screen. Best-effort; never block the paywall on analytics.
+  useEffect(() => {
+    try {
+      (window as any).posthog?.capture?.('paywall_shown', {
+        surface: 'desync_entitlement_gate',
+      });
+    } catch {
+      // ignore: analytics is best-effort
+    }
+  }, []);
 
   if (loading && data === undefined) {
     return <UserOrMetadataLoader />;
@@ -70,6 +100,10 @@ export const DesyncPaywall = () => {
           </StyledStatus>
         )}
       </StyledBlock>
+
+      <StyledLogoutButton onClick={() => void logout()}>
+        Log out
+      </StyledLogoutButton>
     </StyledOnboardingStepPage>
   );
 };

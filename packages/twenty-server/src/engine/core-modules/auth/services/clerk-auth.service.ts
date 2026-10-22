@@ -516,12 +516,28 @@ export class ClerkAuthService {
     );
 
     if (isDefined(userByClerkId)) {
-      return userByClerkId;
+      return await this.syncEmailFromClerkIdentity(userByClerkId, identity);
     }
 
     const userByEmail = await this.userService.findUserByEmail(identity.email);
 
     if (isDefined(userByEmail)) {
+      // Only link an account that no other Clerk identity owns yet; otherwise
+      // whoever later verifies that address in Clerk would take the account over.
+      if (
+        isNonEmptyString(userByEmail.clerkId) &&
+        userByEmail.clerkId !== identity.clerkUserId
+      ) {
+        this.logger.warn(
+          `Refusing Clerk sign-in: user ${userByEmail.id} is linked to another Clerk identity.`,
+        );
+
+        throw new AuthException(
+          'This email is linked to another account.',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
+
       // Link the Clerk identity to the pre-existing (e.g. password/SSO) account.
       return await this.userService.linkClerkIdToUser(
         userByEmail.id,
@@ -530,6 +546,35 @@ export class ClerkAuthService {
     }
 
     return null;
+  }
+
+  // Clerk owns the email of a linked user: overwrite the stored one with Clerk's
+  // verified primary email, so access checks keyed on the email see the address
+  // Clerk verified.
+  private async syncEmailFromClerkIdentity(
+    user: UserEntity,
+    identity: ClerkIdentity,
+  ): Promise<UserEntity> {
+    if (user.email.toLowerCase() === identity.email) {
+      return user;
+    }
+
+    const userHoldingEmail = await this.userService.findUserByEmail(
+      identity.email,
+    );
+
+    if (isDefined(userHoldingEmail) && userHoldingEmail.id !== user.id) {
+      this.logger.warn(
+        `Refusing Clerk sign-in: cannot sync email of user ${user.id}, address held by user ${userHoldingEmail.id}.`,
+      );
+
+      throw new AuthException(
+        'This email is linked to another account.',
+        AuthExceptionCode.FORBIDDEN_EXCEPTION,
+      );
+    }
+
+    return await this.userService.syncEmailFromClerk(user.id, identity.email);
   }
 
   private async buildNewUserPayload(

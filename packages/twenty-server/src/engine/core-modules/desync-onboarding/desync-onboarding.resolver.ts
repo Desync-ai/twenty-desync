@@ -190,9 +190,15 @@ export class DesyncOnboardingResolver {
 
     // Server-authoritative internal flag (matches EntitlementService's @desync.ai
     // bypass) so the UI can hide billing for internal accounts.
+    const normalizedEmail = user.email.toLowerCase();
+
     return {
       ...status,
-      isInternal: user.email.toLowerCase().endsWith('@desync.ai'),
+      // Internal = a Desync team address, EXCLUDING plus-aliases so they show
+      // the billing/paywall UI like real users (matches EntitlementService).
+      isInternal:
+        normalizedEmail.endsWith('@desync.ai') &&
+        !normalizedEmail.slice(0, normalizedEmail.lastIndexOf('@')).includes('+'),
     };
   }
 
@@ -235,7 +241,10 @@ export class DesyncOnboardingResolver {
     @AuthUser() user: AuthContextUser,
     @Args('setupIntentId') setupIntentId: string,
   ): Promise<DesyncActionResult> {
-    return this.desyncOnboardingService.setDefaultCard(user.email, setupIntentId);
+    return this.desyncOnboardingService.setDefaultCard(
+      user.email,
+      setupIntentId,
+    );
   }
 
   // --- Multi-seat (buying seats for teammates) -------------------------------

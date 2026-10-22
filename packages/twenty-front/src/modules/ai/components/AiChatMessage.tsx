@@ -168,13 +168,18 @@ export const AiChatMessage = ({
 
   const fileParts = agentChatMessage.parts.filter(isExtendedFileUIPart);
 
+  // The live thread error below already shows this turn's failure with Retry.
+  const messageParts = shouldShowError
+    ? agentChatMessage.parts.filter((part) => part.type !== 'data-turn-error')
+    : agentChatMessage.parts;
+
   return (
     <StyledMessageBubble isUser={isUser}>
       <StyledMessageContainer isUser={isUser}>
         <StyledMessageText isUser={isUser}>
           <AiChatAssistantMessageRenderer
             isLastMessageStreaming={isLastMessageStreaming}
-            messageParts={agentChatMessage.parts}
+            messageParts={messageParts}
             hasError={shouldShowError}
           />
         </StyledMessageText>

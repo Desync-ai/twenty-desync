@@ -1,13 +1,26 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useEffect, useState } from 'react';
+import { type ComponentType, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconArrowRight, IconPlug, IconSparkles } from 'twenty-ui/icon';
+import {
+  IconArrowRight,
+  IconDatabase,
+  IconMail,
+  IconPlug,
+  IconRefresh,
+  IconSparkles,
+  IconTargetArrow,
+  IconUsers,
+} from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/primitives/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import {
+  type AgentChatModelPreselection,
+  useOpenAskAiPageWithPreprompt,
+} from '@/ai/hooks/useOpenAskAiPageWithPreprompt';
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
@@ -19,8 +32,8 @@ import {
   INTEGRATIONS,
 } from '~/pages/settings/integrations/SettingsIntegrations';
 
-// The integrations that are "places leads/contacts live", shown inline on the
-// Get-started page so the user can connect without leaving the tab.
+// The integrations that are "places leads/contacts live", shown inline in the
+// Populate play so the user can connect without leaving the tab.
 const LEAD_SOURCE_PLUGINS = [
   'hubspot',
   'salesforce',
@@ -35,15 +48,140 @@ const LEAD_SOURCE_INTEGRATIONS = INTEGRATIONS.filter((integration) =>
   LEAD_SOURCE_PLUGINS.includes(integration.plugin),
 );
 
-// Desync "Get started": a painfully-obvious first-run page. New users land on a
-// dense, empty grid and do not know what to do or what the agent can do. This
-// walks them through it: connect tools -> say where their leads are -> one tap
-// to open the copilot pre-filled to clear the demo data and build their CRM.
+// Quick lookup so a play can name the Composio integrations it benefits from.
+const INTEGRATION_BY_PLUGIN = new Map(
+  INTEGRATIONS.map((integration) => [integration.plugin, integration] as const),
+);
+
+// Desync "Playbooks" (was "Get started"): one-tap recipes that open the built-in
+// agent pre-loaded with a battle-tested prompt and run it. Most users don't know
+// how to prompt an AI; each card packages a high-value job into a single button
+// so they get the payoff without writing anything. Master-detail layout: pick a
+// play on the left, its detail (what it does, the tools it uses, the run button)
+// opens on the right. Populate keeps the review-before-send flow since it clears
+// the demo data; the other plays auto-run with a hard no-send rule.
+
+const POPULATE_KEY = 'populate';
 
 const EXAMPLE_PROMPTS = [
   'Find leads that fit my business and add them to my CRM.',
   'Research a specific company and add it with its key contacts.',
   'Build a list of target companies in my market and add them.',
+];
+
+// Shared guardrail for any play that drafts outreach: the agent must understand
+// the goal, the recipient, and our own user's business before it writes a word.
+const OUTREACH_BRIEF =
+  'Before writing anything, make sure you know and briefly state: (1) the goal of this outreach and what I want to happen, (2) what the recipient and their company actually do, and (3) what my company does and what I am offering them. Pull these from my CRM and connected tools; if any of the three is unclear, ask me one short question instead of guessing. Tailor every message to all three.';
+
+// Hard rule appended to every auto-run play: a playbook can draft and prepare,
+// but it must never send a message or take an irreversible action on its own.
+const NO_SEND_RULE =
+  'Hard rule: never send any email or message yourself, and never take an irreversible action, under any circumstances. Only prepare drafts and proposed changes for me to review. I will send anything that goes out.';
+
+const ENRICH_PROMPT =
+  'Enrich the people already in my CRM. Start with the 50 most recently added People that have missing details. For each one, fill in any missing job title, company, work email, LinkedIn URL and location using my connected tools and the web. Update the records in place, do not create duplicates, and do not invent anything: if you cannot verify a field, leave it blank. When you are done, tell me how many people you updated and which fields were most often missing.';
+
+const CATCHUP_PROMPT =
+  'Catch my CRM up on my recent activity. Look at my interactions from the last two weeks across my connected tools: email, calendar, and call or meeting transcripts (Fathom, Granola, Pocket). Only for people and companies already in my CRM, and skip newsletters, automated or no-reply senders, and purely internal threads. For each real interaction: add a short Note summarizing it on the matching Person or Company, and create a Task for any clear follow-up or commitment, with a due date when one was mentioned. Skip anything you have already logged so you do not create duplicates. When you are done, give me a short summary: who I interacted with, the notes and tasks you added, and who I have not been in touch with in a while.';
+
+const LOOKALIKES_PROMPT =
+  'Find new leads that look like my best customers. Work with the standard Opportunities, Companies and People objects and keep your searches targeted; do not repeatedly re-fetch object metadata or re-learn the search tool. A won deal is an Opportunity in a Won stage. First, from my won opportunities and the companies and people I clearly do business with, tell me the pattern you see (industry, company size, the roles of the people). Then find about 15 new leads that fit that same profile and add them as People and Companies, tagged as AI-suggested, each with a one-line reason it matches. Do not draft or send any outreach: just build the list and show me who you added and why.';
+
+const FOLLOWUPS_PROMPT = `Help me see who I have gone quiet on and reach out on my own terms. Using my CRM activity (and email or calendar if connected), find my open opportunities with no activity in the last two weeks, and people I have emailed or met with before but have not contacted recently. Give me a short, ranked list: the person, our last contact and when, the open deal or reason it matters, and a one-line suggested angle. Create a "Follow up with <name>" task for each so it is on my list. Do NOT draft any messages yet. Only when I pick a person and ask you to, draft a single personalized follow-up for that one person for me to review and send myself. ${OUTREACH_BRIEF} Never send anything yourself.`;
+
+type Playbook = {
+  key: string;
+  title: string;
+  outcome: string;
+  cta: string;
+  Icon: ComponentType<{ size?: number }>;
+  prompt: string;
+  hint?: string;
+  // Composio integrations this play benefits from, shown as real connect cards
+  // in the detail panel. Empty/undefined renders "No integration needed".
+  plugins?: string[];
+  // Model tier preselected when the play runs. Omit = follow the workspace
+  // default (Max Thinking). Mechanical plays use a cheaper tier to save budget.
+  model?: AgentChatModelPreselection;
+};
+
+// The one-tap plays. Populate is handled separately because its detail asks
+// questions and runs with review rather than firing the agent immediately.
+const PLAYBOOKS: Playbook[] = [
+  {
+    key: 'catchup',
+    title: 'Catch up my CRM',
+    outcome:
+      'Pull your recent email, calendar and call activity into notes and follow-up tasks, and refresh who you last spoke to. For people already in your CRM.',
+    cta: 'Catch up my CRM',
+    Icon: IconRefresh,
+    prompt: CATCHUP_PROMPT,
+    plugins: [
+      'gmail',
+      'outlook',
+      'googlecalendar',
+      'fathom',
+      'granola_mcp',
+      'pocket',
+    ],
+    model: 'BALANCED',
+  },
+  {
+    key: 'enrich',
+    title: 'Enrich your people',
+    outcome:
+      'Fill in missing titles, companies, work emails and LinkedIn for the people already in your CRM.',
+    cta: 'Enrich my people',
+    Icon: IconUsers,
+    prompt: ENRICH_PROMPT,
+    model: 'BALANCED',
+  },
+  {
+    key: 'lookalikes',
+    title: 'Find leads like your best customers',
+    outcome:
+      'Spot the pattern in your best customers and add ~15 new leads that fit the same profile.',
+    cta: 'Find lookalike leads',
+    Icon: IconTargetArrow,
+    prompt: LOOKALIKES_PROMPT,
+    plugins: ['apollo', 'hubspot', 'salesforce'],
+    model: 'BALANCED',
+  },
+  {
+    key: 'followups',
+    title: 'Follow up with quiet contacts',
+    outcome:
+      "Find the people and deals you've gone quiet on with a suggested angle, then draft a nudge one at a time when you're ready. You review and send.",
+    cta: 'See who to follow up with',
+    Icon: IconMail,
+    prompt: FOLLOWUPS_PROMPT,
+    hint: 'Lists who to reach out to and drafts one at a time, only when you ask. Nothing is ever sent for you.',
+    plugins: ['gmail', 'outlook'],
+    model: 'BALANCED',
+  },
+];
+
+// Left-rail entries: Populate first (its own detail), then the one-tap plays.
+const PLAY_LIST: {
+  key: string;
+  title: string;
+  outcome: string;
+  Icon: ComponentType<{ size?: number }>;
+}[] = [
+  {
+    key: POPULATE_KEY,
+    title: 'Populate your CRM',
+    outcome:
+      'Import your existing contacts and companies, and let the agent set it all up for you.',
+    Icon: IconDatabase,
+  },
+  ...PLAYBOOKS.map(({ key, title, outcome, Icon }) => ({
+    key,
+    title,
+    outcome,
+    Icon,
+  })),
 ];
 
 const StyledPage = styled.div`
@@ -60,7 +198,7 @@ const StyledContent = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[6]};
   margin: 0 auto;
-  max-width: 640px;
+  max-width: 1120px;
   padding: ${themeCssVariables.spacing[8]} ${themeCssVariables.spacing[6]};
   width: 100%;
 `;
@@ -85,52 +223,129 @@ const StyledSubtitle = styled.p`
   margin: 0;
 `;
 
-const StyledSteps = styled.div`
+const StyledLayout = styled.div`
+  align-items: flex-start;
   display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[4]};
+  gap: ${themeCssVariables.spacing[6]};
+
+  @media (max-width: 899px) {
+    flex-direction: column;
+  }
 `;
 
-const StyledStep = styled.div`
+const StyledPlayList = styled.div`
+  display: flex;
+  flex: 0 0 360px;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+  width: 360px;
+
+  @media (max-width: 899px) {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+`;
+
+const StyledPlayCard = styled.button`
   background: ${themeCssVariables.background.secondary};
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.md};
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
-  padding: ${themeCssVariables.spacing[4]};
-`;
-
-const StyledStepTop = styled.div`
-  align-items: center;
-  display: flex;
-  gap: ${themeCssVariables.spacing[3]};
-`;
-
-const StyledStepNumber = styled.div`
-  align-items: center;
-  background: ${themeCssVariables.color.blue};
-  border-radius: 50%;
-  color: #fff;
-  display: flex;
-  flex: 0 0 auto;
-  font-size: ${themeCssVariables.font.size.sm};
-  font-weight: ${themeCssVariables.font.weight.semiBold};
-  height: 24px;
-  justify-content: center;
-  width: 24px;
-`;
-
-const StyledStepText = styled.div`
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[1]};
+  padding: ${themeCssVariables.spacing[4]};
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    border-color: ${themeCssVariables.color.blue};
+  }
 `;
 
-const StyledStepTitle = styled.span`
+const StyledPlayCardTop = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.primary};
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledPlayCardTitle = styled.span`
   color: ${themeCssVariables.font.color.primary};
   font-size: ${themeCssVariables.font.size.md};
   font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledPlayCardOutcome = styled.span`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.4;
+`;
+
+const StyledDetail = styled.div`
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.md};
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[4]};
+  min-height: 320px;
+  min-width: 0;
+  padding: ${themeCssVariables.spacing[6]};
+  width: 100%;
+`;
+
+const StyledPlaceholder = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.light};
+  display: flex;
+  flex: 1;
+  font-size: ${themeCssVariables.font.size.md};
+  justify-content: center;
+  text-align: center;
+`;
+
+const StyledDetailHeader = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.primary};
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledDetailTitle = styled.h2`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.lg};
+  font-weight: ${themeCssVariables.font.weight.semiBold};
+  margin: 0;
+`;
+
+const StyledDetailText = styled.p`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.md};
+  line-height: 1.5;
+  margin: 0;
+`;
+
+const StyledDetailNote = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.4;
+`;
+
+const StyledSectionLabel = styled.span`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+`;
+
+const StyledBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledStepHint = styled.span`
@@ -142,7 +357,7 @@ const StyledStepHint = styled.span`
 const StyledIntegrationsGrid = styled.div`
   display: grid;
   gap: ${themeCssVariables.spacing[2]};
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 `;
 
 const StyledExamples = styled.div`
@@ -177,11 +392,14 @@ export const GetStartedPage = () => {
   const { t } = useLingui();
   const navigate = useNavigate();
   const setAgentChatPreprompt = useSetAtomState(agentChatPrepromptState);
+  const { openAskAiPageWithPreprompt } = useOpenAskAiPageWithPreprompt();
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
   const [leadsSource, setLeadsSource] = useState('');
+  // Which play's detail is open. Null = nothing selected yet.
+  const [activePlaybook, setActivePlaybook] = useState<string | null>(null);
 
-  // Desync: once the user has reached Get-started, don't auto-land them here
+  // Desync: once the user has reached Playbooks, don't auto-land them here
   // again on future entries to this workspace (the sidebar link still works).
   useEffect(() => {
     markGetStartedSeen(currentWorkspace?.id);
@@ -190,6 +408,16 @@ export const GetStartedPage = () => {
   const openCopilotWith = (text: string) => {
     setAgentChatPreprompt({ text, mode: 'PREFILL' });
     navigate('/chat');
+  };
+
+  // Plays fire the agent straight away: one tap, it opens and runs. Every play
+  // carries the no-send rule so the agent can draft but never send.
+  const runPlaybook = (playbook: Playbook) => {
+    openAskAiPageWithPreprompt({
+      text: `${playbook.prompt}\n\n${NO_SEND_RULE}`,
+      mode: 'SEND',
+      model: playbook.model,
+    });
   };
 
   const buildPopulatePrompt = () => {
@@ -208,29 +436,107 @@ export const GetStartedPage = () => {
       .join('\n');
   };
 
-  return (
-    <StyledPage>
-      <StyledContent>
-        <StyledHeader>
-          <StyledTitle>{t`Welcome to Desync. Let's set up your CRM.`}</StyledTitle>
-          <StyledSubtitle>
-            {t`Your built-in AI agent can fill your CRM for you, pull in your contacts, find new leads, and tell you who to follow up with. Three quick steps and it does the work.`}
-          </StyledSubtitle>
-        </StyledHeader>
+  const activePlay =
+    activePlaybook !== null && activePlaybook !== POPULATE_KEY
+      ? PLAYBOOKS.find((playbook) => playbook.key === activePlaybook)
+      : undefined;
 
-        <StyledSteps>
-          <StyledStep>
-            <StyledStepTop>
-              <StyledStepNumber>1</StyledStepNumber>
-              <StyledStepText>
-                <StyledStepTitle>{t`Connect where your leads live`}</StyledStepTitle>
-                <StyledStepHint>
-                  {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
-                </StyledStepHint>
-              </StyledStepText>
-            </StyledStepTop>
+  const renderPopulateDetail = () => (
+    <>
+      <StyledDetailHeader>
+        <IconDatabase size={22} />
+        <StyledDetailTitle>{t`Populate your CRM`}</StyledDetailTitle>
+      </StyledDetailHeader>
+      <StyledDetailText>
+        {t`Import your real customers and leads from the tools you already use, then let the agent set up your People, Companies, and deals for you.`}
+      </StyledDetailText>
+
+      <StyledBlock>
+        <StyledSectionLabel>{t`1. Connect where your leads live`}</StyledSectionLabel>
+        <StyledStepHint>
+          {t`Connect a source and the agent can pull your real contacts and companies straight in. Connect as many as apply.`}
+        </StyledStepHint>
+        <StyledIntegrationsGrid>
+          {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
+            <ConnectIntegrationCard
+              key={integration.plugin}
+              integration={integration}
+              compact
+            />
+          ))}
+        </StyledIntegrationsGrid>
+        <div>
+          <Button
+            variant="outline"
+            startIcon={<IconPlug size={16} />}
+            onClick={() => navigate(getSettingsPath(SettingsPath.Integrations))}
+          >
+            {t`See all integrations`}
+          </Button>
+        </div>
+      </StyledBlock>
+
+      <StyledBlock>
+        <StyledSectionLabel>{t`2. Let the agent build your CRM`}</StyledSectionLabel>
+        <StyledStepHint>
+          {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected. If you connected nothing, it finds a few leads for you.`}
+        </StyledStepHint>
+        <TextArea
+          textAreaId="get-started-leads-source"
+          label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
+          placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
+          value={leadsSource}
+          onChange={setLeadsSource}
+          minRows={2}
+          maxRows={3}
+        />
+        <div>
+          <Button
+            variant="solid"
+            color="accent"
+            startIcon={<IconSparkles size={16} />}
+            onClick={() => openCopilotWith(buildPopulatePrompt())}
+          >
+            {t`Build my CRM`}
+          </Button>
+        </div>
+      </StyledBlock>
+
+      <StyledExamples>
+        <StyledExamplesLabel>
+          {t`Or have the agent fill your CRM another way:`}
+        </StyledExamplesLabel>
+        {EXAMPLE_PROMPTS.map((prompt) => (
+          <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
+            <IconArrowRight
+              size={14}
+              style={{ marginRight: 6, verticalAlign: 'middle' }}
+            />
+            {prompt}
+          </StyledChip>
+        ))}
+      </StyledExamples>
+    </>
+  );
+
+  const renderPlayDetail = (playbook: Playbook) => {
+    const suggested = (playbook.plugins ?? [])
+      .map((plugin) => INTEGRATION_BY_PLUGIN.get(plugin))
+      .filter((def): def is NonNullable<typeof def> => def !== undefined);
+
+    return (
+      <>
+        <StyledDetailHeader>
+          <playbook.Icon size={22} />
+          <StyledDetailTitle>{playbook.title}</StyledDetailTitle>
+        </StyledDetailHeader>
+        <StyledDetailText>{playbook.outcome}</StyledDetailText>
+
+        <StyledBlock>
+          <StyledSectionLabel>{t`Tools this play can use`}</StyledSectionLabel>
+          {suggested.length > 0 ? (
             <StyledIntegrationsGrid>
-              {LEAD_SOURCE_INTEGRATIONS.map((integration) => (
+              {suggested.map((integration) => (
                 <ConnectIntegrationCard
                   key={integration.plugin}
                   integration={integration}
@@ -238,65 +544,76 @@ export const GetStartedPage = () => {
                 />
               ))}
             </StyledIntegrationsGrid>
-            <div>
-              <Button
-                variant="outline"
-                startIcon={<IconPlug size={16} />}
+          ) : (
+            <StyledStepHint>{t`No integration needed for this one.`}</StyledStepHint>
+          )}
+        </StyledBlock>
+
+        <StyledDetailNote>
+          {playbook.hint
+            ? playbook.hint
+            : t`The agent drafts and prepares changes for you. It never sends anything on its own.`}
+        </StyledDetailNote>
+
+        <div>
+          <Button
+            variant="solid"
+            color="accent"
+            startIcon={<IconSparkles size={16} />}
+            onClick={() => runPlaybook(playbook)}
+          >
+            {playbook.cta}
+          </Button>
+        </div>
+      </>
+    );
+  };
+
+  return (
+    <StyledPage>
+      <StyledContent>
+        <StyledHeader>
+          <StyledTitle>{t`Playbooks`}</StyledTitle>
+          <StyledSubtitle>
+            {t`Pick a play and your built-in AI agent does the work for you. One tap, no prompting needed.`}
+          </StyledSubtitle>
+        </StyledHeader>
+
+        <StyledLayout>
+          <StyledPlayList>
+            {PLAY_LIST.map((play) => (
+              <StyledPlayCard
+                key={play.key}
                 onClick={() =>
-                  navigate(getSettingsPath(SettingsPath.Integrations))
+                  setActivePlaybook((prev) =>
+                    prev === play.key ? null : play.key,
+                  )
+                }
+                style={
+                  activePlaybook === play.key
+                    ? { borderColor: themeCssVariables.color.blue }
+                    : undefined
                 }
               >
-                {t`See all integrations`}
-              </Button>
-            </div>
-          </StyledStep>
+                <StyledPlayCardTop>
+                  <play.Icon size={18} />
+                  <StyledPlayCardTitle>{play.title}</StyledPlayCardTitle>
+                </StyledPlayCardTop>
+                <StyledPlayCardOutcome>{play.outcome}</StyledPlayCardOutcome>
+              </StyledPlayCard>
+            ))}
+          </StyledPlayList>
 
-          <StyledStep>
-            <StyledStepTop>
-              <StyledStepNumber>2</StyledStepNumber>
-              <StyledStepText>
-                <StyledStepTitle>{t`Let the agent build your CRM`}</StyledStepTitle>
-                <StyledStepHint>
-                  {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected above. If you connected nothing, it finds a few leads for you.`}
-                </StyledStepHint>
-              </StyledStepText>
-            </StyledStepTop>
-            <TextArea
-              textAreaId="get-started-leads-source"
-              label={t`Optional: a source that isn't a connected tool (a website, a spreadsheet, a list of names)`}
-              placeholder={t`e.g. acme.com and 2 other companies, or paste a list of names`}
-              value={leadsSource}
-              onChange={setLeadsSource}
-              minRows={2}
-              maxRows={3}
-            />
-            <div>
-              <Button
-                variant="solid"
-                color="accent"
-                startIcon={<IconSparkles size={16} />}
-                onClick={() => openCopilotWith(buildPopulatePrompt())}
-              >
-                {t`Build my CRM`}
-              </Button>
-            </div>
-          </StyledStep>
-        </StyledSteps>
-
-        <StyledExamples>
-          <StyledExamplesLabel>
-            {t`Or have the agent fill your CRM another way:`}
-          </StyledExamplesLabel>
-          {EXAMPLE_PROMPTS.map((prompt) => (
-            <StyledChip key={prompt} onClick={() => openCopilotWith(prompt)}>
-              <IconArrowRight
-                size={14}
-                style={{ marginRight: 6, verticalAlign: 'middle' }}
-              />
-              {prompt}
-            </StyledChip>
-          ))}
-        </StyledExamples>
+          <StyledDetail>
+            {activePlaybook === null && (
+              <StyledPlaceholder>
+                {t`Pick a play on the left to see what it does and the tools it uses.`}
+              </StyledPlaceholder>
+            )}
+            {activePlaybook === POPULATE_KEY && renderPopulateDetail()}
+            {activePlay && renderPlayDetail(activePlay)}
+          </StyledDetail>
+        </StyledLayout>
       </StyledContent>
     </StyledPage>
   );
