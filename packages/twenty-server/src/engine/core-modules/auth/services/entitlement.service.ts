@@ -7,11 +7,14 @@ import { Pool } from 'pg';
  * scraper_db on prod) via ENTITLEMENT_DATABASE_URL. Billing stays on the lead-gen
  * platform; Twenty only READS whether a user may have a workspace.
  *
- * This is the cost control: Twenty bills ~$19 per ACTIVE seat, so we must never
- * provision a workspace for a free/trial user. A user is entitled iff they are a
- * Desync admin (@desync.ai) OR have a non-revoked subscription row that is an
- * Admin plan, or a Starter/Crusader/Pro/Referral plan inside its current billing
- * period (so an expired referral or a revoked/cancelled plan is NOT entitled).
+ * A user is entitled iff they are a Desync admin (@desync.ai) OR have a
+ * non-revoked subscription row that is an Admin plan, or a
+ * Starter/Crusader/Pro/Referral/Free plan inside its current billing period (so
+ * a revoked/cancelled plan is NOT entitled). 'Free' is the standing $1/month
+ * tier non-subscribers are lazily granted (see DesyncOnboardingResolver.
+ * myEntitlement -> ensureFreeGrant) so they can browse the CRM; it deliberately
+ * relaxes the old "never admit a free/trial user" cost control, which assumed
+ * ~$19 per ACTIVE seat.
  *
  * Fails CLOSED: if the billing DB is unconfigured or unreachable, isEntitled
  * returns false — we would rather block a sign-up than mint a billable seat we
@@ -81,7 +84,7 @@ export class EntitlementService {
              AND (
                su.plan_level = 'Admin'
                OR (
-                 su.plan_level IN ('Starter', 'Crusader', 'Pro', 'Referral')
+                 su.plan_level IN ('Starter', 'Crusader', 'Pro', 'Referral', 'Free')
                  AND su.period_start <= EXTRACT(EPOCH FROM now())
                  AND su.period_end >= EXTRACT(EPOCH FROM now())
                )
