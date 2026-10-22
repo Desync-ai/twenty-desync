@@ -134,7 +134,19 @@ export class DesyncOnboardingResolver {
   ): Promise<DesyncEntitlementStatus> {
     // clerkId isn't on the auth-context user; email is enough (isEntitled matches
     // by lower(email) OR clerk_id). Fails CLOSED in EntitlementService.
-    const entitled = await this.entitlementService.isEntitled(user.email, '');
+    let entitled = await this.entitlementService.isEntitled(user.email, '');
+
+    if (!entitled) {
+      // Non-subscribers get the standing $1/month Free tier so they can browse
+      // the CRM instead of hitting the paywall. Lazily mint it (twenty-backend
+      // owns eligibility, the calendar-month reset, and idempotency), then
+      // re-check — always, since the row may already exist (the mint no-ops).
+      // The mint fails OPEN; isEntitled still fails CLOSED, so a backend blip
+      // just leaves the paywall up. @desync.ai users returned true above and
+      // never reach here.
+      await this.desyncOnboardingService.ensureFreeGrant(user.email);
+      entitled = await this.entitlementService.isEntitled(user.email, '');
+    }
 
     return { entitled };
   }

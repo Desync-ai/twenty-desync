@@ -109,6 +109,15 @@ const StyledMeterValue = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
 `;
 
+// Desync: a gentle, always-present nudge for non-paying users (Free / trial) to
+// subscribe. Rendered as text inside the card <button>, which already routes to
+// Plan & Billing on click (so it must NOT be a nested <button>).
+const StyledSubscribeCta = styled.span`
+  color: ${themeCssVariables.color.blue};
+  font-size: ${themeCssVariables.font.size.xs};
+  font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
 const formatDate = (epochSeconds: number | null): string => {
   if (epochSeconds == null) {
     return '';
@@ -188,6 +197,9 @@ export const DesyncUsageWidget = () => {
   const showAi = aiQuota > 0;
   const aiPct = showAi ? clampPct((aiUsed / aiQuota) * 100) : 0;
 
+  // Nudge anyone without a paid plan (Free tier or trial) to subscribe.
+  const showSubscribeCta = !isFullAccess && !sub.isPaidPlan;
+
   return (
     <StyledCard
       type="button"
@@ -240,6 +252,10 @@ export const DesyncUsageWidget = () => {
             ariaLabel={t`AI budget used`}
           />
         </StyledMeter>
+      )}
+
+      {showSubscribeCta && (
+        <StyledSubscribeCta>{t`Subscribe to unlock more →`}</StyledSubscribeCta>
       )}
     </StyledCard>
   );
