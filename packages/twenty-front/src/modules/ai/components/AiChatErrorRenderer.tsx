@@ -23,6 +23,12 @@ export const AiChatErrorRenderer = ({
     return null;
   }
 
+  // Desync: the per-user $ AI budget is spent — handled by the DesyncAiBudgetModal
+  // (opened from useAgentChat). Suppress the generic inline error + dead Retry.
+  if (isGraphqlErrorOfType(error, AiChatErrorCode.AI_SPEND_LIMIT_REACHED)) {
+    return null;
+  }
+
   if (isGraphqlErrorOfType(error, AiChatErrorCode.API_KEY_NOT_CONFIGURED)) {
     return <AiChatApiKeyNotConfiguredMessage />;
   }
