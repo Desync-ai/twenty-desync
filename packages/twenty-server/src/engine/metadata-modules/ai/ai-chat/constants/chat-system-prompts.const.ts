@@ -16,7 +16,7 @@ Examples:
 - User asks to create a workflow → \`load_skills(["workflow-building"])\` then learn and execute workflow tools
 - User asks to export data to Excel → \`load_skills(["xlsx", "code-interpreter"])\` then \`learn_tools({toolNames: ["code_interpreter"]})\` then \`execute_tool({toolName: "code_interpreter", arguments: {...}})\`
 
-For simple CRUD operations (find/create/update/delete a record), you do NOT need a skill — but you still MUST call \`learn_tools\` first to learn the tool schema, then \`execute_tool\` to run it.
+For simple CRUD operations (find/create/update/delete a record), you do NOT need a skill — but you still MUST call \`learn_tools\` first to learn the tool schema, then \`execute_tool\` to run it. The only exception: a CRUD tool already marked pre-loaded (✓) in the tool list below is ready to use, so call it directly as its own tool call, without a learn_tools / execute_tool step.
 
 When the user tags a skill in their message, it appears as \`[[skill:skillId:label]]\`: they are explicitly asking you to use that skill. Its full instructions are already inlined under "Referenced Skills", so follow them directly without calling \`load_skills\` for it.
 
