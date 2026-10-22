@@ -72,6 +72,7 @@ import {
 import { type ExtractedFile } from 'src/engine/metadata-modules/ai/ai-chat/types/extracted-file.type';
 import { buildWorkspaceSetupChatThreadId } from 'src/engine/metadata-modules/ai/ai-chat/utils/build-workspace-setup-chat-thread-id.util';
 import { buildFullSystemPrompt } from 'src/engine/metadata-modules/ai/ai-chat/utils/build-full-system-prompt.util';
+import { capturePosthogAiEvent } from 'src/engine/metadata-modules/ai/ai-chat/utils/posthog-ai-capture.util';
 import { hasNoAssistantMessage } from 'src/engine/metadata-modules/ai/ai-chat/utils/has-no-assistant-message.util';
 import { hasSucceededWorkspaceSetupCompletion } from 'src/engine/metadata-modules/ai/ai-chat/utils/has-succeeded-workspace-setup-completion.util';
 import { collectReferencedSkillIds } from 'src/engine/metadata-modules/ai/ai-chat/utils/collect-referenced-skill-ids.util';
@@ -525,6 +526,24 @@ export class ChatExecutionService {
         attributes: modelAttr,
         bucketBoundaries: AI_LATENCY_MS_BUCKET_BOUNDARIES,
       });
+
+      // Desync: fire-and-forget PostHog LLM-analytics trace for this turn.
+      // Fails open (own timeout + swallow); never awaited, never blocks billing.
+      void capturePosthogAiEvent({
+        event: '$ai_trace',
+        distinctId: userId ?? userWorkspaceId,
+        traceId: threadId ?? turnId ?? streamId ?? workspace.id,
+        spanName: 'crm-copilot turn',
+        model: registeredModel.modelId,
+        provider: registeredModel.sdkPackage.replace('@ai-sdk/', ''),
+        latencySeconds: (performance.now() - streamStartedAt) / 1000,
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+        totalCostUsd: costInDollars,
+        tier: workspace.aiChatModelTier,
+        step: stepIndex,
+        workspaceId: workspace.id,
+      });
     };
 
     // Transient model errors (provider overload, rate limits, dropped streams)
@@ -692,6 +711,32 @@ export class ChatExecutionService {
             bucketBoundaries: TOOL_OUTPUT_TOKENS_BUCKET_BOUNDARIES,
           });
         }
+
+        // Desync: fire-and-forget PostHog LLM-analytics generation for this
+        // step. Fails open (own timeout + swallow); never awaited.
+        void capturePosthogAiEvent({
+          event: '$ai_generation',
+          distinctId: userId ?? userWorkspaceId,
+          traceId: threadId ?? turnId ?? streamId ?? workspace.id,
+          spanName: `crm-copilot step ${stepIndex}`,
+          model: registeredModel.modelId,
+          provider: registeredModel.sdkPackage.replace('@ai-sdk/', ''),
+          latencySeconds: (performance.now() - stepStartedAt) / 1000,
+          inputTokens: step.usage.inputTokens ?? 0,
+          outputTokens: step.usage.outputTokens ?? 0,
+          totalCostUsd: this.aiBillingService.calculateCost(
+            registeredModel.modelId,
+            {
+              usage: step.usage,
+              cacheCreationTokens: extractCacheCreationTokens(
+                step.providerMetadata,
+              ),
+            },
+          ),
+          tier: workspace.aiChatModelTier,
+          step: stepIndex,
+          workspaceId: workspace.id,
+        });
       },
       onAbort: async ({ steps }) => {
         await emitTurnUsageEvent(steps);
