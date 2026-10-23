@@ -1,3 +1,5 @@
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
+import { captureFirstRecordCreated } from '@/desync-analytics/utils/captureFirstRecordCreated';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { getLabelIdentifierFieldMetadataItem } from '@/object-metadata/utils/getLabelIdentifierFieldMetadataItem';
 import { useBuildRecordInputFromRLSPredicates } from '@/object-record/hooks/useBuildRecordInputFromRLSPredicates';
@@ -73,6 +75,12 @@ export const useCreateNewRecord = ({
       const createdRecord = await createOneRecord({
         id: recordId,
         ...mergedRecordInput,
+      });
+
+      captureFirstRecordCreated({
+        workspaceId: store.get(currentWorkspaceState.atom)?.id,
+        objectNameSingular: objectMetadataItem.nameSingular,
+        source: 'manual',
       });
 
       const labelIdentifierFieldMetadataItem =
