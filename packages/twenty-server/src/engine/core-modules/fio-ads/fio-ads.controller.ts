@@ -5,7 +5,6 @@ import {
   ForbiddenException,
   Get,
   Post,
-  Query,
   Req,
   UseFilters,
   UseGuards,
@@ -122,35 +121,6 @@ export class FioAdsController {
     });
   }
 
-  @Get('voices')
-  async voices() {
-    return { voices: await this.fioAdsService.listVoices() };
-  }
-
-  @Get('voice-sample')
-  async voiceSample(
-    @Query('voiceId') voiceId: string,
-    @Req() request: AuthenticatedRequest,
-  ) {
-    // Same eligibility as voiceover (it synthesizes through our Cartesia key).
-    const status = await this.fioAdsService.getStatus({
-      userId: this.userId(request),
-      email: this.userEmail(request),
-      workspaceId: this.workspaceId(request),
-      userWorkspaceId: this.userWorkspaceId(request),
-    });
-
-    if (!status.eligible) {
-      throw new ForbiddenException(
-        status.reason === 'not_admin'
-          ? 'Only workspace admins can preview Fio ad voices.'
-          : 'Fio ad voice preview is available on Starter and above.',
-      );
-    }
-
-    return this.fioAdsService.getVoiceSample({ voiceId });
-  }
-
   @Post('transcribe')
   async transcribe(
     @Body()
@@ -176,32 +146,6 @@ export class FioAdsController {
     }
 
     return this.fioAdsService.transcribe({ audio: body?.audio });
-  }
-
-  @Post('voiceover')
-  async voiceover(
-    @Body() body: { text?: string; voiceId?: string },
-    @Req() request: AuthenticatedRequest,
-  ) {
-    const status = await this.fioAdsService.getStatus({
-      userId: this.userId(request),
-      email: this.userEmail(request),
-      workspaceId: this.workspaceId(request),
-      userWorkspaceId: this.userWorkspaceId(request),
-    });
-
-    if (!status.eligible) {
-      throw new ForbiddenException(
-        status.reason === 'not_admin'
-          ? 'Only workspace admins can use Fio ad AI voiceover.'
-          : 'Fio ad AI voiceover is available on Starter and above.',
-      );
-    }
-
-    return this.fioAdsService.generateVoiceover({
-      text: body?.text,
-      voiceId: body?.voiceId,
-    });
   }
 
   @Post('launch')

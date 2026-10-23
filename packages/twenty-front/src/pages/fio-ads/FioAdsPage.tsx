@@ -12,11 +12,6 @@ import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
 import { FIO_LOGO } from './fioLogo';
-import {
-  buildRecordingWithIntro,
-  FIO_INTRO_SOUNDS,
-  playIntroSound,
-} from './fioIntroSounds';
 
 // Desync: "Launch a Fio ad" as its own page, as a short wizard: Brand ->
 // Creative -> Audio -> Review. Admin-only + paid gate is enforced server-side
@@ -67,7 +62,6 @@ type ScriptIdea = {
   highlight: string;
   script: string;
 };
-type IntroSound = { kind: 'bell' | 'trumpet'; variant: string };
 type StatusResponse = {
   eligible: boolean;
   reason: string;
@@ -339,55 +333,6 @@ const StyledScriptAction = styled.div`
   }
 `;
 
-const StyledSoundGrid = styled.div`
-  display: grid;
-  gap: ${themeCssVariables.spacing[2]};
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-`;
-
-const StyledSoundRow = styled.div`
-  align-items: stretch;
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  display: flex;
-  overflow: hidden;
-
-  &[data-selected='true'] {
-    border-color: ${themeCssVariables.color.blue};
-  }
-`;
-
-const StyledSoundSelect = styled.button`
-  background: ${themeCssVariables.background.secondary};
-  border: none;
-  color: ${themeCssVariables.font.color.secondary};
-  cursor: pointer;
-  flex: 1;
-  font-size: ${themeCssVariables.font.size.sm};
-  padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[3]};
-  text-align: left;
-
-  &[data-selected='true'] {
-    color: ${themeCssVariables.color.blue};
-    font-weight: ${themeCssVariables.font.weight.medium};
-  }
-`;
-
-const StyledPlay = styled.button`
-  background: ${themeCssVariables.background.tertiary};
-  border: none;
-  border-left: 1px solid ${themeCssVariables.border.color.medium};
-  color: ${themeCssVariables.font.color.secondary};
-  cursor: pointer;
-  font-size: ${themeCssVariables.font.size.xs};
-  padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[3]};
-  white-space: nowrap;
-
-  &:hover {
-    color: ${themeCssVariables.font.color.primary};
-  }
-`;
-
 const StyledReviewRow = styled.div`
   display: flex;
   font-size: ${themeCssVariables.font.size.sm};
@@ -503,9 +448,6 @@ export const FioAdsPage = () => {
   const [scriptNotes, setScriptNotes] = useState('');
   const [generatingScripts, setGeneratingScripts] = useState(false);
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null);
-  const [introSound, setIntroSound] = useState<IntroSound | null>(null);
-  const [combinedUrl, setCombinedUrl] = useState<string | null>(null);
-  const [combinedBuilding, setCombinedBuilding] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -612,9 +554,7 @@ export const FioAdsPage = () => {
     }
   };
 
-  // Load a chosen idea into the editable script. The intro sound is picked
-  // separately (it goes with any idea, or none), so choosing a script no
-  // longer changes it.
+  // Load a chosen idea into the editable script; the user records it themselves.
   const chooseScript = (idea: ScriptIdea) => {
     setTranscript(idea.script);
     setSelectedFlavor(idea.flavor);
@@ -822,43 +762,6 @@ export const FioAdsPage = () => {
     };
   }, []);
 
-  // On the audio and review steps, build a preview of the recording with the
-  // chosen intro sound added to the front, so the user can hear how their ad
-  // starts and switch sounds before sending. Rebuilds whenever the recording or
-  // the chosen sound changes.
-  useEffect(() => {
-    if ((step !== 2 && step !== 3) || !audio || !introSound) {
-      setCombinedUrl(null);
-      setCombinedBuilding(false);
-      return;
-    }
-    let cancelled = false;
-    let objectUrl: string | null = null;
-    setCombinedUrl(null);
-    setCombinedBuilding(true);
-    void (async () => {
-      const combined = await buildRecordingWithIntro({
-        recordingBase64: audio.dataBase64,
-        recordingContentType: audio.contentType,
-        kind: introSound.kind,
-        variant: introSound.variant,
-      });
-      if (!cancelled) {
-        if (combined) {
-          objectUrl = URL.createObjectURL(combined.blob);
-          setCombinedUrl(objectUrl);
-        }
-        setCombinedBuilding(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [step, audio, introSound]);
-
   const toggleCategory = (category: string) => {
     setCategories((prev) =>
       prev.includes(category)
@@ -908,7 +811,6 @@ export const FioAdsPage = () => {
     setScripts([]);
     setScriptNotes('');
     setSelectedFlavor(null);
-    setIntroSound(null);
     setCategories([]);
     setStep(0);
   };
@@ -917,29 +819,6 @@ export const FioAdsPage = () => {
     if (!isValid || submitting) return;
     setSubmitting(true);
     try {
-      // If an intro sound is chosen, splice it onto the front of the recording
-      // so the submitted audio already contains it. Best-effort: on any failure
-      // we send the raw recording, and the choice still rides along as a label.
-      let audioPayload = audio;
-      if (audio && introSound) {
-        try {
-          const combined = await buildRecordingWithIntro({
-            recordingBase64: audio.dataBase64,
-            recordingContentType: audio.contentType,
-            kind: introSound.kind,
-            variant: introSound.variant,
-          });
-          if (combined) {
-            audioPayload = {
-              filename: 'fio-ad-with-intro.wav',
-              contentType: 'audio/wav',
-              dataBase64: combined.dataBase64,
-            };
-          }
-        } catch {
-          // keep the raw recording
-        }
-      }
       const res = await fetch(`${FIO_BASE}/launch`, {
         method: 'POST',
         credentials: 'include',
@@ -959,10 +838,9 @@ export const FioAdsPage = () => {
           },
           categories,
           audioTranscript: transcript.trim(),
-          introSound: introSound ?? undefined,
           logo,
           adImage,
-          audio: audioPayload,
+          audio,
         }),
       });
       if (!res.ok) {
@@ -1353,88 +1231,6 @@ export const FioAdsPage = () => {
                     )}
                     {audioError && <StyledError>{audioError}</StyledError>}
                   </StyledFieldset>
-
-                  <StyledFieldset>
-                    <StyledGroupTitle>{t`Intro sound (optional)`}</StyledGroupTitle>
-                    <StyledHelper>
-                      {t`Add a short church bell or trumpet to the very start of your ad. It plays first and then your recording, so your ad runs a few seconds longer. Press Play to hear each one on its own, or choose No sound.`}
-                    </StyledHelper>
-                    <StyledSoundGrid>
-                      <StyledSoundRow
-                        data-selected={introSound === null ? 'true' : 'false'}
-                      >
-                        <StyledSoundSelect
-                          type="button"
-                          data-selected={introSound === null ? 'true' : 'false'}
-                          onClick={() => setIntroSound(null)}
-                        >
-                          {t`No sound`}
-                          {introSound === null ? ' ✓' : ''}
-                        </StyledSoundSelect>
-                      </StyledSoundRow>
-                      {FIO_INTRO_SOUNDS.map((sound) => {
-                        const selected =
-                          introSound?.kind === sound.kind &&
-                          introSound?.variant === sound.variant;
-
-                        return (
-                          <StyledSoundRow
-                            key={`${sound.kind}-${sound.variant}`}
-                            data-selected={selected ? 'true' : 'false'}
-                          >
-                            <StyledSoundSelect
-                              type="button"
-                              data-selected={selected ? 'true' : 'false'}
-                              onClick={() =>
-                                setIntroSound({
-                                  kind: sound.kind,
-                                  variant: sound.variant,
-                                })
-                              }
-                            >
-                              {sound.label}
-                              {selected ? ' ✓' : ''}
-                            </StyledSoundSelect>
-                            <StyledPlay
-                              type="button"
-                              aria-label={t`Play ${sound.label}`}
-                              onClick={() =>
-                                playIntroSound(sound.kind, sound.variant)
-                              }
-                            >
-                              {'▶'} {t`Play`}
-                            </StyledPlay>
-                          </StyledSoundRow>
-                        );
-                      })}
-                    </StyledSoundGrid>
-                    {!audio && (
-                      <StyledHelper>
-                        {t`Record or upload your ad above, then pick a sound here to hear how your ad starts.`}
-                      </StyledHelper>
-                    )}
-                    {audio && !introSound && (
-                      <StyledHelper>
-                        {t`No intro selected. Your ad starts with your recording.`}
-                      </StyledHelper>
-                    )}
-                    {audio && introSound && (
-                      <StyledField>
-                        <StyledHelper>
-                          {combinedBuilding
-                            ? t`Building preview...`
-                            : t`Your ad with this intro, start to finish. Switch sounds above to try others.`}
-                        </StyledHelper>
-                        {combinedUrl && !combinedBuilding && (
-                          <audio
-                            controls
-                            src={combinedUrl}
-                            style={{ marginTop: '4px', maxWidth: '100%' }}
-                          />
-                        )}
-                      </StyledField>
-                    )}
-                  </StyledFieldset>
                 </>
               )}
 
@@ -1450,16 +1246,6 @@ export const FioAdsPage = () => {
                   {reviewRow(t`Learn More`, learnMoreUrl)}
                   {reviewRow(t`Categories`, categories.join(', '))}
                   {reviewRow(
-                    t`Intro sound`,
-                    introSound
-                      ? (FIO_INTRO_SOUNDS.find(
-                          (s) =>
-                            s.kind === introSound.kind &&
-                            s.variant === introSound.variant,
-                        )?.label ?? introSound.variant)
-                      : t`none`,
-                  )}
-                  {reviewRow(
                     t`Logo / image`,
                     `${logo ? t`logo set` : t`missing`}, ${adImage ? t`image set` : t`missing`}`,
                   )}
@@ -1470,18 +1256,6 @@ export const FioAdsPage = () => {
                       src={audioPreviewUrl}
                       style={{ maxWidth: '100%' }}
                     />
-                  )}
-                  {combinedUrl && (
-                    <StyledField>
-                      <StyledFieldLabel>
-                        {t`Your ad with the intro sound`}
-                      </StyledFieldLabel>
-                      <audio
-                        controls
-                        src={combinedUrl}
-                        style={{ maxWidth: '100%' }}
-                      />
-                    </StyledField>
                   )}
                   {reviewRow(t`Transcript`, transcript)}
                   {!isValid && (
