@@ -1,6 +1,7 @@
 import { useApolloClient, useMutation } from '@apollo/client/react';
 import { styled } from '@linaria/react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { isNonEmptyString } from '@sniptt/guards';
 import { useState } from 'react';
 import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
@@ -12,6 +13,12 @@ import {
   CREATE_DESYNC_SUBSCRIPTION,
   MY_ENTITLEMENT_QUERY,
 } from '@/desync-onboarding/graphql/desyncBilling';
+import {
+  captureDesyncBillingEvent,
+  type DesyncBillingSurface,
+  type DesyncCheckoutStep,
+  getStripeErrorReasonCode,
+} from '@/desync-onboarding/utils/captureDesyncBillingEvent';
 
 // Desync: the card-based subscribe checkout (plan cards + Stripe card + the
 // create → confirm → activate → poll-entitlement dance). Shared by the lockout
@@ -44,7 +51,10 @@ export const getStripeCardStyle = (isDark: boolean) => ({
 
 // Annual shows the full yearly total AND the monthly-equivalent (10% off);
 // monthly shows the plain monthly price. (Kept for callers that want a one-liner.)
-export const formatPlanPrice = (monthlyPriceUsd: number, annual: boolean): string =>
+export const formatPlanPrice = (
+  monthlyPriceUsd: number,
+  annual: boolean,
+): string =>
   annual
     ? `$${Math.round(monthlyPriceUsd * 12 * 0.9).toLocaleString()}/yr ($${Math.round(
         monthlyPriceUsd * 0.9,
@@ -78,7 +88,9 @@ const StyledToggleButton = styled.button<{ active: boolean }>`
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ active }) =>
-    active ? themeCssVariables.font.color.inverted : themeCssVariables.font.color.secondary};
+    active
+      ? themeCssVariables.font.color.inverted
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
 `;
@@ -102,12 +114,16 @@ type DesyncCheckoutFormProps = {
   onComplete?: () => void;
   // CTA prefix, e.g. "Subscribe to" (default) or "Upgrade to".
   ctaPrefix?: string;
+  // Where the checkout is shown, so funnel events can tell the lockout paywall
+  // from a voluntary upgrade on the Plan & Billing page.
+  surface: DesyncBillingSurface;
 };
 
 export const DesyncCheckoutForm = ({
   plans,
   onComplete,
   ctaPrefix = 'Subscribe to',
+  surface,
 }: DesyncCheckoutFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -126,6 +142,22 @@ export const DesyncCheckoutForm = ({
 
   const selectedPlan = plans.find((p) => p.key === selectedKey) ?? plans[0];
 
+  const handleSelectPlan = (planKey: string, nextAnnual: boolean) => {
+    if (planKey === selectedPlan?.key && nextAnnual === annual) {
+      return;
+    }
+    setSelectedKey(planKey);
+    setAnnual(nextAnnual);
+    if (!isNonEmptyString(planKey)) {
+      return;
+    }
+    captureDesyncBillingEvent('plan_selected', {
+      plan: planKey,
+      cadence: nextAnnual ? 'annual' : 'monthly',
+      surface,
+    });
+  };
+
   const handlePay = async () => {
     if (!stripe || !elements || !selectedPlan || submitting) {
       return;
@@ -135,6 +167,17 @@ export const DesyncCheckoutForm = ({
       ? selectedPlan.priceIdAnnual
       : selectedPlan.priceIdMonthly;
 
+    const checkoutProperties = {
+      plan: selectedPlan.key,
+      cadence: annual ? ('annual' as const) : ('monthly' as const),
+      surface,
+    };
+    // Mutable so the catch below can report where checkout broke and why, as a
+    // code only (the thrown messages are for the toast, not analytics).
+    let step: DesyncCheckoutStep = 'create';
+    let reasonCode = 'request_failed';
+
+    captureDesyncBillingEvent('checkout_submitted', checkoutProperties);
     setSubmitting(true);
     setStatus('Setting up checkout…');
 
@@ -146,11 +189,14 @@ export const DesyncCheckoutForm = ({
       const setupIntentId = created?.createDesyncSubscription?.setupIntentId;
 
       if (!clientSecret || !setupIntentId) {
+        reasonCode = 'missing_client_secret';
         throw new Error('Could not start checkout. Please try again.');
       }
 
+      step = 'card_confirm';
       const card = elements.getElement(CardElement);
       if (!card) {
+        reasonCode = 'card_element_missing';
         throw new Error('Card field is not ready.');
       }
 
@@ -160,14 +206,18 @@ export const DesyncCheckoutForm = ({
       });
 
       if (result.error) {
+        reasonCode = getStripeErrorReasonCode(result.error);
         throw new Error(result.error.message ?? 'Card confirmation failed.');
       }
 
+      step = 'activate';
+      reasonCode = 'request_failed';
       setStatus('Activating your subscription…');
       await activateSubscription({ variables: { setupIntentId, priceId } });
 
       // The subscription_usage row is written asynchronously by the Stripe
       // webhook. Poll entitlement until it lands, then run onComplete.
+      step = 'finalize';
       setStatus('Finalizing, this can take a few seconds…');
       for (let attempt = 0; attempt < 20; attempt++) {
         await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -176,6 +226,10 @@ export const DesyncCheckoutForm = ({
           fetchPolicy: 'network-only',
         });
         if (entitlement?.myEntitlement?.entitled === true) {
+          captureDesyncBillingEvent(
+            'subscription_activated',
+            checkoutProperties,
+          );
           if (onComplete) {
             onComplete();
           } else {
@@ -185,11 +239,23 @@ export const DesyncCheckoutForm = ({
         }
       }
 
+      // Card is set up but the webhook hasn't provisioned yet: usually not a lost
+      // sale, kept as its own reason so dashboards can separate it.
+      captureDesyncBillingEvent('checkout_failed', {
+        ...checkoutProperties,
+        step,
+        reason_code: 'entitlement_timeout',
+      });
       setStatus(
         'Payment received. Activation is taking a moment. Refresh in a bit to continue.',
       );
       setSubmitting(false);
     } catch (error) {
+      captureDesyncBillingEvent('checkout_failed', {
+        ...checkoutProperties,
+        step,
+        reason_code: reasonCode,
+      });
       setSubmitting(false);
       setStatus('');
       enqueueToast({
@@ -205,10 +271,16 @@ export const DesyncCheckoutForm = ({
   return (
     <StyledForm>
       <StyledToggleRow>
-        <StyledToggleButton active={!annual} onClick={() => setAnnual(false)}>
+        <StyledToggleButton
+          active={!annual}
+          onClick={() => handleSelectPlan(selectedKey, false)}
+        >
           Monthly
         </StyledToggleButton>
-        <StyledToggleButton active={annual} onClick={() => setAnnual(true)}>
+        <StyledToggleButton
+          active={annual}
+          onClick={() => handleSelectPlan(selectedKey, true)}
+        >
           Annual (save 10%)
         </StyledToggleButton>
       </StyledToggleRow>
@@ -220,13 +292,15 @@ export const DesyncCheckoutForm = ({
             plan={plan}
             annual={annual}
             selected={plan.key === selectedKey}
-            onSelect={() => setSelectedKey(plan.key)}
+            onSelect={() => handleSelectPlan(plan.key, annual)}
           />
         ))}
       </StyledPlans>
 
       <StyledCardBox>
-        <CardElement options={{ hidePostalCode: true, style: cardElementStyle }} />
+        <CardElement
+          options={{ hidePostalCode: true, style: cardElementStyle }}
+        />
       </StyledCardBox>
 
       {status !== '' && <StyledStatus>{status}</StyledStatus>}
@@ -236,7 +310,9 @@ export const DesyncCheckoutForm = ({
         disabled={!stripe || submitting || !selectedPlan}
         fullWidth
       >
-        {submitting ? 'Processing…' : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}
+        {submitting
+          ? 'Processing…'
+          : `${ctaPrefix} ${selectedPlan?.name ?? ''}`}
       </MainButton>
     </StyledForm>
   );
