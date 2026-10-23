@@ -24,6 +24,7 @@ import {
   MY_SUBSCRIPTION_QUERY,
   RESUME_DESYNC_SUBSCRIPTION,
 } from '@/desync-onboarding/graphql/desyncBilling';
+import { isDesyncNonRenewingPlan } from '@/desync-onboarding/utils/getDesyncPlanCountdown';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
 import { usePermissionFlagMap } from '@/settings/roles/hooks/usePermissionFlagMap';
@@ -51,6 +52,7 @@ type SubscriptionStatus = {
   aiCostCents: number | null;
   aiCostQuotaCents: number | null;
   stripeActive: boolean;
+  stripeBacked?: boolean | null;
   cancelAtPeriodEnd: boolean;
   isInternal: boolean;
 };
@@ -228,7 +230,13 @@ export const SettingsPlanBilling = () => {
   const isInternal = sub?.isInternal === true;
   // Drive the UI off the PLAN, not Stripe state: a Referral has never paid, so
   // they always get the subscribe flow; a current paid plan gets the manage view.
-  const isActivePaid = sub?.isPaidPlan === true && sub?.current === true;
+  // Exception: a paid-level plan with no Stripe subscription behind it (e.g. a
+  // complimentary grant) has nothing to upgrade or cancel, so it also gets the
+  // subscribe flow (where the plan countdown banner sends them).
+  const isActivePaid =
+    sub?.isPaidPlan === true &&
+    sub?.current === true &&
+    !isDesyncNonRenewingPlan(sub);
   // Internal Desync admins (plan_level Admin) have full access — treat as a full
   // plan, never "subscribe to unlock".
   const isFullAccess = isInternal || sub?.planLevel === 'Admin';
@@ -481,7 +489,7 @@ export const SettingsPlanBilling = () => {
 
             {sub?.periodEnd != null && !isInternal && sub?.planLevel !== 'Admin' && (
               <StyledMeta>
-                {sub.cancelAtPeriodEnd
+                {sub.cancelAtPeriodEnd || isDesyncNonRenewingPlan(sub)
                   ? t`Access ends on ${periodEndStr}`
                   : sub.current
                     ? t`Renews on ${periodEndStr}`
