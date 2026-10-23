@@ -299,6 +299,16 @@ const StyledGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 `;
 
+// Filtering hides cards instead of unmounting them: a remount re-fetches every
+// card's status and reloads its logo, which made tag clicks slow (task 95, INP).
+const StyledGridItem = styled.div`
+  display: contents;
+
+  &[hidden] {
+    display: none;
+  }
+`;
+
 // Stretch the whole Card -> CardContent -> inner chain to the grid row height so
 // every card is equally tall and the action row can bottom-anchor uniformly.
 const StyledCard = styled(Card)`
@@ -903,14 +913,28 @@ export const SettingsIntegrations = () => {
     return [ALL_TAG, ...[...set].sort()];
   }, []);
 
-  const visible = useMemo(
+  // Built once so a tag click only toggles `hidden` and never re-renders cards.
+  const cards = useMemo(
     () =>
-      activeTag === ALL_TAG
-        ? INTEGRATIONS
-        : INTEGRATIONS.filter((integration) =>
-            integration.tags.includes(activeTag),
-          ),
-    [activeTag],
+      INTEGRATIONS.map((integration) =>
+        integration.kind === 'mcp' ? (
+          <McpIntegrationCard
+            key={integration.plugin}
+            integration={integration}
+          />
+        ) : integration.kind === 'key' ? (
+          <KeyIntegrationCard
+            key={integration.plugin}
+            integration={integration}
+          />
+        ) : (
+          <ConnectIntegrationCard
+            key={integration.plugin}
+            integration={integration}
+          />
+        ),
+      ),
+    [],
   );
 
   const openFeedback = (kind: 'request' | 'problem') => {
@@ -966,21 +990,16 @@ export const SettingsIntegrations = () => {
             ))}
           </StyledFilters>
           <StyledGrid>
-            {visible.map((integration) =>
-              integration.kind === 'mcp' ? (
-                <McpIntegrationCard
-                  key={integration.plugin}
-                  integration={integration}
-                />
-              ) : integration.kind === 'key' ? (
-                <KeyIntegrationCard
-                  key={integration.plugin}
-                  integration={integration}
-                />
-              ) : (
-                <ConnectIntegrationCard key={integration.plugin} integration={integration} />
-              ),
-            )}
+            {INTEGRATIONS.map((integration, index) => (
+              <StyledGridItem
+                key={integration.plugin}
+                hidden={
+                  activeTag !== ALL_TAG && !integration.tags.includes(activeTag)
+                }
+              >
+                {cards[index]}
+              </StyledGridItem>
+            ))}
           </StyledGrid>
           <StyledFooter>
             <Button variant="outline" onClick={() => openFeedback('request')}>
