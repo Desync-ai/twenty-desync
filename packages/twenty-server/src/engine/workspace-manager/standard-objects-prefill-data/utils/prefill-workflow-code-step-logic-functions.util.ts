@@ -184,3 +184,14 @@ export const getCreateCompanyWhenAddingNewPersonCodeStepLogicFunctionDefinitions
       },
     ];
   };
+
+export const findPrefilledWorkflowCodeStepLogicFunctionDefinition = ({
+  workspaceId,
+  logicFunctionId,
+}: {
+  workspaceId: string;
+  logicFunctionId: string;
+}): PrefilledWorkflowCodeStepLogicFunctionDefinition | undefined =>
+  getCreateCompanyWhenAddingNewPersonCodeStepLogicFunctionDefinitions(
+    workspaceId,
+  ).find((definition) => definition.id === logicFunctionId);

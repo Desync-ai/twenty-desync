@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import crypto from 'crypto';
 
@@ -25,11 +25,14 @@ import { buildUniversalFlatLogicFunctionToCreate } from 'src/engine/metadata-mod
 import { fromCreateLogicFunctionFromSourceInputToUniversalFlatLogicFunctionToCreate } from 'src/engine/metadata-modules/logic-function/utils/from-create-logic-function-from-source-input-to-universal-flat-logic-function-to-create.util';
 import { fromFlatLogicFunctionToLogicFunctionDto } from 'src/engine/metadata-modules/logic-function/utils/from-flat-logic-function-to-logic-function-dto.util';
 import { fromUpdateLogicFunctionFromSourceInputToFlatLogicFunctionToUpdate } from 'src/engine/metadata-modules/logic-function/utils/from-update-logic-function-from-source-input-to-flat-logic-function-to-update.util';
+import { findPrefilledWorkflowCodeStepLogicFunctionDefinition } from 'src/engine/workspace-manager/standard-objects-prefill-data/utils/prefill-workflow-code-step-logic-functions.util';
 import { WorkspaceMigrationBuilderException } from 'src/engine/workspace-manager/workspace-migration/exceptions/workspace-migration-builder-exception';
 import { WorkspaceMigrationValidateBuildAndRunService } from 'src/engine/workspace-manager/workspace-migration/services/workspace-migration-validate-build-and-run-service';
 
 @Injectable()
 export class LogicFunctionFromSourceService {
+  private readonly logger = new Logger(LogicFunctionFromSourceService.name);
+
   constructor(
     private readonly logicFunctionExecutorService: LogicFunctionExecutorService,
     private readonly logicFunctionResourceService: LogicFunctionResourceService,
@@ -304,11 +307,20 @@ export class LogicFunctionFromSourceService {
         workspaceId,
       });
 
-    const sourceCode = await this.logicFunctionResourceService.getSourceFile({
-      workspaceId,
-      applicationUniversalIdentifier: ownerFlatApplication.universalIdentifier,
-      sourceHandlerPath: flatLogicFunction.sourceHandlerPath,
-    });
+    const sourceCode =
+      (await this.logicFunctionResourceService.getSourceFile({
+        workspaceId,
+        applicationUniversalIdentifier:
+          ownerFlatApplication.universalIdentifier,
+        sourceHandlerPath: flatLogicFunction.sourceHandlerPath,
+      })) ??
+      (await this.restorePrefilledSourceFile({
+        logicFunctionId: id,
+        workspaceId,
+        applicationUniversalIdentifier:
+          ownerFlatApplication.universalIdentifier,
+        sourceHandlerPath: flatLogicFunction.sourceHandlerPath,
+      }));
 
     if (!sourceCode) {
       throw new LogicFunctionException(
@@ -411,6 +423,44 @@ export class LogicFunctionFromSourceService {
       applicationUniversalIdentifier: ownerFlatApplication.universalIdentifier,
       sourceHandlerPath: flatLogicFunction.sourceHandlerPath,
     });
+  }
+
+  // Prefilled code steps (seeded workflows) have a known source: if their file
+  // is missing from storage (e.g. lost or written to another instance's local
+  // disk), re-upload it instead of failing every run with 'Source file not found'.
+  private async restorePrefilledSourceFile({
+    logicFunctionId,
+    workspaceId,
+    applicationUniversalIdentifier,
+    sourceHandlerPath,
+  }: {
+    logicFunctionId: string;
+    workspaceId: string;
+    applicationUniversalIdentifier: string;
+    sourceHandlerPath: string;
+  }): Promise<string | null> {
+    const prefilledDefinition =
+      findPrefilledWorkflowCodeStepLogicFunctionDefinition({
+        workspaceId,
+        logicFunctionId,
+      });
+
+    if (!isDefined(prefilledDefinition)) {
+      return null;
+    }
+
+    this.logger.warn(
+      `Source file missing for prefilled logic function '${logicFunctionId}' (workspace=${workspaceId}), restoring it from its prefill definition`,
+    );
+
+    await this.logicFunctionResourceService.uploadSourceFile({
+      sourceHandlerPath,
+      sourceHandlerCode: prefilledDefinition.sourceHandlerCode,
+      applicationUniversalIdentifier,
+      workspaceId,
+    });
+
+    return prefilledDefinition.sourceHandlerCode;
   }
 
   private async findFlatLogicFunctionByIdAndConvertToDto({
