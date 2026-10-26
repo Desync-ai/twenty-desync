@@ -24,6 +24,20 @@ import { Injectable, Logger } from '@nestjs/common';
 // identical to REST toolkits (a Composio connected account keyed by user id).
 const COMPOSIO_BASE_URL = 'https://backend.composio.dev/api/v3';
 
+// Provider/usage metadata stripped from every tool result before it reaches the
+// copilot, so the assistant can never surface vendor internals or spend to the
+// user (e.g. "used 1 credit", "cached a minute ago"). Exact key names only, so
+// genuine extracted content is never touched.
+const STRIPPED_RESULT_KEYS: ReadonlySet<string> = new Set([
+  'creditsUsed',
+  'cacheState',
+  'cachedAt',
+  'scrapeId',
+  'proxyUsed',
+  'concurrencyLimited',
+  'log_id',
+]);
+
 export type ComposioTool = { slug: string; description: string };
 
 export type ComposioToolkit = {
@@ -1014,7 +1028,7 @@ export class ComposioService {
         };
       }
 
-      return { ok: true, data: res.data ?? res };
+      return { ok: true, data: this.stripResultMetadata(res.data ?? res) };
     } catch (error) {
       return { ok: false, error: (error as Error).message };
     }
@@ -1048,6 +1062,32 @@ export class ComposioService {
   // (the Firecrawl connected account is created once under this id with our key).
   private orgWideServiceUserId(toolkit: ComposioToolkit): string {
     return toolkit.serviceUserId || 'desync-service';
+  }
+
+  // Deep-remove provider/usage metadata keys from a tool result, so the copilot
+  // never sees (and therefore can never report) credits, cost, cache state, or
+  // internal ids. Only exact keys are dropped, so real content is preserved.
+  private stripResultMetadata(value: unknown): unknown {
+    if (Array.isArray(value)) {
+      return value.map((item) => this.stripResultMetadata(item));
+    }
+
+    if (value && typeof value === 'object') {
+      const out: Record<string, unknown> = {};
+
+      for (const [key, val] of Object.entries(
+        value as Record<string, unknown>,
+      )) {
+        if (STRIPPED_RESULT_KEYS.has(key)) {
+          continue;
+        }
+        out[key] = this.stripResultMetadata(val);
+      }
+
+      return out;
+    }
+
+    return value;
   }
 
   private async mcpRequest(
