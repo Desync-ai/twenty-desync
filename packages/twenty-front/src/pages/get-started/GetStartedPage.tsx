@@ -24,6 +24,12 @@ import {
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
+import {
+  getLastOpenPlaybook,
+  getStartedPlaybooks,
+  markPlaybookStarted,
+  setLastOpenPlaybook,
+} from '@/desync-onboarding/utils/playbookProgress';
 import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
@@ -417,6 +423,14 @@ const StyledStartHereBadge = styled.span`
   white-space: nowrap;
 `;
 
+// Quiet "you've done this" tick on a play the user has already launched.
+const StyledDoneCheck = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  margin-left: auto;
+`;
+
 export const GetStartedPage = () => {
   const { t } = useLingui();
   const navigate = useNavigate();
@@ -424,24 +438,68 @@ export const GetStartedPage = () => {
   const { openAskAiPageWithPreprompt } = useOpenAskAiPageWithPreprompt();
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
+  const workspaceId = currentWorkspace?.id;
+
   const [leadsSource, setLeadsSource] = useState('');
   // Which play's detail is open. Null = nothing selected yet.
   const [activePlaybook, setActivePlaybook] = useState<string | null>(null);
+  // Plays the user has already launched (per workspace, this browser). Drives the
+  // moving "next step" nudge so it advances off a play once it has been started.
+  const [startedPlays, setStartedPlays] = useState<Set<string>>(new Set());
 
-  // Desync: once the user has reached Playbooks, don't auto-land them here
-  // again on future entries to this workspace (the sidebar link still works).
+  // On entering Playbooks: mark it seen, load progress, and restore which play is
+  // open. We reopen the play they last had open (so a connect/OAuth round-trip
+  // returns to the same place) or, failing that, the recommended next step (hand-
+  // holding). `prev ?? ...` so we never clobber a detail the user already opened.
   useEffect(() => {
-    markGetStartedSeen(currentWorkspace?.id);
-  }, [currentWorkspace?.id]);
+    if (!workspaceId) {
+      return;
+    }
+    markGetStartedSeen(workspaceId);
+    const started = getStartedPlaybooks(workspaceId);
+    setStartedPlays(started);
+    const lastOpen = getLastOpenPlaybook(workspaceId);
+    const nextStep = PLAY_LIST.map((play) => play.key).find(
+      (key) => !started.has(key),
+    );
+    setActivePlaybook((prev) => prev ?? lastOpen ?? nextStep ?? null);
+  }, [workspaceId]);
 
   const openCopilotWith = (text: string) => {
     setAgentChatPreprompt({ text, mode: 'PREFILL' });
     navigate('/chat');
   };
 
+  // Open a play's detail and remember it, so a connect/OAuth round-trip returns
+  // to the same open play.
+  const selectPlay = (key: string) => {
+    const next = activePlaybook === key ? null : key;
+    setActivePlaybook(next);
+    setLastOpenPlaybook(workspaceId, next);
+  };
+
+  // Record that a play has been launched, which advances the "next step" nudge.
+  const markStarted = (key: string) => {
+    markPlaybookStarted(workspaceId, key);
+    setStartedPlays((prev) => {
+      if (prev.has(key)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+  };
+
+  // The play to nudge next = the first in the list the user hasn't started yet.
+  const recommendedNext =
+    PLAY_LIST.map((play) => play.key).find((key) => !startedPlays.has(key)) ??
+    null;
+
   // Plays fire the agent straight away: one tap, it opens and runs. Every play
   // carries the no-send rule so the agent can draft but never send.
   const runPlaybook = (playbook: Playbook) => {
+    markStarted(playbook.key);
     openAskAiPageWithPreprompt({
       text: `${playbook.prompt}\n\n${GUIDED_FLOW}\n\n${NO_SEND_RULE}`,
       mode: 'SEND',
@@ -474,6 +532,7 @@ export const GetStartedPage = () => {
   // wall of text for the user to read and send. Safe to auto-run because the prompt
   // makes the agent preview and confirm before it deletes or bulk-writes anything.
   const runGuidedPopulate = () => {
+    markStarted(POPULATE_KEY);
     openAskAiPageWithPreprompt({
       text: buildPopulatePrompt(),
       mode: 'SEND',
@@ -628,11 +687,7 @@ export const GetStartedPage = () => {
             {PLAY_LIST.map((play) => (
               <StyledPlayCard
                 key={play.key}
-                onClick={() =>
-                  setActivePlaybook((prev) =>
-                    prev === play.key ? null : play.key,
-                  )
-                }
+                onClick={() => selectPlay(play.key)}
                 style={
                   activePlaybook === play.key
                     ? { borderColor: themeCssVariables.color.blue }
@@ -642,8 +697,13 @@ export const GetStartedPage = () => {
                 <StyledPlayCardTop>
                   <play.Icon size={18} />
                   <StyledPlayCardTitle>{play.title}</StyledPlayCardTitle>
-                  {play.key === POPULATE_KEY && (
-                    <StyledStartHereBadge>{t`Start here`}</StyledStartHereBadge>
+                  {play.key === recommendedNext && (
+                    <StyledStartHereBadge>
+                      {startedPlays.size === 0 ? t`Start here` : t`Next step`}
+                    </StyledStartHereBadge>
+                  )}
+                  {startedPlays.has(play.key) && (
+                    <StyledDoneCheck aria-label={t`Started`}>✓</StyledDoneCheck>
                   )}
                 </StyledPlayCardTop>
                 <StyledPlayCardOutcome>{play.outcome}</StyledPlayCardOutcome>
