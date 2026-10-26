@@ -34,6 +34,11 @@ export type ComposioToolkit = {
   // When set, this toolkit is an MCP proxy: its tools are listed/executed over
   // MCP JSON-RPC at this URL instead of Composio's REST /tools/execute path.
   mcpServerUrl?: string;
+  // Org-wide toolkits are backed by OUR own shared key (not a per-user OAuth /
+  // API-key connection): their tools are available to every user, executed under
+  // `serviceUserId`, and they render NO per-user "Connect" card.
+  orgWide?: boolean;
+  serviceUserId?: string;
 };
 
 // Curated Slack tools exposed to the copilot (slug -> short description). Kept
@@ -468,6 +473,26 @@ export const COMPOSIO_SALESFORCE_TOOLS: ComposioTool[] = [
   { slug: 'SALESFORCE_GET_OPPORTUNITY', description: 'Get a Salesforce opportunity by id.' },
 ];
 
+// Firecrawl via Composio — web scrape/search/extract exposed to the copilot.
+// API_KEY auth, used ORG-WIDE under our own key (see the registry entry below).
+export const COMPOSIO_FIRECRAWL_TOOLS: ComposioTool[] = [
+  {
+    slug: 'FIRECRAWL_SCRAPE',
+    description:
+      'Scrape a single web page and return clean, LLM-ready content (markdown). Use to read a specific URL (a company site, a person/LinkedIn page, an article). Requires `url`.',
+  },
+  {
+    slug: 'FIRECRAWL_SEARCH',
+    description:
+      'Web search that returns results with scraped page content. Use to research a company or person, or to find pages when you do not already have the URL. Requires `query`.',
+  },
+  {
+    slug: 'FIRECRAWL_EXTRACT',
+    description:
+      'Extract structured data from one or more web pages given a prompt/schema. Use when you need specific fields (e.g. pricing, team, contact details) rather than the full page text.',
+  },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -613,6 +638,21 @@ export class ComposioService {
         tools: [],
         mcpServerUrl: process.env.COMPOSIO_GRANOLA_MCP_SERVER_URL ?? '',
       },
+      {
+        // Firecrawl: web scrape/search/extract for the copilot. ORG-WIDE — backed
+        // by OUR single Firecrawl key (API_KEY auth), not a per-user connection,
+        // so it's available to everyone, executed under a shared service user id,
+        // and intentionally has NO "connect your account" card. Enabled once its
+        // auth config id is set (same gate as every other toolkit).
+        slug: 'firecrawl',
+        label: 'Firecrawl',
+        authConfigId: process.env.COMPOSIO_FIRECRAWL_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_FIRECRAWL_TOOLS,
+        orgWide: true,
+        serviceUserId:
+          process.env.COMPOSIO_FIRECRAWL_SERVICE_USER_ID ??
+          'desync-firecrawl-service',
+      },
     ];
     const map: Record<string, ComposioToolkit> = {};
 
@@ -661,6 +701,12 @@ export class ComposioService {
 
   get enabledToolkits(): ComposioToolkit[] {
     return Object.values(this.toolkits);
+  }
+
+  // True when any enabled toolkit is org-wide (backed by our shared key), so the
+  // copilot tool provider can offer it even to users who've connected nothing.
+  get hasOrgWideToolkits(): boolean {
+    return this.enabledToolkits.some((toolkit) => toolkit.orgWide === true);
   }
 
   private get callbackUrl(): string | undefined {
@@ -827,9 +873,17 @@ export class ComposioService {
   // contribute the tools their MCP server advertises (cached, static schemas).
   async getToolsForUser(userId: string): Promise<ComposioTool[]> {
     const connected = await this.getConnectedToolkits(userId);
+    const slugs = new Set<string>(connected);
+    // Org-wide toolkits (e.g. Firecrawl) are backed by OUR shared key rather than
+    // a per-user connection, so expose their tools to every user.
+    for (const toolkit of this.enabledToolkits) {
+      if (toolkit.orgWide) {
+        slugs.add(toolkit.slug);
+      }
+    }
     const out: ComposioTool[] = [];
 
-    for (const slug of connected) {
+    for (const slug of slugs) {
       const toolkit = this.toolkits[slug];
 
       if (!toolkit) {
@@ -933,13 +987,20 @@ export class ComposioService {
       return this.executeMcp(mcpToolkit, userId, toolSlug, args);
     }
 
+    // Org-wide toolkits (e.g. Firecrawl) run under OUR shared service account, so
+    // the call isn't scoped to the end user's own connections.
+    const orgWideToolkit = this.orgWideToolkitForSlug(toolSlug);
+    const effectiveUserId = orgWideToolkit
+      ? this.orgWideServiceUserId(orgWideToolkit)
+      : userId;
+
     try {
       const res = await this.request<{
         data?: unknown;
         error?: unknown;
         successful?: boolean;
       }>('POST', `/tools/execute/${encodeURIComponent(toolSlug)}`, {
-        user_id: userId,
+        user_id: effectiveUserId,
         arguments: args ?? {},
       });
 
@@ -971,6 +1032,22 @@ export class ComposioService {
         Boolean(toolkit.mcpServerUrl) &&
         toolSlug.startsWith(`${toolkit.slug.toUpperCase()}_`),
     );
+  }
+
+  // Org-wide toolkit (e.g. Firecrawl) this slug belongs to — matched by the
+  // `TOOLKIT_` slug prefix, the same convention as the MCP matcher above.
+  private orgWideToolkitForSlug(toolSlug: string): ComposioToolkit | undefined {
+    return this.enabledToolkits.find(
+      (toolkit) =>
+        Boolean(toolkit.orgWide) &&
+        toolSlug.startsWith(`${toolkit.slug.toUpperCase()}_`),
+    );
+  }
+
+  // The shared Composio user id that holds our org-wide connection for a toolkit
+  // (the Firecrawl connected account is created once under this id with our key).
+  private orgWideServiceUserId(toolkit: ComposioToolkit): string {
+    return toolkit.serviceUserId || 'desync-service';
   }
 
   private async mcpRequest(
