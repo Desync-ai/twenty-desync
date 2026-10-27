@@ -24,6 +24,12 @@ import {
 import { agentChatPrepromptState } from '@/ai/states/agentChatPrepromptState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { markGetStartedSeen } from '@/desync-onboarding/utils/getStartedSeen';
+import {
+  getLastOpenPlaybook,
+  getStartedPlaybooks,
+  markPlaybookStarted,
+  setLastOpenPlaybook,
+} from '@/desync-onboarding/utils/playbookProgress';
 import { TextArea } from '@/ui/input/components/TextArea';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
@@ -54,12 +60,14 @@ const INTEGRATION_BY_PLUGIN = new Map(
 );
 
 // Desync "Playbooks" (was "Get started"): one-tap recipes that open the built-in
-// agent pre-loaded with a battle-tested prompt and run it. Most users don't know
-// how to prompt an AI; each card packages a high-value job into a single button
-// so they get the payoff without writing anything. Master-detail layout: pick a
-// play on the left, its detail (what it does, the tools it uses, the run button)
-// opens on the right. Populate keeps the review-before-send flow since it clears
-// the demo data; the other plays auto-run with a hard no-send rule.
+// agent and run a battle-tested job for you. Most users don't know how to prompt
+// an AI, so each card packages a high-value job into a single button. Every play
+// runs as a GUIDED flow (see GUIDED_FLOW): the agent works one step at a time,
+// asks tap-or-type questions via ask_questions, and previews before it writes, so
+// non-technical users are handheld rather than dumped a wall of output. Master-
+// detail layout: pick a play on the left, its detail (what it does, the tools it
+// uses, the run button) opens on the right. The Populate/setup play additionally
+// reads the user's own website for context before it does anything.
 
 const POPULATE_KEY = 'populate';
 
@@ -78,6 +86,19 @@ const OUTREACH_BRIEF =
 // but it must never send a message or take an irreversible action on its own.
 const NO_SEND_RULE =
   'Hard rule: never send any email or message yourself, and never take an irreversible action, under any circumstances. Only prepare drafts and proposed changes for me to review. I will send anything that goes out.';
+
+// Turns a play from a single fire-and-forget job into a guided, one-step-at-a-time
+// conversation. The copilot's ask_questions tool is always available and pauses the
+// turn for a tap-or-type answer, so the agent genuinely waits for the user at each
+// step. Appended to every play so non-technical users are handheld, not dumped a
+// wall of output.
+const GUIDED_FLOW =
+  'How to run this: guide me through it like a patient assistant, one step at a time, and keep me in control. ' +
+  '(1) Do not dump a long plan or try to do everything in a single turn. Take the smallest useful next step, then check in. ' +
+  '(2) Whenever you need a decision or any information from me, ask using the ask_questions tool. Offer tappable choices when the answer is a short list; for anything open-ended, ask me to type it. Ask one focused thing at a time (two at most), never a long questionnaire. ' +
+  '(3) Before you create, change, or delete records, show me a short, plain-language preview of what you plan to do and get my go-ahead. A summary plus a small sample is enough for bulk changes; do not make me confirm every single record. ' +
+  '(4) If you need a tool or integration I have not connected yet, tell me which one and that I can connect it under Settings then Integrations, and carry on once I confirm it is connected. ' +
+  '(5) Keep it simple and non-technical: explain things in plain language, and never show raw IDs, JSON, code, or the names of the tools or data sources you use behind the scenes.';
 
 const ENRICH_PROMPT =
   'Enrich the people already in my CRM. Start with the 50 most recently added People that have missing details. For each one, fill in any missing job title, company, work email, LinkedIn URL and location using my connected tools and the web. Update the records in place, do not create duplicates, and do not invent anything: if you cannot verify a field, leave it blank. When you are done, tell me how many people you updated and which fields were most often missing.';
@@ -388,6 +409,28 @@ const StyledChip = styled.button`
   }
 `;
 
+// Soft "start here" nudge on the setup play so new users do that one first. Not a
+// hard lock: already-set-up users can still run anything, it just points the way.
+const StyledStartHereBadge = styled.span`
+  border: 1px solid ${themeCssVariables.color.blue};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.color.blue};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+`;
+
+// Quiet "you've done this" tick on a play the user has already launched.
+const StyledDoneCheck = styled.span`
+  color: ${themeCssVariables.font.color.light};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  margin-left: auto;
+`;
+
 export const GetStartedPage = () => {
   const { t } = useLingui();
   const navigate = useNavigate();
@@ -395,26 +438,70 @@ export const GetStartedPage = () => {
   const { openAskAiPageWithPreprompt } = useOpenAskAiPageWithPreprompt();
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
+  const workspaceId = currentWorkspace?.id;
+
   const [leadsSource, setLeadsSource] = useState('');
   // Which play's detail is open. Null = nothing selected yet.
   const [activePlaybook, setActivePlaybook] = useState<string | null>(null);
+  // Plays the user has already launched (per workspace, this browser). Drives the
+  // moving "next step" nudge so it advances off a play once it has been started.
+  const [startedPlays, setStartedPlays] = useState<Set<string>>(new Set());
 
-  // Desync: once the user has reached Playbooks, don't auto-land them here
-  // again on future entries to this workspace (the sidebar link still works).
+  // On entering Playbooks: mark it seen, load progress, and restore which play is
+  // open. We reopen the play they last had open (so a connect/OAuth round-trip
+  // returns to the same place) or, failing that, the recommended next step (hand-
+  // holding). `prev ?? ...` so we never clobber a detail the user already opened.
   useEffect(() => {
-    markGetStartedSeen(currentWorkspace?.id);
-  }, [currentWorkspace?.id]);
+    if (!workspaceId) {
+      return;
+    }
+    markGetStartedSeen(workspaceId);
+    const started = getStartedPlaybooks(workspaceId);
+    setStartedPlays(started);
+    const lastOpen = getLastOpenPlaybook(workspaceId);
+    const nextStep = PLAY_LIST.map((play) => play.key).find(
+      (key) => !started.has(key),
+    );
+    setActivePlaybook((prev) => prev ?? lastOpen ?? nextStep ?? null);
+  }, [workspaceId]);
 
   const openCopilotWith = (text: string) => {
     setAgentChatPreprompt({ text, mode: 'PREFILL' });
     navigate('/chat');
   };
 
+  // Open a play's detail and remember it, so a connect/OAuth round-trip returns
+  // to the same open play.
+  const selectPlay = (key: string) => {
+    const next = activePlaybook === key ? null : key;
+    setActivePlaybook(next);
+    setLastOpenPlaybook(workspaceId, next);
+  };
+
+  // Record that a play has been launched, which advances the "next step" nudge.
+  const markStarted = (key: string) => {
+    markPlaybookStarted(workspaceId, key);
+    setStartedPlays((prev) => {
+      if (prev.has(key)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+  };
+
+  // The play to nudge next = the first in the list the user hasn't started yet.
+  const recommendedNext =
+    PLAY_LIST.map((play) => play.key).find((key) => !startedPlays.has(key)) ??
+    null;
+
   // Plays fire the agent straight away: one tap, it opens and runs. Every play
   // carries the no-send rule so the agent can draft but never send.
   const runPlaybook = (playbook: Playbook) => {
+    markStarted(playbook.key);
     openAskAiPageWithPreprompt({
-      text: `${playbook.prompt}\n\n${NO_SEND_RULE}`,
+      text: `${playbook.prompt}\n\n${GUIDED_FLOW}\n\n${NO_SEND_RULE}`,
       mode: 'SEND',
       model: playbook.model,
     });
@@ -423,17 +510,33 @@ export const GetStartedPage = () => {
   const buildPopulatePrompt = () => {
     const src = leadsSource.trim();
     return [
-      'Help me set up my CRM. Please do these in order:',
-      '1. Remove the sample/demo data that came with this workspace (the example companies, people, notes and opportunities) so I start clean. Confirm with me before deleting anything.',
+      'Help me set up my CRM. We will do this together, one step at a time.',
+      // Step 0: understand the business from the user's own website before touching data.
+      "First, get to know my business. If you can tell my company's website from what you already know about me, show it to me and ask me to confirm it; otherwise ask me for it (I can type it in). Then read my website from the web and give me a 2 to 3 sentence, plain-language summary of what my company does and who we serve, and ask me to confirm or correct it. Use what you learn to guide the rest of the setup.",
+      'Once I have confirmed that, work through the following in order, checking in with me at each step:',
+      '1. Clear out the sample/demo data that came with this workspace (the example companies, people, notes and opportunities) so I start clean. Show me what you are about to remove and get my yes before you delete anything.',
       `2. Add my real customers and leads: pull them from the tools I have connected (email, calendar, meeting notes, HubSpot, Salesforce, and so on)${
         src ? `, and from here: ${src}` : ''
-      }. Create the matching People and Companies.`,
+      }. Create the matching People and Companies. Show me a short preview and a sample before you add them in bulk.`,
       '3. Where it is clearly warranted (do not force it or invent anything), also create Opportunities and add Notes. For example: if you see payments I RECEIVED, invoices, or signed or won deals, add matching Opportunities and link them to the right person or company; add a Note when there is useful context like a deal thread or meeting summary. Do NOT turn my own purchases or vendor subscriptions into Opportunities, and skip this step entirely when there is no obvious signal.',
       '4. If, after checking my connected tools and any source above, there are no real contacts to add, then (and only then) search the web for 3 to 5 leads that fit my business and add them as People and Companies, tagged as AI-suggested.',
       'When you are done, give me a short summary of what you added and 3 follow-ups I should do this week.',
+      GUIDED_FLOW,
+      NO_SEND_RULE,
     ]
       .filter(Boolean)
       .join('\n');
+  };
+
+  // Setup play: auto-start the guided flow (fresh thread) instead of prefilling a
+  // wall of text for the user to read and send. Safe to auto-run because the prompt
+  // makes the agent preview and confirm before it deletes or bulk-writes anything.
+  const runGuidedPopulate = () => {
+    markStarted(POPULATE_KEY);
+    openAskAiPageWithPreprompt({
+      text: buildPopulatePrompt(),
+      mode: 'SEND',
+    });
   };
 
   const activePlay =
@@ -479,7 +582,7 @@ export const GetStartedPage = () => {
       <StyledBlock>
         <StyledSectionLabel>{t`2. Let the agent build your CRM`}</StyledSectionLabel>
         <StyledStepHint>
-          {t`Opens the agent with a ready-to-send plan: it clears the sample data (confirming first), then pulls your contacts and companies from whatever you connected. If you connected nothing, it finds a few leads for you.`}
+          {t`Opens your AI agent and walks you through setup, one step at a time: it reads your website to understand your business, clears the sample data (asking first), then pulls in your real contacts and companies from whatever you connected. If you connected nothing, it finds a few leads for you.`}
         </StyledStepHint>
         <TextArea
           textAreaId="get-started-leads-source"
@@ -495,7 +598,7 @@ export const GetStartedPage = () => {
             variant="solid"
             color="accent"
             startIcon={<IconSparkles size={16} />}
-            onClick={() => openCopilotWith(buildPopulatePrompt())}
+            onClick={() => runGuidedPopulate()}
           >
             {t`Build my CRM`}
           </Button>
@@ -575,7 +678,7 @@ export const GetStartedPage = () => {
         <StyledHeader>
           <StyledTitle>{t`Playbooks`}</StyledTitle>
           <StyledSubtitle>
-            {t`Pick a play and your built-in AI agent does the work for you. One tap, no prompting needed.`}
+            {t`Pick a play and your built-in AI agent walks you through it, step by step. It asks before it changes anything, and you never have to write a prompt.`}
           </StyledSubtitle>
         </StyledHeader>
 
@@ -584,11 +687,7 @@ export const GetStartedPage = () => {
             {PLAY_LIST.map((play) => (
               <StyledPlayCard
                 key={play.key}
-                onClick={() =>
-                  setActivePlaybook((prev) =>
-                    prev === play.key ? null : play.key,
-                  )
-                }
+                onClick={() => selectPlay(play.key)}
                 style={
                   activePlaybook === play.key
                     ? { borderColor: themeCssVariables.color.blue }
@@ -598,6 +697,14 @@ export const GetStartedPage = () => {
                 <StyledPlayCardTop>
                   <play.Icon size={18} />
                   <StyledPlayCardTitle>{play.title}</StyledPlayCardTitle>
+                  {play.key === recommendedNext && (
+                    <StyledStartHereBadge>
+                      {startedPlays.size === 0 ? t`Start here` : t`Next step`}
+                    </StyledStartHereBadge>
+                  )}
+                  {startedPlays.has(play.key) && (
+                    <StyledDoneCheck aria-label={t`Started`}>✓</StyledDoneCheck>
+                  )}
                 </StyledPlayCardTop>
                 <StyledPlayCardOutcome>{play.outcome}</StyledPlayCardOutcome>
               </StyledPlayCard>
