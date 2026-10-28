@@ -910,7 +910,7 @@ export const FioAdsPage = () => {
           <StyledHeaderText>
             <StyledTitle>{t`Launch a Fio ad`}</StyledTitle>
             <StyledBlurb>
-              {t`Fio is a Catholic podcast network`}{' '}
+              {t`Fio is a Catholic streaming app that hosts thousands of podcasts, songs, and audiobooks created by faithful Catholics`}{' '}
               (
               <a href="https://fio.fm/" target="_blank" rel="noopener noreferrer">
                 fio.fm
