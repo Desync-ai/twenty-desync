@@ -111,6 +111,9 @@ const LOOKALIKES_PROMPT =
 
 const FOLLOWUPS_PROMPT = `Help me see who I have gone quiet on and reach out on my own terms. Using my CRM activity (and email or calendar if connected), find my open opportunities with no activity in the last two weeks, and people I have emailed or met with before but have not contacted recently. Give me a short, ranked list: the person, our last contact and when, the open deal or reason it matters, and a one-line suggested angle. Create a "Follow up with <name>" task for each so it is on my list. Do NOT draft any messages yet. Only when I pick a person and ask you to, draft a single personalized follow-up for that one person for me to review and send myself. ${OUTREACH_BRIEF} Never send anything yourself.`;
 
+const LINKEDIN_CUSTOMERS_PROMPT =
+  'Go through my LinkedIn Seen list and find the people who would be good customers for my business, then add the best ones to my CRM. First look at my LinkedIn Seen records (the people the Desync LinkedIn extension saved as I browsed LinkedIn). If I have none, or that list does not exist yet, stop and tell me to install the Desync LinkedIn browser extension and browse LinkedIn to capture some people first, and do nothing else. Otherwise, work out what my business does and who my ideal customer is from my company profile and the customers and won deals already in my CRM. Then review the people in my LinkedIn Seen list (most recent first, up to 50) and judge each one against that ideal customer using their name, headline, company and role. For the ones who are a good fit, add them to my People as new contacts (do not duplicate people I already have), link their company, tag them as AI-suggested from LinkedIn, and add a one-line note on each saying why they fit; then mark those LinkedIn Seen people as added so they do not come up again. Skip anyone who is clearly not a fit. Do not draft or send any outreach. When you are done, show me who you added and the reason for each, and roughly how many you skipped and why.';
+
 type Playbook = {
   key: string;
   title: string;
@@ -179,6 +182,17 @@ const PLAYBOOKS: Playbook[] = [
     prompt: FOLLOWUPS_PROMPT,
     hint: 'Lists who to reach out to and drafts one at a time, only when you ask. Nothing is ever sent for you.',
     plugins: ['gmail', 'outlook'],
+    model: 'BALANCED',
+  },
+  {
+    key: 'linkedin-customers',
+    title: 'Find customers in LinkedIn Seen',
+    outcome:
+      'Go through the people the Desync LinkedIn extension captured, find the ones who fit your business, and add the best as new contacts with a reason. Needs people in your LinkedIn Seen list.',
+    cta: 'Find customers from LinkedIn',
+    Icon: IconSparkles,
+    prompt: LINKEDIN_CUSTOMERS_PROMPT,
+    hint: 'Only works once the Desync LinkedIn extension has saved people to your LinkedIn Seen list. Adds good-fit people as new contacts; never sends anything.',
     model: 'BALANCED',
   },
 ];
