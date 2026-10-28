@@ -256,7 +256,12 @@ export class DesyncOnboardingService {
     }>;
     publishableKey: string;
   }> {
-    this.assertBackend();
+    // Enterprise self-host (no paywall / no billing backend): no catalog to show,
+    // so return an empty one instead of throwing and 500-ing the page that fires
+    // this query on load (which otherwise breaks the choose-workspace/onboarding UI).
+    if (!this.baseUrl) {
+      return { plans: [], publishableKey: '' };
+    }
 
     const response = await this.get('/billing-plans');
 
@@ -358,6 +363,27 @@ export class DesyncOnboardingService {
     stripeActive: boolean;
     cancelAtPeriodEnd: boolean;
   }> {
+    // Enterprise self-host (no paywall): present a flat "Enterprise" plan so the
+    // sidebar widget and Plan & Billing show "Enterprise" (not "Free"), with no
+    // leads/AI meters or Subscribe CTA. Gated on the same env as the entitlement
+    // allowlist, so the hosted multi-tenant CRM is unaffected (empty => skip).
+    if ((process.env.ENTERPRISE_ALLOWED_EMAIL_DOMAINS ?? '').trim() !== '') {
+      return {
+        hasSubscription: true,
+        planLevel: 'Enterprise',
+        isPaidPlan: true,
+        current: true,
+        cadence: null,
+        periodEnd: null,
+        quota: null,
+        used: null,
+        aiCostCents: null,
+        aiCostQuotaCents: null,
+        stripeActive: false,
+        cancelAtPeriodEnd: false,
+      };
+    }
+
     const fallback = {
       hasSubscription: false,
       planLevel: null,
