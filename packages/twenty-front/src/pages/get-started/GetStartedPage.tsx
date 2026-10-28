@@ -111,6 +111,9 @@ const LOOKALIKES_PROMPT =
 
 const FOLLOWUPS_PROMPT = `Help me see who I have gone quiet on and reach out on my own terms. Using my CRM activity (and email or calendar if connected), find my open opportunities with no activity in the last two weeks, and people I have emailed or met with before but have not contacted recently. Give me a short, ranked list: the person, our last contact and when, the open deal or reason it matters, and a one-line suggested angle. Create a "Follow up with <name>" task for each so it is on my list. Do NOT draft any messages yet. Only when I pick a person and ask you to, draft a single personalized follow-up for that one person for me to review and send myself. ${OUTREACH_BRIEF} Never send anything yourself.`;
 
+const LINKEDIN_CUSTOMERS_PROMPT =
+  'Go through my LinkedIn Seen list and find the people who would be good customers for my business, then add the best ones to my CRM as new contacts. Work autonomously: do not interview me. Do not ask me what my business does or who my ideal customer is, and do not check in between research steps. The only time you pause for me is the single preview in step 4. Step 1: look at my LinkedIn Seen records (the people the Desync LinkedIn extension saved as I browsed LinkedIn). If I have none, or that list does not exist yet, stop and tell me to install the Desync LinkedIn browser extension and browse LinkedIn to capture some people first, and do nothing else. Step 2: silently work out what my business does and who my ideal customer is from my company profile, my companies, my won deals and the people already in my CRM; if there is genuinely nothing to go on, make your best guess from whatever is there and briefly say what you assumed, rather than asking me. Step 3: review the people in my LinkedIn Seen list (most recent first, up to 50) in one pass and judge each against that ideal customer using their name, headline, company and role; pick the good-fit ones, skipping anyone already in my People and anyone clearly not a fit. Step 4 (the only check-in): show me a short preview of the good-fit people you plan to add, each with a one-line reason, plus roughly how many you are skipping and why, and ask me once to go ahead; do not make me confirm them one at a time. Step 5: once I say go, add the approved people to my People as new contacts, link each to their company, tag them as AI-suggested from LinkedIn, add the one-line reason as a note on each, and mark those LinkedIn Seen people as added so they do not come up again; then show me who you added. Never draft or send any outreach, email or message, under any circumstances.';
+
 type Playbook = {
   key: string;
   title: string;
@@ -179,6 +182,17 @@ const PLAYBOOKS: Playbook[] = [
     prompt: FOLLOWUPS_PROMPT,
     hint: 'Lists who to reach out to and drafts one at a time, only when you ask. Nothing is ever sent for you.',
     plugins: ['gmail', 'outlook'],
+    model: 'BALANCED',
+  },
+  {
+    key: 'linkedin-customers',
+    title: 'Find customers in LinkedIn Seen',
+    outcome:
+      'Go through the people the Desync LinkedIn extension captured, find the ones who fit your business, and add the best as new contacts with a reason. Needs people in your LinkedIn Seen list.',
+    cta: 'Find customers from LinkedIn',
+    Icon: IconSparkles,
+    prompt: LINKEDIN_CUSTOMERS_PROMPT,
+    hint: 'Only works once the Desync LinkedIn extension has saved people to your LinkedIn Seen list. Adds good-fit people as new contacts; never sends anything.',
     model: 'BALANCED',
   },
 ];
