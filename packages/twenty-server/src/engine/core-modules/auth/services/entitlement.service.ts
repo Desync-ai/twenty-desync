@@ -62,6 +62,26 @@ export class EntitlementService {
       return true;
     }
 
+    // Enterprise self-host (no paywall): an env-configured allowlist of customer
+    // email domains is entitled without any billing subscription. Empty/unset =>
+    // no effect, so the hosted multi-tenant CRM keeps its billing-gated behavior.
+    const enterpriseAllowedDomains = (
+      process.env.ENTERPRISE_ALLOWED_EMAIL_DOMAINS ?? ''
+    )
+      .split(',')
+      .map((domain) => domain.trim().toLowerCase())
+      .filter((domain) => domain.length > 0);
+
+    if (enterpriseAllowedDomains.length > 0) {
+      const emailDomain = normalizedEmail.slice(
+        normalizedEmail.lastIndexOf('@') + 1,
+      );
+
+      if (enterpriseAllowedDomains.includes(emailDomain)) {
+        return true;
+      }
+    }
+
     const pool = this.getPool();
 
     if (!pool) {
