@@ -507,6 +507,50 @@ export const COMPOSIO_FIRECRAWL_TOOLS: ComposioTool[] = [
   },
 ];
 
+// GoHighLevel (location / sub-account scope) via Composio. BYO OAuth through our
+// own HighLevel marketplace app. Curated CRM tools: contacts, opportunities,
+// conversations, calendars (read + safe writes).
+export const COMPOSIO_HIGHLEVEL_TOOLS: ComposioTool[] = [
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_SEARCH_CONTACTS_ADVANCED', description: 'Search HighLevel contacts with advanced filters.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_GET_CONTACT', description: 'Get a HighLevel contact by id.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_CREATE_CONTACT', description: 'Create a HighLevel contact.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_UPDATE_CONTACT', description: "Update a HighLevel contact's fields." },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_CREATE_NOTE', description: 'Add a note to a HighLevel contact.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_SEARCH_OPPORTUNITIES_ADVANCED', description: 'Search HighLevel opportunities with advanced filters.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_GET_PIPELINES', description: 'List HighLevel pipelines and their stages.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_CREATE_OPPORTUNITY', description: 'Create a HighLevel opportunity in a pipeline.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_UPDATE_OPPORTUNITY', description: 'Update a HighLevel opportunity (stage, value, status).' },
+  { slug: 'HIGHLEVEL_LOCATION_CONVERSATIONS_SEARCH_CONVERSATION', description: 'Search HighLevel conversations for the location.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONVERSATIONS_SEND_A_NEW_MESSAGE', description: 'Send a message to a contact (SMS, email, etc.).' },
+  { slug: 'HIGHLEVEL_LOCATION_CALENDARS_GET_SLOTS', description: 'Get free appointment slots for a calendar.' },
+  { slug: 'HIGHLEVEL_LOCATION_CALENDARS_CREATE_APPOINTMENT', description: 'Book an appointment on a HighLevel calendar.' },
+];
+
+// OneDrive (Microsoft Graph) via Composio. BYO OAuth through our own Azure AD
+// app. Read + safe writes; destructive delete/move/permission tools left out.
+export const COMPOSIO_ONEDRIVE_TOOLS: ComposioTool[] = [
+  { slug: 'ONE_DRIVE_SEARCH_ITEMS', description: "Search the user's OneDrive for files and folders by query." },
+  { slug: 'ONE_DRIVE_ONEDRIVE_LIST_ITEMS', description: 'List files and folders in a OneDrive folder (root by default).' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_FIND_FILE', description: 'Find a file by name within a OneDrive folder.' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_FIND_FOLDER', description: 'Find a folder by name in OneDrive.' },
+  { slug: 'ONE_DRIVE_GET_ITEM', description: "Get a drive item's metadata by id." },
+  { slug: 'ONE_DRIVE_DOWNLOAD_FILE', description: 'Download a file from OneDrive by item id so the assistant can read it.' },
+  { slug: 'ONE_DRIVE_LIST_DRIVES', description: 'List the drives available to the connected account.' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_CREATE_FOLDER', description: 'Create a folder in OneDrive.' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_UPLOAD_FILE', description: 'Upload a file to a OneDrive folder.' },
+];
+
+// SharePoint (Microsoft Graph) via Composio. BYO OAuth through our own Azure AD
+// app. Note: SharePoint document/site *reads* live in the one_drive toolkit
+// (shared Graph surface); this dedicated toolkit exposes folder/list writes
+// plus user lookup.
+export const COMPOSIO_SHAREPOINT_TOOLS: ComposioTool[] = [
+  { slug: 'SHARE_POINT_SHAREPOINT_CREATE_FOLDER', description: 'Create a folder in SharePoint.' },
+  { slug: 'SHARE_POINT_SHAREPOINT_CREATE_LIST', description: 'Create a new SharePoint list.' },
+  { slug: 'SHARE_POINT_SHAREPOINT_CREATE_LIST_ITEM', description: 'Add an item to a SharePoint list.' },
+  { slug: 'SHARE_POINT_SHAREPOINT_FIND_USER', description: 'Find a user in SharePoint / Microsoft Graph.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -643,6 +687,31 @@ export class ComposioService {
         label: 'Apollo',
         authConfigId: process.env.COMPOSIO_APOLLO_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_APOLLO_TOOLS,
+      },
+      {
+        // GoHighLevel (location / sub-account scope). BYO OAuth via our own
+        // HighLevel marketplace app (client id + secret on the auth config).
+        slug: 'highlevel_location',
+        label: 'GoHighLevel',
+        authConfigId:
+          process.env.COMPOSIO_HIGHLEVEL_LOCATION_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_HIGHLEVEL_TOOLS,
+      },
+      {
+        // OneDrive (Microsoft Graph). BYO OAuth via our own Azure AD app.
+        slug: 'one_drive',
+        label: 'OneDrive',
+        authConfigId: process.env.COMPOSIO_ONE_DRIVE_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_ONEDRIVE_TOOLS,
+      },
+      {
+        // SharePoint (Microsoft Graph). BYO OAuth via our own Azure AD app.
+        // SharePoint doc/site reads live in the one_drive toolkit; this exposes
+        // folder/list writes + user lookup.
+        slug: 'share_point',
+        label: 'SharePoint',
+        authConfigId: process.env.COMPOSIO_SHARE_POINT_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_SHAREPOINT_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.
