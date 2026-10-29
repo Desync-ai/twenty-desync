@@ -551,6 +551,25 @@ export const COMPOSIO_SHAREPOINT_TOOLS: ComposioTool[] = [
   { slug: 'SHARE_POINT_SHAREPOINT_FIND_USER', description: 'Find a user in SharePoint / Microsoft Graph.' },
 ];
 
+// Asana via Composio. OAuth2 (Composio-managed OAuth available), gated on
+// COMPOSIO_ASANA_AUTH_CONFIG_ID. Curated read-biased task/project tools; no
+// delete/duplicate (destructive) tools.
+export const COMPOSIO_ASANA_TOOLS: ComposioTool[] = [
+  { slug: 'ASANA_GET_CURRENT_USER', description: 'Get the connected Asana user and their workspaces.' },
+  { slug: 'ASANA_GET_MULTIPLE_PROJECTS', description: 'List Asana projects, filterable by workspace or team.' },
+  { slug: 'ASANA_GET_A_PROJECT', description: 'Get an Asana project by id.' },
+  { slug: 'ASANA_GET_MULTIPLE_TASKS', description: 'List Asana tasks, filterable by project, section, assignee, or workspace.' },
+  { slug: 'ASANA_GET_A_TASK', description: 'Get an Asana task by id.' },
+  { slug: 'ASANA_GET_STORIES_FOR_TASK', description: "Get a task's stories (comments and activity)." },
+  { slug: 'ASANA_CREATE_A_TASK', description: 'Create an Asana task.' },
+  { slug: 'ASANA_CREATE_SUBTASK', description: 'Create a subtask under an Asana task.' },
+  { slug: 'ASANA_CREATE_TASK_COMMENT', description: 'Add a comment (story) to an Asana task.' },
+  { slug: 'ASANA_ADD_TASK_TO_SECTION', description: 'Move a task into a project section.' },
+  { slug: 'ASANA_CREATE_A_PROJECT', description: 'Create an Asana project.' },
+  { slug: 'ASANA_CREATE_SECTION_IN_PROJECT', description: 'Create a section in an Asana project.' },
+  { slug: 'ASANA_CREATE_PROJECT_STATUS_UPDATE', description: 'Post a status update on an Asana project.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -712,6 +731,14 @@ export class ComposioService {
         label: 'SharePoint',
         authConfigId: process.env.COMPOSIO_SHARE_POINT_AUTH_CONFIG_ID ?? '',
         tools: COMPOSIO_SHAREPOINT_TOOLS,
+      },
+      {
+        // Asana via Composio. OAuth2 (Composio-managed OAuth available); gated
+        // on COMPOSIO_ASANA_AUTH_CONFIG_ID, so it ships dormant until set.
+        slug: 'asana',
+        label: 'Asana',
+        authConfigId: process.env.COMPOSIO_ASANA_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_ASANA_TOOLS,
       },
       {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.

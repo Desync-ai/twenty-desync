@@ -95,6 +95,16 @@ export const INTEGRATIONS: IntegrationDef[] = [
     connectedBlurb: 'Available to your AI assistant',
   },
   {
+    plugin: 'asana',
+    name: 'Asana',
+    kind: 'connect',
+    tags: ['Project Management'],
+    logoDomain: 'asana.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant read & manage your Asana tasks, projects & sections',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
     plugin: 'granola_mcp',
     name: 'Granola',
     kind: 'connect',
