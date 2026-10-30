@@ -6,7 +6,7 @@ import { BlockNoteView } from '@blocknote/mantine';
 import { SuggestionMenuController } from '@blocknote/react';
 import { useLingui } from '@lingui/react/macro';
 import { styled } from '@linaria/react';
-import { type ClipboardEvent, useContext } from 'react';
+import { type ClipboardEvent, useCallback, useContext } from 'react';
 import { type BLOCK_SCHEMA } from '@/blocknote-editor/blocks/Schema';
 import { getSlashMenu } from '@/blocknote-editor/utils/getSlashMenu';
 import { CustomMentionMenu } from '@/blocknote-editor/components/CustomMentionMenu';
@@ -171,24 +171,31 @@ export const BlockEditor = ({
   const blockNoteTheme = colorScheme === 'light' ? 'light' : 'dark';
   const getMentionItems = useMentionMenu(editor);
 
-  const getSlashMenuItems = async (query: string) => {
-    const filtered = filterSuggestionItems<SuggestionItem>(
-      getSlashMenu(editor),
-      query,
-    );
+  // BlockNote reloads a suggestion menu's items (and resets its selection)
+  // whenever getItems changes identity, so a new function on every render
+  // turns each editor re-render into another load and state update while a
+  // menu is open, which can chain into React's maximum update depth (#185).
+  const getSlashMenuItems = useCallback(
+    async (query: string) => {
+      const filtered = filterSuggestionItems<SuggestionItem>(
+        getSlashMenu(editor),
+        query,
+      );
 
-    if (filtered.length > 0) {
-      return filtered;
-    }
+      if (filtered.length > 0) {
+        return filtered;
+      }
 
-    return [
-      {
-        title: t`Close menu`,
-        Icon: IconX,
-        onItemClick: () => editor.getExtension(SuggestionMenu)?.closeMenu(),
-      },
-    ];
-  };
+      return [
+        {
+          title: t`Close menu`,
+          Icon: IconX,
+          onItemClick: () => editor.getExtension(SuggestionMenu)?.closeMenu(),
+        },
+      ];
+    },
+    [editor, t],
+  );
 
   const handleFocus = () => {
     onFocus?.();
@@ -227,7 +234,7 @@ export const BlockEditor = ({
         />
         <SuggestionMenuController
           triggerCharacter="@"
-          getItems={async (query) => getMentionItems(query)}
+          getItems={getMentionItems}
           suggestionMenuComponent={CustomMentionMenu}
         />
       </BlockNoteView>
