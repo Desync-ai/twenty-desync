@@ -11,6 +11,7 @@ import {
   type DesyncPlan,
 } from '@/desync-onboarding/components/DesyncCheckoutForm';
 import { DESYNC_BILLING_PLANS_QUERY } from '@/desync-onboarding/graphql/desyncBilling';
+import { captureDesyncBillingEvent } from '@/desync-onboarding/utils/captureDesyncBillingEvent';
 import { StyledOnboardingStepHeading } from '@/onboarding/components/StyledOnboardingStepHeading';
 import { StyledOnboardingStepPage } from '@/onboarding/components/StyledOnboardingStepPage';
 import { StyledOnboardingStepSubtitle } from '@/onboarding/components/StyledOnboardingStepSubtitle';
@@ -52,6 +53,11 @@ export const DesyncPaywall = () => {
   const { data, loading } = useQuery(DESYNC_BILLING_PLANS_QUERY);
   const { logout } = useLogout();
 
+  // Once per mount: the entitlement gate keeps this mounted while it polls.
+  useEffect(() => {
+    captureDesyncBillingEvent('paywall_viewed', { surface: 'paywall' });
+  }, []);
+
   const publishableKey: string | undefined =
     data?.desyncBillingPlans?.publishableKey;
 
@@ -82,7 +88,9 @@ export const DesyncPaywall = () => {
   return (
     <StyledOnboardingStepPage>
       <StyledOnboardingStepHeading>
-        <StyledOnboardingStepTitle>Subscribe to continue</StyledOnboardingStepTitle>
+        <StyledOnboardingStepTitle>
+          Subscribe to continue
+        </StyledOnboardingStepTitle>
         <StyledOnboardingStepSubtitle>
           Your plan has expired. Choose a plan to get back into your workspace.
           Everything is right where you left it.
@@ -92,11 +100,12 @@ export const DesyncPaywall = () => {
       <StyledBlock>
         {stripePromise !== null ? (
           <Elements stripe={stripePromise}>
-            <DesyncCheckoutForm plans={plans} />
+            <DesyncCheckoutForm plans={plans} surface="paywall" />
           </Elements>
         ) : (
           <StyledStatus>
-            Billing isn’t configured on this environment. Please contact support.
+            Billing isn’t configured on this environment. Please contact
+            support.
           </StyledStatus>
         )}
       </StyledBlock>
