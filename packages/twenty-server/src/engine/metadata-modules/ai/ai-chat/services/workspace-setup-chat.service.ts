@@ -175,7 +175,12 @@ export class WorkspaceSetupChatService {
           },
           locale,
         }),
-        modelId: AUTO_SELECT_MODEL_ID_BY_TIER.fast,
+        // Desync: the setup kickoff builds the whole CRM autonomously, which the
+        // fast model (Haiku) does poorly — run it on the smart tier (Opus) instead.
+        // Credits are already guaranteed here: startWorkspaceSetupChat returns
+        // UNAVAILABLE above unless hasAvailableCredits, and the Desync per-user
+        // budget gate fails closed per turn, so this only runs when they can pay.
+        modelId: AUTO_SELECT_MODEL_ID_BY_TIER.smart,
       });
 
     if (!isDefined(kickoffResult)) {
