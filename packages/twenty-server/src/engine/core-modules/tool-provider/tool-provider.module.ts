@@ -1,7 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { CatholicInstitutionsModule } from 'src/engine/core-modules/catholic-institutions/catholic-institutions.module';
 import { ComposioModule } from 'src/engine/core-modules/composio/composio.module';
+import { FeatureFlagModule } from 'src/engine/core-modules/feature-flag/feature-flag.module';
 import { PocketModule } from 'src/engine/core-modules/pocket/pocket.module';
 import { FathomModule } from 'src/engine/core-modules/fathom/fathom.module';
 import { FileEntity } from 'src/engine/core-modules/file/entities/file.entity';
@@ -9,6 +11,7 @@ import { FilesFieldModule } from 'src/engine/core-modules/file/files-field/files
 import { RecordCrudModule } from 'src/engine/core-modules/record-crud/record-crud.module';
 import { TOOL_PROVIDERS } from 'src/engine/core-modules/tool-provider/constants/tool-providers.token';
 import { ActionToolProvider } from 'src/engine/core-modules/tool-provider/providers/action-tool.provider';
+import { CatholicInstitutionsToolProvider } from 'src/engine/core-modules/tool-provider/providers/catholic-institutions-tool.provider';
 import { ComposioToolProvider } from 'src/engine/core-modules/tool-provider/providers/composio-tool.provider';
 import { PocketToolProvider } from 'src/engine/core-modules/tool-provider/providers/pocket-tool.provider';
 import { FathomToolProvider } from 'src/engine/core-modules/tool-provider/providers/fathom-tool.provider';
@@ -62,6 +65,8 @@ import { ToolRegistryService } from './services/tool-registry.service';
 @Module({
   imports: [
     ApplicationTranslationCatalogModule,
+    CatholicInstitutionsModule,
+    FeatureFlagModule,
     ComposioModule,
     PocketModule,
     FathomModule,
@@ -93,6 +98,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
     RecordFilesResolverService,
     provideWorkspaceScopedRepository(FileEntity),
     ActionToolProvider,
+    CatholicInstitutionsToolProvider,
     ComposioToolProvider,
     PocketToolProvider,
     FathomToolProvider,
@@ -113,6 +119,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
       provide: TOOL_PROVIDERS,
       useFactory: (
         actionProvider: ActionToolProvider,
+        catholicInstitutionsProvider: CatholicInstitutionsToolProvider,
         composioProvider: ComposioToolProvider,
         pocketProvider: PocketToolProvider,
         fathomProvider: FathomToolProvider,
@@ -127,6 +134,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
         dashboardProvider: DashboardToolProvider,
       ) => [
         actionProvider,
+        catholicInstitutionsProvider,
         composioProvider,
         pocketProvider,
         fathomProvider,
@@ -142,6 +150,7 @@ import { ToolRegistryService } from './services/tool-registry.service';
       ],
       inject: [
         ActionToolProvider,
+        CatholicInstitutionsToolProvider,
         ComposioToolProvider,
         PocketToolProvider,
         FathomToolProvider,
