@@ -1,6 +1,6 @@
-
 import {
   extractSessionCookie,
+  hasClearingCookie,
   postMetadataOperationWithHeaders,
   signInWithCookieCapture,
 } from 'test/integration/graphql/suites/auth/user-sessions/utils/sign-in-with-cookie-capture.util';
@@ -42,4 +42,30 @@ describe('successful session cookie authentication (integration)', () => {
     });
   });
 
+  // A page that signs in over its live session (e.g. /verify?loginToken=…)
+  // still has requests in flight carrying the old cookie. Rejecting them
+  // logged the user out, and the clearing cookie on their responses wiped the
+  // session that had just replaced it.
+  it('should keep authenticating a just-superseded session cookie without clearing the cookie', async () => {
+    const replacingSignInResponse = await signInWithCookieCapture({
+      originHeader: ALLOWED_ORIGIN,
+      cookieHeader: sessionCookieHeader,
+    });
+
+    expect(extractSessionCookie(replacingSignInResponse)).toBeDefined();
+
+    const stragglerResponse = await postMetadataOperationWithHeaders(
+      currentUserIdentityQueryFactory(),
+      {
+        originHeader: ALLOWED_ORIGIN,
+        cookieHeader: sessionCookieHeader,
+      },
+    );
+
+    expect(stragglerResponse.body.errors).toBeUndefined();
+    expect(stragglerResponse.body.data.currentUser).toMatchObject({
+      id: USER_DATA_SEED_IDS.TIM,
+    });
+    expect(hasClearingCookie(stragglerResponse)).toBe(false);
+  });
 });
