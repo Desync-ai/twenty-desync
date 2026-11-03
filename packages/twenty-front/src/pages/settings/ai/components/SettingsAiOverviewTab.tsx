@@ -3,7 +3,9 @@ import { AI_INSTRUCTIONS_EDITOR_PROFILE } from '@/ai/constants/AiInstructionsEdi
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { getToastOptionsFromError } from '@/error-handler/utils/getToastOptionsFromError';
 import { SettingsCard } from '@/settings/components/SettingsCard';
+import { SettingsOptionCardContentSwitch } from '@/settings/components/SettingsOptions/SettingsOptionCardContentSwitch';
 import { SettingsStatsGrid } from '@/settings/components/SettingsStatsGrid';
+import { useLabPublicFeatureFlags } from '@/settings/lab/hooks/useLabPublicFeatureFlags';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { CombinedGraphQLErrors } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -12,10 +14,17 @@ import { t } from '@lingui/core/macro';
 import { Fragment, useContext, useState } from 'react';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconBook, IconMessage, IconSparkles, IconTool } from 'twenty-ui/icon';
+import {
+  IconBook,
+  IconMessage,
+  IconSparkles,
+  IconTool,
+  useIcons,
+} from 'twenty-ui/icon';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { Section } from 'twenty-ui/primitives/layout';
 import { UndecoratedLink } from 'twenty-ui/primitives/navigation';
+import { Card } from 'twenty-ui/primitives/surfaces';
 import { H2Title } from 'twenty-ui/primitives/typography';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { useDebouncedCallback } from 'use-debounce';
@@ -39,6 +48,17 @@ export const SettingsAiOverviewTab = () => {
     currentWorkspaceState,
   );
   const [updateWorkspace] = useMutation(UpdateWorkspaceDocument);
+
+  const { getIcon } = useIcons();
+  const { labPublicFeatureFlags, handleLabPublicFeatureFlagUpdate } =
+    useLabPublicFeatureFlags();
+  // Desync: self-serve toggle for the Catholic institutions DB. Present in the
+  // public flags only when the server has CATHOLIC_DB_URL set, so this section
+  // is absent on instances without the data source. Entitlement is re-checked
+  // server-side by the agent tool provider.
+  const catholicInstitutionsFlag = labPublicFeatureFlags.find(
+    (flag) => String(flag.key) === 'IS_CATHOLIC_INSTITUTIONS_ENABLED',
+  );
 
   const { data: aiStatsData } = useQuery(FindWorkspaceAiStatsDocument);
   const stats = aiStatsData?.findWorkspaceAiStats;
@@ -150,6 +170,35 @@ export const SettingsAiOverviewTab = () => {
           />
         </StyledInstructionsContainer>
       </Section>
+
+      {catholicInstitutionsFlag && (
+        <Section>
+          <H2Title
+            title={t`Desync data`}
+            description={t`Give the AI agent access to Desync's own databases`}
+          />
+          <Card
+            rounded
+            backgroundColor={themeCssVariables.background.secondary}
+          >
+            <SettingsOptionCardContentSwitch
+              Icon={getIcon(catholicInstitutionsFlag.metadata.icon)}
+              title={catholicInstitutionsFlag.metadata.label}
+              description={catholicInstitutionsFlag.metadata.description}
+              checked={catholicInstitutionsFlag.value}
+              onChange={(value) => {
+                if (catholicInstitutionsFlag) {
+                  void handleLabPublicFeatureFlagUpdate(
+                    catholicInstitutionsFlag.key,
+                    value,
+                  );
+                }
+              }}
+              switchCentered={false}
+            />
+          </Card>
+        </Section>
+      )}
     </Fragment>
   );
 };
