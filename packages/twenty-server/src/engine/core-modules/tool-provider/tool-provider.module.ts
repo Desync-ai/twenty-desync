@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { EntitlementService } from 'src/engine/core-modules/auth/services/entitlement.service';
 import { CatholicInstitutionsModule } from 'src/engine/core-modules/catholic-institutions/catholic-institutions.module';
 import { ComposioModule } from 'src/engine/core-modules/composio/composio.module';
 import { FeatureFlagModule } from 'src/engine/core-modules/feature-flag/feature-flag.module';
@@ -97,6 +98,9 @@ import { ToolRegistryService } from './services/tool-registry.service';
     ToolExecutorService,
     RecordFilesResolverService,
     provideWorkspaceScopedRepository(FileEntity),
+    // Desync: standalone-provided so CatholicInstitutionsToolProvider can re-check
+    // entitlement in isAvailable (same self-contained pattern as DesyncOnboarding).
+    EntitlementService,
     ActionToolProvider,
     CatholicInstitutionsToolProvider,
     ComposioToolProvider,

@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+import { isNonEmptyString } from '@sniptt/guards';
 import { ToolCategory } from 'twenty-shared/ai';
 import { FeatureFlagKey } from 'twenty-shared/types';
 
+import { EntitlementService } from 'src/engine/core-modules/auth/services/entitlement.service';
 import {
   CatholicInstitutionsService,
   type CatholicInstitutionsQueryResult,
@@ -22,11 +24,13 @@ import { type ToolIndexEntry } from 'src/engine/core-modules/tool-provider/types
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
 
 // Desync fork: surfaces read-only search tools over our own Catholic
-// institutions reference data (the `compat` views of `desync_core`). Gated two
-// ways — the CATHOLIC_DB_URL env must be set AND the workspace must have the
-// IS_CATHOLIC_INSTITUTIONS_ENABLED flag on — so it stays absent unless an admin
-// turns it on. Flows into the agent catalog automatically (ToolRegistryService
-// iterates all TOOL_PROVIDERS) and executes via the existing execute_tool path.
+// institutions reference data (the `compat` views of `desync_core`). Gated three
+// ways — CATHOLIC_DB_URL must be set, the workspace must have the
+// IS_CATHOLIC_INSTITUTIONS_ENABLED flag on (a self-serve public flag any entitled
+// member can toggle from the AI settings tab), AND the requesting user must be
+// entitled (free trial / paid plan / admin). Flows into the agent catalog
+// automatically (ToolRegistryService iterates all TOOL_PROVIDERS) and executes
+// via the existing execute_tool path.
 @Injectable()
 export class CatholicInstitutionsToolProvider implements ToolProvider {
   readonly category = ToolCategory.CATHOLIC_INSTITUTIONS;
@@ -35,6 +39,7 @@ export class CatholicInstitutionsToolProvider implements ToolProvider {
   constructor(
     private readonly catholicInstitutionsService: CatholicInstitutionsService,
     private readonly featureFlagService: FeatureFlagService,
+    private readonly entitlementService: EntitlementService,
   ) {}
 
   async isAvailable(context: ToolProviderContext): Promise<boolean> {
@@ -42,10 +47,39 @@ export class CatholicInstitutionsToolProvider implements ToolProvider {
       return false;
     }
 
-    return this.featureFlagService.isFeatureEnabled(
+    const flagEnabled = await this.featureFlagService.isFeatureEnabled(
       FeatureFlagKey.IS_CATHOLIC_INSTITUTIONS_ENABLED,
       context.workspaceId,
     );
+
+    if (!flagEnabled) {
+      return false;
+    }
+
+    // The flag is self-serve, so re-check entitlement here: the DB tools only
+    // expose to users who may use the product (free trial, paid plan, or admin /
+    // @desync.ai). Non-user callers (API key / application / system) carry no
+    // user email to check and pass through — their workspace already exists,
+    // which implies an entitled owner.
+    const authContext = context.authContext;
+
+    if (
+      authContext?.type === 'user' ||
+      authContext?.type === 'pendingActivationUser'
+    ) {
+      const email = authContext.user.email;
+
+      if (!isNonEmptyString(email)) {
+        return false;
+      }
+
+      return this.entitlementService.isEntitled(
+        email,
+        authContext.user.clerkId ?? '',
+      );
+    }
+
+    return true;
   }
 
   async generateDescriptors(
