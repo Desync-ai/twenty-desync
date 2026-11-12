@@ -1,4 +1,5 @@
 import { Logger, UseFilters, UseGuards, UsePipes } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { Args, Context, Mutation, Query } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -83,6 +84,7 @@ import { UserSessionCookieService } from 'src/engine/core-modules/user-session/s
 import { UserSessionService } from 'src/engine/core-modules/user-session/services/user-session.service';
 import { UserWorkspaceEntity } from 'src/engine/core-modules/user-workspace/user-workspace.entity';
 import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/user-workspace.service';
+import { WorkspaceService } from 'src/engine/core-modules/workspace/services/workspace.service';
 import { UserService } from 'src/engine/core-modules/user/services/user.service';
 import { UserEntity } from 'src/engine/core-modules/user/user.entity';
 import { AuthProviderEnum } from 'src/engine/core-modules/workspace/types/workspace.type';
@@ -169,7 +171,38 @@ export class AuthResolver {
     private readonly fileCorePictureService: FileCorePictureService,
     private readonly userSessionService: UserSessionService,
     private readonly userSessionCookieService: UserSessionCookieService,
+    private readonly moduleRef: ModuleRef,
   ) {}
+
+  // Desync: activation (~1k standard metadata rows, ~30s on prod) starts here so
+  // it overlaps the redirect to the new subdomain and the app load; the
+  // activate-on-mount mutation then joins the in-flight attempt through the
+  // activation lock, and stays the fallback if this one fails. Resolved lazily
+  // to avoid an Auth <-> Workspace module cycle; never allowed to break signup.
+  private startWorkspaceActivationInBackground(
+    user: AuthContextUser,
+    workspace: WorkspaceEntity,
+  ) {
+    try {
+      const workspaceService = this.moduleRef.get(WorkspaceService, {
+        strict: false,
+      });
+
+      void workspaceService
+        .activateWorkspace(user, workspace)
+        .catch((error: unknown) =>
+          this.logger.error(
+            `Background activation failed for workspace ${workspace.id}`,
+            error,
+          ),
+        );
+    } catch (error) {
+      this.logger.error(
+        `Could not start background activation for workspace ${workspace.id}`,
+        error,
+      );
+    }
+  }
 
   @UseGuards(CaptchaGuard, PublicEndpointGuard, NoPermissionGuard)
   @Query(() => CheckUserExistDTO)
@@ -636,6 +669,8 @@ export class AuthResolver {
       { type: 'existingUser', existingUser: fullUser },
       { displayName: input?.displayName, subdomain: input?.subdomain },
     );
+
+    this.startWorkspaceActivationInBackground(currentUser, workspace);
 
     const loginToken = await this.loginTokenService.generateLoginToken(
       user.email,

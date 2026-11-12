@@ -109,10 +109,12 @@ import { WorkspaceMigrationValidateBuildAndRunService } from 'src/engine/workspa
 // PENDING_CREATION) and may be retried. It is far longer than a real activation
 // takes, so a genuinely in-progress activation is never reclaimed.
 const WORKSPACE_ACTIVATION_STALE_LOCK_TIMEOUT_MS = 5 * 60 * 1000;
-// When a concurrent activation already holds the lock (e.g. the client re-fired
-// during a racy Clerk token re-exchange), wait for that in-flight winner to
-// finish rather than surfacing a "creation failed" error to the user.
-const WORKSPACE_ACTIVATION_CONCURRENT_WAIT_TIMEOUT_MS = 45 * 1000;
+// When a concurrent activation already holds the lock (the background
+// activation started at workspace creation, or the client re-fired during a racy
+// Clerk token re-exchange), wait for that in-flight winner to finish rather than
+// surfacing a "creation failed" error to the user. Joining the background
+// activation is the normal path, so this must cover a full activation.
+const WORKSPACE_ACTIVATION_CONCURRENT_WAIT_TIMEOUT_MS = 2 * 60 * 1000;
 const WORKSPACE_ACTIVATION_CONCURRENT_POLL_MS = 750;
 const WORKSPACE_APPLICATION_UNINSTALL_RETRY_LIMIT = 3;
 
@@ -385,7 +387,10 @@ export class WorkspaceService {
     return updatedWorkspace;
   }
 
-  async activateWorkspace(user: AuthContextUser, workspace: WorkspaceEntity) {
+  async activateWorkspace(
+    user: AuthContextUser,
+    workspace: WorkspaceEntity,
+  ): Promise<WorkspaceEntity | null> {
     // Acquire the activation lock by atomically moving the workspace to
     // ONGOING_CREATION. First try the normal case (PENDING_CREATION). If nothing
     // matches, the workspace may be stuck in ONGOING_CREATION from a prior
@@ -437,6 +442,15 @@ export class WorkspaceService {
             WorkspaceActivationStatus.CREATED
         ) {
           return existingWorkspace;
+        }
+
+        // The in-flight attempt failed and released the lock: run it ourselves
+        // instead of waiting out the deadline.
+        if (
+          existingWorkspace?.activationStatus ===
+          WorkspaceActivationStatus.PENDING_CREATION
+        ) {
+          return await this.activateWorkspace(user, workspace);
         }
 
         if (Date.now() >= deadline) {
