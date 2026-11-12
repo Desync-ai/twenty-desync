@@ -8,7 +8,6 @@ import { useEffect, useCallback } from 'react';
 
 import { useInitializeQueryParamState } from '@/app/hooks/useInitializeQueryParamState';
 import { useGetPublicWorkspaceDataByDomain } from '@/domain-manager/hooks/useGetPublicWorkspaceDataByDomain';
-import { useIsCurrentLocationOnDefaultDomain } from '@/domain-manager/hooks/useIsCurrentLocationOnDefaultDomain';
 import { isDefined } from 'twenty-shared/utils';
 import { type WorkspaceUrls } from '~/generated-metadata/graphql';
 import { getWorkspaceUrl } from '~/utils/getWorkspaceUrl';
@@ -24,7 +23,6 @@ export const WorkspaceProviderEffect = () => {
   );
 
   const { redirectToWorkspaceDomain } = useRedirectToWorkspaceDomain();
-  const { isDefaultDomain } = useIsCurrentLocationOnDefaultDomain();
 
   const { currentLocationHostname } = useReadWorkspaceUrlFromCurrentLocation();
 
@@ -35,11 +33,11 @@ export const WorkspaceProviderEffect = () => {
   const domainConfiguration = useAtomStateValue(domainConfigurationState);
 
   // A returning user who opens the bare apex front domain (no workspace
-  // subdomain) should reach their last workspace the same way they do from the
-  // central/default domain. Without this they fall through to
-  // /welcome -> central -> a full Clerk re-exchange, and the funnel to central
-  // clears the last-workspace cookie on the way, so the hint that could have
-  // sent them straight home is already gone by the time they arrive.
+  // subdomain) is sent straight to their last workspace via the persisted hint
+  // cookie, skipping the /welcome -> central -> Clerk re-exchange detour. Apex
+  // only: on the central domain we let the Clerk exchange establish the session
+  // instead, since a central -> workspace cookie redirect would loop whenever
+  // that workspace's session is invalid.
   const isOnApexFrontDomain =
     window.location.hostname === domainConfiguration.frontDomain;
 
@@ -78,7 +76,7 @@ export const WorkspaceProviderEffect = () => {
   useEffect(() => {
     if (
       isMultiWorkspaceEnabled &&
-      (isDefaultDomain || isOnApexFrontDomain) &&
+      isOnApexFrontDomain &&
       isDefined(lastAuthenticatedWorkspaceDomain) &&
       'workspaceUrl' in lastAuthenticatedWorkspaceDomain &&
       isDefined(lastAuthenticatedWorkspaceDomain?.workspaceUrl)
@@ -92,7 +90,6 @@ export const WorkspaceProviderEffect = () => {
     }
   }, [
     isMultiWorkspaceEnabled,
-    isDefaultDomain,
     isOnApexFrontDomain,
     lastAuthenticatedWorkspaceDomain,
     redirectToWorkspaceDomain,
