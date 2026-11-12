@@ -24,6 +24,20 @@ import { Injectable, Logger } from '@nestjs/common';
 // identical to REST toolkits (a Composio connected account keyed by user id).
 const COMPOSIO_BASE_URL = 'https://backend.composio.dev/api/v3';
 
+// Provider/usage metadata stripped from every tool result before it reaches the
+// copilot, so the assistant can never surface vendor internals or spend to the
+// user (e.g. "used 1 credit", "cached a minute ago"). Exact key names only, so
+// genuine extracted content is never touched.
+const STRIPPED_RESULT_KEYS: ReadonlySet<string> = new Set([
+  'creditsUsed',
+  'cacheState',
+  'cachedAt',
+  'scrapeId',
+  'proxyUsed',
+  'concurrencyLimited',
+  'log_id',
+]);
+
 export type ComposioTool = { slug: string; description: string };
 
 export type ComposioToolkit = {
@@ -34,6 +48,11 @@ export type ComposioToolkit = {
   // When set, this toolkit is an MCP proxy: its tools are listed/executed over
   // MCP JSON-RPC at this URL instead of Composio's REST /tools/execute path.
   mcpServerUrl?: string;
+  // Org-wide toolkits are backed by OUR own shared key (not a per-user OAuth /
+  // API-key connection): their tools are available to every user, executed under
+  // `serviceUserId`, and they render NO per-user "Connect" card.
+  orgWide?: boolean;
+  serviceUserId?: string;
 };
 
 // Curated Slack tools exposed to the copilot (slug -> short description). Kept
@@ -468,6 +487,89 @@ export const COMPOSIO_SALESFORCE_TOOLS: ComposioTool[] = [
   { slug: 'SALESFORCE_GET_OPPORTUNITY', description: 'Get a Salesforce opportunity by id.' },
 ];
 
+// Firecrawl via Composio — web scrape/search/extract exposed to the copilot.
+// API_KEY auth, used ORG-WIDE under our own key (see the registry entry below).
+export const COMPOSIO_FIRECRAWL_TOOLS: ComposioTool[] = [
+  {
+    slug: 'FIRECRAWL_SCRAPE',
+    description:
+      'Scrape a single web page and return clean, LLM-ready content (markdown). Use to read a specific URL (a company site, a person/LinkedIn page, an article). Requires `url`.',
+  },
+  {
+    slug: 'FIRECRAWL_SEARCH',
+    description:
+      'Web search that returns results with scraped page content. Use to research a company or person, or to find pages when you do not already have the URL. Requires `query`.',
+  },
+  {
+    slug: 'FIRECRAWL_EXTRACT',
+    description:
+      'Extract structured data from one or more web pages given a prompt/schema. Use when you need specific fields (e.g. pricing, team, contact details) rather than the full page text.',
+  },
+];
+
+// GoHighLevel (location / sub-account scope) via Composio. BYO OAuth through our
+// own HighLevel marketplace app. Curated CRM tools: contacts, opportunities,
+// conversations, calendars (read + safe writes).
+export const COMPOSIO_HIGHLEVEL_TOOLS: ComposioTool[] = [
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_SEARCH_CONTACTS_ADVANCED', description: 'Search HighLevel contacts with advanced filters.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_GET_CONTACT', description: 'Get a HighLevel contact by id.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_CREATE_CONTACT', description: 'Create a HighLevel contact.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_UPDATE_CONTACT', description: "Update a HighLevel contact's fields." },
+  { slug: 'HIGHLEVEL_LOCATION_CONTACTS_CREATE_NOTE', description: 'Add a note to a HighLevel contact.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_SEARCH_OPPORTUNITIES_ADVANCED', description: 'Search HighLevel opportunities with advanced filters.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_GET_PIPELINES', description: 'List HighLevel pipelines and their stages.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_CREATE_OPPORTUNITY', description: 'Create a HighLevel opportunity in a pipeline.' },
+  { slug: 'HIGHLEVEL_LOCATION_OPPORTUNITIES_UPDATE_OPPORTUNITY', description: 'Update a HighLevel opportunity (stage, value, status).' },
+  { slug: 'HIGHLEVEL_LOCATION_CONVERSATIONS_SEARCH_CONVERSATION', description: 'Search HighLevel conversations for the location.' },
+  { slug: 'HIGHLEVEL_LOCATION_CONVERSATIONS_SEND_A_NEW_MESSAGE', description: 'Send a message to a contact (SMS, email, etc.).' },
+  { slug: 'HIGHLEVEL_LOCATION_CALENDARS_GET_SLOTS', description: 'Get free appointment slots for a calendar.' },
+  { slug: 'HIGHLEVEL_LOCATION_CALENDARS_CREATE_APPOINTMENT', description: 'Book an appointment on a HighLevel calendar.' },
+];
+
+// OneDrive (Microsoft Graph) via Composio. BYO OAuth through our own Azure AD
+// app. Read + safe writes; destructive delete/move/permission tools left out.
+export const COMPOSIO_ONEDRIVE_TOOLS: ComposioTool[] = [
+  { slug: 'ONE_DRIVE_SEARCH_ITEMS', description: "Search the user's OneDrive for files and folders by query." },
+  { slug: 'ONE_DRIVE_ONEDRIVE_LIST_ITEMS', description: 'List files and folders in a OneDrive folder (root by default).' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_FIND_FILE', description: 'Find a file by name within a OneDrive folder.' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_FIND_FOLDER', description: 'Find a folder by name in OneDrive.' },
+  { slug: 'ONE_DRIVE_GET_ITEM', description: "Get a drive item's metadata by id." },
+  { slug: 'ONE_DRIVE_DOWNLOAD_FILE', description: 'Download a file from OneDrive by item id so the assistant can read it.' },
+  { slug: 'ONE_DRIVE_LIST_DRIVES', description: 'List the drives available to the connected account.' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_CREATE_FOLDER', description: 'Create a folder in OneDrive.' },
+  { slug: 'ONE_DRIVE_ONEDRIVE_UPLOAD_FILE', description: 'Upload a file to a OneDrive folder.' },
+];
+
+// SharePoint (Microsoft Graph) via Composio. BYO OAuth through our own Azure AD
+// app. Note: SharePoint document/site *reads* live in the one_drive toolkit
+// (shared Graph surface); this dedicated toolkit exposes folder/list writes
+// plus user lookup.
+export const COMPOSIO_SHAREPOINT_TOOLS: ComposioTool[] = [
+  { slug: 'SHARE_POINT_SHAREPOINT_CREATE_FOLDER', description: 'Create a folder in SharePoint.' },
+  { slug: 'SHARE_POINT_SHAREPOINT_CREATE_LIST', description: 'Create a new SharePoint list.' },
+  { slug: 'SHARE_POINT_SHAREPOINT_CREATE_LIST_ITEM', description: 'Add an item to a SharePoint list.' },
+  { slug: 'SHARE_POINT_SHAREPOINT_FIND_USER', description: 'Find a user in SharePoint / Microsoft Graph.' },
+];
+
+// Asana via Composio. OAuth2 (Composio-managed OAuth available), gated on
+// COMPOSIO_ASANA_AUTH_CONFIG_ID. Curated read-biased task/project tools; no
+// delete/duplicate (destructive) tools.
+export const COMPOSIO_ASANA_TOOLS: ComposioTool[] = [
+  { slug: 'ASANA_GET_CURRENT_USER', description: 'Get the connected Asana user and their workspaces.' },
+  { slug: 'ASANA_GET_MULTIPLE_PROJECTS', description: 'List Asana projects, filterable by workspace or team.' },
+  { slug: 'ASANA_GET_A_PROJECT', description: 'Get an Asana project by id.' },
+  { slug: 'ASANA_GET_MULTIPLE_TASKS', description: 'List Asana tasks, filterable by project, section, assignee, or workspace.' },
+  { slug: 'ASANA_GET_A_TASK', description: 'Get an Asana task by id.' },
+  { slug: 'ASANA_GET_STORIES_FOR_TASK', description: "Get a task's stories (comments and activity)." },
+  { slug: 'ASANA_CREATE_A_TASK', description: 'Create an Asana task.' },
+  { slug: 'ASANA_CREATE_SUBTASK', description: 'Create a subtask under an Asana task.' },
+  { slug: 'ASANA_CREATE_TASK_COMMENT', description: 'Add a comment (story) to an Asana task.' },
+  { slug: 'ASANA_ADD_TASK_TO_SECTION', description: 'Move a task into a project section.' },
+  { slug: 'ASANA_CREATE_A_PROJECT', description: 'Create an Asana project.' },
+  { slug: 'ASANA_CREATE_SECTION_IN_PROJECT', description: 'Create a section in an Asana project.' },
+  { slug: 'ASANA_CREATE_PROJECT_STATUS_UPDATE', description: 'Post a status update on an Asana project.' },
+];
+
 type ConnectedAccount = {
   id: string;
   status: string;
@@ -606,12 +708,60 @@ export class ComposioService {
         tools: COMPOSIO_APOLLO_TOOLS,
       },
       {
+        // GoHighLevel (location / sub-account scope). BYO OAuth via our own
+        // HighLevel marketplace app (client id + secret on the auth config).
+        slug: 'highlevel_location',
+        label: 'GoHighLevel',
+        authConfigId:
+          process.env.COMPOSIO_HIGHLEVEL_LOCATION_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_HIGHLEVEL_TOOLS,
+      },
+      {
+        // OneDrive (Microsoft Graph). BYO OAuth via our own Azure AD app.
+        slug: 'one_drive',
+        label: 'OneDrive',
+        authConfigId: process.env.COMPOSIO_ONE_DRIVE_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_ONEDRIVE_TOOLS,
+      },
+      {
+        // SharePoint (Microsoft Graph). BYO OAuth via our own Azure AD app.
+        // SharePoint doc/site reads live in the one_drive toolkit; this exposes
+        // folder/list writes + user lookup.
+        slug: 'share_point',
+        label: 'SharePoint',
+        authConfigId: process.env.COMPOSIO_SHARE_POINT_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_SHAREPOINT_TOOLS,
+      },
+      {
+        // Asana via Composio. OAuth2 (Composio-managed OAuth available); gated
+        // on COMPOSIO_ASANA_AUTH_CONFIG_ID, so it ships dormant until set.
+        slug: 'asana',
+        label: 'Asana',
+        authConfigId: process.env.COMPOSIO_ASANA_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_ASANA_TOOLS,
+      },
+      {
         // Granola is an MCP toolkit: tools come from its MCP server, not REST.
         slug: 'granola_mcp',
         label: 'Granola',
         authConfigId: process.env.COMPOSIO_GRANOLA_MCP_AUTH_CONFIG_ID ?? '',
         tools: [],
         mcpServerUrl: process.env.COMPOSIO_GRANOLA_MCP_SERVER_URL ?? '',
+      },
+      {
+        // Firecrawl: web scrape/search/extract for the copilot. ORG-WIDE — backed
+        // by OUR single Firecrawl key (API_KEY auth), not a per-user connection,
+        // so it's available to everyone, executed under a shared service user id,
+        // and intentionally has NO "connect your account" card. Enabled once its
+        // auth config id is set (same gate as every other toolkit).
+        slug: 'firecrawl',
+        label: 'Firecrawl',
+        authConfigId: process.env.COMPOSIO_FIRECRAWL_AUTH_CONFIG_ID ?? '',
+        tools: COMPOSIO_FIRECRAWL_TOOLS,
+        orgWide: true,
+        serviceUserId:
+          process.env.COMPOSIO_FIRECRAWL_SERVICE_USER_ID ??
+          'desync-firecrawl-service',
       },
     ];
     const map: Record<string, ComposioToolkit> = {};
@@ -661,6 +811,12 @@ export class ComposioService {
 
   get enabledToolkits(): ComposioToolkit[] {
     return Object.values(this.toolkits);
+  }
+
+  // True when any enabled toolkit is org-wide (backed by our shared key), so the
+  // copilot tool provider can offer it even to users who've connected nothing.
+  get hasOrgWideToolkits(): boolean {
+    return this.enabledToolkits.some((toolkit) => toolkit.orgWide === true);
   }
 
   private get callbackUrl(): string | undefined {
@@ -827,9 +983,17 @@ export class ComposioService {
   // contribute the tools their MCP server advertises (cached, static schemas).
   async getToolsForUser(userId: string): Promise<ComposioTool[]> {
     const connected = await this.getConnectedToolkits(userId);
+    const slugs = new Set<string>(connected);
+    // Org-wide toolkits (e.g. Firecrawl) are backed by OUR shared key rather than
+    // a per-user connection, so expose their tools to every user.
+    for (const toolkit of this.enabledToolkits) {
+      if (toolkit.orgWide) {
+        slugs.add(toolkit.slug);
+      }
+    }
     const out: ComposioTool[] = [];
 
-    for (const slug of connected) {
+    for (const slug of slugs) {
       const toolkit = this.toolkits[slug];
 
       if (!toolkit) {
@@ -933,13 +1097,20 @@ export class ComposioService {
       return this.executeMcp(mcpToolkit, userId, toolSlug, args);
     }
 
+    // Org-wide toolkits (e.g. Firecrawl) run under OUR shared service account, so
+    // the call isn't scoped to the end user's own connections.
+    const orgWideToolkit = this.orgWideToolkitForSlug(toolSlug);
+    const effectiveUserId = orgWideToolkit
+      ? this.orgWideServiceUserId(orgWideToolkit)
+      : userId;
+
     try {
       const res = await this.request<{
         data?: unknown;
         error?: unknown;
         successful?: boolean;
       }>('POST', `/tools/execute/${encodeURIComponent(toolSlug)}`, {
-        user_id: userId,
+        user_id: effectiveUserId,
         arguments: args ?? {},
       });
 
@@ -953,7 +1124,7 @@ export class ComposioService {
         };
       }
 
-      return { ok: true, data: res.data ?? res };
+      return { ok: true, data: this.stripResultMetadata(res.data ?? res) };
     } catch (error) {
       return { ok: false, error: (error as Error).message };
     }
@@ -971,6 +1142,48 @@ export class ComposioService {
         Boolean(toolkit.mcpServerUrl) &&
         toolSlug.startsWith(`${toolkit.slug.toUpperCase()}_`),
     );
+  }
+
+  // Org-wide toolkit (e.g. Firecrawl) this slug belongs to — matched by the
+  // `TOOLKIT_` slug prefix, the same convention as the MCP matcher above.
+  private orgWideToolkitForSlug(toolSlug: string): ComposioToolkit | undefined {
+    return this.enabledToolkits.find(
+      (toolkit) =>
+        Boolean(toolkit.orgWide) &&
+        toolSlug.startsWith(`${toolkit.slug.toUpperCase()}_`),
+    );
+  }
+
+  // The shared Composio user id that holds our org-wide connection for a toolkit
+  // (the Firecrawl connected account is created once under this id with our key).
+  private orgWideServiceUserId(toolkit: ComposioToolkit): string {
+    return toolkit.serviceUserId || 'desync-service';
+  }
+
+  // Deep-remove provider/usage metadata keys from a tool result, so the copilot
+  // never sees (and therefore can never report) credits, cost, cache state, or
+  // internal ids. Only exact keys are dropped, so real content is preserved.
+  private stripResultMetadata(value: unknown): unknown {
+    if (Array.isArray(value)) {
+      return value.map((item) => this.stripResultMetadata(item));
+    }
+
+    if (value && typeof value === 'object') {
+      const out: Record<string, unknown> = {};
+
+      for (const [key, val] of Object.entries(
+        value as Record<string, unknown>,
+      )) {
+        if (STRIPPED_RESULT_KEYS.has(key)) {
+          continue;
+        }
+        out[key] = this.stripResultMetadata(val);
+      }
+
+      return out;
+    }
+
+    return value;
   }
 
   private async mcpRequest(

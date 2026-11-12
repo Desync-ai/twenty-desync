@@ -12,11 +12,11 @@ export function generateFrontConfig(): void {
   // was loaded from, so the front resolves it from window.location (see
   // packages/twenty-front/src/config). Rewriting clears any value baked into
   // index.html at build time.
-  const configString = `<!-- BEGIN: Twenty Config -->
-    <script id="twenty-env-config">
+  const configString = `<!-- BEGIN: Desync Config -->
+    <script id="desync-env-config">
       window._env_ = {};
     </script>
-    <!-- END: Twenty Config -->`;
+    <!-- END: Desync Config -->`;
 
   const distPath = path.join(__dirname, '..', 'front');
   const indexPath = path.join(distPath, 'index.html');
@@ -25,7 +25,7 @@ export function generateFrontConfig(): void {
     let indexContent = fs.readFileSync(indexPath, 'utf8');
 
     indexContent = indexContent.replace(
-      /<!-- BEGIN: Twenty Config -->[\s\S]*?<!-- END: Twenty Config -->/,
+      /<!-- BEGIN: Desync Config -->[\s\S]*?<!-- END: Desync Config -->/,
       configString,
     );
 

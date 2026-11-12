@@ -28,6 +28,12 @@ export class ComposioToolProvider implements ToolProvider {
       return false;
     }
 
+    // Org-wide toolkits (e.g. Firecrawl) are available to every user regardless
+    // of what they have personally connected.
+    if (this.composioService.hasOrgWideToolkits) {
+      return true;
+    }
+
     const connected = await this.composioService.getConnectedToolkits(
       context.userId,
     );

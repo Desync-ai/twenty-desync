@@ -5,7 +5,6 @@ import {
   ForbiddenException,
   Get,
   Post,
-  Query,
   Req,
   UseFilters,
   UseGuards,
@@ -93,17 +92,13 @@ export class FioAdsController {
     });
   }
 
-  @Get('voices')
-  async voices() {
-    return { voices: await this.fioAdsService.listVoices() };
-  }
-
-  @Get('voice-sample')
-  async voiceSample(
-    @Query('voiceId') voiceId: string,
+  @Post('scripts')
+  async scripts(
+    @Body()
+    body: { brand?: { name?: string; website?: string }; notes?: string },
     @Req() request: AuthenticatedRequest,
   ) {
-    // Same eligibility as voiceover (it synthesizes through our Cartesia key).
+    // Generating the five script ideas spends AI budget, so gate it like launch.
     const status = await this.fioAdsService.getStatus({
       userId: this.userId(request),
       email: this.userEmail(request),
@@ -114,12 +109,16 @@ export class FioAdsController {
     if (!status.eligible) {
       throw new ForbiddenException(
         status.reason === 'not_admin'
-          ? 'Only workspace admins can preview Fio ad voices.'
-          : 'Fio ad voice preview is available on Starter and above.',
+          ? 'Only workspace admins can generate Fio ad scripts.'
+          : 'Fio ad scripts are available on Starter and above.',
       );
     }
 
-    return this.fioAdsService.getVoiceSample({ voiceId });
+    return this.fioAdsService.generateScripts({
+      brand: body?.brand,
+      email: this.userEmail(request),
+      notes: body?.notes,
+    });
   }
 
   @Post('transcribe')
@@ -147,32 +146,6 @@ export class FioAdsController {
     }
 
     return this.fioAdsService.transcribe({ audio: body?.audio });
-  }
-
-  @Post('voiceover')
-  async voiceover(
-    @Body() body: { text?: string; voiceId?: string },
-    @Req() request: AuthenticatedRequest,
-  ) {
-    const status = await this.fioAdsService.getStatus({
-      userId: this.userId(request),
-      email: this.userEmail(request),
-      workspaceId: this.workspaceId(request),
-      userWorkspaceId: this.userWorkspaceId(request),
-    });
-
-    if (!status.eligible) {
-      throw new ForbiddenException(
-        status.reason === 'not_admin'
-          ? 'Only workspace admins can use Fio ad AI voiceover.'
-          : 'Fio ad AI voiceover is available on Starter and above.',
-      );
-    }
-
-    return this.fioAdsService.generateVoiceover({
-      text: body?.text,
-      voiceId: body?.voiceId,
-    });
   }
 
   @Post('launch')

@@ -48,6 +48,10 @@ import {
   markWorkspaceCreditsAvailable,
   markWorkspaceCreditsExhausted,
 } from '@/workspace/utils/updateWorkspaceResourceCreditCap';
+import { DESYNC_AI_BUDGET_MODAL_ID } from '@/ai/constants/DesyncAiBudgetModalId';
+import { AiChatErrorCode } from '@/ai/utils/aiChatErrorCode';
+import { useModal } from '@/ui/layout/modal/hooks/useModal';
+import { isGraphqlErrorOfType } from '~/utils/is-graphql-error-of-type.util';
 
 export const useAgentChat = (
   ensureThreadIdForSend: () => Promise<string | null>,
@@ -61,6 +65,7 @@ export const useAgentChat = (
   const setCurrentAiChatThread = useSetAtomState(currentAiChatThreadState);
   const { projectAiChatThreadToUrl } = useProjectAiChatThreadToUrl();
   const store = useStore();
+  const { openModal } = useModal();
 
   const setAgentChatUploadedFiles = useSetAtomState(
     agentChatUploadedFilesState,
@@ -260,6 +265,13 @@ export const useAgentChat = (
         store.set(currentWorkspaceState.atom, markWorkspaceCreditsExhausted);
       }
 
+      // Desync: the per-user $ AI budget (free $1/month tier, or a plan cap) is
+      // spent — twenty-backend returns AI_SPEND_LIMIT_REACHED. Pop the Subscribe
+      // modal rather than leaving only the generic inline "failed to respond".
+      if (isGraphqlErrorOfType(error, AiChatErrorCode.AI_SPEND_LIMIT_REACHED)) {
+        openModal(DESYNC_AI_BUDGET_MODAL_ID);
+      }
+
       dispatchBrowserEvent(AGENT_CHAT_RESTORE_EDITOR_CONTENT_EVENT_NAME, {
         content: serializedContentToSend,
       });
@@ -278,6 +290,7 @@ export const useAgentChat = (
     setCurrentAiChatThread,
     apolloClient,
     applyOptimisticUnarchive,
+    openModal,
   ]);
 
   useListenToBrowserEvent({

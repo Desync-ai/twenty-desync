@@ -72,6 +72,7 @@ import {
 import { type ExtractedFile } from 'src/engine/metadata-modules/ai/ai-chat/types/extracted-file.type';
 import { buildWorkspaceSetupChatThreadId } from 'src/engine/metadata-modules/ai/ai-chat/utils/build-workspace-setup-chat-thread-id.util';
 import { buildFullSystemPrompt } from 'src/engine/metadata-modules/ai/ai-chat/utils/build-full-system-prompt.util';
+import { capturePosthogAiEvent } from 'src/engine/metadata-modules/ai/ai-chat/utils/posthog-ai-capture.util';
 import { hasNoAssistantMessage } from 'src/engine/metadata-modules/ai/ai-chat/utils/has-no-assistant-message.util';
 import { hasSucceededWorkspaceSetupCompletion } from 'src/engine/metadata-modules/ai/ai-chat/utils/has-succeeded-workspace-setup-completion.util';
 import { collectReferencedSkillIds } from 'src/engine/metadata-modules/ai/ai-chat/utils/collect-referenced-skill-ids.util';
@@ -525,7 +526,33 @@ export class ChatExecutionService {
         attributes: modelAttr,
         bucketBoundaries: AI_LATENCY_MS_BUCKET_BOUNDARIES,
       });
+
+      // Desync: fire-and-forget PostHog LLM-analytics trace for this turn.
+      // Fails open (own timeout + swallow); never awaited, never blocks billing.
+      void capturePosthogAiEvent({
+        event: '$ai_trace',
+        distinctId: userId ?? userWorkspaceId,
+        traceId: threadId ?? turnId ?? streamId ?? workspace.id,
+        spanName: 'crm-copilot turn',
+        model: registeredModel.modelId,
+        provider: registeredModel.sdkPackage.replace('@ai-sdk/', ''),
+        latencySeconds: (performance.now() - streamStartedAt) / 1000,
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+        totalCostUsd: costInDollars,
+        tier: workspace.aiChatModelTier,
+        step: stepIndex,
+        workspaceId: workspace.id,
+      });
     };
+
+    // Transient model errors (provider overload, rate limits, dropped streams)
+    // mid-run would otherwise surface to the user as a generic failure they
+    // must retry by hand. streamRetries reruns ONLY the current model step: the
+    // SDK discards that step's buffered tool calls before re-calling, so no tool
+    // side effect is ever duplicated. maxRetries covers the pre-stream case.
+    const MODEL_STREAM_RETRIES = 2;
+    let modelStreamRetryCount = 0;
 
     const stream = streamText({
       model: registeredModel.model,
@@ -535,6 +562,8 @@ export class ChatExecutionService {
       // Every step of the kickoff turn is forced so it cannot end in prose; stopWhen ends it at the first ask_questions.
       toolChoice: isWorkspaceSetupKickoffTurn ? 'required' : 'auto',
       abortSignal,
+      maxRetries: 3,
+      streamRetries: MODEL_STREAM_RETRIES,
       stopWhen: (step) =>
         isStepCount(AGENT_CONFIG.MAX_STEPS)(step) ||
         hasToolCall(ASK_QUESTIONS_TOOL_NAME)(step) ||
@@ -580,11 +609,23 @@ export class ChatExecutionService {
           });
         }
       },
-      onError: ({ error }) => {
+      onError: async ({ error }) => {
         lastUnderlyingStreamError = error;
         this.logger.error(
           `Stream ${streamId} emitted an error: ${error instanceof Error ? error.message : String(error)}`,
         );
+        // streamRetries reruns the current model step with no delay of its own;
+        // give an overloaded/rate-limited provider a short backoff first, and
+        // only while retries remain so the final surfaced error is not delayed.
+        modelStreamRetryCount += 1;
+        if (modelStreamRetryCount <= MODEL_STREAM_RETRIES) {
+          await new Promise((resolve) =>
+            setTimeout(
+              resolve,
+              Math.min(4000, 800 * 2 ** (modelStreamRetryCount - 1)),
+            ),
+          );
+        }
       },
       onToolExecutionEnd: (event) => {
         this.metricsService.recordHistogram({
@@ -670,6 +711,32 @@ export class ChatExecutionService {
             bucketBoundaries: TOOL_OUTPUT_TOKENS_BUCKET_BOUNDARIES,
           });
         }
+
+        // Desync: fire-and-forget PostHog LLM-analytics generation for this
+        // step. Fails open (own timeout + swallow); never awaited.
+        void capturePosthogAiEvent({
+          event: '$ai_generation',
+          distinctId: userId ?? userWorkspaceId,
+          traceId: threadId ?? turnId ?? streamId ?? workspace.id,
+          spanName: `crm-copilot step ${stepIndex}`,
+          model: registeredModel.modelId,
+          provider: registeredModel.sdkPackage.replace('@ai-sdk/', ''),
+          latencySeconds: (performance.now() - stepStartedAt) / 1000,
+          inputTokens: step.usage.inputTokens ?? 0,
+          outputTokens: step.usage.outputTokens ?? 0,
+          totalCostUsd: this.aiBillingService.calculateCost(
+            registeredModel.modelId,
+            {
+              usage: step.usage,
+              cacheCreationTokens: extractCacheCreationTokens(
+                step.providerMetadata,
+              ),
+            },
+          ),
+          tier: workspace.aiChatModelTier,
+          step: stepIndex,
+          workspaceId: workspace.id,
+        });
       },
       onAbort: async ({ steps }) => {
         await emitTurnUsageEvent(steps);

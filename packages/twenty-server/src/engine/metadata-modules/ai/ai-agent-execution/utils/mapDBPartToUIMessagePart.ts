@@ -55,6 +55,7 @@ export const mapDBPartToUIMessagePart = (
         type: 'step-start',
       };
     case 'data-routing-status':
+    case 'data-turn-error':
       return null;
     default: {
       const isStaticToolPart =

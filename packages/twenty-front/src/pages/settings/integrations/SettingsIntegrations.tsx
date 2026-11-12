@@ -14,6 +14,13 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
+import { MCP_SETUP } from '@/settings/mcp-and-apis/constants/McpSetup';
+import {
+  buildClaudeInstallLink,
+  buildCursorInstallLink,
+  buildMcpServerUrl,
+  isHttpsUrl,
+} from '@/settings/mcp-and-apis/utils/mcpSetup';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { ModalStatefulWrapper } from '@/ui/layout/modal/components/ModalStatefulWrapper';
 import { useModal } from '@/ui/layout/modal/hooks/useModal';
@@ -85,6 +92,16 @@ export const INTEGRATIONS: IntegrationDef[] = [
     logoDomain: 'airtable.com',
     agentTool: true,
     blurb: 'Let the AI assistant read & write your bases',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'asana',
+    name: 'Asana',
+    kind: 'connect',
+    tags: ['Project Management'],
+    logoDomain: 'asana.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant read & manage your Asana tasks, projects & sections',
     connectedBlurb: 'Available to your AI assistant',
   },
   {
@@ -243,6 +260,36 @@ export const INTEGRATIONS: IntegrationDef[] = [
     logoDomain: 'apollo.io',
     agentTool: true,
     blurb: 'Let the AI assistant search, enrich, and manage leads in Apollo',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'highlevel_location',
+    name: 'GoHighLevel',
+    kind: 'connect',
+    tags: ['CRM'],
+    logoDomain: 'gohighlevel.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant manage your HighLevel contacts, opportunities & conversations',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'one_drive',
+    name: 'OneDrive',
+    kind: 'connect',
+    tags: ['Docs & Files'],
+    logoDomain: 'onedrive.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant find & read your OneDrive files',
+    connectedBlurb: 'Available to your AI assistant',
+  },
+  {
+    plugin: 'share_point',
+    name: 'SharePoint',
+    kind: 'connect',
+    tags: ['Docs & Files'],
+    logoDomain: 'sharepoint.com',
+    agentTool: true,
+    blurb: 'Let the AI assistant work with your SharePoint lists & folders',
     connectedBlurb: 'Available to your AI assistant',
   },
   {
@@ -610,6 +657,28 @@ export const ConnectIntegrationCard = ({
   );
 };
 
+// The AI-app providers (ChatGPT/Claude/Cursor) have a one-click "open in the
+// app" link, identical to the Open/Install button on Settings -> MCP & APIs.
+// Non-technical users were bouncing to that page and getting lost, so the card
+// opens the provider directly instead. Grok has no install link, so it falls
+// back to the MCP & APIs page for manual setup.
+const getMcpProviderOpenUrl = (plugin: string): string | undefined => {
+  const mcpServerUrl = buildMcpServerUrl(REACT_APP_SERVER_BASE_URL);
+
+  switch (plugin) {
+    case 'chatgpt':
+      return MCP_SETUP.chatGptTwentyAppUrl;
+    case 'claude':
+      return isHttpsUrl(mcpServerUrl)
+        ? buildClaudeInstallLink(mcpServerUrl)
+        : undefined;
+    case 'cursor':
+      return buildCursorInstallLink(mcpServerUrl);
+    default:
+      return undefined;
+  }
+};
+
 const McpIntegrationCard = ({
   integration,
 }: {
@@ -618,6 +687,7 @@ const McpIntegrationCard = ({
   const { t } = useLingui();
   const navigate = useNavigate();
   const { name } = integration;
+  const openUrl = getMcpProviderOpenUrl(integration.plugin);
 
   return (
     <StyledCard rounded>
@@ -643,12 +713,25 @@ const McpIntegrationCard = ({
             {t`This runs inside ${name}, not in Desync, so there is no connection status to show here. Add the connection details in ${name} and you are all set.`}
           </StyledStatus>
           <StyledCardActions>
-            <Button
-              variant="outline"
-              onClick={() => navigate(getSettingsPath(SettingsPath.ApiWebhooks))}
-            >
-              {t`Get connection details`}
-            </Button>
+            {openUrl ? (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  window.open(openUrl, '_blank', 'noopener,noreferrer')
+                }
+              >
+                {t`Open in ${name}`}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(getSettingsPath(SettingsPath.ApiWebhooks))
+                }
+              >
+                {t`Get connection details`}
+              </Button>
+            )}
           </StyledCardActions>
         </StyledCardInner>
       </StyledCardContent>

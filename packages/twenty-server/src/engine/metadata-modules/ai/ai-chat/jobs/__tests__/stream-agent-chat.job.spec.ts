@@ -5,7 +5,10 @@ import { isDefined } from 'twenty-shared/utils';
 import { type WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { StreamAgentChatJob } from 'src/engine/metadata-modules/ai/ai-chat/jobs/stream-agent-chat.job';
 import { type StreamAgentChatJobData } from 'src/engine/metadata-modules/ai/ai-chat/jobs/stream-agent-chat-job.types';
-import { AiExceptionCode } from 'src/engine/metadata-modules/ai/ai.exception';
+import {
+  AiException,
+  AiExceptionCode,
+} from 'src/engine/metadata-modules/ai/ai.exception';
 
 type PublishedEvent = { type: string } & Record<string, unknown>;
 
@@ -161,6 +164,7 @@ describe('StreamAgentChatJob', () => {
     assistantPersistRejection,
     totalsUpdateAffected = 1,
     finalPublishRejection,
+    hasNoMoreAvailableCredits = false,
   }: {
     workspaceFound?: boolean;
     chatStream?: ReturnType<typeof createFakeChatStream>;
@@ -169,6 +173,7 @@ describe('StreamAgentChatJob', () => {
     assistantPersistRejection?: Error;
     totalsUpdateAffected?: number;
     finalPublishRejection?: Error;
+    hasNoMoreAvailableCredits?: boolean;
   } = {}) => {
     const publishedEvents: PublishedEvent[] = [];
 
@@ -197,6 +202,7 @@ describe('StreamAgentChatJob', () => {
       upsertAssistantMessage: assistantPersistRejection
         ? jest.fn().mockRejectedValue(assistantPersistRejection)
         : jest.fn().mockResolvedValue(undefined),
+      upsertTurnErrorMessage: jest.fn().mockResolvedValue(undefined),
       generateTitleIfNeeded: jest.fn().mockResolvedValue(null),
       notifyThreadUsageUpdated: jest.fn().mockResolvedValue(undefined),
     };
@@ -210,7 +216,7 @@ describe('StreamAgentChatJob', () => {
               inputCostPerMillionTokens: 1,
               outputCostPerMillionTokens: 2,
             },
-            hasNoMoreAvailableCredits: () => false,
+            hasNoMoreAvailableCredits: () => hasNoMoreAvailableCredits,
           }),
     };
     const eventPublisherService = {
@@ -732,7 +738,7 @@ describe('StreamAgentChatJob', () => {
       }),
     });
 
-    await job.handle(jobData);
+    await job.handle(jobData).catch(() => {});
 
     expect(turnCounts('ai-chat/turn-failed')).toEqual([
       expect.objectContaining({
@@ -803,5 +809,160 @@ describe('StreamAgentChatJob', () => {
     ]);
     expect(turnCounts('ai-chat/turn-failed')).toEqual([]);
     expect(turnCounts('ai-chat/turn-started')).toHaveLength(1);
+  });
+
+  describe('turn error reply', () => {
+    it('persists an error reply when execution setup throws before streaming', async () => {
+      const { job, agentChatService } = buildJob({
+        streamChatRejection: new Error("Didn't expect to get here."),
+      });
+
+      await expect(job.handle(jobData)).rejects.toThrow();
+
+      expect(agentChatService.upsertTurnErrorMessage).toHaveBeenCalledWith({
+        threadId: 'thread-id',
+        turnId: 'turn-id',
+        workspaceId: 'workspace-id',
+        turnError: {
+          code: 'STREAM_EXECUTION_FAILED',
+          message:
+            'Something went wrong while generating a response. Please try again.',
+        },
+      });
+    });
+
+    it('keeps the code and user-facing message of a gate refusal', async () => {
+      const { job, agentChatService } = buildJob({
+        streamChatRejection: new AiException(
+          'spend limit reached for user-workspace-id',
+          AiExceptionCode.AI_SPEND_LIMIT_REACHED,
+        ),
+      });
+
+      await expect(job.handle(jobData)).rejects.toMatchObject({
+        code: AiExceptionCode.AI_SPEND_LIMIT_REACHED,
+      });
+
+      const [[{ turnError }]] =
+        agentChatService.upsertTurnErrorMessage.mock.calls;
+
+      expect(turnError.code).toBe(AiExceptionCode.AI_SPEND_LIMIT_REACHED);
+      expect(turnError.message).not.toContain('user-workspace-id');
+    });
+
+    it('persists an error reply when the provider fails mid-stream', async () => {
+      const { job, agentChatService } = buildJob({
+        chatStream: createFakeChatStream({
+          parts: START_PARTS,
+          midStreamError: new Error('provider exploded'),
+        }),
+      });
+
+      await expect(job.handle(jobData)).rejects.toThrow('provider exploded');
+
+      expect(agentChatService.upsertTurnErrorMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          turnId: 'turn-id',
+          turnError: expect.objectContaining({
+            code: 'STREAM_EXECUTION_FAILED',
+          }),
+        }),
+      );
+    });
+
+    it('attaches the error reply to the turn the job created itself', async () => {
+      const { job, agentChatService } = buildJob({
+        chatStream: createFakeChatStream({
+          parts: START_PARTS,
+          midStreamError: new Error('provider exploded'),
+        }),
+      });
+
+      agentChatService.addMessage.mockResolvedValue({
+        id: 'user-message-id',
+        turnId: 'new-turn-id',
+      });
+
+      await expect(
+        job.handle({ ...jobData, existingTurnId: undefined }),
+      ).rejects.toThrow('provider exploded');
+
+      expect(agentChatService.upsertTurnErrorMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ turnId: 'new-turn-id' }),
+      );
+    });
+
+    it('fails an empty completion with an error reply instead of ending silently', async () => {
+      const { job, agentChatService, threadRepository } = buildJob({
+        chatStream: createFakeChatStream({ parts: EMPTY_REPLY_PARTS }),
+      });
+
+      await expect(job.handle(jobData)).rejects.toThrow();
+
+      expect(agentChatService.upsertTurnErrorMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          turnId: 'turn-id',
+          turnError: expect.objectContaining({ code: 'EMPTY_RESPONSE' }),
+        }),
+      );
+      expect(threadRepository.update).toHaveBeenCalledWith(
+        'workspace-id',
+        { id: 'thread-id' },
+        {
+          lastStreamError: expect.objectContaining({
+            code: 'STREAM_EXECUTION_FAILED',
+          }),
+        },
+      );
+    });
+
+    it('persists a credits-exhausted reply when credits ran out before any answer', async () => {
+      const { job, agentChatService } = buildJob({
+        chatStream: createFakeChatStream({ parts: EMPTY_REPLY_PARTS }),
+        hasNoMoreAvailableCredits: true,
+      });
+
+      await job.handle(jobData).catch(() => {});
+
+      expect(agentChatService.upsertTurnErrorMessage).toHaveBeenCalledTimes(1);
+      expect(agentChatService.upsertTurnErrorMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          turnError: expect.objectContaining({
+            code: 'BILLING_CREDITS_EXHAUSTED',
+          }),
+        }),
+      );
+    });
+
+    it('adds no error reply to an answered turn', async () => {
+      const { job, agentChatService } = buildJob();
+
+      await job.handle(jobData);
+
+      expect(agentChatService.upsertTurnErrorMessage).not.toHaveBeenCalled();
+    });
+
+    it('adds no error reply to a cancelled turn', async () => {
+      const { job, agentChatService } = buildJob({
+        chatStream: createFakeChatStream({
+          parts: START_PARTS,
+          isAborted: true,
+        }),
+      });
+
+      await job.handle(jobData).catch(() => {});
+
+      expect(agentChatService.upsertTurnErrorMessage).not.toHaveBeenCalled();
+    });
+
+    it('adds no error reply when only the final publish fails after the reply was saved', async () => {
+      const { job, agentChatService } = buildJob({
+        finalPublishRejection: new Error('redis is down'),
+      });
+
+      await job.handle(jobData).catch(() => {});
+
+      expect(agentChatService.upsertTurnErrorMessage).not.toHaveBeenCalled();
+    });
   });
 });

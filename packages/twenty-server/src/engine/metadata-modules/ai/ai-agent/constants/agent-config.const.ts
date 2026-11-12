@@ -1,3 +1,3 @@
 export const AGENT_CONFIG = {
-  MAX_STEPS: 300,
+  MAX_STEPS: 40,
 };

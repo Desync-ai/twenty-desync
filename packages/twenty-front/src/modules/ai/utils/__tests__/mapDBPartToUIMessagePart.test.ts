@@ -25,4 +25,20 @@ describe('mapDBPartToUIMessagePart', () => {
       providerMetadata,
     });
   });
+
+  it('maps a persisted turn error to its code and message', () => {
+    expect(
+      mapDBPartToUIMessagePart({
+        type: 'data-turn-error',
+        textContent: 'No response was received. Please try again.',
+        state: 'STREAM_INTERRUPTED',
+      } as AgentMessagePart),
+    ).toEqual({
+      type: 'data-turn-error',
+      data: {
+        code: 'STREAM_INTERRUPTED',
+        message: 'No response was received. Please try again.',
+      },
+    });
+  });
 });

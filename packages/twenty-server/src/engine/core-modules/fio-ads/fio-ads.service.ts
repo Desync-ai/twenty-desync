@@ -10,13 +10,10 @@ import { PermissionFlagType } from 'twenty-shared/constants';
 
 import { DesyncOnboardingService } from 'src/engine/core-modules/desync-onboarding/desync-onboarding.service';
 import {
-  CARTESIA_DEFAULT_VOICE_ID,
-  CARTESIA_EN_VOICE_ALLOWLIST,
   FIO_AD_CATEGORY_SET,
   FIO_AD_LIMITS,
   FIO_AD_SUBMISSION_KV_KEY,
   FIO_ADS_FALLBACK_RECIPIENT,
-  FIO_VOICE_FALLBACK,
 } from 'src/engine/core-modules/fio-ads/constants/fio-ad.constants';
 import { KeyValuePairType } from 'src/engine/core-modules/key-value-pair/key-value-pair.entity';
 import { KeyValuePairService } from 'src/engine/core-modules/key-value-pair/key-value-pair.service';
@@ -48,6 +45,14 @@ type FioAdPayload = {
   audio?: FioUpload;
 };
 
+// One of the five generated script ideas, each with a distinct standout element.
+export type FioAdScript = {
+  flavor: 'bell' | 'trumpet' | 'latin' | 'prayer' | 'plain';
+  label: string;
+  highlight: string;
+  script: string;
+};
+
 export type FioAdStatus = {
   eligible: boolean;
   reason:
@@ -74,26 +79,6 @@ export class FioAdsService {
   // Groq-hosted Whisper for optional auto-transcription of the ad audio.
   private static readonly TRANSCRIBE_MODEL = 'whisper-large-v3-turbo';
   private readonly groqKey = process.env.GROQ_API_KEY ?? '';
-  // Cartesia (Sonic) TTS for optional AI voiceover of the script (returns MP3).
-  private static readonly CARTESIA_TTS_URL = 'https://api.cartesia.ai/tts/bytes';
-  private static readonly CARTESIA_VOICES_URL = 'https://api.cartesia.ai/voices?limit=200';
-  private static readonly CARTESIA_VERSION = '2026-08-14';
-  private static readonly CARTESIA_MODEL = 'sonic-3.6';
-  private static readonly DEFAULT_VOICE_ID = CARTESIA_DEFAULT_VOICE_ID;
-  // Short phrase used for the pre-generation voice preview (kept brief so it is
-  // cheap/fast); each voice is synthesized at most once then cached in-process.
-  private static readonly VOICE_SAMPLE_TEXT =
-    'Hi, this is a preview of how your Fio ad could sound.';
-  private readonly voiceSampleCache = new Map<string, string>(); // voiceId -> base64 mp3
-  private readonly cartesiaKey = process.env.CARTESIA_API_KEY ?? '';
-  // Curated voice list resolved from Cartesia's live catalog, cached in-process.
-  private static readonly VOICES_TTL_MS = 6 * 60 * 60 * 1000;
-  private voicesCache: ReadonlyArray<{
-    id: string;
-    name: string;
-    description: string;
-  }> | null = null;
-  private voicesCacheAt = 0;
   // Lazy pool on the lead-gen billing DB (scraper_db) for prefill, same conn as
   // EntitlementService. Reads only the user's own onboarding company + URL.
   private prefillPool: Pool | null = null;
@@ -183,104 +168,6 @@ export class FioAdsService {
 
       return empty;
     }
-  }
-
-  // The curated voice selection shown in the picker: Cartesia's most natural
-  // English voices (our allowlist), resolved to real IDs from Cartesia's live
-  // catalog and cached. Falls back to the verified list if the fetch fails or
-  // the key isn't set yet, so the picker is never empty.
-  async listVoices(): Promise<
-    ReadonlyArray<{ id: string; name: string; description: string }>
-  > {
-    const now = Date.now();
-    if (
-      this.voicesCache &&
-      now - this.voicesCacheAt < FioAdsService.VOICES_TTL_MS
-    ) {
-      return this.voicesCache;
-    }
-    const curated = await this.fetchCuratedVoices();
-    this.voicesCache = curated;
-    this.voicesCacheAt = now;
-
-    return curated;
-  }
-
-  private async fetchCuratedVoices(): Promise<
-    ReadonlyArray<{ id: string; name: string; description: string }>
-  > {
-    if (!this.cartesiaKey) {
-      return FIO_VOICE_FALLBACK;
-    }
-    try {
-      const res = await fetch(FioAdsService.CARTESIA_VOICES_URL, {
-        headers: {
-          Authorization: `Bearer ${this.cartesiaKey}`,
-          'Cartesia-Version': FioAdsService.CARTESIA_VERSION,
-        },
-      });
-
-      if (!res.ok) {
-        this.logger.warn(`Fio ads: Cartesia /voices returned ${res.status}`);
-
-        return FIO_VOICE_FALLBACK;
-      }
-
-      const data = (await res.json()) as unknown;
-      const list = (
-        Array.isArray(data)
-          ? data
-          : Array.isArray((data as { data?: unknown })?.data)
-            ? (data as { data: unknown[] }).data
-            : []
-      ) as Array<{ id?: string; name?: string; language?: string }>;
-
-      // Index the English catalog by lowercased name (first match wins).
-      const byName = new Map<string, string>();
-      for (const v of list) {
-        const id = typeof v?.id === 'string' ? v.id : '';
-        const name = typeof v?.name === 'string' ? v.name : '';
-        const lang = typeof v?.language === 'string' ? v.language : '';
-        if (!id || !name) {
-          continue;
-        }
-        if (lang && !lang.toLowerCase().startsWith('en')) {
-          continue;
-        }
-        const key = name.toLowerCase();
-        if (!byName.has(key)) {
-          byName.set(key, id);
-        }
-      }
-
-      // Pick our allowlisted voices, in order, using their real catalog IDs.
-      const curated: Array<{ id: string; name: string; description: string }> = [];
-      for (const rec of CARTESIA_EN_VOICE_ALLOWLIST) {
-        const id = byName.get(rec.name.toLowerCase());
-        if (id) {
-          curated.push({ id, name: rec.name, description: rec.description });
-        }
-        if (curated.length >= 8) {
-          break;
-        }
-      }
-
-      return curated.length > 0 ? curated : FIO_VOICE_FALLBACK;
-    } catch (error) {
-      this.logger.warn(
-        `Fio ads: Cartesia /voices failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-
-      return FIO_VOICE_FALLBACK;
-    }
-  }
-
-  private async allowedVoiceIds(): Promise<Set<string>> {
-    const voices = await this.listVoices();
-
-    return new Set(voices.map((v) => v.id));
   }
 
   // The user's signup answers (scraper_db) summarized for the script writer.
@@ -485,6 +372,185 @@ export class FioAdsService {
     return { reply: reply || 'Sorry, I could not generate a response.' };
   }
 
+  // Generate five ready-to-read script ideas, each with a distinct standout
+  // element (church bell open, trumpet open, Latin phrase, prayer intention,
+  // plain). The user picks one and records it themselves; AI voiceover is gone.
+  // Grounded in the user's signup answers + a scrape of their site, same as the
+  // assistant. Caller gates on eligibility (spends AI).
+  async generateScripts({
+    brand,
+    email,
+    notes,
+  }: {
+    brand?: { name?: string; website?: string };
+    email?: string;
+    notes?: string;
+  }): Promise<{ scripts: FioAdScript[] }> {
+    if (!this.anthropicKey) {
+      throw new Error('Script ideas are not configured (ANTHROPIC_API_KEY).');
+    }
+
+    // Extra things the user typed in the "add to the scripts" box. Layered on
+    // top of the signup + website grounding; clamped and dash-stripped.
+    const extra = (notes ?? '')
+      .replace(/\s*[—–]\s*/g, ', ')
+      .trim()
+      .slice(0, 1000);
+
+    const brandLine =
+      brand?.name || brand?.website
+        ? `The user's brand is ${brand?.name ?? 'their organization'}${
+            brand?.website ? ` (${brand.website})` : ''
+          }.`
+        : 'The user has not named their brand; keep the scripts usable for a Catholic organization.';
+
+    const system =
+      `You write short audio advertisements for a Desync CRM user to run on ` +
+      `Fio, a Catholic podcast network. ${brandLine} ` +
+      `Each spoken ad must read in 20 to 30 seconds (roughly 50 to 75 words), ` +
+      `warm, clear, and broadcast-ready for a Catholic audience; avoid hype and ` +
+      `anything off-brand for that context. The user will record it in their own ` +
+      `voice, so write natural spoken words, not stage directions.\n\n` +
+      `Write FIVE distinct script options, each with a different standout element, ` +
+      `in this exact order:\n` +
+      `1. "bell": a strong, clean script. A short church bell will play right ` +
+      `before it, so make the opening line land well after a bell. Do NOT write ` +
+      `the bell as words.\n` +
+      `2. "trumpet": like the first, but a short trumpet fanfare plays right ` +
+      `before it. Do NOT write the trumpet as words.\n` +
+      `3. "latin": begin the spoken script with a short, fitting Latin phrase ` +
+      `(choose an apt motto or liturgical line) and then continue in English, ` +
+      `making its meaning clear from what follows. Keep it natural, not showy.\n` +
+      `4. "prayer": weave in a brief, sincere invitation to pray for an intention ` +
+      `(for example the Holy Father, vocations, families, persecuted Christians, ` +
+      `or the faithful departed). VARY the intention; do not always pick the same ` +
+      `one. Tie it to the audience when it fits naturally.\n` +
+      `5. "plain": a clean, strong script with no extra element.\n\n` +
+      `Rules for every script: spoken words only, no titles, no headings, no ` +
+      `markdown, no quotation marks, no stage directions, no word counts, no ` +
+      `labels. Never use em dashes or en dashes; use commas, periods, or ` +
+      `parentheses instead. Stay within the 20 to 30 second limit. Write in ` +
+      `short, punchy sentences; the app lays each sentence on its own line for ` +
+      `easy reading.\n\n` +
+      `Return ONLY a JSON array of exactly five objects, in the order above, each ` +
+      `with keys: "flavor" (one of bell, trumpet, latin, prayer, plain), "label" ` +
+      `(two to four words naming the idea), "highlight" (one short sentence on ` +
+      `what stands out), and "script" (the spoken words). Output the JSON array ` +
+      `and nothing else, with no text or markdown fences before or after it.`;
+
+    const context = await this.getScriptContext(email, brand?.website);
+    const systemWithContext = context
+      ? `${system}\n\nUse this real context about the user and their business to ` +
+        `make the scripts specific and accurate; do not contradict or invent ` +
+        `beyond it:\n${context}`
+      : system;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': this.anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: FioAdsService.ASSIST_MODEL,
+        max_tokens: 1500,
+        system: systemWithContext,
+        messages: [
+          {
+            role: 'user',
+            content:
+              'Write the five script ideas now as the JSON array described.' +
+              (extra
+                ? `\n\nThe user specifically wants the scripts to include or ` +
+                  `reflect the following. Honor it in every script where it ` +
+                  `fits naturally, without breaking the rules above:\n${extra}`
+                : ''),
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Script ideas error ${res.status}: ${text.slice(0, 200)}`);
+    }
+
+    const data = (await res.json()) as {
+      content?: Array<{ type?: string; text?: string }>;
+    };
+    const raw = (data.content ?? [])
+      .filter((block) => block?.type === 'text' && typeof block.text === 'string')
+      .map((block) => block.text)
+      .join('\n');
+
+    return { scripts: this.parseScripts(raw) };
+  }
+
+  private parseScripts(raw: string): FioAdScript[] {
+    const start = raw.indexOf('[');
+    const end = raw.lastIndexOf(']');
+    if (start === -1 || end <= start) {
+      throw new Error('Could not read the generated scripts. Please try again.');
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw.slice(start, end + 1));
+    } catch {
+      throw new Error('Could not read the generated scripts. Please try again.');
+    }
+
+    const allowedFlavors = new Set<FioAdScript['flavor']>([
+      'bell',
+      'trumpet',
+      'latin',
+      'prayer',
+      'plain',
+    ]);
+    const clean = (s: unknown): string =>
+      (typeof s === 'string' ? s : '').replace(/\s*[—–]\s*/g, ', ').trim();
+
+    const scripts = (Array.isArray(parsed) ? parsed : [])
+      .map((item) => {
+        const row = (item ?? {}) as Record<string, unknown>;
+        const flavor = clean(row.flavor) as FioAdScript['flavor'];
+
+        return {
+          flavor,
+          label: clean(row.label).slice(0, 60),
+          highlight: clean(row.highlight).slice(0, 200),
+          script: this.formatScript(clean(row.script).slice(0, 2000)),
+        };
+      })
+      .filter((s) => allowedFlavors.has(s.flavor) && s.script.length > 0);
+
+    if (scripts.length === 0) {
+      throw new Error('Could not read the generated scripts. Please try again.');
+    }
+
+    return scripts;
+  }
+
+  // Lay a one-paragraph script out as one sentence (beat) per line so it reads
+  // easily while recording, instead of a single wall of text. If the model
+  // already added line breaks, keep them as-is.
+  private formatScript(text: string): string {
+    const s = text.trim();
+    if (!s || s.includes('\n')) {
+      return s;
+    }
+    const parts = s.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g);
+    if (!parts || parts.length <= 1) {
+      return s;
+    }
+
+    return parts
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join('\n');
+  }
+
   // Optional auto-transcription of the ad audio via Groq-hosted Whisper. Returns
   // the transcript text; the client only uses it when the transcript is blank.
   async transcribe({
@@ -535,103 +601,6 @@ export class FioAdsService {
     return { text: (data.text ?? '').trim() };
   }
 
-  // Optional AI voiceover of the script via Cartesia (Sonic) TTS. Returns an MP3
-  // the client drops in as the ad audio. Caller gates on eligibility (spends our
-  // Cartesia credits).
-  async generateVoiceover({
-    text,
-    voiceId,
-  }: {
-    text?: string;
-    voiceId?: string;
-  }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
-    if (!this.cartesiaKey) {
-      throw new Error('AI voiceover is not configured (CARTESIA_API_KEY).');
-    }
-    const script = (text ?? '').trim();
-    if (!script) {
-      throw new BadRequestException('No script to voice.');
-    }
-    if (script.length > 2500) {
-      throw new BadRequestException('Script is too long for a 20-30s ad.');
-    }
-
-    // Only allow a voice from our curated picker list; otherwise fall back to the
-    // default (prevents arbitrary voice ids being driven through our key).
-    const requested = (voiceId ?? '').trim();
-    const allowed = await this.allowedVoiceIds();
-    const voice =
-      requested && allowed.has(requested)
-        ? requested
-        : process.env.CARTESIA_VOICE_ID || FioAdsService.DEFAULT_VOICE_ID;
-
-    const dataBase64 = await this.synthesizeMp3(voice, script);
-
-    return {
-      audio: { filename: 'voiceover.mp3', contentType: 'audio/mpeg', dataBase64 },
-    };
-  }
-
-  // Low-level Cartesia (Sonic) TTS -> base64 MP3. Shared by the full voiceover
-  // and the short voice preview. POST /tts/bytes returns the MP3 bytes directly.
-  // Throws on a non-2xx with the status + body snippet. (If Cartesia ever rejects
-  // the voice shape, switch `voice` to a bare `{ id: voice }`.)
-  private async synthesizeMp3(voice: string, text: string): Promise<string> {
-    const res = await fetch(FioAdsService.CARTESIA_TTS_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.cartesiaKey}`,
-        'Cartesia-Version': FioAdsService.CARTESIA_VERSION,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model_id: FioAdsService.CARTESIA_MODEL,
-        transcript: text,
-        voice: { mode: 'id', id: voice },
-        language: 'en',
-        output_format: {
-          container: 'mp3',
-          sample_rate: 44100,
-          bit_rate: 128000,
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      throw new Error(`Voiceover error ${res.status}: ${errText.slice(0, 200)}`);
-    }
-
-    return Buffer.from(await res.arrayBuffer()).toString('base64');
-  }
-
-  // A short, cached sample of one of our picker voices so the user can hear it
-  // before generating a full voiceover. Picker voices only; synthesized at most
-  // once per voice (cached in-process) to keep previews ~free. Caller gates.
-  async getVoiceSample({
-    voiceId,
-  }: {
-    voiceId?: string;
-  }): Promise<{ audio: { filename: string; contentType: string; dataBase64: string } }> {
-    if (!this.cartesiaKey) {
-      throw new Error('AI voiceover is not configured (CARTESIA_API_KEY).');
-    }
-    const voice = (voiceId ?? '').trim();
-    const allowed = await this.allowedVoiceIds();
-    if (!voice || !allowed.has(voice)) {
-      throw new BadRequestException('Unknown voice.');
-    }
-    let dataBase64 = this.voiceSampleCache.get(voice);
-    if (!dataBase64) {
-      dataBase64 = await this.synthesizeMp3(voice, FioAdsService.VOICE_SAMPLE_TEXT);
-      this.voiceSampleCache.set(voice, dataBase64);
-    }
-
-    return {
-      audio: { filename: 'voice-sample.mp3', contentType: 'audio/mpeg', dataBase64 },
-    };
-  }
-
   async getStatus({
     userId,
     email,
@@ -644,7 +613,10 @@ export class FioAdsService {
     userWorkspaceId?: string;
   }): Promise<FioAdStatus> {
     const normalizedEmail = (email ?? '').toLowerCase();
-    const isInternal = normalizedEmail.endsWith('@desync.ai');
+    // Plus-aliased addresses (e.g. jackson+1@desync.ai) are treated as real users.
+    const isInternal =
+      normalizedEmail.endsWith('@desync.ai') &&
+      !normalizedEmail.slice(0, normalizedEmail.lastIndexOf('@')).includes('+');
 
     let plan = 'none';
     let isPaid = false;
@@ -905,7 +877,8 @@ export class FioAdsService {
       `<p><strong>Categories:</strong> ${esc((p.categories ?? []).join(', '))}</p>` +
       `<p><strong>Transcript:</strong><br/>` +
       `<span style="white-space:pre-wrap">${esc(p.audioTranscript ?? '')}</span></p>` +
-      `<p>Logo, advertisement image, the MP3, and a machine-readable JSON file are attached.</p>`;
+      `<p>Logo, advertisement image, the audio file, and a machine-readable JSON ` +
+      `file are attached.</p>`;
 
     const attachments = [
       {

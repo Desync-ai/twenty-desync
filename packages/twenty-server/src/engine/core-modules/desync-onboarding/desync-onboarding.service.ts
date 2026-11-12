@@ -111,6 +111,44 @@ export class DesyncOnboardingService {
   }
 
   /**
+   * Ensure a non-paid user has the standing $1/month 'Free' entitling row, so
+   * they can browse the CRM instead of hitting the paywall. twenty-backend owns
+   * eligibility (mints only when no current row exists), the calendar-month
+   * reset, and idempotency. Fails OPEN (returns false + logs); the caller
+   * re-checks entitlement, which fails closed, so a backend blip just leaves the
+   * paywall up. No-op when the backend is unset.
+   */
+  async ensureFreeGrant(email: string): Promise<boolean> {
+    if (!this.baseUrl) {
+      return false;
+    }
+
+    try {
+      const response = await this.post('/ensure-free-grant', { email });
+
+      if (!response.ok) {
+        this.logger.warn(
+          `ensure-free-grant returned ${response.status} for ${email}`,
+        );
+
+        return false;
+      }
+
+      const data = (await response.json()) as { granted?: boolean };
+
+      return data.granted === true;
+    } catch (error) {
+      this.logger.error(
+        `ensure-free-grant failed for ${email} (fail open): ${
+          (error as Error)?.message
+        }`,
+      );
+
+      return false;
+    }
+  }
+
+  /**
    * Best-effort website → structured prefill for the questionnaire. FAILS SILENT:
    * returns an empty (ok=false) result on any error, timeout, or unset backend, so
    * the form just stays blank and onboarding is never blocked. Uses a longer
@@ -218,7 +256,12 @@ export class DesyncOnboardingService {
     }>;
     publishableKey: string;
   }> {
-    this.assertBackend();
+    // Enterprise self-host (no paywall / no billing backend): no catalog to show,
+    // so return an empty one instead of throwing and 500-ing the page that fires
+    // this query on load (which otherwise breaks the choose-workspace/onboarding UI).
+    if (!this.baseUrl) {
+      return { plans: [], publishableKey: '' };
+    }
 
     const response = await this.get('/billing-plans');
 
@@ -320,6 +363,27 @@ export class DesyncOnboardingService {
     stripeActive: boolean;
     cancelAtPeriodEnd: boolean;
   }> {
+    // Enterprise self-host (no paywall): present a flat "Enterprise" plan so the
+    // sidebar widget and Plan & Billing show "Enterprise" (not "Free"), with no
+    // leads/AI meters or Subscribe CTA. Gated on the same env as the entitlement
+    // allowlist, so the hosted multi-tenant CRM is unaffected (empty => skip).
+    if ((process.env.ENTERPRISE_ALLOWED_EMAIL_DOMAINS ?? '').trim() !== '') {
+      return {
+        hasSubscription: true,
+        planLevel: 'Enterprise',
+        isPaidPlan: true,
+        current: true,
+        cadence: null,
+        periodEnd: null,
+        quota: null,
+        used: null,
+        aiCostCents: null,
+        aiCostQuotaCents: null,
+        stripeActive: false,
+        cancelAtPeriodEnd: false,
+      };
+    }
+
     const fallback = {
       hasSubscription: false,
       planLevel: null,

@@ -5,4 +5,7 @@ export const AiChatErrorCode = {
   CONNECTION_LOST: 'CONNECTION_LOST',
   QUESTION_NOT_PENDING: 'QUESTION_NOT_PENDING',
   QUOTA_EXHAUSTED: 'QUOTA_EXHAUSTED',
+  // Desync: the per-user $ AI budget (free $1/month tier or a plan cap) is spent.
+  // Emitted by twenty-backend's /ai/check as AiException AI_SPEND_LIMIT_REACHED.
+  AI_SPEND_LIMIT_REACHED: 'AI_SPEND_LIMIT_REACHED',
 } as const;

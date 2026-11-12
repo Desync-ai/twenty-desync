@@ -33,6 +33,7 @@ import { AgentChatEventPublisherService } from 'src/engine/metadata-modules/ai/a
 import { AgentChatStreamHeartbeatService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat-stream-heartbeat.service';
 import { AgentChatService } from 'src/engine/metadata-modules/ai/ai-chat/services/agent-chat.service';
 import { AiChatFileAttachment } from 'src/engine/metadata-modules/ai/ai-chat/types/ai-chat-file-attachment.type';
+import { isTurnErrorOnlyMessage } from 'src/engine/metadata-modules/ai/ai-chat/utils/is-turn-error-only-message.util';
 import { mapErrorToStreamError } from 'src/engine/metadata-modules/ai/ai-chat/utils/map-error-to-stream-error.util';
 import {
   AiException,
@@ -854,11 +855,13 @@ export class AgentChatStreamingService {
     });
 
     // A hidden row without parts is an interrupted seed attempt: it carries no context and
-    // would otherwise reach the model as an empty user message.
+    // would otherwise reach the model as an empty user message. An error-only reply is for
+    // the user; the model sees the failed turn as unanswered, as before it was recorded.
     const filteredMessages = allMessages.filter(
       (message) =>
         message.status !== AgentMessageStatus.QUEUED &&
-        (!message.isHidden || isNonEmptyArray(message.parts)),
+        (!message.isHidden || isNonEmptyArray(message.parts)) &&
+        !isTurnErrorOnlyMessage(message),
     );
 
     return Promise.all(

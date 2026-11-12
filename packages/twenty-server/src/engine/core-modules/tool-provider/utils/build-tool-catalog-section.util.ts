@@ -31,6 +31,12 @@ const getCategoryLabel = (category: ToolCategory): string => {
       return 'Role Tools (manage roles and permissions)';
     case ToolCategory.COMPOSIO:
       return 'Connected App Tools (via Composio — e.g. Slack, Airtable)';
+    case ToolCategory.POCKET:
+      return 'Pocket Tools (meeting recordings and transcripts)';
+    case ToolCategory.FATHOM:
+      return 'Fathom Tools (meeting recordings and transcripts)';
+    case ToolCategory.CATHOLIC_INSTITUTIONS:
+      return 'Catholic Institutions (read-only search of Desync parish/school/hospital reference data)';
     default:
       return assertUnreachable(category);
   }

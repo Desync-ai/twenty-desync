@@ -486,4 +486,21 @@ describe('AiChatAssistantMessageRenderer', () => {
       'Here is what I found.',
     ]);
   });
+
+  it('should show the error reply of a failed turn', () => {
+    renderAssistantRenderer([
+      {
+        type: 'data-turn-error',
+        data: {
+          code: 'STREAM_INTERRUPTED',
+          message: 'No response was received. Please try again.',
+        },
+      },
+    ] as ExtendedUIMessagePart[]);
+
+    expect(
+      screen.getByText('No response was received. Please try again.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
 });
