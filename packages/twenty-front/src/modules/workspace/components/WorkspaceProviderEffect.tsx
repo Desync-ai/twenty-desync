@@ -1,6 +1,7 @@
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
 import { useReadWorkspaceUrlFromCurrentLocation } from '@/domain-manager/hooks/useReadWorkspaceUrlFromCurrentLocation';
 import { useRedirectToWorkspaceDomain } from '@/domain-manager/hooks/useRedirectToWorkspaceDomain';
+import { domainConfigurationState } from '@/domain-manager/states/domainConfigurationState';
 import { lastAuthenticatedWorkspaceDomainState } from '@/domain-manager/states/lastAuthenticatedWorkspaceDomainState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useEffect, useCallback } from 'react';
@@ -30,6 +31,17 @@ export const WorkspaceProviderEffect = () => {
   const isMultiWorkspaceEnabled = useAtomStateValue(
     isMultiWorkspaceEnabledState,
   );
+
+  const domainConfiguration = useAtomStateValue(domainConfigurationState);
+
+  // A returning user who opens the bare apex front domain (no workspace
+  // subdomain) should reach their last workspace the same way they do from the
+  // central/default domain. Without this they fall through to
+  // /welcome -> central -> a full Clerk re-exchange, and the funnel to central
+  // clears the last-workspace cookie on the way, so the hint that could have
+  // sent them straight home is already gone by the time they arrive.
+  const isOnApexFrontDomain =
+    window.location.hostname === domainConfiguration.frontDomain;
 
   const { initializeQueryParamState } = useInitializeQueryParamState();
 
@@ -66,7 +78,7 @@ export const WorkspaceProviderEffect = () => {
   useEffect(() => {
     if (
       isMultiWorkspaceEnabled &&
-      isDefaultDomain &&
+      (isDefaultDomain || isOnApexFrontDomain) &&
       isDefined(lastAuthenticatedWorkspaceDomain) &&
       'workspaceUrl' in lastAuthenticatedWorkspaceDomain &&
       isDefined(lastAuthenticatedWorkspaceDomain?.workspaceUrl)
@@ -81,6 +93,7 @@ export const WorkspaceProviderEffect = () => {
   }, [
     isMultiWorkspaceEnabled,
     isDefaultDomain,
+    isOnApexFrontDomain,
     lastAuthenticatedWorkspaceDomain,
     redirectToWorkspaceDomain,
     initializeQueryParamState,
