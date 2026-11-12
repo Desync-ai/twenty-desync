@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { isBoolean } from '@sniptt/guards';
 
 import { type DesyncWebsiteAnalysis } from './dtos/desync-billing.dto';
 
@@ -361,6 +362,7 @@ export class DesyncOnboardingService {
     aiCostCents: number | null;
     aiCostQuotaCents: number | null;
     stripeActive: boolean;
+    stripeBacked: boolean | null;
     cancelAtPeriodEnd: boolean;
   }> {
     // Enterprise self-host (no paywall): present a flat "Enterprise" plan so the
@@ -396,6 +398,7 @@ export class DesyncOnboardingService {
       aiCostCents: null,
       aiCostQuotaCents: null,
       stripeActive: false,
+      stripeBacked: null,
       cancelAtPeriodEnd: false,
     };
 
@@ -428,6 +431,8 @@ export class DesyncOnboardingService {
         aiCostCents: (d.ai_cost_cents as number) ?? null,
         aiCostQuotaCents: (d.ai_cost_quota_cents as number) ?? null,
         stripeActive: d.stripe_active === true,
+        // null while the billing API predates the field: unknown, not "no".
+        stripeBacked: isBoolean(d.stripe_backed) ? d.stripe_backed : null,
         cancelAtPeriodEnd: d.cancel_at_period_end === true,
       };
     } catch (error) {

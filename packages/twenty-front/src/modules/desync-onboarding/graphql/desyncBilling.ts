@@ -62,6 +62,7 @@ export const MY_SUBSCRIPTION_QUERY = gql`
       aiCostCents
       aiCostQuotaCents
       stripeActive
+      stripeBacked
       cancelAtPeriodEnd
       isInternal
     }

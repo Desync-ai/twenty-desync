@@ -2,6 +2,7 @@ import { styled } from '@linaria/react';
 import { isDefined } from 'twenty-shared/utils';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 
+import { InformationBannerDesyncPlanCountdown } from '@/desync-onboarding/components/InformationBannerDesyncPlanCountdown';
 import { InformationBannerBillingSubscriptionPaused } from '@/information-banner/components/billing/InformationBannerBillingSubscriptionPaused';
 import { InformationBannerEndTrialPeriod } from '@/information-banner/components/billing/InformationBannerEndTrialPeriod';
 import { InformationBannerFailPaymentInfo } from '@/information-banner/components/billing/InformationBannerFailPaymentInfo';
@@ -81,6 +82,7 @@ export const InformationBannerWrapper = () => {
       {displayFailPaymentInfoBanner && <InformationBannerFailPaymentInfo />}
       {displayEndTrialPeriodBanner && <InformationBannerEndTrialPeriod />}
       {displayNoMoreCreditsBanner && <InformationBannerNoMoreCredits />}
+      <InformationBannerDesyncPlanCountdown />
     </StyledInformationBannerWrapper>
   );
 };
