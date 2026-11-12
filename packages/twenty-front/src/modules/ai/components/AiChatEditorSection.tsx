@@ -21,6 +21,7 @@ import { AiChatDictationButton } from '@/ai/dictation/components/AiChatDictation
 import { AiChatDictationEffect } from '@/ai/dictation/components/AiChatDictationEffect';
 import { AiChatDictationHint } from '@/ai/dictation/components/AiChatDictationHint';
 import { AiChatContextUsageButton } from '@/ai/components/internal/AiChatContextUsageButton';
+import { AiChatDesyncDatabaseToggleButton } from '@/ai/components/internal/AiChatDesyncDatabaseToggleButton';
 import { AiChatEditorFocusEffect } from '@/ai/components/internal/AiChatEditorFocusEffect';
 import { SendMessageButton } from '@/ai/components/internal/SendMessageButton';
 import { useAiChatEditor } from '@/ai/hooks/useAiChatEditor';
@@ -194,6 +195,7 @@ export const AiChatEditorSection = () => {
                 <AgentChatFileUploadButton />
                 <AiChatDictationButton />
                 <AiChatContextUsageButton />
+                <AiChatDesyncDatabaseToggleButton />
               </StyledLeftButtonsContainer>
               <StyledRightButtonsContainer>
                 <AiModelTierDropdown

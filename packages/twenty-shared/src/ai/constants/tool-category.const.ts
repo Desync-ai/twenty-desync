@@ -19,4 +19,8 @@ export enum ToolCategory {
   // Desync fork: Fathom (fathom.video) meeting tools, wired DIRECTLY to Fathom's
   // own MCP server (NOT via Composio), per-user bring-your-own-key.
   FATHOM = 'FATHOM',
+  // Desync fork: read-only search over our own Catholic institutions reference
+  // data (the `compat` views of `desync_core`), gated per workspace by the
+  // IS_CATHOLIC_INSTITUTIONS_ENABLED feature flag.
+  CATHOLIC_INSTITUTIONS = 'CATHOLIC_INSTITUTIONS',
 }

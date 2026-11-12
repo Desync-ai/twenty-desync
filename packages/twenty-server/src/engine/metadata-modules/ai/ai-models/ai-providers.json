@@ -1,4 +1,45 @@
 {
+  "cloudflare": {
+    "npm": "@ai-sdk/openai-compatible",
+    "name": "cloudflare",
+    "label": "Cloudflare Workers AI",
+    "apiKey": "{{CLOUDFLARE_API_KEY}}",
+    "baseUrl": "{{CLOUDFLARE_AI_BASE_URL}}",
+    "models": [
+      {
+        "name": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        "label": "Llama 3.3 70B (Cloudflare)",
+        "inputCostPerMillionTokens": 0.29,
+        "outputCostPerMillionTokens": 2.25,
+        "contextWindowTokens": 128000,
+        "maxOutputTokens": 32000
+      },
+      {
+        "name": "@cf/qwen/qwen3-30b-a3b-fp8",
+        "label": "Qwen3 30B A3B (Cloudflare)",
+        "inputCostPerMillionTokens": 0.1,
+        "outputCostPerMillionTokens": 0.4,
+        "contextWindowTokens": 32000,
+        "maxOutputTokens": 16000
+      },
+      {
+        "name": "@cf/meta/llama-4-scout-17b-16e-instruct",
+        "label": "Llama 4 Scout 17B (Cloudflare)",
+        "inputCostPerMillionTokens": 0.27,
+        "outputCostPerMillionTokens": 0.85,
+        "contextWindowTokens": 128000,
+        "maxOutputTokens": 32000
+      },
+      {
+        "name": "@cf/mistralai/mistral-small-3.1-24b-instruct",
+        "label": "Mistral Small 3.1 24B (Cloudflare)",
+        "inputCostPerMillionTokens": 0.35,
+        "outputCostPerMillionTokens": 0.55,
+        "contextWindowTokens": 128000,
+        "maxOutputTokens": 32000
+      }
+    ]
+  },
   "openai": {
     "npm": "@ai-sdk/openai",
     "label": "OpenAI",

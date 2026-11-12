@@ -225,7 +225,9 @@ export class AccessTokenService {
     sessionToken: string,
   ): Promise<AuthContext> {
     const { payload, authenticatedAt } =
-      await this.userSessionService.resolveSession(sessionToken);
+      await this.userSessionService.resolveSession(sessionToken, {
+        allowSupersededGracePeriod: true,
+      });
 
     const context = await this.jwtStrategy.validate(payload);
 

@@ -207,7 +207,7 @@ export class IntegrationsService {
     const html =
       `<p><strong>${label}</strong>` +
       (severityText ? ` (severity ${escape(severityText)})` : '') +
-      ` from ${escape(fromEmail ?? 'a Twenty CRM user')}:</p>` +
+      ` from ${escape(fromEmail ?? 'a Desync CRM user')}:</p>` +
       `<p style="white-space:pre-wrap">${escape(message)}</p>`;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
