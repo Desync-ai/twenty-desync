@@ -32,12 +32,29 @@ describe('ClerkAuthService account resolution', () => {
   };
 
   const buildUser = (overrides: Partial<UserEntity>) =>
-    ({ id: 'user-a', clerkId: null, ...overrides }) as UserEntity;
+    ({
+      id: 'user-a',
+      clerkId: null,
+      isEmailVerified: true,
+      ...overrides,
+    }) as UserEntity;
 
   const findExistingUser = () => clerkAuthService['findExistingUser'](identity);
 
+  const twentyConfigService = { get: jest.fn() };
+
+  const workspaceRepository = { exists: jest.fn() };
+
+  const assertAuthorizedParty = (azp: unknown) =>
+    clerkAuthService['assertAuthorizedParty'](azp);
+
   beforeEach(async () => {
     jest.clearAllMocks();
+
+    twentyConfigService.get.mockImplementation((key: string) =>
+      key === 'FRONTEND_URL' ? 'https://crm.example.com' : undefined,
+    );
+    workspaceRepository.exists.mockResolvedValue(false);
 
     userService.findUserByClerkId.mockResolvedValue(null);
     userService.findUserByEmail.mockResolvedValue(null);
@@ -53,7 +70,7 @@ describe('ClerkAuthService account resolution', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClerkAuthService,
-        { provide: TwentyConfigService, useValue: { get: jest.fn() } },
+        { provide: TwentyConfigService, useValue: twentyConfigService },
         { provide: UserService, useValue: userService },
         { provide: SignInUpService, useValue: {} },
         { provide: EntitlementService, useValue: {} },
@@ -62,7 +79,10 @@ describe('ClerkAuthService account resolution', () => {
         { provide: WorkspaceDomainsService, useValue: {} },
         { provide: WorkspaceInvitationService, useValue: {} },
         { provide: getRepositoryToken(UserWorkspaceEntity), useValue: {} },
-        { provide: getRepositoryToken(WorkspaceEntity), useValue: {} },
+        {
+          provide: getRepositoryToken(WorkspaceEntity),
+          useValue: workspaceRepository,
+        },
       ],
     }).compile();
 
@@ -139,6 +159,57 @@ describe('ClerkAuthService account resolution', () => {
         'This email is linked to another account.',
       );
       expect(userService.linkClerkIdToUser).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['an unverified email', { isEmailVerified: false }],
+      ['a native password', { passwordHash: 'hash' }],
+    ])(
+      'should refuse to link a user with %s',
+      async (_label, overrides: Partial<UserEntity>) => {
+        userService.findUserByEmail.mockResolvedValue(
+          buildUser({ email: identity.email, ...overrides }),
+        );
+
+        await expect(findExistingUser()).rejects.toThrow(
+          'This email is linked to another account.',
+        );
+        expect(userService.linkClerkIdToUser).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  describe('authorized party (azp) check', () => {
+    it.each(['https://crm.example.com', 'https://acme.crm.example.com'])(
+      'should accept a token minted on %s',
+      async (azp) => {
+        await expect(assertAuthorizedParty(azp)).resolves.toBeUndefined();
+        expect(workspaceRepository.exists).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
+      undefined,
+      'https://other-product.example.com',
+      'https://evilcrm.example.com',
+    ])('should reject a token minted on %p', async (azp) => {
+      await expect(assertAuthorizedParty(azp)).rejects.toThrow(
+        'Invalid Clerk token',
+      );
+    });
+
+    it('should accept an enabled workspace custom domain', async () => {
+      workspaceRepository.exists.mockResolvedValue(true);
+
+      await expect(
+        assertAuthorizedParty('https://crm.customer.org'),
+      ).resolves.toBeUndefined();
+      expect(workspaceRepository.exists).toHaveBeenCalledWith({
+        where: {
+          customDomain: 'crm.customer.org',
+          isCustomDomainEnabled: true,
+        },
+      });
     });
   });
 });

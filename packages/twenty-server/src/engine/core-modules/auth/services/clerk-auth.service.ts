@@ -15,6 +15,10 @@ import { EntitlementService } from 'src/engine/core-modules/auth/services/entitl
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
 import { LoginTokenService } from 'src/engine/core-modules/auth/token/services/login-token.service';
 import { type PartialUserWithPicture } from 'src/engine/core-modules/auth/types/signInUp.type';
+import {
+  isClerkPartyOnFrontDomain,
+  parseClerkAuthorizedParty,
+} from 'src/engine/core-modules/auth/utils/is-clerk-party-on-front-domain.util';
 import { WorkspaceDomainsService } from 'src/engine/core-modules/domain/workspace-domains/services/workspace-domains.service';
 import { WorkspaceInvitationService } from 'src/engine/core-modules/workspace-invitation/services/workspace-invitation.service';
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
@@ -266,20 +270,58 @@ export class ClerkAuthService {
     return secretKey;
   }
 
+  // The prod Clerk instance is shared by every Desync product: only accept a
+  // token minted on the CRM front, a workspace subdomain of it, or an enabled
+  // workspace custom domain.
+  private async assertAuthorizedParty(azp: unknown): Promise<void> {
+    const party = parseClerkAuthorizedParty(azp);
+
+    if (isDefined(party)) {
+      const frontUrl = new URL(
+        this.twentyConfigService.get('FRONTEND_URL') ??
+          this.twentyConfigService.get('SERVER_URL'),
+      );
+
+      if (isClerkPartyOnFrontDomain(party, frontUrl)) {
+        return;
+      }
+
+      if (
+        party.protocol === 'https:' &&
+        (await this.workspaceRepository.exists({
+          where: { customDomain: party.hostname, isCustomDomainEnabled: true },
+        }))
+      ) {
+        return;
+      }
+    }
+
+    this.logger.warn(
+      `Clerk token rejected: unauthorized party ${JSON.stringify(azp)}`,
+    );
+
+    throw new AuthException(
+      'Invalid Clerk token',
+      AuthExceptionCode.UNAUTHENTICATED,
+    );
+  }
+
   private async verifyClerkTokenAndFetchUser(
     clerkToken: string,
   ): Promise<ClerkIdentity> {
     const secretKey = this.getSecretKeyOrThrow();
 
     let clerkUserId: string;
+    let authorizedParty: unknown;
 
     try {
       // @clerk/backend fetches and caches Clerk's JWKS using the secret key and
-      // verifies signature + expiry. `authorizedParties` can be added here to
-      // pin the accepted origin(s) once the deployment's front URL is known.
+      // verifies signature + expiry. The origin (`azp`) is checked below by
+      // hand: the SDK's exact-match list cannot express workspace subdomains.
       const claims = await verifyToken(clerkToken, { secretKey });
 
       clerkUserId = claims.sub;
+      authorizedParty = claims.azp;
     } catch (error) {
       this.logger.warn(`Clerk token verification failed: ${error?.message}`);
 
@@ -295,6 +337,8 @@ export class ClerkAuthService {
         AuthExceptionCode.UNAUTHENTICATED,
       );
     }
+
+    await this.assertAuthorizedParty(authorizedParty);
 
     const clerkClient = createClerkClient({ secretKey });
 
@@ -530,6 +574,23 @@ export class ClerkAuthService {
       ) {
         this.logger.warn(
           `Refusing Clerk sign-in: user ${userByEmail.id} is linked to another Clerk identity.`,
+        );
+
+        throw new AuthException(
+          'This email is linked to another account.',
+          AuthExceptionCode.FORBIDDEN_EXCEPTION,
+        );
+      }
+
+      // An account whose address was never verified, or that carries a native
+      // password, may have been pre-created by someone else for this address:
+      // linking would hand the Clerk user an account its creator still controls.
+      if (
+        !userByEmail.isEmailVerified ||
+        isNonEmptyString(userByEmail.passwordHash)
+      ) {
+        this.logger.warn(
+          `Refusing Clerk sign-in: user ${userByEmail.id} is unverified or has a native password.`,
         );
 
         throw new AuthException(
