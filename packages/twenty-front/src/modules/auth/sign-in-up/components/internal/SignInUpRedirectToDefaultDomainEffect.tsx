@@ -4,6 +4,8 @@ import { clientConfigApiStatusState } from '@/client-config/states/clientConfigA
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
 import { useIsCurrentLocationOnDefaultDomain } from '@/domain-manager/hooks/useIsCurrentLocationOnDefaultDomain';
 import { useRedirectToDefaultDomain } from '@/domain-manager/hooks/useRedirectToDefaultDomain';
+import { useRedirectToWorkspaceDomain } from '@/domain-manager/hooks/useRedirectToWorkspaceDomain';
+import { lastAuthenticatedWorkspaceDomainState } from '@/domain-manager/states/lastAuthenticatedWorkspaceDomainState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { useEffect } from 'react';
@@ -35,6 +37,10 @@ export const SignInUpRedirectToDefaultDomainEffect = () => {
   const isLogged = useIsLogged();
   const { isLoaded, isSignedIn } = useClerkAuth();
   const { redirectToDefaultDomain } = useRedirectToDefaultDomain();
+  const { redirectToWorkspaceDomain } = useRedirectToWorkspaceDomain();
+  const lastAuthenticatedWorkspaceDomain = useAtomStateValue(
+    lastAuthenticatedWorkspaceDomainState,
+  );
 
   useEffect(() => {
     if (
@@ -50,6 +56,27 @@ export const SignInUpRedirectToDefaultDomainEffect = () => {
       return;
     }
 
+    // Before funneling to central, if we remember the workspace this person was
+    // last authenticated on, send them straight there: their session cookie is
+    // still on that subdomain, so they land in one hop instead of bouncing
+    // through central and a full Clerk re-exchange. Only when it is a DIFFERENT
+    // host than the current one, so a stale session on the current workspace
+    // falls through to central (which clears the hint) and this cannot loop.
+    const lastWorkspaceUrl =
+      isDefined(lastAuthenticatedWorkspaceDomain) &&
+      'workspaceUrl' in lastAuthenticatedWorkspaceDomain
+        ? lastAuthenticatedWorkspaceDomain.workspaceUrl
+        : undefined;
+
+    if (
+      isDefined(lastWorkspaceUrl) &&
+      new URL(lastWorkspaceUrl).hostname !== window.location.hostname
+    ) {
+      void redirectToWorkspaceDomain(lastWorkspaceUrl, AppPath.Index);
+
+      return;
+    }
+
     redirectToDefaultDomain({ pathname: AppPath.SignInUp });
   }, [
     clientConfigApiStatus.isLoadedOnce,
@@ -59,6 +86,8 @@ export const SignInUpRedirectToDefaultDomainEffect = () => {
     workspaceInviteHash,
     isLogged,
     isSignedIn,
+    lastAuthenticatedWorkspaceDomain,
+    redirectToWorkspaceDomain,
     redirectToDefaultDomain,
   ]);
 
