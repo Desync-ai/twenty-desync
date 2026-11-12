@@ -113,8 +113,15 @@ export const usePageChangeEffectNavigateLocation = () => {
     isOnboardingCheckoutPendingState,
   );
 
+  // Send to sign-in only when we KNOW the user is unauthenticated. isLogged is
+  // persisted per-origin and hydrates synchronously, but currentWorkspace loads
+  // a beat later on a fresh page load. Bouncing an authenticated user to
+  // /welcome just because their workspace data hasn't arrived yet kicks off a
+  // needless central -> Clerk re-exchange (the apex-return bounce). A genuinely
+  // invalid session self-corrects: the currentUser query 401s,
+  // onUnauthenticatedError flips isLogged false, and we land back here.
   if (
-    (!isLogged || !isOnAWorkspace || !isDefined(currentWorkspace)) &&
+    (!isLogged || !isOnAWorkspace) &&
     !someMatchingLocationOf([
       ...ONGOING_USER_CREATION_PATHS,
       AppPath.ResetPassword,
