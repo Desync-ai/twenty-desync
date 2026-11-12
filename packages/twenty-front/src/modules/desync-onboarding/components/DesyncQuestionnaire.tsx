@@ -6,6 +6,7 @@ import { MainButton } from 'twenty-ui/components';
 import { useToast } from 'twenty-ui/primitives/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { captureFunnelEvent } from '@/desync-analytics/utils/captureFunnelEvent';
 import { StyledOnboardingStepHeading } from '@/onboarding/components/StyledOnboardingStepHeading';
 import { StyledOnboardingStepSubtitle } from '@/onboarding/components/StyledOnboardingStepSubtitle';
 import { StyledOnboardingStepTitle } from '@/onboarding/components/StyledOnboardingStepTitle';
@@ -303,6 +304,10 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
     if (step === 1) {
       runAnalyze(website);
     }
+    captureFunnelEvent('onboarding_question_answered', {
+      step,
+      total_steps: TOTAL_STEPS,
+    });
     setStep((s) => Math.min(s + 1, TOTAL_STEPS));
   };
 
@@ -337,6 +342,10 @@ export const DesyncQuestionnaire = ({ onCompleted }: Props) => {
         throw new Error('Could not save your answers. Please try again.');
       }
 
+      captureFunnelEvent('onboarding_question_answered', {
+        step: TOTAL_STEPS,
+        total_steps: TOTAL_STEPS,
+      });
       onCompleted();
     } catch (error) {
       enqueueToast({

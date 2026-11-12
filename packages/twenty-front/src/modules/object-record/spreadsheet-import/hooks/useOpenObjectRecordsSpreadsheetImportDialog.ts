@@ -1,4 +1,6 @@
 import { getToastOptionsFromError } from '@/error-handler/utils/getToastOptionsFromError';
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
+import { captureFirstRecordCreated } from '@/desync-analytics/utils/captureFirstRecordCreated';
 import { useApolloCoreClient } from '@/object-metadata/hooks/useApolloCoreClient';
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { useGenerateDepthRecordGqlFieldsFromObject } from '@/object-record/graphql/record-gql-fields/hooks/useGenerateDepthRecordGqlFieldsFromObject';
@@ -11,6 +13,7 @@ import { SPREADSHEET_IMPORT_CREATE_RECORDS_BATCH_SIZE } from '@/spreadsheet-impo
 import { useOpenSpreadsheetImportDialog } from '@/spreadsheet-import/hooks/useOpenSpreadsheetImportDialog';
 import { spreadsheetImportCreatedRecordsProgressState } from '@/spreadsheet-import/states/spreadsheetImportCreatedRecordsProgressState';
 import { type SpreadsheetImportDialogOptions } from '@/spreadsheet-import/types';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { useToast } from 'twenty-ui/primitives/feedback';
 
@@ -22,6 +25,7 @@ export const useOpenObjectRecordsSpreadsheetImportDialog = (
   const { buildSpreadsheetImportFields } = useBuildSpreadsheetImportFields();
 
   const { enqueueToast } = useToast();
+  const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
   const { objectMetadataItem } = useObjectMetadataItem({
     objectNameSingular,
@@ -81,6 +85,13 @@ export const useOpenObjectRecordsSpreadsheetImportDialog = (
             recordsToCreate: createInputs,
             upsert: true,
           });
+          if (createInputs.length > 0) {
+            captureFirstRecordCreated({
+              workspaceId: currentWorkspace?.id,
+              objectNameSingular,
+              source: 'csv_import',
+            });
+          }
           await apolloCoreClient.refetchQueries({
             updateCache: (cache) => {
               cache.evict({ fieldName: objectMetadataItem.namePlural });

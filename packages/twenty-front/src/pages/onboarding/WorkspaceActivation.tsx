@@ -4,6 +4,7 @@ import { SubTitle } from '@/auth/components/SubTitle';
 import { Title } from '@/auth/components/Title';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { isCreatingWorkspaceState } from '@/auth/states/isCreatingWorkspaceState';
+import { captureFunnelEvent } from '@/desync-analytics/utils/captureFunnelEvent';
 import { OnboardingStepAnimatedItem } from '@/onboarding/components/OnboardingStepAnimatedItem';
 import { useSetNextOnboardingStatus } from '@/onboarding/hooks/useSetNextOnboardingStatus';
 import { onboardingActivationFailedState } from '@/onboarding/states/onboardingActivationFailedState';
@@ -62,6 +63,7 @@ export const WorkspaceActivation = () => {
 
   const activate = useCallback(async () => {
     setOnboardingActivationFailed(false);
+    const activationStartedAt = Date.now();
 
     try {
       const result = await activateWorkspace({
@@ -74,6 +76,9 @@ export const WorkspaceActivation = () => {
         throw result.error;
       }
 
+      captureFunnelEvent('workspace_activated', {
+        duration_ms: Date.now() - activationStartedAt,
+      });
       setIsAppEffectRedirectEnabled(false);
       await loadCurrentUser();
       setNextOnboardingStatus({ stepHistoryEffect: 'leaveUnchanged' });

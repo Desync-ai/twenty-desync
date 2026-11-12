@@ -1,12 +1,15 @@
 import { useIsLogged } from '@/auth/hooks/useIsLogged';
 import { useLogout } from '@/auth/hooks/useLogout';
 import { clerkExchangeFailedState } from '@/auth/states/clerkExchangeFailedState';
+import { captureClerkAuthCompleted } from '@/desync-analytics/utils/captureClerkAuthCompleted';
+import { captureClerkFormShown } from '@/desync-analytics/utils/captureClerkFormShown';
 import { subscribeRequiredUrlState } from '@/auth/states/subscribeRequiredUrlState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { SignIn, useAuth as useClerkAuth, useClerk } from '@clerk/clerk-react';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
+import { useEffect } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { MainButton } from 'twenty-ui/components';
 import { Loader } from 'twenty-ui/primitives/feedback';
@@ -59,6 +62,18 @@ export const SignInUpWithClerk = () => {
   const subscribeRequiredUrl = useAtomStateValue(subscribeRequiredUrlState);
   const setSubscribeRequiredUrl = useSetAtomState(subscribeRequiredUrlState);
   const { logout } = useLogout();
+
+  // Funnel analytics: the Clerk widget is invisible to PostHog autocapture.
+  useEffect(() => {
+    if (isLoaded !== true) {
+      return;
+    }
+    if (isSignedIn === true) {
+      captureClerkAuthCompleted();
+    } else {
+      captureClerkFormShown();
+    }
+  }, [isLoaded, isSignedIn]);
 
   const handleRetry = async () => {
     setClerkExchangeFailed(false);

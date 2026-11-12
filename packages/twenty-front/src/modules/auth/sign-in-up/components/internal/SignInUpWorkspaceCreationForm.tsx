@@ -5,6 +5,7 @@ import { ONBOARDING_CONTENT_BLOCK_WIDTH } from '@/onboarding/constants/Onboardin
 import { useWorkspaceSubdomainField } from '@/auth/sign-in-up/hooks/useWorkspaceSubdomainField';
 import { isCreatingWorkspaceState } from '@/auth/states/isCreatingWorkspaceState';
 import { isMultiWorkspaceEnabledState } from '@/client-config/states/isMultiWorkspaceEnabledState';
+import { captureFunnelEvent } from '@/desync-analytics/utils/captureFunnelEvent';
 import { domainConfigurationState } from '@/domain-manager/states/domainConfigurationState';
 import { TextInput } from '@/ui/input/components/TextInput';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -204,6 +205,9 @@ export const SignInUpWorkspaceCreationForm = () => {
     }
 
     setIsCreatingWorkspace(true);
+    captureFunnelEvent('workspace_create_clicked', {
+      has_logo: isDefined(logo),
+    });
 
     const isWorkspaceCreated = await createWorkspace({
       displayName: workspaceName.trim(),
