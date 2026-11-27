@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
 import { getToastOptionsFromError } from '@/error-handler/utils/getToastOptionsFromError';
+import { STALE_CHUNK_RELOAD_SENTRY_FINGERPRINT } from '@/error-handler/constants/StaleChunkReloadSentryFingerprint';
 import { checkIfItsAViteStaleChunkLazyLoadingError } from '@/error-handler/utils/checkIfItsAViteStaleChunkLazyLoadingError';
 import {
   CombinedGraphQLErrors,
@@ -56,6 +57,16 @@ export const PromiseRejectionEffect = () => {
         const { captureException } = await import('@sentry/react');
         captureException(error, (scope) => {
           scope.setExtras({ mechanism: 'onUnhandle' });
+
+          // A chunk lost to a deploy outside a boundary (a route preloaded on
+          // hover): the page still works, and the boundary reloads it once the
+          // chunk is needed. Grouped with the boundary's reloads, as a warning.
+          if (isViteStaleChunkLazyLoadingError) {
+            scope.setLevel('warning');
+            scope.setFingerprint([STALE_CHUNK_RELOAD_SENTRY_FINGERPRINT]);
+            error.name = error.message;
+            return scope;
+          }
 
           const fingerprint = hasErrorCode(error) ? error.code : error.message;
           scope.setFingerprint([fingerprint]);

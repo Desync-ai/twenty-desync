@@ -28,6 +28,19 @@ const Thrower = ({ error }: ThrowerProps): never => {
 
 const Fallback = () => <div>fallback content</div>;
 
+const createScope = () => ({
+  setExtras: jest.fn(),
+  setLevel: jest.fn(),
+  setFingerprint: jest.fn(),
+  setTag: jest.fn(),
+});
+
+const applyCapturedScope = () => {
+  const scope = createScope();
+  captureException.mock.calls[0][1](scope);
+  return scope;
+};
+
 const renderWithBoundary = (error: Error) =>
   render(
     <AppErrorBoundary
@@ -68,6 +81,41 @@ describe('AppErrorBoundary', () => {
     expect(captureException.mock.invocationCallOrder[0]).toBeLessThan(
       reloadWindow.mock.invocationCallOrder[0],
     );
+  });
+
+  it('should report a stale chunk it reloads past as one warning issue, not an error per chunk', async () => {
+    renderWithBoundary(new Error(STALE_CHUNK_ERROR_MESSAGE));
+
+    await waitFor(() => {
+      expect(captureException).toHaveBeenCalledTimes(1);
+    });
+
+    const scope = applyCapturedScope();
+
+    expect(scope.setLevel).toHaveBeenCalledWith('warning');
+    expect(scope.setFingerprint).toHaveBeenCalledWith([
+      'vite-stale-chunk-reload',
+    ]);
+  });
+
+  it('should still report a stale chunk as an error when the reload cooldown blocks the reload', async () => {
+    window.sessionStorage.setItem(
+      STALE_CHUNK_RELOAD_TIMESTAMP_KEY,
+      Date.now().toString(),
+    );
+
+    renderWithBoundary(new Error(STALE_CHUNK_ERROR_MESSAGE));
+
+    await waitFor(() => {
+      expect(captureException).toHaveBeenCalledTimes(1);
+    });
+
+    const scope = applyCapturedScope();
+
+    expect(scope.setLevel).not.toHaveBeenCalled();
+    expect(scope.setFingerprint).toHaveBeenCalledWith([
+      STALE_CHUNK_ERROR_MESSAGE,
+    ]);
   });
 
   it('should still reload after the flush timeout when the Sentry flush hangs', async () => {
