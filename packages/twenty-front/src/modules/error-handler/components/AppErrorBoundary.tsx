@@ -1,6 +1,7 @@
 import type * as SentryReact from '@sentry/react';
 
 import { AppErrorBoundaryEffect } from '@/error-handler/components/internal/AppErrorBoundaryEffect';
+import { STALE_CHUNK_RELOAD_SENTRY_FINGERPRINT } from '@/error-handler/constants/StaleChunkReloadSentryFingerprint';
 import { checkIfItsAViteStaleChunkLazyLoadingError } from '@/error-handler/utils/checkIfItsAViteStaleChunkLazyLoadingError';
 import { isStaleChunkReloadCooldownActive } from '@/error-handler/utils/isStaleChunkReloadCooldownActive';
 import { storeStaleChunkReloadTimestamp } from '@/error-handler/utils/storeStaleChunkReloadTimestamp';
@@ -28,14 +29,23 @@ const captureAppError = (
   sentryImportPromise: Promise<typeof SentryReact>,
   error: Error | CustomError,
   info: ErrorInfo,
+  isRecoveringByReload: boolean,
 ) =>
   sentryImportPromise
     .then(({ captureException, flush }) => {
       captureException(error, (scope) => {
         scope.setExtras({ info });
 
-        const fingerprint = hasErrorCode(error) ? error.code : error.message;
-        scope.setFingerprint([fingerprint]);
+        // The reload loads the current build, so the visitor is put right:
+        // kept as a warning in one issue rather than an error per chunk name.
+        if (isRecoveringByReload) {
+          scope.setLevel('warning');
+          scope.setFingerprint([STALE_CHUNK_RELOAD_SENTRY_FINGERPRINT]);
+          scope.setTag('stale_chunk_reload', 'true');
+        } else {
+          const fingerprint = hasErrorCode(error) ? error.code : error.message;
+          scope.setFingerprint([fingerprint]);
+        }
         error.name = error.message;
         return scope;
       });
@@ -53,26 +63,23 @@ export const AppErrorBoundary = ({
   resetOnLocationChange = true,
 }: AppErrorBoundaryProps) => {
   const handleError = (error: Error | CustomError, info: ErrorInfo) => {
+    const isViteStaleChunkLazyLoadingError =
+      checkIfItsAViteStaleChunkLazyLoadingError(error);
+
+    const shouldAttemptStaleChunkReload =
+      isViteStaleChunkLazyLoadingError &&
+      !isStaleChunkReloadCooldownActive() &&
+      storeStaleChunkReloadTimestamp();
+
     const sentryImportPromise = import('@sentry/react');
     const captureAppErrorPromise = captureAppError(
       sentryImportPromise,
       error,
       info,
+      shouldAttemptStaleChunkReload,
     );
 
-    const isViteStaleChunkLazyLoadingError =
-      checkIfItsAViteStaleChunkLazyLoadingError(error);
-
-    const shouldAttemptStaleChunkReload =
-      isViteStaleChunkLazyLoadingError && !isStaleChunkReloadCooldownActive();
-
     if (!shouldAttemptStaleChunkReload) {
-      return;
-    }
-
-    const isReloadTimestampStored = storeStaleChunkReloadTimestamp();
-
-    if (!isReloadTimestampStored) {
       return;
     }
 

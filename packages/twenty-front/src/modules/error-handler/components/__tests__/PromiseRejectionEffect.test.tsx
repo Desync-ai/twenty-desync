@@ -38,6 +38,26 @@ describe('PromiseRejectionEffect', () => {
     expect(mockEnqueueToast).not.toHaveBeenCalled();
   });
 
+  it('should group a stale chunk rejection with the boundary reloads, as a warning', async () => {
+    dispatchUnhandledRejection(new Error('Importing a module script failed.'));
+
+    await waitFor(() => {
+      expect(captureException).toHaveBeenCalledTimes(1);
+    });
+
+    const scope = {
+      setExtras: jest.fn(),
+      setLevel: jest.fn(),
+      setFingerprint: jest.fn(),
+    };
+    captureException.mock.calls[0][1](scope);
+
+    expect(scope.setLevel).toHaveBeenCalledWith('warning');
+    expect(scope.setFingerprint).toHaveBeenCalledWith([
+      'vite-stale-chunk-reload',
+    ]);
+  });
+
   it('should still toast an unrelated error', async () => {
     dispatchUnhandledRejection(new Error('Some unrelated error'));
 
