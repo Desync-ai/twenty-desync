@@ -2,6 +2,8 @@ import { isNonEmptyString } from '@sniptt/guards';
 import { clsx } from 'clsx';
 import { createContext, useLayoutEffect, useRef, useState } from 'react';
 
+import { THEME_DARK } from '@ui/theme/constants/ThemeDark';
+import { THEME_LIGHT } from '@ui/theme/constants/ThemeLight';
 import { isDefined } from '@ui/utilities/utils/isDefined';
 
 import { ThemeScopeContext } from './ThemeScopeContext';
@@ -18,9 +20,14 @@ export type ThemeOverrides = Record<string, string | number>;
 const resolveTokenValue = (
   cssVariableReference: string,
   computedValue: string,
+  staticValue: unknown,
 ): string | number => {
   if (!isNonEmptyString(computedValue)) {
-    return cssVariableReference;
+    // Before the theme stylesheet has loaded no variable resolves. A colour can
+    // stay a live var() reference, but a number (an animation duration, the
+    // spacing multiplicator) feeds JS math and framer-motion, where the string
+    // becomes NaN and Element.animate throws "duration must be non-negative".
+    return typeof staticValue === 'number' ? staticValue : cssVariableReference;
   }
 
   const numericValue = Number(computedValue);
@@ -28,7 +35,10 @@ const resolveTokenValue = (
   return Number.isNaN(numericValue) ? computedValue : numericValue;
 };
 
-const computeThemeFromCss = (sourceElement?: HTMLElement): ThemeType => {
+const computeThemeFromCss = (
+  sourceElement?: HTMLElement,
+  colorScheme: 'light' | 'dark' = 'light',
+): ThemeType => {
   if (
     typeof document === 'undefined' ||
     typeof getComputedStyle !== 'function'
@@ -40,11 +50,15 @@ const computeThemeFromCss = (sourceElement?: HTMLElement): ThemeType => {
     sourceElement ?? document.documentElement,
   );
 
-  const resolve = (obj: Record<string, unknown>): Record<string, unknown> => {
+  const resolve = (
+    obj: Record<string, unknown>,
+    staticTheme: Record<string, unknown> | undefined,
+  ): Record<string, unknown> => {
     const result: Record<string, unknown> = {};
 
     for (const key of Object.keys(obj)) {
       const value = obj[key];
+      const staticValue = staticTheme?.[key];
 
       if (typeof value === 'string' && value.startsWith('var(')) {
         const varName = value.slice(4, -1);
@@ -52,9 +66,15 @@ const computeThemeFromCss = (sourceElement?: HTMLElement): ThemeType => {
         result[key] = resolveTokenValue(
           value,
           computedStyle.getPropertyValue(varName).trim(),
+          staticValue,
         );
       } else if (typeof value === 'object' && value !== null) {
-        result[key] = resolve(value as Record<string, unknown>);
+        result[key] = resolve(
+          value as Record<string, unknown>,
+          typeof staticValue === 'object' && staticValue !== null
+            ? (staticValue as Record<string, unknown>)
+            : undefined,
+        );
       } else {
         result[key] = value;
       }
@@ -65,6 +85,10 @@ const computeThemeFromCss = (sourceElement?: HTMLElement): ThemeType => {
 
   return resolve(
     themeCssVariables as unknown as Record<string, unknown>,
+    (colorScheme === 'dark' ? THEME_DARK : THEME_LIGHT) as unknown as Record<
+      string,
+      unknown
+    >,
   ) as unknown as ThemeType;
 };
 
@@ -104,7 +128,7 @@ export const ThemeProvider = ({
     if (applyToRoot) {
       applyColorSchemeClass(colorScheme);
     }
-    return computeThemeFromCss();
+    return computeThemeFromCss(undefined, colorScheme);
   });
   const [scopeContainer, setScopeContainer] = useState<HTMLElement | null>(
     null,
@@ -120,6 +144,7 @@ export const ThemeProvider = ({
     setTheme(
       computeThemeFromCss(
         isScoped ? (wrapperRef.current ?? undefined) : undefined,
+        colorScheme,
       ),
     );
     setScopeContainer(isScoped ? wrapperRef.current : null);
